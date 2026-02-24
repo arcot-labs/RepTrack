@@ -50,6 +50,7 @@ def run_migrations(connection: Connection) -> None:
 
 @pytest.fixture(scope="session")
 async def engine(anyio_backend: str) -> AsyncGenerator[AsyncEngine]:
+    _ = anyio_backend
     with PostgresContainer(image="postgres:18", driver="asyncpg") as postgres:
         url = postgres.get_connection_url()
         engine = create_async_engine(url, echo=False, pool_pre_ping=True)

@@ -6,6 +6,7 @@ from app.core.dependencies import get_db
 
 
 async def test_get_db_yields_async_session(anyio_backend: str, settings: Settings):
+    _ = anyio_backend
     generator = get_db(settings)
 
     session = await anext(generator)
