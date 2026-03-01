@@ -6,6 +6,7 @@ dependencies = [
     "aiosmtplib>=5.0.0",
     "alembic[tz]>=1.17.2",
     "asyncpg>=0.31.0",
+    "fastapi-swagger-dark>=0.0.9",
     "fastapi[standard]>=0.124.4",
     "pwdlib[argon2]>=0.3.0",
     "pydantic-settings>=2.12.0",

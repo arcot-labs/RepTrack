@@ -1,7 +1,8 @@
 import logging
 from typing import Tuple
 
-from fastapi import FastAPI
+import fastapi_swagger_dark as fsd  # pyright: ignore[reportMissingTypeStubs]
+from fastapi import APIRouter, FastAPI
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.cors import CORSMiddleware
 
@@ -30,23 +31,23 @@ def create_app(settings: Settings | None = None) -> Tuple[FastAPI, CORSMiddlewar
     if settings.env != "prod":
         title += f" ({settings.env})"
 
-    if settings.is_prod_like:
-        fastapi_app = FastAPI(
-            title=title,
-            docs_url=None,
-            redoc_url=None,
-        )
-    else:
-        fastapi_app = FastAPI(
-            title=title,
-        )
+    fastapi_app = FastAPI(
+        title=title,
+        docs_url=None,
+        redoc_url=None,
+    )
 
     # set for exception handler
     fastapi_app.state.is_prod = settings.is_prod_like
 
     fastapi_app.add_exception_handler(StarletteHTTPException, exception_handler)
     fastapi_app.add_exception_handler(Exception, exception_handler)
-    fastapi_app.include_router(api_router, prefix="/api")
+
+    router = APIRouter()
+    router.include_router(api_router, prefix="/api")
+    if not settings.is_prod_like:
+        fsd.install(router)
+    fastapi_app.include_router(router)
 
     # CORS headers are not included in error responses when using add_middleware for CORSMiddleware
     # https://github.com/fastapi/fastapi/discussions/8027#discussioncomment-5146484
