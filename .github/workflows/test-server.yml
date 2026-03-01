@@ -1,4 +1,4 @@
-name: Run Server Tests
+name: CI / Test Server
 
 on:
     workflow_dispatch:
@@ -12,6 +12,7 @@ permissions:
 
 jobs:
     test-server:
+        name: Test Server
         runs-on: self-hosted
         environment: test
         steps:

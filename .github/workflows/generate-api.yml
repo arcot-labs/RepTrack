@@ -1,4 +1,4 @@
-name: Generate API Client on PR Merge
+name: Maintenance / Generate API Client after PR Merge
 
 on:
     pull_request:
@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
     generate-api:
+        name: Generate API Client
         if: github.event.pull_request.merged == true
         runs-on: self-hosted
         environment: stage
