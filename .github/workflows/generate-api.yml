@@ -26,6 +26,10 @@ jobs:
                   echo "NPM_CONFIG_CACHE=$HOME/.cache/npm" >> $GITHUB_ENV
                   echo "UV_CACHE_DIR=$HOME/.cache/uv" >> $GITHUB_ENV
 
+            - name: unlock keychain
+              if: runner.os == 'macOS'
+              run: security unlock-keychain -p ${{ secrets.KEYCHAIN_PASSWORD }} login.keychain
+
             - name: checkout
               uses: actions/checkout@v6
               with:
