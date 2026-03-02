@@ -21,7 +21,7 @@ def create_app(settings: Settings | None = None) -> Tuple[FastAPI, CORSMiddlewar
     settings.data_dir.mkdir(parents=True, exist_ok=True)
     settings.log_dir.mkdir(parents=True, exist_ok=True)
 
-    setup_logging(settings.env, settings)
+    setup_logging(settings.log_dir, settings.env, settings.log_level)
 
     logger.debug(f"Loaded settings: {settings.model_dump()}")
     logger.debug("Initialized logging")
