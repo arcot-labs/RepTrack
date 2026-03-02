@@ -596,6 +596,24 @@ export type GetHealthResponses = {
 
 export type GetHealthResponse = GetHealthResponses[keyof GetHealthResponses];
 
+export type GetDbHealthData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/health/db';
+};
+
+export type GetDbHealthResponses = {
+    /**
+     * Response Getdbhealth
+     *
+     * Successful Response
+     */
+    200: string;
+};
+
+export type GetDbHealthResponse = GetDbHealthResponses[keyof GetDbHealthResponses];
+
 export type GetCurrentUserData = {
     body?: never;
     path?: never;

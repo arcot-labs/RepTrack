@@ -273,6 +273,19 @@ export const zGetHealthData = z.object({
  */
 export const zGetHealthResponse = z.string();
 
+export const zGetDbHealthData = z.object({
+    body: z.never().optional(),
+    path: z.never().optional(),
+    query: z.never().optional()
+});
+
+/**
+ * Response Getdbhealth
+ *
+ * Successful Response
+ */
+export const zGetDbHealthResponse = z.string();
+
 export const zGetCurrentUserData = z.object({
     body: z.never().optional(),
     path: z.never().optional(),
