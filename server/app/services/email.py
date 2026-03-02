@@ -3,10 +3,10 @@ import ssl
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from email.message import EmailMessage
+from typing import Annotated
 
 import aiosmtplib
 from fastapi import Depends
-from typing_extensions import Annotated
 
 from app.core.config import Settings, get_settings
 from app.models.database.access_request import AccessRequest

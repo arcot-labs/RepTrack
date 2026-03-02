@@ -1,12 +1,11 @@
 import logging
-from collections.abc import AsyncGenerator
 from functools import cache
+from typing import Annotated, AsyncGenerator
 
 from fastapi import Depends
 from fastapi.security import APIKeyCookie
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from typing_extensions import Annotated
 
 from app.core.config import Settings, get_settings
 from app.core.security import ACCESS_JWT_KEY, REFRESH_JWT_KEY, verify_jwt

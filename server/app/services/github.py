@@ -1,10 +1,9 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Annotated, Any
 
 import httpx
 from fastapi import Depends
-from typing_extensions import Annotated
 
 from app.core.config import Settings, get_settings
 from app.models.database.feedback import Feedback
@@ -35,8 +34,8 @@ class ApiGitHubService(GitHubService):
     async def create_feedback_issue(self, feedback: Feedback, settings: Settings):
         logger.info(f"Creating GitHub issue for feedback id: {feedback.id}")
 
-        github_api_url_repo = f"https://api.github.com/repos/{settings.gh.repo_owner}/{settings.repo_name}"
-        url = f"{github_api_url_repo}/issues"
+        repo_api_url = f"https://api.github.com/repos/{settings.gh.repo_owner}/{settings.repo_name}"
+        url = f"{repo_api_url}/issues"
         headers = {
             "Authorization": f"Bearer {settings.gh.token}",
             "Accept": "application/vnd.github+json",
