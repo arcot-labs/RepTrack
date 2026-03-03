@@ -1,8 +1,7 @@
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
+from app.core.config import Settings
 from app.tests.api.utilities import HttpMethod, make_http_request
 
 
@@ -18,7 +17,7 @@ async def make_request(client: AsyncClient, email: str):
 
 
 # 204
-async def test_forgot_password(client: AsyncClient, session: AsyncSession):
+async def test_forgot_password(client: AsyncClient, settings: Settings):
     resp = await make_request(client, email=settings.admin.email)
     assert resp.status_code == status.HTTP_204_NO_CONTENT
 

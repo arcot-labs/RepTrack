@@ -2,7 +2,7 @@ from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
+from app.core.config import Settings
 from app.core.security import create_registration_token
 from app.models.database.access_request import AccessRequest, AccessRequestStatus
 from app.models.errors import InvalidToken, UsernameAlreadyRegistered
@@ -41,7 +41,7 @@ async def create_approved_request_with_token(session: AsyncSession) -> tuple[str
 
 # 204
 async def test_register(client: AsyncClient, session: AsyncSession):
-    email, token_str = await create_approved_request_with_token(session)
+    _, token_str = await create_approved_request_with_token(session)
 
     resp = await make_request(
         client,
@@ -69,7 +69,7 @@ async def test_register_invalid_token(client: AsyncClient):
 
 # 409
 async def test_register_username_already_registered(
-    client: AsyncClient, session: AsyncSession
+    client: AsyncClient, session: AsyncSession, settings: Settings
 ):
     _, token_str = await create_approved_request_with_token(session)
 
@@ -91,9 +91,9 @@ async def test_register_invalid_body(client: AsyncClient):
         client,
         token="some_token",
         username="newuser",
-        password=None,  # ty:ignore[invalid-argument-type]
+        password=None,  # type: ignore
     )
 
-    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     body = resp.json()
     assert body["detail"][0]["loc"] == ["body", "password"]

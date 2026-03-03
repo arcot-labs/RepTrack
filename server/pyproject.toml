@@ -6,6 +6,7 @@ dependencies = [
     "aiosmtplib>=5.0.0",
     "alembic[tz]>=1.17.2",
     "asyncpg>=0.31.0",
+    "fastapi-swagger-dark>=0.0.9",
     "fastapi[standard]>=0.124.4",
     "pwdlib[argon2]>=0.3.0",
     "pydantic-settings>=2.12.0",
@@ -18,10 +19,17 @@ dependencies = [
 [dependency-groups]
 dev = [
     "greenlet>=3.3.0",
+    "pyright>=1.1.408",
     "pytest>=9.0.2",
     "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7.0.0",
     "ruff>=0.14.9",
     "testcontainers>=4.13.3",
-    "ty>=0.0.13",
     "types-pyjwt>=1.7.1",
 ]
+
+[tool.pyright]
+typeCheckingMode = "strict"
+
+[tool.coverage.run]
+omit = ["app/migrations/*", "app/tests/*"]

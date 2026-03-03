@@ -3,7 +3,7 @@ from httpx import AsyncClient
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
+from app.core.config import Settings
 from app.models.database.access_request import AccessRequest, AccessRequestStatus
 from app.models.database.feedback import FeedbackType
 from app.models.database.user import User
@@ -28,7 +28,7 @@ async def make_request(
     )
 
 
-async def get_admin(session: AsyncSession) -> User:
+async def get_admin(session: AsyncSession, settings: Settings) -> User:
     result = await session.execute(
         select(User).where(User.username == settings.admin.username)
     )
@@ -37,7 +37,7 @@ async def get_admin(session: AsyncSession) -> User:
 
 # 204
 async def test_update_access_request_status_approved(
-    client: AsyncClient, session: AsyncSession
+    client: AsyncClient, session: AsyncSession, settings: Settings
 ):
     access_request = AccessRequest(
         email="pending@example.com",
@@ -48,9 +48,9 @@ async def test_update_access_request_status_approved(
     session.add(access_request)
     await session.commit()
 
-    admin = await get_admin(session)
+    admin = await get_admin(session, settings)
 
-    await login_admin(client)
+    await login_admin(client, settings)
     resp = await make_request(client, access_request.id, AccessRequestStatus.APPROVED)
 
     assert resp.status_code == status.HTTP_204_NO_CONTENT
@@ -63,7 +63,7 @@ async def test_update_access_request_status_approved(
 
 # 400
 async def test_update_access_request_status_not_pending(
-    client: AsyncClient, session: AsyncSession
+    client: AsyncClient, session: AsyncSession, settings: Settings
 ):
     access_request = AccessRequest(
         email="approved@example.com",
@@ -74,7 +74,7 @@ async def test_update_access_request_status_not_pending(
     session.add(access_request)
     await session.commit()
 
-    await login_admin(client)
+    await login_admin(client, settings)
     resp = await make_request(client, access_request.id, AccessRequestStatus.REJECTED)
 
     assert resp.status_code == AccessRequestStatusError.status_code
@@ -93,7 +93,7 @@ async def test_update_access_request_status_not_logged_in(client: AsyncClient):
 
 # 403
 async def test_update_access_request_status_non_admin_user(
-    client: AsyncClient, session: AsyncSession
+    client: AsyncClient, session: AsyncSession, settings: Settings
 ):
     await session.execute(
         update(User)
@@ -102,7 +102,7 @@ async def test_update_access_request_status_non_admin_user(
     )
     await session.commit()
 
-    await login_admin(client)
+    await login_admin(client, settings)
     resp = await make_request(client, 1, AccessRequestStatus.APPROVED)
 
     assert resp.status_code == InsufficientPermissions.status_code
@@ -111,8 +111,10 @@ async def test_update_access_request_status_non_admin_user(
 
 
 # 404
-async def test_update_access_request_status_not_found(client: AsyncClient):
-    await login_admin(client)
+async def test_update_access_request_status_not_found(
+    client: AsyncClient, settings: Settings
+):
+    await login_admin(client, settings)
     resp = await make_request(client, 1, AccessRequestStatus.APPROVED)
 
     assert resp.status_code == NotFound.status_code
@@ -121,9 +123,11 @@ async def test_update_access_request_status_not_found(client: AsyncClient):
 
 
 # 422
-async def test_update_access_request_status_invalid_status(client: AsyncClient):
-    await login_admin(client)
-    resp = await make_request(client, 1, FeedbackType.feedback)  # ty:ignore[invalid-argument-type]
+async def test_update_access_request_status_invalid_status(
+    client: AsyncClient, settings: Settings
+):
+    await login_admin(client, settings)
+    resp = await make_request(client, 1, FeedbackType.feedback)  # type: ignore
 
     assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     body = resp.json()

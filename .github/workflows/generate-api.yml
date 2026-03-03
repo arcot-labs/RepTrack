@@ -1,4 +1,4 @@
-name: Generate API Client on PR Merge
+name: Maintenance / Generate API Client after PR Merge
 
 on:
     pull_request:
@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
     generate-api:
+        name: Generate API Client
         if: github.event.pull_request.merged == true
         runs-on: self-hosted
         environment: stage
@@ -24,6 +25,10 @@ jobs:
               run: |
                   echo "NPM_CONFIG_CACHE=$HOME/.cache/npm" >> $GITHUB_ENV
                   echo "UV_CACHE_DIR=$HOME/.cache/uv" >> $GITHUB_ENV
+
+            - name: unlock keychain
+              if: runner.os == 'macOS'
+              run: security unlock-keychain -p ${{ secrets.KEYCHAIN_PASSWORD }} login.keychain
 
             - name: checkout
               uses: actions/checkout@v6
@@ -57,7 +62,7 @@ jobs:
             - name: create .env
               working-directory: config/env
               run: |
-                  echo "ENV=stage" >> .env
+                  echo "ENV=test" >> .env
                   echo "LOG_LEVEL=debug" >> .env
                   echo "CLIENT_URL=" >> .env
 

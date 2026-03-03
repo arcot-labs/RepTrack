@@ -1,7 +1,7 @@
 import logging
 import secrets
 from datetime import datetime, timedelta, timezone
-from typing import Any, Tuple
+from typing import Any, Optional, Tuple, Type, TypeVar
 
 import jwt
 from pwdlib import PasswordHash
@@ -9,7 +9,7 @@ from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute, selectinload
 
-from app.core.config import settings
+from app.core.config import Settings
 from app.models.database.password_reset_token import PasswordResetToken
 from app.models.database.registration_token import RegistrationToken
 from app.models.database.user import User
@@ -25,12 +25,15 @@ ACCESS_JWT_KEY = "access_token"
 REFRESH_JWT_KEY = "refresh_token"
 
 
+T = TypeVar("T", RegistrationToken, PasswordResetToken)
+
+
 async def _get_token(
     token_str: str,
-    model: type[RegistrationToken | PasswordResetToken],
-    load_option: InstrumentedAttribute,
+    model: Type[T],
+    load_option: InstrumentedAttribute[Any],
     db: AsyncSession,
-):
+) -> Optional[T]:
     token_prefix = token_str[:TOKEN_PREFIX_LENGTH]
     tokens = (
         (
@@ -76,8 +79,8 @@ async def get_password_reset_token(
 
 
 async def _expire_existing_tokens(
-    model: type[RegistrationToken | PasswordResetToken],
-    where_clause: list,
+    model: type[T],
+    where_clause: list[Any],
     db: AsyncSession,
 ) -> None:
     await db.execute(
@@ -113,11 +116,11 @@ async def expire_existing_password_reset_tokens(
     )
 
 
-def _create_token(model: type[RegistrationToken | PasswordResetToken], **fields):
+def _create_token(model: Type[T], **fields: Any) -> Tuple[str, T]:
     token_str = secrets.token_urlsafe(TOKEN_URLSAFE_SIZE)
     token_hash = PASSWORD_HASH.hash(token_str)
 
-    token: RegistrationToken | PasswordResetToken = model(
+    token: T = model(
         token_prefix=token_str[:TOKEN_PREFIX_LENGTH],
         token_hash=token_hash,
         **fields,
@@ -157,36 +160,44 @@ async def authenticate_user(
     return user
 
 
-def create_jwt(username: str, expires_delta: timedelta):
+def _create_jwt(
+    username: str, expires_delta: timedelta, secret_key: str, algorithm: str
+) -> str:
     payload: dict[str, Any] = {
         "sub": username,
         "exp": datetime.now(timezone.utc) + expires_delta,
     }
     token = jwt.encode(
-        payload, settings.jwt.secret_key, algorithm=settings.jwt.algorithm
+        payload=payload,
+        key=secret_key,
+        algorithm=algorithm,
     )
     return str(token)
 
 
-def create_access_jwt(username: str):
-    return create_jwt(
+def create_access_jwt(username: str, settings: Settings):
+    return _create_jwt(
         username,
         expires_delta=timedelta(minutes=settings.jwt.access_token_expire_minutes),
+        secret_key=settings.jwt.secret_key,
+        algorithm=settings.jwt.algorithm,
     )
 
 
-def create_refresh_jwt(username: str):
-    return create_jwt(
+def create_refresh_jwt(username: str, settings: Settings):
+    return _create_jwt(
         username,
         expires_delta=timedelta(days=settings.jwt.refresh_token_expire_days),
+        secret_key=settings.jwt.secret_key,
+        algorithm=settings.jwt.algorithm,
     )
 
 
-def verify_jwt(token: str) -> str:
+def verify_jwt(token: str, settings: Settings) -> str:
     try:
         # checks expiration
         payload = jwt.decode(
-            token, settings.jwt.secret_key, algorithms=[settings.jwt.algorithm]
+            jwt=token, key=settings.jwt.secret_key, algorithms=[settings.jwt.algorithm]
         )
     except Exception as e:
         logger.error(f"JWT decode error: {e}")

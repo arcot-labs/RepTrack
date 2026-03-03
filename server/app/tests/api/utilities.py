@@ -1,9 +1,12 @@
+import logging
 from enum import Enum
 from typing import Any
 
 from httpx import AsyncClient
 
-from app.core.config import settings
+from app.core.config import Settings
+
+logger = logging.getLogger(__name__)
 
 
 class HttpMethod(str, Enum):
@@ -21,25 +24,22 @@ async def make_http_request(
     endpoint: str,
     headers: dict[str, str] | None = None,
     json: dict[str, Any] | None = None,
+    data: dict[str, Any] | None = None,
 ):
-    if headers is None:
-        headers = {}
-
-    if method == HttpMethod.GET:
-        return await client.get(endpoint, headers=headers)
-    elif method == HttpMethod.POST:
-        return await client.post(endpoint, json=json, headers=headers)
-    elif method == HttpMethod.DELETE:
-        return await client.delete(endpoint, headers=headers)
-    elif method == HttpMethod.PUT:
-        return await client.put(endpoint, json=json, headers=headers)
-    else:  # patch
-        return await client.patch(endpoint, json=json, headers=headers)
+    request = client.build_request(
+        method=method.value,
+        url=endpoint,
+        headers=headers,
+        json=json,
+        data=data,
+    )
+    logger.debug(
+        f"Making HTTP request: {method.value.upper()} {endpoint} with headers={headers}, json={json}, data={data}"
+    )
+    return await client.send(request)
 
 
-async def login_admin(
-    client: AsyncClient,
-):
+async def login_admin(client: AsyncClient, settings: Settings):
     return await login(
         client,
         username=settings.admin.username,

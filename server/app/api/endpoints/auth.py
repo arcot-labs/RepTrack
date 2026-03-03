@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, BackgroundTasks, Depends, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
+from app.core.config import Settings, get_settings
 from app.core.dependencies import get_db, refresh_token_cookie
 from app.core.security import ACCESS_JWT_KEY, REFRESH_JWT_KEY
 from app.models.api import (
@@ -44,6 +44,7 @@ async def request_access_endpoint(
     background_tasks: BackgroundTasks,
     db: Annotated[AsyncSession, Depends(get_db)],
     email_svc: Annotated[EmailService, Depends(get_email_service)],
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> str:
     already_approved = await request_access(
         first_name=req.first_name,
@@ -52,6 +53,7 @@ async def request_access_endpoint(
         background_tasks=background_tasks,
         db=db,
         email=req.email,
+        settings=settings,
     )
     if already_approved:
         return REQUEST_ACCESS_APPROVED_MESSAGE
@@ -89,12 +91,14 @@ async def forgot_password_endpoint(
     background_tasks: BackgroundTasks,
     db: Annotated[AsyncSession, Depends(get_db)],
     email_svc: Annotated[EmailService, Depends(get_email_service)],
+    settings: Annotated[Settings, Depends(get_settings)],
 ):
     await request_password_reset(
         email=req.email,
         background_tasks=background_tasks,
         db=db,
         email_svc=email_svc,
+        settings=settings,
     )
 
 
@@ -128,9 +132,12 @@ async def reset_password_endpoint(
 async def login_endpoint(
     req: LoginRequest,
     db: Annotated[AsyncSession, Depends(get_db)],
+    settings: Annotated[Settings, Depends(get_settings)],
     res: Response,
 ):
-    result = await login(username=req.username, password=req.password, db=db)
+    result = await login(
+        username=req.username, password=req.password, db=db, settings=settings
+    )
     res.set_cookie(
         key=ACCESS_JWT_KEY,
         value=result.access_token,
@@ -160,9 +167,10 @@ async def login_endpoint(
 async def refresh_token_endpoint(
     db: Annotated[AsyncSession, Depends(get_db)],
     refresh_token: Annotated[str, Depends(refresh_token_cookie)],
+    settings: Annotated[Settings, Depends(get_settings)],
     res: Response,
 ):
-    access_token = await refresh(db=db, token=refresh_token)
+    access_token = await refresh(db=db, token=refresh_token, settings=settings)
     res.set_cookie(
         key=ACCESS_JWT_KEY,
         value=access_token,
@@ -178,7 +186,10 @@ async def refresh_token_endpoint(
     operation_id="logout",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-async def logout_endpoint(res: Response):
+async def logout_endpoint(
+    settings: Annotated[Settings, Depends(get_settings)],
+    res: Response,
+):
     res.delete_cookie(
         key=ACCESS_JWT_KEY,
         httponly=True,

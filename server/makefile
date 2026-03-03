@@ -1,4 +1,4 @@
-.PHONY: dev test check check_migrations manual_migration auto_migration run_migrations
+.PHONY: dev test cov open-cov check check_migrations manual_migration auto_migration migrate
 
 dev:
 	uv run uvicorn app.main:app \
@@ -11,8 +11,14 @@ dev:
 test:
 	uv run pytest -v
 
+cov:
+	uv run pytest -v --cov=app --cov-config=pyproject.toml --cov-report=term-missing --cov-report=html
+
+open-cov:
+	open -a "Google Chrome" htmlcov/index.html
+
 check:
-	uv run ty check
+	uv run pyright
 
 check_migrations:
 	uv run alembic check
@@ -25,5 +31,5 @@ auto_migration:
 	@test -n "$(msg)" || (echo "ERROR: msg is required"; exit 1)
 	uv run alembic revision --autogenerate -m "$(msg)"
 
-run_migrations:
+migrate:
 	uv run alembic upgrade head

@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import func
 
+from app.core.config import Settings
 from app.models.database.access_request import AccessRequest
 from app.models.database.user import User
 from app.models.enums import AccessRequestStatus
@@ -48,6 +49,7 @@ async def update_access_request_status(
     user: UserPublic,
     background_tasks: BackgroundTasks,
     email_svc: EmailService,
+    settings: Settings,
 ) -> None:
     logger.info(f"Updating access request {access_request_id} to status {status}")
 
@@ -74,11 +76,14 @@ async def update_access_request_status(
 
     if status == AccessRequestStatus.APPROVED:
         background_tasks.add_task(
-            email_svc.send_access_request_approved_email, access_request, token_str
+            email_svc.send_access_request_approved_email,
+            settings,
+            access_request,
+            token_str,
         )
     else:
         background_tasks.add_task(
-            email_svc.send_access_request_rejected_email, access_request
+            email_svc.send_access_request_rejected_email, settings, access_request
         )
 
 

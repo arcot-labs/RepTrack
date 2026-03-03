@@ -1,30 +1,29 @@
+import logging
+from typing import Any, Callable
+
 import pytest
 
-from app.core.config import (
-    EmailSettings,
-    settings,
-)
-from app.services.email import get_email_service
+from app.core.config import EmailSettings, Settings
+from app.services.email import EmailService, get_email_service
 
-
-@pytest.fixture(autouse=True)
-def override_env_test(monkeypatch: pytest.MonkeyPatch):
-    original_env = settings.env
-
-    monkeypatch.setattr(settings, "env", "test")
-    yield
-
-    monkeypatch.setattr(settings, "env", original_env)
+logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
-def override_email(monkeypatch: pytest.MonkeyPatch):
-    original_email: EmailSettings = settings.email
+def override_settings(settings: Settings) -> Callable[[dict[str, Any]], Settings]:
+    def _factory(overrides: dict[str, Any]) -> Settings:
+        return settings.model_copy(update=overrides)
 
-    def _override(email: EmailSettings):
-        monkeypatch.setattr(settings, "email", email)
-        return get_email_service()
+    return _factory
 
-    yield _override
 
-    monkeypatch.setattr(settings, "email", original_email)
+@pytest.fixture
+def override_email_settings(
+    settings: Settings,
+) -> Callable[[EmailSettings], EmailService]:
+    def _factory(email_settings: EmailSettings) -> EmailService:
+        updated_settings = settings.model_copy(update={"email": email_settings})
+        service: EmailService = get_email_service(updated_settings)
+        return service
+
+    return _factory

@@ -141,6 +141,6 @@ async def test_request_access_invalid_email(client: AsyncClient):
         },
     )
 
-    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     body = resp.json()
     assert body["detail"][0]["loc"] == ["body", "email"]

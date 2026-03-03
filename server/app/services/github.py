@@ -1,10 +1,11 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Annotated, Any
 
 import httpx
+from fastapi import Depends
 
-from app.core.config import settings
+from app.core.config import Settings, get_settings
 from app.models.database.feedback import Feedback
 from app.models.schemas.feedback import FeedbackType
 from app.utilities.date import get_utc_timestamp_str
@@ -12,7 +13,9 @@ from app.utilities.date import get_utc_timestamp_str
 logger = logging.getLogger(__name__)
 
 
-def get_github_service() -> GitHubService:
+def get_github_service(
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> GitHubService:
     match settings.gh.backend:
         case "api":
             return ApiGitHubService()
@@ -22,23 +25,21 @@ def get_github_service() -> GitHubService:
 
 class GitHubService(ABC):
     @abstractmethod
-    async def create_feedback_issue(self, feedback: Feedback) -> None: ...
+    async def create_feedback_issue(
+        self, feedback: Feedback, settings: Settings
+    ) -> None: ...
 
 
 class ApiGitHubService(GitHubService):
-    GITHUB_API_URL_REPO = (
-        f"https://api.github.com/repos/{settings.gh.repo_owner}/{settings.repo_name}"
-    )
+    async def create_feedback_issue(self, feedback: Feedback, settings: Settings):
+        logger.info(f"Creating GitHub issue for feedback id: {feedback.id}")
 
-    HEADERS = {
-        "Authorization": f"Bearer {settings.gh.token}",
-        "Accept": "application/vnd.github+json",
-    }
-
-    async def create_feedback_issue(self, feedback: Feedback):
-        logging.info(f"Creating GitHub issue for feedback id: {feedback.id}")
-
-        url = f"{self.GITHUB_API_URL_REPO}/issues"
+        repo_api_url = f"https://api.github.com/repos/{settings.gh.repo_owner}/{settings.repo_name}"
+        url = f"{repo_api_url}/issues"
+        headers = {
+            "Authorization": f"Bearer {settings.gh.token}",
+            "Accept": "application/vnd.github+json",
+        }
 
         if feedback.type == FeedbackType.feedback:
             title = f"[Feedback] {feedback.title}"
@@ -75,9 +76,9 @@ class ApiGitHubService(GitHubService):
         }
         async with httpx.AsyncClient() as client:
             try:
-                resp = await client.post(url, headers=self.HEADERS, json=payload)
+                resp = await client.post(url, headers=headers, json=payload)
                 resp.raise_for_status()
-                logging.info(f"Created GitHub issue for feedback id: {feedback.id}")
+                logger.info(f"Created GitHub issue for feedback id: {feedback.id}")
             except httpx.HTTPStatusError as e:
                 logger.error(
                     "Failed to create GitHub issue for feedback id %s - %s",
@@ -93,5 +94,5 @@ class ApiGitHubService(GitHubService):
 
 
 class ConsoleGitHubService(GitHubService):
-    async def create_feedback_issue(self, feedback: Feedback):
+    async def create_feedback_issue(self, feedback: Feedback, settings: Settings):
         logger.info(f"(Console) Creating GitHub issue for feedback id: {feedback.id}")

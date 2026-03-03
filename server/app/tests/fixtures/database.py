@@ -13,7 +13,9 @@ from sqlalchemy.ext.asyncio import (
     AsyncTransaction,
     create_async_engine,
 )
-from testcontainers.postgres import PostgresContainer
+from testcontainers.postgres import (  # pyright: ignore[reportMissingTypeStubs]
+    PostgresContainer,
+)
 
 from app.core.database import Base
 
@@ -25,10 +27,12 @@ def anyio_backend():
 
 def run_migrations(connection: Connection) -> None:
     config = Config("alembic.ini")
+    # used by seed admin migration to prevent reading from .env
+    config.attributes["is_testing"] = True
     script = ScriptDirectory.from_config(config)
 
-    def upgrade(rev: str, context: EnvironmentContext):
-        return script._upgrade_revs("head", rev)
+    def upgrade(rev: str, _: EnvironmentContext):
+        return script._upgrade_revs("head", rev)  # type: ignore
 
     with EnvironmentContext(
         config,
@@ -46,6 +50,7 @@ def run_migrations(connection: Connection) -> None:
 
 @pytest.fixture(scope="session")
 async def engine(anyio_backend: str) -> AsyncGenerator[AsyncEngine]:
+    _ = anyio_backend
     with PostgresContainer(image="postgres:18", driver="asyncpg") as postgres:
         url = postgres.get_connection_url()
         engine = create_async_engine(url, echo=False, pool_pre_ping=True)
@@ -81,4 +86,6 @@ async def session(
         expire_on_commit=False,
     )
     yield async_session
-    await transaction.rollback()
+
+    if transaction.is_active:
+        await transaction.rollback()

@@ -5,6 +5,7 @@ from fastapi import BackgroundTasks
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import Settings
 from app.core.security import (
     PASSWORD_HASH,
     authenticate_user,
@@ -42,6 +43,7 @@ async def request_access(
     background_tasks: BackgroundTasks,
     db: AsyncSession,
     email_svc: EmailService,
+    settings: Settings,
 ) -> bool:
     """Returns True if access was already approved, False otherwise"""
     logger.info(f"Requesting access for email: {email}")
@@ -78,6 +80,7 @@ async def request_access(
 
                 background_tasks.add_task(
                     email_svc.send_access_request_approved_email,
+                    settings,
                     existing_request,
                     token_str,
                 )
@@ -95,7 +98,10 @@ async def request_access(
     admins = (await db.execute(select(User).where(User.is_admin))).scalars().all()
     for admin in admins:
         background_tasks.add_task(
-            email_svc.send_access_request_notification, admin.email, access_request
+            email_svc.send_access_request_notification,
+            settings,
+            admin.email,
+            access_request,
         )
 
     return False
@@ -142,6 +148,7 @@ async def request_password_reset(
     background_tasks: BackgroundTasks,
     db: AsyncSession,
     email_svc: EmailService,
+    settings: Settings,
 ) -> None:
     logger.info(f"Requesting password reset for email: {email}")
 
@@ -160,6 +167,7 @@ async def request_password_reset(
 
     background_tasks.add_task(
         email_svc.send_password_reset_email,
+        settings,
         user.email,
         token_str,
     )
@@ -184,15 +192,17 @@ async def reset_password(
     await db.commit()
 
 
-async def login(username: str, password: str, db: AsyncSession) -> LoginResult:
+async def login(
+    username: str, password: str, db: AsyncSession, settings: Settings
+) -> LoginResult:
     logger.info(f"Logging in user {username}")
 
     user = await authenticate_user(username, password, db)
     if not user:
         raise InvalidCredentials()
 
-    access_token = create_access_jwt(user.username)
-    refresh_token = create_refresh_jwt(user.username)
+    access_token = create_access_jwt(user.username, settings)
+    refresh_token = create_refresh_jwt(user.username, settings)
 
     return LoginResult(
         access_token=access_token,
@@ -200,14 +210,14 @@ async def login(username: str, password: str, db: AsyncSession) -> LoginResult:
     )
 
 
-async def refresh(db: AsyncSession, token: str) -> str:
+async def refresh(db: AsyncSession, token: str, settings: Settings) -> str:
     logger.info("Refreshing access token")
 
-    username = verify_jwt(token)
+    username = verify_jwt(token, settings)
     user = (
         await db.execute(select(User).where(User.username == username))
     ).scalar_one_or_none()
     if not user:
         raise InvalidCredentials()
 
-    return create_access_jwt(user.username)
+    return create_access_jwt(user.username, settings)

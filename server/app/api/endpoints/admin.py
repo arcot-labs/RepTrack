@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, BackgroundTasks, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import Settings, get_settings
 from app.core.dependencies import get_current_admin, get_db
 from app.models.schemas.access_request import (
     AccessRequestPublic,
@@ -54,6 +55,7 @@ async def update_access_request_status_endpoint(
     db: Annotated[AsyncSession, Depends(get_db)],
     background_tasks: BackgroundTasks,
     email_svc: Annotated[EmailService, Depends(get_email_service)],
+    settings: Annotated[Settings, Depends(get_settings)],
 ):
     await update_access_request_status(
         access_request_id=access_request_id,
@@ -62,6 +64,7 @@ async def update_access_request_status_endpoint(
         db=db,
         background_tasks=background_tasks,
         email_svc=email_svc,
+        settings=settings,
     )
 
 

@@ -2,6 +2,7 @@ from fastapi import status
 from httpx import AsyncClient
 
 
+# 200
 async def test_health(client: AsyncClient):
     resp = await client.get("/api/health")
 

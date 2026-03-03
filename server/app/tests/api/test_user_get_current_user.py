@@ -3,7 +3,7 @@ from httpx import AsyncClient
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
+from app.core.config import Settings
 from app.core.security import ACCESS_JWT_KEY
 from app.models.database.user import User
 from app.models.errors import InvalidCredentials
@@ -17,8 +17,9 @@ async def make_request(client: AsyncClient):
     )
 
 
-async def test_get_current_user(client: AsyncClient):
-    await login_admin(client)
+# 200
+async def test_get_current_user(client: AsyncClient, settings: Settings):
+    await login_admin(client, settings)
     resp = await make_request(client)
 
     assert resp.status_code == status.HTTP_200_OK
@@ -29,6 +30,7 @@ async def test_get_current_user(client: AsyncClient):
     assert body["is_admin"] is True
 
 
+# 401
 async def test_get_current_user_not_logged_in(client: AsyncClient):
     resp = await make_request(client)
 
@@ -37,8 +39,9 @@ async def test_get_current_user_not_logged_in(client: AsyncClient):
     assert body["detail"] == "Not authenticated"
 
 
-async def test_get_current_user_invalid_cookie(client: AsyncClient):
-    await login_admin(client)
+# 401
+async def test_get_current_user_invalid_cookie(client: AsyncClient, settings: Settings):
+    await login_admin(client, settings)
     client.cookies.set(ACCESS_JWT_KEY, "invalid_token")
     resp = await make_request(client)
 
@@ -47,10 +50,11 @@ async def test_get_current_user_invalid_cookie(client: AsyncClient):
     assert body["detail"] == InvalidCredentials.detail
 
 
+# 401
 async def test_get_current_user_deleted_user(
-    client: AsyncClient, session: AsyncSession
+    client: AsyncClient, session: AsyncSession, settings: Settings
 ):
-    await login_admin(client)
+    await login_admin(client, settings)
 
     await session.execute(delete(User).where(User.username == settings.admin.username))
     await session.commit()

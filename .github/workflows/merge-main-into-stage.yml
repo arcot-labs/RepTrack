@@ -1,4 +1,4 @@
-name: Merge main into stage on PR Merge
+name: Maintenance / Merge main into stage after PR Merge
 
 on:
     pull_request:
@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
     merge-main-into-stage:
+        name: Merge main into stage
         if: github.event.pull_request.merged == true
         runs-on: self-hosted
         steps:

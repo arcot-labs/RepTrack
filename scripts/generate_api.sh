@@ -25,7 +25,11 @@ tmpfile="$(mktemp)"
 
 python3 << EOF
 import json
+import logging
+
+logging.disable(logging.CRITICAL)
 from app.main import fastapi_app
+logging.disable(logging.NOTSET)
 
 spec = fastapi_app.openapi()
 with open("$tmpfile", "w") as f:

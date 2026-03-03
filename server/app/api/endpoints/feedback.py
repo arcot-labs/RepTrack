@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, BackgroundTasks, Depends, Form, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import Settings, get_settings
 from app.core.dependencies import get_current_user, get_db
 from app.models.schemas.errors import ErrorResponseModel
 from app.models.schemas.feedback import CreateFeedbackRequest
@@ -28,6 +29,7 @@ def create_feedback_endpoint(
     background_tasks: BackgroundTasks,
     db: Annotated[AsyncSession, Depends(get_db)],
     github_svc: Annotated[GitHubService, Depends(get_github_service)],
+    settings: Annotated[Settings, Depends(get_settings)],
     req: CreateFeedbackRequest = Form(..., media_type="multipart/form-data"),
 ):
     background_tasks.add_task(
@@ -36,4 +38,5 @@ def create_feedback_endpoint(
         req=req,
         db=db,
         github_svc=github_svc,
+        settings=settings,
     )

@@ -1,4 +1,4 @@
-name: Deploy Client
+name: CD / Deploy Client Image (Reusable)
 
 on:
     workflow_call:
@@ -14,7 +14,8 @@ permissions:
     contents: none
 
 jobs:
-    deploy:
+    deploy-client:
+        name: Deploy Client Image
         runs-on: ${{ inputs.runner }}
         environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name }}
         steps:

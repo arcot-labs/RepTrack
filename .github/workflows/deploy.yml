@@ -1,4 +1,4 @@
-name: Deploy Application
+name: CD / Deploy Application
 
 on:
     workflow_dispatch:
@@ -31,7 +31,8 @@ permissions:
     contents: none
 
 jobs:
-    setup:
+    set-variables:
+        name: Set Variables
         runs-on: self-hosted
         environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name }}
         outputs:
@@ -49,25 +50,28 @@ jobs:
                   echo "tag=$(date +%Y-%m-%d).$VERSION" >> $GITHUB_OUTPUT
 
     deploy-client:
-        needs: setup
+        name: Deploy Client Image (Reusable)
+        needs: set-variables
         uses: ./.github/workflows/deploy-client.yml
         with:
-            runner: ${{ needs.setup.outputs.runner }}
-            tag: ${{ needs.setup.outputs.tag }}
+            runner: ${{ needs.set-variables.outputs.runner }}
+            tag: ${{ needs.set-variables.outputs.tag }}
         secrets: inherit
 
     deploy-server:
-        needs: setup
+        name: Deploy Server Image (Reusable)
+        needs: set-variables
         uses: ./.github/workflows/deploy-server.yml
         with:
-            runner: ${{ needs.setup.outputs.runner }}
-            tag: ${{ needs.setup.outputs.tag }}
+            runner: ${{ needs.set-variables.outputs.runner }}
+            tag: ${{ needs.set-variables.outputs.tag }}
         secrets: inherit
 
     deploy-infra:
-        needs: [setup, deploy-client, deploy-server]
+        name: Deploy Infrastructure (Reusable)
+        needs: [set-variables, deploy-client, deploy-server]
         uses: ./.github/workflows/deploy-infra.yml
         with:
-            runner: ${{ needs.setup.outputs.runner }}
-            tag: ${{ needs.setup.outputs.tag }}
+            runner: ${{ needs.set-variables.outputs.runner }}
+            tag: ${{ needs.set-variables.outputs.tag }}
         secrets: inherit

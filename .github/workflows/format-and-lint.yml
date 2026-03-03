@@ -1,8 +1,8 @@
-name: Format & Lint Code on PR Merge
+name: Maintenance / Format and Lint after PR Merge
 
 on:
     workflow_run:
-        workflows: ['Generate API Client on PR Merge']
+        workflows: ['Maintenance / Generate API Client after PR Merge']
         types:
             - completed
 
@@ -11,6 +11,7 @@ permissions:
 
 jobs:
     format-and-lint:
+        name: Format and Lint
         runs-on: self-hosted
         steps:
             - name: set cache dirs
@@ -68,7 +69,7 @@ jobs:
 
                     git add .
                     git status
-                    git commit -m "chore: format & lint code after PR merge"
+                    git commit -m "chore: format & lint after PR merge"
                     git status
                     git push
                   else

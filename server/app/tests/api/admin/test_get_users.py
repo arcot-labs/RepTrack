@@ -3,7 +3,7 @@ from httpx import AsyncClient
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
+from app.core.config import Settings
 from app.models.database.user import User
 from app.models.errors import InsufficientPermissions
 from app.models.schemas.user import UserPublic
@@ -19,17 +19,17 @@ async def make_request(client: AsyncClient):
 
 
 # 200
-async def test_get_users(client: AsyncClient):
-    await login_admin(client)
+async def test_get_users(client: AsyncClient, settings: Settings):
+    await login_admin(client, settings)
     resp = await make_request(client)
 
     assert resp.status_code == status.HTTP_200_OK
     body = resp.json()
     assert isinstance(body, list)
-    for item in body:
+    for item in body:  # type: ignore
         UserPublic.model_validate(item)
 
-    usernames = {item["username"] for item in body}
+    usernames = {item["username"] for item in body}  # type: ignore
     assert settings.admin.username in usernames
 
 
@@ -43,7 +43,9 @@ async def test_get_users_not_logged_in(client: AsyncClient):
 
 
 # 403
-async def test_get_users_non_admin_user(client: AsyncClient, session: AsyncSession):
+async def test_get_users_non_admin_user(
+    client: AsyncClient, session: AsyncSession, settings: Settings
+):
     await session.execute(
         update(User)
         .where(User.username == settings.admin.username)
@@ -51,7 +53,7 @@ async def test_get_users_non_admin_user(client: AsyncClient, session: AsyncSessi
     )
     await session.commit()
 
-    await login_admin(client)
+    await login_admin(client, settings)
     resp = await make_request(client)
 
     assert resp.status_code == InsufficientPermissions.status_code

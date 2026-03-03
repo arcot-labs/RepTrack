@@ -2,16 +2,17 @@ import jwt
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
+from app.core.config import Settings
 from app.models.errors import InvalidCredentials
 from app.services.auth import login
 
 
-async def test_login(session: AsyncSession):
+async def test_login(session: AsyncSession, settings: Settings):
     result = await login(
         username=settings.admin.username,
         password=settings.admin.password,
         db=session,
+        settings=settings,
     )
 
     payload = jwt.decode(
@@ -24,19 +25,21 @@ async def test_login(session: AsyncSession):
     assert "exp" in payload
 
 
-async def test_login_non_existent_user(session: AsyncSession):
+async def test_login_non_existent_user(session: AsyncSession, settings: Settings):
     with pytest.raises(InvalidCredentials):
         await login(
             username="non_existent_user",
             password="some_password",
             db=session,
+            settings=settings,
         )
 
 
-async def test_login_invalid_password(session: AsyncSession):
+async def test_login_invalid_password(session: AsyncSession, settings: Settings):
     with pytest.raises(InvalidCredentials):
         await login(
             username=settings.admin.username,
             password="some_password",
             db=session,
+            settings=settings,
         )

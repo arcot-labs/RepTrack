@@ -1,4 +1,4 @@
-name: Deploy Server
+name: CD / Deploy Server Image (Reusable)
 
 on:
     workflow_call:
@@ -14,7 +14,8 @@ permissions:
     contents: none
 
 jobs:
-    deploy:
+    deploy-server:
+        name: Deploy Server Image
         runs-on: ${{ inputs.runner }}
         environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name }}
         steps:

@@ -4,12 +4,12 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.core.config import settings
-
 logger = logging.getLogger(__name__)
 
 
 async def exception_handler(request: Request, exc: Exception):
+    is_prod: bool = getattr(request.app.state, "is_prod", True)
+
     if isinstance(exc, StarletteHTTPException):
         logger.error(f"HTTP error: {exc.status_code} - {exc.detail}")
 
@@ -19,7 +19,7 @@ async def exception_handler(request: Request, exc: Exception):
 
         else:
             detail = "HTTP Error"
-            if (not settings.is_prod) and exc.detail:
+            if (not is_prod) and exc.detail:
                 detail = exc.detail
 
             content = {
@@ -35,7 +35,7 @@ async def exception_handler(request: Request, exc: Exception):
     logger.exception(f"Unhandled error: {exc}")
 
     detail = "Internal Server Error"
-    if not settings.is_prod:
+    if not is_prod:
         detail = str(exc) or detail
 
     return JSONResponse(
