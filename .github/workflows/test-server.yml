@@ -40,6 +40,6 @@ jobs:
               working-directory: server
               run: make check
 
-            - name: run tests
+            - name: run tests with coverage
               working-directory: server
-              run: make test
+              run: make cov
