@@ -86,4 +86,6 @@ async def session(
         expire_on_commit=False,
     )
     yield async_session
-    await transaction.rollback()
+
+    if transaction.is_active:
+        await transaction.rollback()

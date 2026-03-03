@@ -15,7 +15,6 @@ from app.core.config import Settings, get_settings
 from app.core.dependencies import get_db
 from app.services.email import EmailService, get_email_service
 from app.services.github import GitHubService, get_github_service
-from app.tests.fixtures.settings import TEST_SETTINGS
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +30,7 @@ def fastapi_app(settings: Settings) -> FastAPI:
 @pytest.fixture()
 async def client(
     fastapi_app: FastAPI,
+    settings: Settings,
     connection: AsyncConnection,
     transaction: AsyncTransaction,
     mock_email_svc: EmailService,
@@ -39,7 +39,7 @@ async def client(
     logger.info("Setting up test client")
 
     async def override_get_settings() -> Settings:
-        return TEST_SETTINGS
+        return settings
 
     async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
         async_session = AsyncSession(
@@ -54,6 +54,7 @@ async def client(
     fastapi_app.dependency_overrides[get_db] = override_get_db
     fastapi_app.dependency_overrides[get_email_service] = lambda: mock_email_svc
     fastapi_app.dependency_overrides[get_github_service] = lambda: mock_github_svc
+
     try:
         yield AsyncClient(
             transport=ASGITransport(app=fastapi_app), base_url="http://test"
@@ -64,4 +65,5 @@ async def client(
         del fastapi_app.dependency_overrides[get_email_service]
         del fastapi_app.dependency_overrides[get_github_service]
 
-        await transaction.rollback()
+        if transaction.is_active:
+            await transaction.rollback()

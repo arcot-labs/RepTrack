@@ -37,7 +37,7 @@ def test_verify_jwt_raises_on_decode_error(anyio_backend: str, settings: Setting
             "sub": settings.admin.username,
             "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
         },
-        secret="wrong-jwt-secret-key",
+        secret="wrong-jwt-secret-key-at-least-32-bytes",
         algorithm=settings.jwt.algorithm,
     )
 

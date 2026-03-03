@@ -58,5 +58,5 @@ def disable_env_file(monkeypatch: pytest.MonkeyPatch):
 
 
 @pytest.fixture(scope="session")
-async def settings() -> Settings:
+def settings() -> Settings:
     return TEST_SETTINGS

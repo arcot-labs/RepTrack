@@ -17,6 +17,10 @@ MOCK_CLIENT_URL = "http://example.com"
 LOCALHOST_URL = "http://localhost"
 
 
+def _revalidate_settings(settings: Settings) -> Settings:
+    return Settings.model_validate(settings.model_dump(warnings=False))
+
+
 def test_dev_config(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
@@ -25,7 +29,7 @@ def test_dev_config(
         "client_url": MOCK_CLIENT_URL,
     }
     settings = override_settings(overrides)
-    settings = Settings.model_validate(settings.model_dump())
+    settings = _revalidate_settings(settings)
 
     assert settings.env == "dev"
     assert settings.client_url == MOCK_CLIENT_URL
@@ -59,7 +63,7 @@ def test_test_config(
         },
     }
     settings = override_settings(overrides)
-    settings = Settings.model_validate(settings.model_dump())
+    settings = _revalidate_settings(settings)
 
     assert settings.env == "test"
     assert settings.client_url == MOCK_CLIENT_URL
@@ -101,7 +105,7 @@ def test_stage_config(
         },
     }
     settings = override_settings(overrides)
-    settings = Settings.model_validate(settings.model_dump())
+    settings = _revalidate_settings(settings)
 
     assert settings.env == "stage"
     assert settings.client_url == MOCK_CLIENT_URL
@@ -143,7 +147,7 @@ def test_prod_config(
         },
     }
     settings = override_settings(overrides)
-    settings = Settings.model_validate(settings.model_dump())
+    settings = _revalidate_settings(settings)
 
     assert settings.env == "prod"
     assert settings.client_url == MOCK_CLIENT_URL
@@ -181,7 +185,7 @@ def test_prod_gh_validator_raises_for_wrong_backend(
     settings = override_settings(overrides)
 
     with pytest.raises(ValueError, match="github.backend must be 'api' in production"):
-        Settings.model_validate(settings.model_dump())
+        _revalidate_settings(settings)
 
 
 def test_prod_email_validator_raises_for_wrong_backend(
@@ -200,7 +204,7 @@ def test_prod_email_validator_raises_for_wrong_backend(
     settings = override_settings(overrides)
 
     with pytest.raises(ValueError, match="email.backend must be 'smtp' in production"):
-        Settings.model_validate(settings.model_dump())
+        _revalidate_settings(settings)
 
 
 def test_gh_backend_fails_with_missing_properties(
@@ -214,7 +218,7 @@ def test_gh_backend_fails_with_missing_properties(
     settings = override_settings(overrides)
 
     with pytest.raises(ValueError, match="3 validation errors"):
-        Settings.model_validate(settings.model_dump())
+        _revalidate_settings(settings)
 
 
 def test_email_backend_fails_with_missing_properties(
@@ -228,7 +232,7 @@ def test_email_backend_fails_with_missing_properties(
     settings = override_settings(overrides)
 
     with pytest.raises(ValueError, match="5 validation errors"):
-        Settings.model_validate(settings.model_dump())
+        _revalidate_settings(settings)
 
 
 def test_extra_field_ignored(
@@ -239,7 +243,7 @@ def test_extra_field_ignored(
         "extra_field": "ignored",
     }
     settings = override_settings(overrides)
-    settings = Settings.model_validate(settings.model_dump())
+    settings = _revalidate_settings(settings)
 
     assert not hasattr(settings, "extra_field")
 
