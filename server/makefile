@@ -9,7 +9,10 @@ dev:
 		--reload-include '.env'
 
 test:
-	uv run pytest -v && open -a "Google Chrome" htmlcov/index.html
+	uv run pytest -v
+
+open-coverage:
+	open -a "Google Chrome" htmlcov/index.html
 
 check:
 	uv run pyright
