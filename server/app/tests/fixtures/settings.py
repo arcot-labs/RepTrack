@@ -50,10 +50,12 @@ TEST_SETTINGS = Settings(
 
 @pytest.fixture(autouse=True)
 def disable_env_file(monkeypatch: pytest.MonkeyPatch):
+    config = dict(Settings.model_config)
+    config["env_file"] = None
     monkeypatch.setattr(
         Settings,
         "model_config",
-        SettingsConfigDict(extra="ignore"),
+        SettingsConfigDict(**config),  # pyright: ignore[reportArgumentType]
     )
 
 
