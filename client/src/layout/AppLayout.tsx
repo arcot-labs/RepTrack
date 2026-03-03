@@ -1,6 +1,7 @@
 import { AuthService } from '@/api/generated'
 import { useSession } from '@/auth/session'
 import { Feedback } from '@/components/Feedback'
+import { ModeToggle } from '@/components/ModeToggle'
 import { Button } from '@/components/ui/button'
 import { NavItem } from '@/lib/nav'
 import { notify } from '@/lib/notify'
@@ -38,6 +39,7 @@ export function AppLayout() {
                         </nav>
                     </div>
                     <div className="flex items-center gap-2">
+                        <ModeToggle />
                         <Feedback />
                         <Button
                             variant="destructive"

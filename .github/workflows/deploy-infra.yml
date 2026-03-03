@@ -1,4 +1,4 @@
-name: Deploy Infra
+name: CD / Deploy Infrastructure (Reusable)
 
 on:
     workflow_call:
@@ -14,7 +14,8 @@ permissions:
     contents: none
 
 jobs:
-    deploy:
+    deploy-infra:
+        name: Deploy Infrastructure
         runs-on: ${{ inputs.runner }}
         environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name }}
         steps:

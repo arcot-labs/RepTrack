@@ -1,4 +1,4 @@
-name: Build Client & Server
+name: CI / Build Client and Server Images
 
 on:
     workflow_dispatch:
@@ -12,6 +12,7 @@ permissions:
 
 jobs:
     build-client:
+        name: Build Client Image
         runs-on: self-hosted
         environment: ${{ github.base_ref == 'main' && 'prod' || github.base_ref }}
         steps:
@@ -39,6 +40,7 @@ jobs:
                       VITE_API_URL=https://api.example.com
 
     build-server:
+        name: Build Server Image
         runs-on: self-hosted
         environment: ${{ github.base_ref == 'main' && 'prod' || github.base_ref }}
         steps:

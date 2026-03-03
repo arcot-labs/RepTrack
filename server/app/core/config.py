@@ -104,7 +104,7 @@ class Settings(BaseSettings):
     )
 
 
-# should only be used as a dependency, with the exception of in create_app
+# should only be used via Depends(...), except in create_app
 @cache
 def get_settings() -> Settings:
     return Settings()  # type: ignore

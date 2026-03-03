@@ -1,4 +1,4 @@
-name: Run Server Tests
+name: CI / Test Server
 
 on:
     workflow_dispatch:
@@ -12,6 +12,7 @@ permissions:
 
 jobs:
     test-server:
+        name: Test Server
         runs-on: self-hosted
         environment: test
         steps:
@@ -39,6 +40,6 @@ jobs:
               working-directory: server
               run: make check
 
-            - name: run tests
+            - name: run tests with coverage
               working-directory: server
-              run: make test
+              run: make cov

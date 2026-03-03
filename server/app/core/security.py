@@ -160,7 +160,7 @@ async def authenticate_user(
     return user
 
 
-def create_jwt(
+def _create_jwt(
     username: str, expires_delta: timedelta, secret_key: str, algorithm: str
 ) -> str:
     payload: dict[str, Any] = {
@@ -176,7 +176,7 @@ def create_jwt(
 
 
 def create_access_jwt(username: str, settings: Settings):
-    return create_jwt(
+    return _create_jwt(
         username,
         expires_delta=timedelta(minutes=settings.jwt.access_token_expire_minutes),
         secret_key=settings.jwt.secret_key,
@@ -185,7 +185,7 @@ def create_access_jwt(username: str, settings: Settings):
 
 
 def create_refresh_jwt(username: str, settings: Settings):
-    return create_jwt(
+    return _create_jwt(
         username,
         expires_delta=timedelta(days=settings.jwt.refresh_token_expire_days),
         secret_key=settings.jwt.secret_key,

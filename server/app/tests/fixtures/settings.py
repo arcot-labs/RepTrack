@@ -1,4 +1,5 @@
 import pytest
+from pydantic_settings import SettingsConfigDict
 
 from app.core.config import (
     AdminSettings,
@@ -47,6 +48,17 @@ TEST_SETTINGS = Settings(
 )
 
 
+@pytest.fixture(autouse=True)
+def disable_env_file(monkeypatch: pytest.MonkeyPatch):
+    config = dict(Settings.model_config)
+    config["env_file"] = None
+    monkeypatch.setattr(
+        Settings,
+        "model_config",
+        SettingsConfigDict(**config),  # pyright: ignore[reportArgumentType]
+    )
+
+
 @pytest.fixture(scope="session")
-async def settings() -> Settings:
+def settings() -> Settings:
     return TEST_SETTINGS

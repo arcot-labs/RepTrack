@@ -2,7 +2,6 @@ from typing import Callable
 from unittest.mock import patch
 
 from _pytest.logging import LogCaptureFixture
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import (
     EmailConsoleSettings,
@@ -15,11 +14,11 @@ from app.services.email import EmailService
 
 
 async def test_smtp(
-    # required to prevent pytest error
-    session: AsyncSession,
+    anyio_backend: str,
     settings: Settings,
     override_email_settings: Callable[[EmailSettings], EmailService],
 ):
+    _ = anyio_backend
     smtp_settings = EmailSmtpSettings(
         backend="smtp",
         email_from="test@example.com",
@@ -35,11 +34,12 @@ async def test_smtp(
 
 
 async def test_console(
-    session: AsyncSession,
+    anyio_backend: str,
     settings: Settings,
     override_email_settings: Callable[[EmailSettings], EmailService],
     caplog: LogCaptureFixture,
 ):
+    _ = anyio_backend
     console_settings = EmailConsoleSettings(backend="console")
     service = override_email_settings(console_settings)
     caplog.set_level("INFO")
@@ -48,11 +48,12 @@ async def test_console(
 
 
 async def test_disabled(
-    session: AsyncSession,
+    anyio_backend: str,
     settings: Settings,
     override_email_settings: Callable[[EmailSettings], EmailService],
     caplog: LogCaptureFixture,
 ):
+    _ = anyio_backend
     disabled_settings = EmailDisabledSettings(backend="disabled")
     service = override_email_settings(disabled_settings)
     caplog.set_level("DEBUG")

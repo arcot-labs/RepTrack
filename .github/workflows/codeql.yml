@@ -1,4 +1,4 @@
-name: Run CodeQL Analysis
+name: Security / Run CodeQL Analysis
 
 on:
     workflow_dispatch:
@@ -27,8 +27,8 @@ permissions:
     security-events: write
 
 jobs:
-    analyze:
-        name: analyze ${{ matrix.language }}${{ matrix.project && format(' ({0})', matrix.project) || '' }}
+    run-codeql:
+        name: Run CodeQL Analysis for ${{ matrix.language }}${{ matrix.project && format(' ({0})', matrix.project) || '' }}
         runs-on: self-hosted
         strategy:
             fail-fast: false

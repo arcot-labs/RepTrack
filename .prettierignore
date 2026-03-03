@@ -2,3 +2,5 @@ client/src/api/generated/
 dist/
 server/.venv/
 server/.pytest_cache/
+server/htmlcov/
+server/logs/

@@ -32,7 +32,7 @@ export const zCreateFeedbackRequest = z.object({
     url: z.string().min(1).max(1000),
     title: z.string().min(1).max(100),
     description: z.string().min(1).max(10000),
-    files: z.optional(z.array(z.string())).default([])
+    files: z.array(z.string()).optional().default([])
 });
 
 /**
@@ -93,14 +93,8 @@ export const zAccessRequestPublic = z.object({
     first_name: z.string(),
     last_name: z.string(),
     status: zAccessRequestStatus,
-    reviewed_at: z.union([
-        z.iso.datetime(),
-        z.null()
-    ]),
-    reviewer: z.union([
-        zReviewerPublic,
-        z.null()
-    ]),
+    reviewed_at: z.iso.datetime().nullable(),
+    reviewer: zReviewerPublic.nullable(),
     created_at: z.iso.datetime(),
     updated_at: z.iso.datetime()
 });
@@ -139,13 +133,13 @@ export const zValidationError = z.object({
  * HTTPValidationError
  */
 export const zHttpValidationError = z.object({
-    detail: z.optional(z.array(zValidationError))
+    detail: z.array(zValidationError).optional()
 });
 
 export const zGetAccessRequestsData = z.object({
-    body: z.optional(z.never()),
-    path: z.optional(z.never()),
-    query: z.optional(z.never())
+    body: z.never().optional(),
+    path: z.never().optional(),
+    query: z.never().optional()
 });
 
 /**
@@ -160,7 +154,7 @@ export const zUpdateAccessRequestStatusData = z.object({
     path: z.object({
         access_request_id: z.int()
     }),
-    query: z.optional(z.never())
+    query: z.never().optional()
 });
 
 /**
@@ -169,9 +163,9 @@ export const zUpdateAccessRequestStatusData = z.object({
 export const zUpdateAccessRequestStatusResponse = z.void();
 
 export const zGetUsersData = z.object({
-    body: z.optional(z.never()),
-    path: z.optional(z.never()),
-    query: z.optional(z.never())
+    body: z.never().optional(),
+    path: z.never().optional(),
+    query: z.never().optional()
 });
 
 /**
@@ -183,8 +177,8 @@ export const zGetUsersResponse = z.array(zUserPublic);
 
 export const zRequestAccessData = z.object({
     body: zRequestAccessRequest,
-    path: z.optional(z.never()),
-    query: z.optional(z.never())
+    path: z.never().optional(),
+    query: z.never().optional()
 });
 
 /**
@@ -196,8 +190,8 @@ export const zRequestAccessResponse = z.string();
 
 export const zRegisterData = z.object({
     body: zRegisterRequest,
-    path: z.optional(z.never()),
-    query: z.optional(z.never())
+    path: z.never().optional(),
+    query: z.never().optional()
 });
 
 /**
@@ -207,8 +201,8 @@ export const zRegisterResponse = z.void();
 
 export const zForgotPasswordData = z.object({
     body: zForgotPasswordRequest,
-    path: z.optional(z.never()),
-    query: z.optional(z.never())
+    path: z.never().optional(),
+    query: z.never().optional()
 });
 
 /**
@@ -218,8 +212,8 @@ export const zForgotPasswordResponse = z.void();
 
 export const zResetPasswordData = z.object({
     body: zResetPasswordRequest,
-    path: z.optional(z.never()),
-    query: z.optional(z.never())
+    path: z.never().optional(),
+    query: z.never().optional()
 });
 
 /**
@@ -229,8 +223,8 @@ export const zResetPasswordResponse = z.void();
 
 export const zLoginData = z.object({
     body: zLoginRequest,
-    path: z.optional(z.never()),
-    query: z.optional(z.never())
+    path: z.never().optional(),
+    query: z.never().optional()
 });
 
 /**
@@ -239,9 +233,9 @@ export const zLoginData = z.object({
 export const zLoginResponse = z.void();
 
 export const zRefreshTokenData = z.object({
-    body: z.optional(z.never()),
-    path: z.optional(z.never()),
-    query: z.optional(z.never())
+    body: z.never().optional(),
+    path: z.never().optional(),
+    query: z.never().optional()
 });
 
 /**
@@ -250,9 +244,9 @@ export const zRefreshTokenData = z.object({
 export const zRefreshTokenResponse = z.void();
 
 export const zLogoutData = z.object({
-    body: z.optional(z.never()),
-    path: z.optional(z.never()),
-    query: z.optional(z.never())
+    body: z.never().optional(),
+    path: z.never().optional(),
+    query: z.never().optional()
 });
 
 /**
@@ -262,14 +256,14 @@ export const zLogoutResponse = z.void();
 
 export const zCreateFeedbackData = z.object({
     body: zCreateFeedbackRequest,
-    path: z.optional(z.never()),
-    query: z.optional(z.never())
+    path: z.never().optional(),
+    query: z.never().optional()
 });
 
 export const zGetHealthData = z.object({
-    body: z.optional(z.never()),
-    path: z.optional(z.never()),
-    query: z.optional(z.never())
+    body: z.never().optional(),
+    path: z.never().optional(),
+    query: z.never().optional()
 });
 
 /**
@@ -279,10 +273,23 @@ export const zGetHealthData = z.object({
  */
 export const zGetHealthResponse = z.string();
 
+export const zGetDbHealthData = z.object({
+    body: z.never().optional(),
+    path: z.never().optional(),
+    query: z.never().optional()
+});
+
+/**
+ * Response Getdbhealth
+ *
+ * Successful Response
+ */
+export const zGetDbHealthResponse = z.string();
+
 export const zGetCurrentUserData = z.object({
-    body: z.optional(z.never()),
-    path: z.optional(z.never()),
-    query: z.optional(z.never())
+    body: z.never().optional(),
+    path: z.never().optional(),
+    query: z.never().optional()
 });
 
 /**
