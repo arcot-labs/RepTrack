@@ -9,7 +9,9 @@ from app.core.config import (
     GitHubApiSettings,
     GitHubConsoleSettings,
     Settings,
+    get_settings,
 )
+from app.tests.fixtures.settings import TEST_SETTINGS
 
 MOCK_CLIENT_URL = "http://example.com"
 LOCALHOST_URL = "http://localhost"
@@ -240,3 +242,32 @@ def test_extra_field_ignored(
     settings = Settings.model_validate(settings.model_dump())
 
     assert not hasattr(settings, "extra_field")
+
+
+def test_get_settings_returns_settings_instance(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("app.core.config.Settings", lambda: TEST_SETTINGS)
+    get_settings.cache_clear()
+    settings = get_settings()
+    get_settings.cache_clear()
+
+    assert isinstance(settings, Settings)
+
+
+def test_get_settings_is_cached(monkeypatch: pytest.MonkeyPatch) -> None:
+    call_count = 0
+
+    def fake_settings() -> Settings:
+        nonlocal call_count
+        call_count += 1
+        return TEST_SETTINGS.model_copy(deep=True)
+
+    monkeypatch.setattr("app.core.config.Settings", fake_settings)
+    get_settings.cache_clear()
+    first = get_settings()
+    second = get_settings()
+    get_settings.cache_clear()
+
+    assert first is second
+    assert call_count == 1
