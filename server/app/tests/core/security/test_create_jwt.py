@@ -3,8 +3,8 @@ from datetime import datetime, timedelta, timezone
 import jwt
 
 from app.core.config import Settings
-from app.core.security import (  # pyright: ignore[reportPrivateUsage]
-    _create_jwt,
+from app.core.security import (
+    _create_jwt,  # pyright: ignore[reportPrivateUsage]
     create_access_jwt,
     create_refresh_jwt,
 )
