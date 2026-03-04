@@ -4,7 +4,7 @@ from fastapi import status
 from httpx import AsyncClient
 
 from app.core.config import Settings
-from app.tests.api.utilities import HttpMethod, login_admin, make_http_request
+from app.tests.api.utilities import HttpMethod, login_admin
 
 MOCK_DATA = {
     "type": "feedback",
@@ -12,15 +12,23 @@ MOCK_DATA = {
     "title": "Bug report",
     "description": "The page crashes when clicking submit.",
 }
+MOCK_FILE = ("screenshot.png", b"mock image content", "image/png")
 
 
-async def make_request(client: AsyncClient, data: dict[str, Any] = MOCK_DATA):
-    return await make_http_request(
-        client,
-        method=HttpMethod.POST,
-        endpoint="/api/feedback",
+async def make_request(
+    client: AsyncClient,
+    data: dict[str, Any] = MOCK_DATA,
+    files: list[tuple[str, bytes, str]] | None = None,
+):
+    if files is None:
+        files = [MOCK_FILE]
+    request = client.build_request(
+        method=HttpMethod.POST.value,
+        url="/api/feedback",
         data=data,
+        files=[("files", file) for file in files],
     )
+    return await client.send(request)
 
 
 # 202

@@ -1,7 +1,7 @@
 import logging
 import secrets
 from datetime import datetime, timedelta, timezone
-from typing import Any, Optional, Tuple, Type, TypeVar
+from typing import Any, Tuple, Type, TypeVar
 
 import jwt
 from pwdlib import PasswordHash
@@ -33,7 +33,7 @@ async def _get_token(
     model: Type[T],
     load_option: InstrumentedAttribute[Any],
     db: AsyncSession,
-) -> Optional[T]:
+) -> T | None:
     token_prefix = token_str[:TOKEN_PREFIX_LENGTH]
     tokens = (
         (
