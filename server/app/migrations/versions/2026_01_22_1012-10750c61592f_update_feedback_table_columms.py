@@ -1,9 +1,9 @@
-"""update feedback table columms
+"""
+update feedback table columms
 
 Revision ID: 10750c61592f
 Revises: 79347a71235f
 Create Date: 2026-01-22 10:12:49.042346-06:00
-
 """
 
 from collections.abc import Sequence
@@ -18,7 +18,6 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    """Upgrade schema."""
     op.add_column(
         "feedbacks", sa.Column("url", sa.TEXT(), nullable=False, server_default="")
     )
@@ -33,7 +32,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Downgrade schema."""
     op.add_column(
         "feedbacks",
         sa.Column(

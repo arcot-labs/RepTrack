@@ -1,9 +1,9 @@
-"""update models for auth
+"""
+update models for auth
 
 Revision ID: 1e1a6b37847d
 Revises: e42a259d7b17
 Create Date: 2025-12-15 17:09:27.596982-06:00
-
 """
 
 from collections.abc import Sequence
@@ -11,7 +11,6 @@ from collections.abc import Sequence
 import sqlalchemy as sa
 from alembic import op
 
-# revision identifiers, used by Alembic.
 revision: str = "1e1a6b37847d"
 down_revision: str | Sequence[str] | None = "e42a259d7b17"
 branch_labels: str | Sequence[str] | None = None
@@ -100,7 +99,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Downgrade schema."""
     op.drop_index("ix_users_username", table_name="users")
     op.drop_index("ix_users_email", table_name="users")
     op.drop_column("users", "is_admin")

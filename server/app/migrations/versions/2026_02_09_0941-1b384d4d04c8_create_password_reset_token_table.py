@@ -1,9 +1,9 @@
-"""create password reset token table
+"""
+create password reset token table
 
 Revision ID: 1b384d4d04c8
 Revises: 1396f3316b15
 Create Date: 2026-02-09 09:41:49.992006-06:00
-
 """
 
 from collections.abc import Sequence
@@ -18,8 +18,6 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    """Upgrade schema."""
-
     op.create_table(
         "password_reset_tokens",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
@@ -63,8 +61,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Downgrade schema."""
-
     op.drop_index(
         "ix_password_reset_tokens_user_id", table_name="password_reset_tokens"
     )

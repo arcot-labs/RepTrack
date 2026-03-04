@@ -1,9 +1,9 @@
-"""seed admin user
+"""
+seed admin user
 
 Revision ID: b38ada12f56b
 Revises: 1e1a6b37847d
 Create Date: 2025-12-22 10:54:09.798302-06:00
-
 """
 
 import logging
@@ -17,7 +17,6 @@ from pwdlib import PasswordHash
 
 logger = logging.getLogger(__name__)
 
-# revision identifiers, used by Alembic.
 revision: str = "b38ada12f56b"
 down_revision: str | Sequence[str] | None = "1e1a6b37847d"
 branch_labels: str | Sequence[str] | None = None
@@ -48,10 +47,6 @@ if not all([username, email, first_name, last_name, password]):
 password_hash = PasswordHash.recommended()
 
 
-def hash_password(password: str) -> str:
-    return password_hash.hash(password)
-
-
 def upgrade() -> None:
     connection = op.get_bind()
     connection.execute(
@@ -74,7 +69,7 @@ def upgrade() -> None:
             "email": email,
             "first_name": first_name,
             "last_name": last_name,
-            "password_hash": hash_password(password),  # type: ignore
+            "password_hash": password_hash.hash(password),  # type: ignore
         },
     )
 

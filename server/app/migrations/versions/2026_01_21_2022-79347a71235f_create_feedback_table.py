@@ -1,9 +1,9 @@
-"""create feedback table
+"""
+create feedback table
 
 Revision ID: 79347a71235f
 Revises: b38ada12f56b
 Create Date: 2026-01-21 20:22:47.327977-06:00
-
 """
 
 from collections.abc import Sequence
@@ -21,7 +21,6 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    """Upgrade schema."""
     op.create_table(
         "feedbacks",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
@@ -47,7 +46,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Downgrade schema."""
     op.drop_index("ix_feedbacks_user_id", table_name="feedbacks")
     op.drop_index("ix_feedbacks_created_at", table_name="feedbacks")
     op.drop_table("feedbacks")

@@ -1,9 +1,9 @@
-"""remove feedback table defaults
+"""
+remove feedback table defaults
 
 Revision ID: 5460f1eac74c
 Revises: 10750c61592f
 Create Date: 2026-01-23 12:47:29.459961-06:00
-
 """
 
 from collections.abc import Sequence
@@ -18,7 +18,6 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    """Upgrade schema."""
     op.alter_column(
         "feedbacks",
         "url",
@@ -43,7 +42,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Downgrade schema."""
     op.alter_column(
         "feedbacks",
         "description",
