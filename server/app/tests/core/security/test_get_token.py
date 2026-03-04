@@ -1,11 +1,11 @@
 from datetime import UTC, datetime, timedelta
 
-from pwdlib import PasswordHash
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
 from app.core.security import (
+    PASSWORD_HASH,
     _get_token,  # pyright: ignore[reportPrivateUsage]
     create_password_reset_token,
     create_registration_token,
@@ -18,8 +18,6 @@ from app.models.database.user import User
 # _get_token tests use RegistrationToken
 # PasswordResetToken behavior is identical
 # wrappers are tested separately
-
-PASSWORD_HASH = PasswordHash.recommended()
 
 
 async def get_admin(session: AsyncSession, settings: Settings) -> User:

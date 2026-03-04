@@ -36,7 +36,8 @@ async def test_request_access(
     assert task.func == mock_email_svc.send_access_request_notification
     assert isinstance(task.args[0], Settings)
     assert task.args[1] == settings.admin.email
-    assert task.args[2].email == new_email  # type: ignore
+    assert isinstance(task.args[2], AccessRequest)
+    assert task.args[2].email == new_email
 
 
 async def test_request_access_approved(
@@ -69,10 +70,11 @@ async def test_request_access_approved(
     task = background_tasks.tasks[0]
     assert task.func == mock_email_svc.send_access_request_approved_email
     assert isinstance(task.args[0], Settings)
-    assert task.args[1].email == approved_email  # type: ignore
+    assert isinstance(task.args[1], AccessRequest)
+    assert task.args[1].email == approved_email
 
 
-async def test_request_access_existing_user(
+async def test_request_access_raises_for_existing_user(
     session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     user = User(
@@ -100,7 +102,7 @@ async def test_request_access_existing_user(
     assert len(background_tasks.tasks) == 0
 
 
-async def test_request_access_pending(
+async def test_request_access_raises_for_pending(
     session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     req = AccessRequest(
@@ -127,7 +129,7 @@ async def test_request_access_pending(
     assert len(background_tasks.tasks) == 0
 
 
-async def test_request_access_rejected(
+async def test_request_access_raises_for_rejected(
     session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     req = AccessRequest(
