@@ -44,7 +44,7 @@ async def test_create_feedback(
     resp = await make_request(client)
 
     assert resp.status_code == status.HTTP_202_ACCEPTED
-    assert store_files_mock.assert_awaited_once()
+    store_files_mock.assert_awaited_once()
 
 
 # 401
