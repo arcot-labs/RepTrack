@@ -1,5 +1,7 @@
 from typing import Any
+from unittest.mock import AsyncMock
 
+import pytest
 from fastapi import status
 from httpx import AsyncClient
 
@@ -12,7 +14,7 @@ MOCK_DATA = {
     "title": "Bug report",
     "description": "The page crashes when clicking submit.",
 }
-MOCK_FILE = ("screenshot.png", b"mock image content", "image/png")
+MOCK_FILE = ("file.txt", b"mock file content", "text/plain")
 
 
 async def make_request(
@@ -32,11 +34,17 @@ async def make_request(
 
 
 # 202
-async def test_create_feedback(client: AsyncClient, settings: Settings):
+async def test_create_feedback(
+    client: AsyncClient, settings: Settings, monkeypatch: pytest.MonkeyPatch
+):
+    store_files_mock = AsyncMock(return_value=[])
+    monkeypatch.setattr("app.services.feedback.store_files", store_files_mock)
+
     await login_admin(client, settings)
     resp = await make_request(client)
 
     assert resp.status_code == status.HTTP_202_ACCEPTED
+    assert store_files_mock.assert_awaited_once()
 
 
 # 401
