@@ -31,5 +31,17 @@ dev = [
 [tool.pyright]
 typeCheckingMode = "strict"
 
+[tool.pytest.ini_options]
+log_cli = true
+log_cli_level = "INFO"
+
 [tool.coverage.run]
-omit = ["app/migrations/*", "app/tests/*"]
+branch = true
+source = ["app"]
+omit = ["app/migrations/*", "app/tests/*", "conftest.py"]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.coverage.html]
+directory = "htmlcov"
