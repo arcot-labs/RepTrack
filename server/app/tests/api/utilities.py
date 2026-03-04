@@ -1,5 +1,5 @@
 import logging
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from httpx import AsyncClient
@@ -9,7 +9,7 @@ from app.core.config import Settings
 logger = logging.getLogger(__name__)
 
 
-class HttpMethod(str, Enum):
+class HttpMethod(StrEnum):
     GET = "get"
     POST = "post"
     DELETE = "delete"

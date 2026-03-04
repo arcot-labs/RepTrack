@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from pwdlib import PasswordHash
 from sqlalchemy import select
@@ -76,7 +76,7 @@ async def test_get_token_registration_returns_none_for_used_token(
 ):
     access_request = await create_access_request(session, "used@example.com")
     token_str, _token = create_registration_token(access_request.id)
-    _token.used_at = datetime.now(timezone.utc)
+    _token.used_at = datetime.now(UTC)
     session.add(_token)
     await session.commit()
 
@@ -94,7 +94,7 @@ async def test_get_token_registration_returns_none_for_expired_token(
 ):
     access_request = await create_access_request(session, "expired@example.com")
     token_str, _token = create_registration_token(access_request.id)
-    _token.expires_at = datetime.now(timezone.utc) - timedelta(minutes=1)
+    _token.expires_at = datetime.now(UTC) - timedelta(minutes=1)
     session.add(_token)
     await session.commit()
 

@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import UploadFile
@@ -10,7 +10,7 @@ from app.models.schemas.storage import StoredFile
 async def store_files(
     files: list[UploadFile], base_storage_dir: Path
 ) -> list[StoredFile]:
-    storage_dir = base_storage_dir / datetime.now(timezone.utc).strftime("%Y-%m")
+    storage_dir = base_storage_dir / datetime.now(UTC).strftime("%Y-%m")
     storage_dir.mkdir(parents=True, exist_ok=True)
 
     stored_files: list[StoredFile] = []

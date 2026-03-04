@@ -1,19 +1,18 @@
-from typing import Any, Generic, Sequence, Type, TypeVar
+from collections.abc import Sequence
+from typing import Any
 
 from pydantic import BaseModel
 from sqlalchemy.engine.interfaces import Dialect
 from sqlalchemy.types import JSON, TypeDecorator
 
-T = TypeVar("T", bound=BaseModel)
 
-
-class PydanticJSON(TypeDecorator[Any], Generic[T]):
+class PydanticJSON[T: BaseModel](TypeDecorator[Any]):
     impl = JSON
     cache_ok = True
 
-    def __init__(self, model: Type[T]) -> None:
+    def __init__(self, model: type[T]) -> None:
         super().__init__()
-        self.model: Type[T] = model
+        self.model: type[T] = model
 
     def process_bind_param(
         self,

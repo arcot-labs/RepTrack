@@ -8,7 +8,7 @@ Create Date: 2025-12-22 10:54:09.798302-06:00
 
 import logging
 import os
-from typing import Sequence, Union
+from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic import context, op
@@ -19,9 +19,9 @@ logger = logging.getLogger(__name__)
 
 # revision identifiers, used by Alembic.
 revision: str = "b38ada12f56b"
-down_revision: Union[str, Sequence[str], None] = "1e1a6b37847d"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "1e1a6b37847d"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 testing = context.config.attributes.get("is_testing", False)
 if testing:

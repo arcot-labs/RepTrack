@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import BackgroundTasks
 from sqlalchemy import select
@@ -129,7 +129,7 @@ async def register(
     if existing_user:
         raise UsernameAlreadyRegistered()
 
-    token.used_at = datetime.now(timezone.utc)
+    token.used_at = datetime.now(UTC)
     await expire_existing_registration_tokens(access_request.id, db)
 
     user = User(
@@ -185,7 +185,7 @@ async def reset_password(
         raise InvalidToken()
 
     user = token.user
-    token.used_at = datetime.now(timezone.utc)
+    token.used_at = datetime.now(UTC)
     await expire_existing_password_reset_tokens(user.id, db)
 
     user.password_hash = PASSWORD_HASH.hash(password)

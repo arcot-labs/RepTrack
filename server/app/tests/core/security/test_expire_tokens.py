@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -58,7 +58,7 @@ async def test_expire_existing_tokens_registration_expires_active_tokens(
     access_request = await create_access_request(session, "expire@example.com")
     _, active_token = create_registration_token(access_request.id)
     _, expired_token = create_registration_token(access_request.id)
-    expired_token.expires_at = datetime.now(timezone.utc) - timedelta(minutes=1)
+    expired_token.expires_at = datetime.now(UTC) - timedelta(minutes=1)
 
     session.add_all([active_token, expired_token])
     await session.commit()
@@ -74,7 +74,7 @@ async def test_expire_existing_tokens_registration_expires_active_tokens(
     await session.refresh(active_token)
     await session.refresh(expired_token)
 
-    assert active_token.expires_at <= datetime.now(timezone.utc)
+    assert active_token.expires_at <= datetime.now(UTC)
     assert expired_token.expires_at == previous_expired_value
 
 
@@ -99,7 +99,7 @@ async def test_expire_existing_tokens_registration_uses_where_clause(
     await session.refresh(target_token)
     await session.refresh(other_token)
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     assert target_token.expires_at <= now
     assert other_token.expires_at > now
 
@@ -121,7 +121,7 @@ async def test_expire_existing_registration_tokens_expires_tokens_for_access_req
     await session.refresh(target_token)
     await session.refresh(other_token)
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     assert target_token.expires_at <= now
     assert other_token.expires_at > now
 
@@ -148,6 +148,6 @@ async def test_expire_existing_password_reset_tokens_expires_tokens_for_user(
     await session.refresh(target_token)
     await session.refresh(other_token)
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     assert target_token.expires_at <= now
     assert other_token.expires_at > now

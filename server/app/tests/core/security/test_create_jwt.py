@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import jwt
 
@@ -42,7 +42,7 @@ def test_create_jwt_returns_string_with_expected_payload(
 def test_create_jwt_respects_expiry_delta(anyio_backend: str, settings: Settings):
     _ = anyio_backend
     expires_delta = timedelta(minutes=5)
-    before_create = datetime.now(timezone.utc)
+    before_create = datetime.now(UTC)
 
     token = _create_jwt(
         username="delta_user",
@@ -56,8 +56,8 @@ def test_create_jwt_respects_expiry_delta(anyio_backend: str, settings: Settings
         settings.jwt.secret_key,
         algorithms=[settings.jwt.algorithm],
     )
-    expires_at = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
-    after_create = datetime.now(timezone.utc)
+    expires_at = datetime.fromtimestamp(payload["exp"], tz=UTC)
+    after_create = datetime.now(UTC)
 
     earliest_expected = before_create + expires_delta - timedelta(seconds=2)
     latest_expected = after_create + expires_delta + timedelta(seconds=2)

@@ -1,7 +1,7 @@
 import logging
 import ssl
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from email.message import EmailMessage
 from typing import Annotated
 
@@ -163,7 +163,7 @@ class SmtpEmailService(EmailService):
         text: str,
         html: str | None = None,
     ) -> None:
-        now = get_utc_timestamp_str(datetime.now(timezone.utc))
+        now = get_utc_timestamp_str(datetime.now(UTC))
         logger.info(f"Sending email to {to} with subject {subject} ({now})")
 
         message = EmailMessage()
