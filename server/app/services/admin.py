@@ -70,11 +70,15 @@ async def update_access_request_status(
     access_request.reviewed_at = func.now()
     access_request.reviewed_by = user.id
 
-    token_str, token = create_registration_token(access_request.id)
-    db.add(token)
+    token_str: str | None = None
+    if status == AccessRequestStatus.APPROVED:
+        token_str, token = create_registration_token(access_request.id)
+        db.add(token)
+
     await db.commit()
 
     if status == AccessRequestStatus.APPROVED:
+        assert token_str is not None
         background_tasks.add_task(
             email_svc.send_access_request_approved_email,
             settings,
@@ -90,12 +94,7 @@ async def update_access_request_status(
 async def get_users(db: AsyncSession) -> list[UserPublic]:
     logger.info("Getting users")
 
-    result = await db.execute(
-        select(User)
-        .order_by(User.username.asc())
-        .order_by(User.updated_at.desc())
-        .order_by(User.id.desc())
-    )
+    result = await db.execute(select(User).order_by(User.username.asc()))
     return [
         UserPublic.model_validate(user, from_attributes=True)
         for user in result.scalars().all()
