@@ -75,16 +75,14 @@ class Settings(BaseSettings):
     @property
     def data_dir(self) -> Path:
         path = Path("data")
-        if not path.is_absolute():
-            path = Path(os.getcwd()) / path
+        path = Path(os.getcwd()) / path
         return path.resolve()
 
     @computed_field
     @property
     def log_dir(self) -> Path:
         path = Path("logs")
-        if not path.is_absolute():
-            path = Path(os.getcwd()) / path
+        path = Path(os.getcwd()) / path
         return path.resolve()
 
     @model_validator(mode="after")

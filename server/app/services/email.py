@@ -23,7 +23,7 @@ def get_email_service(
             return SmtpEmailService()
         case "console":
             return ConsoleEmailService()
-        case "disabled":
+        case _:
             return DisabledEmailService()
 
 

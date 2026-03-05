@@ -71,7 +71,7 @@ async def request_access(
                 raise AccessRequestPending()
             case AccessRequestStatus.REJECTED:
                 raise AccessRequestRejected()
-            case AccessRequestStatus.APPROVED:
+            case _:
                 await expire_existing_registration_tokens(existing_request.id, db)
 
                 token_str, token = create_registration_token(existing_request.id)

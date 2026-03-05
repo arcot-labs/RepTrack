@@ -19,7 +19,7 @@ def get_github_service(
     match settings.gh.backend:
         case "api":
             return ApiGitHubService()
-        case "console":
+        case _:
             return ConsoleGitHubService()
 
 
