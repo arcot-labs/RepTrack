@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import jwt
 import pytest
@@ -20,7 +20,7 @@ def test_verify_jwt_returns_username(anyio_backend: str, settings: Settings):
     token = make_token(
         {
             "sub": username,
-            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+            "exp": datetime.now(UTC) + timedelta(minutes=5),
         },
         secret=settings.jwt.secret_key,
         algorithm=settings.jwt.algorithm,
@@ -35,7 +35,7 @@ def test_verify_jwt_raises_on_decode_error(anyio_backend: str, settings: Setting
     token = make_token(
         {
             "sub": settings.admin.username,
-            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+            "exp": datetime.now(UTC) + timedelta(minutes=5),
         },
         secret="wrong-jwt-secret-key-at-least-32-bytes",
         algorithm=settings.jwt.algorithm,
@@ -48,7 +48,7 @@ def test_verify_jwt_raises_on_decode_error(anyio_backend: str, settings: Setting
 def test_verify_jwt_raises_for_missing_sub(anyio_backend: str, settings: Settings):
     _ = anyio_backend
     token = make_token(
-        {"exp": datetime.now(timezone.utc) + timedelta(minutes=5)},
+        {"exp": datetime.now(UTC) + timedelta(minutes=5)},
         secret=settings.jwt.secret_key,
         algorithm=settings.jwt.algorithm,
     )
@@ -64,7 +64,7 @@ def test_verify_jwt_raises_for_invalid_sub_shape(
     token = make_token(
         {
             "sub": [settings.admin.username],
-            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+            "exp": datetime.now(UTC) + timedelta(minutes=5),
         },
         secret=settings.jwt.secret_key,
         algorithm=settings.jwt.algorithm,
@@ -81,7 +81,7 @@ def test_verify_jwt_raises_on_jwtdata_validation_error(
     token = make_token(
         {
             "sub": settings.admin.username,
-            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+            "exp": datetime.now(UTC) + timedelta(minutes=5),
         },
         secret=settings.jwt.secret_key,
         algorithm=settings.jwt.algorithm,

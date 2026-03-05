@@ -1,25 +1,25 @@
-from typing import Any, Generic, Sequence, Type, TypeVar
+from collections.abc import Sequence
+from typing import Any
 
 from pydantic import BaseModel
 from sqlalchemy.engine.interfaces import Dialect
 from sqlalchemy.types import JSON, TypeDecorator
 
-T = TypeVar("T", bound=BaseModel)
 
-
-class PydanticJSON(TypeDecorator[Any], Generic[T]):
+class PydanticJSON[T: BaseModel](TypeDecorator[Any]):
     impl = JSON
     cache_ok = True
 
-    def __init__(self, model: Type[T]) -> None:
+    def __init__(self, model: type[T]) -> None:
         super().__init__()
-        self.model: Type[T] = model
+        self.model: type[T] = model
 
     def process_bind_param(
         self,
         value: Sequence[T] | None,
-        dialect: Dialect,
+        dialect: Dialect | None,
     ) -> list[dict[str, Any]] | None:
+        _ = dialect
         if value is None:
             return []
         return [v.model_dump() for v in value]
@@ -27,8 +27,9 @@ class PydanticJSON(TypeDecorator[Any], Generic[T]):
     def process_result_value(
         self,
         value: list[dict[str, Any]] | None,
-        dialect: Dialect,
+        dialect: Dialect | None,
     ) -> list[T]:
+        _ = dialect
         if value is None:
             return []
         return [self.model.model_validate(v) for v in value]

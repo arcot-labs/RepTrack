@@ -1,25 +1,23 @@
-"""create password reset token table
+"""
+create password reset token table
 
 Revision ID: 1b384d4d04c8
 Revises: 1396f3316b15
 Create Date: 2026-02-09 09:41:49.992006-06:00
-
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic import op
 
 revision: str = "1b384d4d04c8"
-down_revision: Union[str, Sequence[str], None] = "1396f3316b15"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "1396f3316b15"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    """Upgrade schema."""
-
     op.create_table(
         "password_reset_tokens",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
@@ -63,8 +61,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Downgrade schema."""
-
     op.drop_index(
         "ix_password_reset_tokens_user_id", table_name="password_reset_tokens"
     )

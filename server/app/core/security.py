@@ -1,7 +1,7 @@
 import logging
 import secrets
-from datetime import datetime, timedelta, timezone
-from typing import Any, Optional, Tuple, Type, TypeVar
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import jwt
 from pwdlib import PasswordHash
@@ -25,15 +25,12 @@ ACCESS_JWT_KEY = "access_token"
 REFRESH_JWT_KEY = "refresh_token"
 
 
-T = TypeVar("T", RegistrationToken, PasswordResetToken)
-
-
-async def _get_token(
+async def _get_token[T: (RegistrationToken, PasswordResetToken)](
     token_str: str,
-    model: Type[T],
+    model: type[T],
     load_option: InstrumentedAttribute[Any],
     db: AsyncSession,
-) -> Optional[T]:
+) -> T | None:
     token_prefix = token_str[:TOKEN_PREFIX_LENGTH]
     tokens = (
         (
@@ -78,7 +75,7 @@ async def get_password_reset_token(
     )
 
 
-async def _expire_existing_tokens(
+async def _expire_existing_tokens[T: (RegistrationToken, PasswordResetToken)](
     model: type[T],
     where_clause: list[Any],
     db: AsyncSession,
@@ -116,7 +113,9 @@ async def expire_existing_password_reset_tokens(
     )
 
 
-def _create_token(model: Type[T], **fields: Any) -> Tuple[str, T]:
+def _create_token[T: (RegistrationToken, PasswordResetToken)](
+    model: type[T], **fields: Any
+) -> tuple[str, T]:
     token_str = secrets.token_urlsafe(TOKEN_URLSAFE_SIZE)
     token_hash = PASSWORD_HASH.hash(token_str)
 
@@ -130,7 +129,7 @@ def _create_token(model: Type[T], **fields: Any) -> Tuple[str, T]:
 
 def create_registration_token(
     access_request_id: int,
-) -> Tuple[str, RegistrationToken]:
+) -> tuple[str, RegistrationToken]:
     logger.info(f"Creating registration token for access request {access_request_id}")
     return _create_token(
         RegistrationToken,
@@ -140,7 +139,7 @@ def create_registration_token(
 
 def create_password_reset_token(
     user_id: int,
-) -> Tuple[str, PasswordResetToken]:
+) -> tuple[str, PasswordResetToken]:
     logger.info(f"Creating password reset token for user {user_id}")
     return _create_token(
         PasswordResetToken,
@@ -165,7 +164,7 @@ def _create_jwt(
 ) -> str:
     payload: dict[str, Any] = {
         "sub": username,
-        "exp": datetime.now(timezone.utc) + expires_delta,
+        "exp": datetime.now(UTC) + expires_delta,
     }
     token = jwt.encode(
         payload=payload,

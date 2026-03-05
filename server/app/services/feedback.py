@@ -22,7 +22,11 @@ async def create_feedback(
     logger.info(f"Creating feedback from user {user.username} with title: {req.title}")
 
     feedback_dir = settings.data_dir / "feedback"
-    stored_files = await store_files(req.files, feedback_dir)
+
+    stored_files = []
+    if len(req.files) > 0:
+        stored_files = await store_files(req.files, feedback_dir)
+
     feedback = Feedback(
         user_id=user.id,
         type=req.type,

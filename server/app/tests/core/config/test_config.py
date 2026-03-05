@@ -1,4 +1,5 @@
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import pytest
 
@@ -21,7 +22,7 @@ def _revalidate_settings(settings: Settings) -> Settings:
     return Settings.model_validate(settings.model_dump(warnings=False))
 
 
-def test_dev_config(
+def test_dev_settings(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     overrides: dict[str, Any] = {
@@ -49,7 +50,7 @@ def test_dev_config(
     assert settings.log_dir.is_absolute()
 
 
-def test_test_config(
+def test_test_settings(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     overrides: dict[str, Any] = {
@@ -83,7 +84,7 @@ def test_test_config(
     assert settings.log_dir.is_absolute()
 
 
-def test_stage_config(
+def test_stage_settings(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     overrides: dict[str, Any] = {
@@ -125,7 +126,7 @@ def test_stage_config(
     assert settings.log_dir.is_absolute()
 
 
-def test_prod_config(
+def test_prod_settings(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     overrides: dict[str, Any] = {

@@ -1,5 +1,4 @@
 import logging
-from typing import Tuple
 
 import fastapi_swagger_dark as fsd  # pyright: ignore[reportMissingTypeStubs]
 from fastapi import APIRouter, FastAPI
@@ -14,7 +13,7 @@ from .core.logging import setup_logging
 logger = logging.getLogger(__name__)
 
 
-def create_app(settings: Settings | None = None) -> Tuple[FastAPI, CORSMiddleware]:
+def create_app(settings: Settings | None = None) -> tuple[FastAPI, CORSMiddleware]:
     logger.info("Creating FastAPI app")
 
     settings = settings or get_settings()

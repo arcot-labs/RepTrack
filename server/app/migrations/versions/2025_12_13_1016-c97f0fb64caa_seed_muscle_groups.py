@@ -1,20 +1,19 @@
-"""seed muscle groups
+"""
+seed muscle groups
 
 Revision ID: c97f0fb64caa
 Revises: 1eac280a80f9
 Create Date: 2025-12-13 10:16:29.507334-06:00
-
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
 
 from alembic import op
 
-# revision identifiers, used by Alembic.
 revision: str = "c97f0fb64caa"
-down_revision: Union[str, Sequence[str], None] = "1eac280a80f9"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "1eac280a80f9"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade():
@@ -34,7 +33,6 @@ def upgrade():
 
 
 def downgrade() -> None:
-    """Downgrade schema."""
     op.execute(
         """
         DELETE FROM muscle_groups

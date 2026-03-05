@@ -2,5 +2,9 @@
     "files.associations": {
         "*.css": "tailwindcss"
     },
-    "python.analysis.useNearestConfiguration": true
+    "python.defaultInterpreterPath": "${workspaceFolder}/server/.venv/bin/python",
+    "python.analysis.useNearestConfiguration": true,
+    "python.testing.cwd": "${workspaceFolder}/server",
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }

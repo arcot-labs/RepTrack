@@ -19,7 +19,7 @@ def get_github_service(
     match settings.gh.backend:
         case "api":
             return ApiGitHubService()
-        case "console":
+        case _:
             return ConsoleGitHubService()
 
 
@@ -68,12 +68,12 @@ class ApiGitHubService(GitHubService):
                 body_lines.append(f"- {file.original_name} (`{file.path}`)")
 
         body = "\n".join(body_lines)
-
         payload: dict[str, Any] = {
             "title": title,
             "body": body,
             "assignees": [settings.gh.issue_assignee],
         }
+
         async with httpx.AsyncClient() as client:
             try:
                 resp = await client.post(url, headers=headers, json=payload)

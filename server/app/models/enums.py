@@ -1,12 +1,12 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class AccessRequestStatus(str, Enum):
+class AccessRequestStatus(StrEnum):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
 
 
-class FeedbackType(str, Enum):
+class FeedbackType(StrEnum):
     feedback = "feedback"
     feature = "feature"

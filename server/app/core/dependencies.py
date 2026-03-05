@@ -1,6 +1,7 @@
 import logging
+from collections.abc import AsyncGenerator
 from functools import cache
-from typing import Annotated, AsyncGenerator
+from typing import Annotated
 
 from fastapi import Depends
 from fastapi.security import APIKeyCookie
@@ -30,7 +31,7 @@ def get_sessionmaker(db_url: str, is_prod: bool):
 
 async def get_db(
     settings: Annotated[Settings, Depends(get_settings)],
-) -> AsyncGenerator[AsyncSession, None]:
+) -> AsyncGenerator[AsyncSession]:
     async with get_sessionmaker(settings.db.url, settings.is_prod_like)() as session:
         yield session
 

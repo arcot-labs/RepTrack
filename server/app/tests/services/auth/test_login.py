@@ -14,7 +14,6 @@ async def test_login(session: AsyncSession, settings: Settings):
         db=session,
         settings=settings,
     )
-
     payload = jwt.decode(
         result.access_token,
         settings.jwt.secret_key,
@@ -25,7 +24,9 @@ async def test_login(session: AsyncSession, settings: Settings):
     assert "exp" in payload
 
 
-async def test_login_non_existent_user(session: AsyncSession, settings: Settings):
+async def test_login_raises_for_user_not_found(
+    session: AsyncSession, settings: Settings
+):
     with pytest.raises(InvalidCredentials):
         await login(
             username="non_existent_user",
@@ -35,7 +36,9 @@ async def test_login_non_existent_user(session: AsyncSession, settings: Settings
         )
 
 
-async def test_login_invalid_password(session: AsyncSession, settings: Settings):
+async def test_login_raises_for_invalid_password(
+    session: AsyncSession, settings: Settings
+):
     with pytest.raises(InvalidCredentials):
         await login(
             username=settings.admin.username,

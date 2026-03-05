@@ -1,7 +1,7 @@
 import os
 from functools import cache
 from pathlib import Path
-from typing import Annotated, Literal, Union
+from typing import Annotated, Literal
 
 from pydantic import Field, computed_field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -18,10 +18,13 @@ from app.models.schemas.config import (
     JWTSettings,
 )
 
-EmailSettings = Union[
-    EmailSmtpSettings, EmailLocalSettings, EmailConsoleSettings, EmailDisabledSettings
-]
-GitHubSettings = Union[GitHubApiSettings, GitHubConsoleSettings]
+EmailSettings = (
+    EmailSmtpSettings
+    | EmailLocalSettings
+    | EmailConsoleSettings
+    | EmailDisabledSettings
+)
+GitHubSettings = GitHubApiSettings | GitHubConsoleSettings
 
 
 class Settings(BaseSettings):
@@ -72,16 +75,14 @@ class Settings(BaseSettings):
     @property
     def data_dir(self) -> Path:
         path = Path("data")
-        if not path.is_absolute():
-            path = Path(os.getcwd()) / path
+        path = Path(os.getcwd()) / path
         return path.resolve()
 
     @computed_field
     @property
     def log_dir(self) -> Path:
         path = Path("logs")
-        if not path.is_absolute():
-            path = Path(os.getcwd()) / path
+        path = Path(os.getcwd()) / path
         return path.resolve()
 
     @model_validator(mode="after")

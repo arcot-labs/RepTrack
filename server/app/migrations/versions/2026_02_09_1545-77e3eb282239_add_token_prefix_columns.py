@@ -1,25 +1,23 @@
-"""add token prefix columns
+"""
+add token prefix columns
 
 Revision ID: 77e3eb282239
 Revises: 1b384d4d04c8
 Create Date: 2026-02-09 15:45:45.525416-06:00
-
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic import op
 
 revision: str = "77e3eb282239"
-down_revision: Union[str, Sequence[str], None] = "1b384d4d04c8"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "1b384d4d04c8"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    """Upgrade schema."""
-
     op.execute("DELETE FROM password_reset_tokens")
     op.add_column(
         "password_reset_tokens",
@@ -46,8 +44,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Downgrade schema."""
-
     op.drop_index(
         "ix_registration_tokens_token_prefix", table_name="registration_tokens"
     )
