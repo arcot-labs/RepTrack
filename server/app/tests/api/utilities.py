@@ -49,9 +49,7 @@ async def login(
     email: str | None = None,
     password: str | None = None,
 ):
-    payload: dict[str, Any] = {
-        "password": password,
-    }
+    payload: dict[str, Any] = {}
     if username is not None:
         payload["username"] = username
     if email is not None:
