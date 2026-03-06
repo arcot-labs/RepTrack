@@ -142,6 +142,10 @@ async def request_password_reset(
 ) -> None:
     logger.info(f"Requesting password reset for email: {email}")
 
+    if email == settings.admin.email:
+        logger.warning("Password reset requested for admin email, ignoring")
+        return
+
     user = await get_user_by_email(email, db)
     if not user:
         logger.info(f"Password reset requested for unregistered email: {email}")
