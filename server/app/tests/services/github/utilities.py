@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Self
 
 import httpx
 import pytest
@@ -69,7 +69,7 @@ def patch_async_client(
     post_impl: Callable[[str, dict[str, str], dict[str, Any]], Any],
 ) -> None:
     class Client:
-        async def __aenter__(self) -> Client:
+        async def __aenter__(self) -> Self:
             return self
 
         async def __aexit__(
