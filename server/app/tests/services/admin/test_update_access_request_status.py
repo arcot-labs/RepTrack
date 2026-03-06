@@ -130,7 +130,7 @@ async def test_update_access_request_status_not_found(
         )
 
 
-async def test_update_access_request_not_pending(
+async def test_update_access_request_status_not_pending(
     session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     access_request = AccessRequest(
