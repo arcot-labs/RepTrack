@@ -114,7 +114,11 @@ export type LoginRequest = {
     /**
      * Username
      */
-    username: string;
+    username?: string | null;
+    /**
+     * Email
+     */
+    email?: string | null;
     /**
      * Password
      */

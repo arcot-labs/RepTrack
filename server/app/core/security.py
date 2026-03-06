@@ -15,7 +15,7 @@ from app.models.database.user import User
 from app.models.errors import InvalidCredentials
 from app.models.schemas.user import JWTData
 from app.services.token import expire_tokens, get_tokens_by_prefix
-from app.services.user import get_user_by_username
+from app.services.user import get_user_by_identifier
 
 logger = logging.getLogger(__name__)
 
@@ -136,11 +136,11 @@ def create_password_reset_token(
 
 
 async def authenticate_user(
-    username: str,
+    identifier: str,
     password: str,
     db: AsyncSession,
 ) -> User | None:
-    user = await get_user_by_username(username, db)
+    user = await get_user_by_identifier(identifier, db)
     if not user or not verify_secret(password, user.password_hash):
         return None
     return user

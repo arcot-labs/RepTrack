@@ -45,17 +45,25 @@ async def make_http_request(
 async def login(
     client: AsyncClient,
     *,
-    username: str,
-    password: str,
+    username: str | None = None,
+    email: str | None = None,
+    password: str | None = None,
 ):
+    payload: dict[str, Any] = {
+        "password": password,
+    }
+    if username is not None:
+        payload["username"] = username
+    if email is not None:
+        payload["email"] = email
+    if password is not None:
+        payload["password"] = password
+
     return await make_http_request(
         client,
         method=HttpMethod.POST,
         endpoint="/api/auth/login",
-        json={
-            "username": username,
-            "password": password,
-        },
+        json=payload,
     )
 
 

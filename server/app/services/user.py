@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.user import User
@@ -24,6 +24,21 @@ async def get_user_by_email(
     db: AsyncSession,
 ) -> User | None:
     result = await db.execute(select(User).where(User.email == email))
+    return result.scalar_one_or_none()
+
+
+async def get_user_by_identifier(
+    identifier: str,
+    db: AsyncSession,
+) -> User | None:
+    result = await db.execute(
+        select(User).where(
+            or_(
+                User.username == identifier,
+                User.email == identifier,
+            )
+        )
+    )
     return result.scalar_one_or_none()
 
 

@@ -1,27 +1,42 @@
-from pydantic import BaseModel, EmailStr, Field
+from typing import Self
+
+from pydantic import BaseModel, model_validator
+
+from app.models.schemas.types import Email, Name, Password, Token, Username
 
 
 class RequestAccessRequest(BaseModel):
-    email: EmailStr
-    first_name: str = Field(min_length=1, max_length=50)
-    last_name: str = Field(min_length=1, max_length=50)
+    email: Email
+    first_name: Name
+    last_name: Name
 
 
 class RegisterRequest(BaseModel):
-    token: str = Field(min_length=1, max_length=64)
-    username: str = Field(min_length=3, max_length=50)
-    password: str = Field(min_length=8, max_length=64)
+    token: Token
+    username: Username
+    password: Password
 
 
 class ForgotPasswordRequest(BaseModel):
-    email: EmailStr
+    email: Email
 
 
 class ResetPasswordRequest(BaseModel):
-    token: str = Field(min_length=1, max_length=64)
-    password: str = Field(min_length=8, max_length=64)
+    token: Token
+    password: Password
 
 
 class LoginRequest(BaseModel):
-    username: str = Field(min_length=3, max_length=50)
-    password: str = Field(min_length=8, max_length=64)
+    username: Username | None = None
+    email: Email | None = None
+    password: Password
+
+    @model_validator(mode="after")
+    def validate_login_identifier(self) -> Self:
+        if not self.username and not self.email:
+            raise ValueError("At least one of username or email must be provided")
+        return self
+
+    @property
+    def identifier(self) -> str:
+        return self.username or str(self.email)

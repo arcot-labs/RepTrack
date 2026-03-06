@@ -181,11 +181,14 @@ async def reset_password(
 
 
 async def login(
-    username: str, password: str, db: AsyncSession, settings: Settings
+    identifier: str,
+    password: str,
+    db: AsyncSession,
+    settings: Settings,
 ) -> LoginResult:
-    logger.info(f"Logging in user {username}")
+    logger.info(f"Logging in user with identifier {identifier}")
 
-    user = await authenticate_user(username, password, db)
+    user = await authenticate_user(identifier, password, db)
     if not user:
         raise InvalidCredentials()
 
