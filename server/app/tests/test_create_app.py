@@ -8,7 +8,7 @@ import app
 from app.core.config import Settings
 
 
-def test_create_app_prod_skips_env_suffix_and_swagger_install(
+def test_create_app_prod(
     monkeypatch: pytest.MonkeyPatch,
     override_settings: Callable[[dict[str, Any]], Settings],
 ):

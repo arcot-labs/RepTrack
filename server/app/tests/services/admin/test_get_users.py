@@ -6,7 +6,29 @@ from app.models.schemas.user import UserPublic
 from app.services.admin import get_users
 
 
-async def test_get_users_returns_orders_by_username(session: AsyncSession):
+async def test_get_users(session: AsyncSession):
+    user = User(
+        email="shape-user@example.com",
+        username="shape_user",
+        first_name="Shape",
+        last_name="User",
+        password_hash="hash",
+    )
+    session.add(user)
+    await session.commit()
+
+    result = await get_users(session)
+    item = next(entry for entry in result if entry.id == user.id)
+
+    assert isinstance(item, UserPublic)
+    assert item.username == "shape_user"
+    assert item.email == "shape-user@example.com"
+    assert item.first_name == "Shape"
+    assert item.last_name == "User"
+    assert isinstance(item.is_admin, bool)
+
+
+async def test_get_users_username_ordering(session: AsyncSession):
     session.add_all(
         [
             User(
@@ -36,29 +58,7 @@ async def test_get_users_returns_orders_by_username(session: AsyncSession):
     assert alpha_index < zeta_index
 
 
-async def test_get_users_returns_user_public_shape(session: AsyncSession):
-    user = User(
-        email="shape-user@example.com",
-        username="shape_user",
-        first_name="Shape",
-        last_name="User",
-        password_hash="hash",
-    )
-    session.add(user)
-    await session.commit()
-
-    result = await get_users(session)
-    item = next(entry for entry in result if entry.id == user.id)
-
-    assert isinstance(item, UserPublic)
-    assert item.username == "shape_user"
-    assert item.email == "shape-user@example.com"
-    assert item.first_name == "Shape"
-    assert item.last_name == "User"
-    assert isinstance(item.is_admin, bool)
-
-
-async def test_get_users_is_read_only(session: AsyncSession):
+async def test_get_users_read_only(session: AsyncSession):
     before_count = await session.scalar(select(func.count()).select_from(User))
 
     _ = await get_users(session)

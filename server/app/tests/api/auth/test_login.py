@@ -17,7 +17,7 @@ async def test_login(client: AsyncClient, settings: Settings):
 
 
 # 401
-async def test_login_non_existent_user(client: AsyncClient):
+async def test_login_user_not_found(client: AsyncClient):
     resp = await login(client, username="non_existent_user", password="some_password")
 
     assert resp.status_code == InvalidCredentials.status_code

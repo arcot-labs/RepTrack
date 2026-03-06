@@ -17,7 +17,7 @@ from .utilities import (
 )
 
 
-async def test_api_github_service_posts_feedback_payload(
+async def test_api_github_service_create_feedback(
     anyio_backend: str,
     monkeypatch: pytest.MonkeyPatch,
     override_settings: Callable[[dict[str, Any]], Settings],
@@ -55,7 +55,7 @@ async def test_api_github_service_posts_feedback_payload(
     assert "(`2026-03/file.txt`)" in payload["body"]
 
 
-async def test_api_github_service_posts_feature_request_title(
+async def test_api_github_service_create_feature_request(
     anyio_backend: str,
     monkeypatch: pytest.MonkeyPatch,
     override_settings: Callable[[dict[str, Any]], Settings],
@@ -84,7 +84,7 @@ async def test_api_github_service_posts_feature_request_title(
     assert "### Attachments" not in payload["body"]
 
 
-async def test_api_github_service_logs_http_status_error(
+async def test_api_github_service_http_error(
     anyio_backend: str,
     monkeypatch: pytest.MonkeyPatch,
     override_settings: Callable[[dict[str, Any]], Settings],
@@ -112,7 +112,7 @@ async def test_api_github_service_logs_http_status_error(
     )
 
 
-async def test_api_github_service_logs_unexpected_error(
+async def test_api_github_service_unexpected_error(
     anyio_backend: str,
     monkeypatch: pytest.MonkeyPatch,
     override_settings: Callable[[dict[str, Any]], Settings],

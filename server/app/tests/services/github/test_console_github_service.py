@@ -7,7 +7,7 @@ from app.services.github import ConsoleGitHubService
 from .utilities import feedback
 
 
-async def test_console_github_service_logs_create_issue(
+async def test_console_github_service_create_feedback(
     anyio_backend: str, settings: Settings, caplog: LogCaptureFixture
 ):
     _ = anyio_backend

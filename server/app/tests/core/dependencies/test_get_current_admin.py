@@ -9,7 +9,7 @@ from app.models.errors import InsufficientPermissions
 from app.models.schemas.user import UserPublic
 
 
-async def get_admin(session: AsyncSession, settings: Settings) -> UserPublic:
+async def _get_admin(session: AsyncSession, settings: Settings) -> UserPublic:
     result = await session.execute(
         select(User).where(User.username == settings.admin.username)
     )
@@ -19,15 +19,17 @@ async def get_admin(session: AsyncSession, settings: Settings) -> UserPublic:
 
 
 async def test_get_current_admin(session: AsyncSession, settings: Settings):
-    admin = await get_admin(session, settings)
+    admin = await _get_admin(session, settings)
     admin = await get_current_admin(user=admin)
 
     assert admin.username == settings.admin.username
     assert admin.is_admin is True
 
 
-async def test_get_current_admin_non_admin(session: AsyncSession, settings: Settings):
-    admin = await get_admin(session, settings)
+async def test_get_current_admin_insufficient_permissions(
+    session: AsyncSession, settings: Settings
+):
+    admin = await _get_admin(session, settings)
     admin.is_admin = False
 
     with pytest.raises(InsufficientPermissions):

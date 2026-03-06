@@ -15,7 +15,7 @@ async def test_authenticate_user(session: AsyncSession, settings: Settings):
     assert user.username == settings.admin.username
 
 
-async def test_authenticate_user_non_existent_user(session: AsyncSession):
+async def test_authenticate_user_not_found(session: AsyncSession):
     user = await authenticate_user(
         username="non_existent_user",
         password="some_password",

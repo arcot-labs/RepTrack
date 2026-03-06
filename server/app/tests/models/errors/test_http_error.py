@@ -3,7 +3,7 @@ import pytest
 from app.models.errors import HTTPError
 
 
-def test_http_error_populates_http_exception_fields():
+def test_http_error():
     class TeapotError(HTTPError):
         status_code = 418
         code = "teapot"
@@ -18,7 +18,7 @@ def test_http_error_populates_http_exception_fields():
     }
 
 
-def test_http_error_raises_when_code_missing():
+def test_http_error_missing_code():
     class MissingCodeError(HTTPError):
         status_code = 400
         detail = "missing code"

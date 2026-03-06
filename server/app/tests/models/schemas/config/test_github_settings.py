@@ -1,7 +1,7 @@
 from app.models.schemas.config import GitHubConsoleSettings
 
 
-def test_github_console_settings_computed_fields_return_none():
+def test_github_console_settings():
     settings = GitHubConsoleSettings(backend="console")
 
     assert settings.repo_owner is None

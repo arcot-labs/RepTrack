@@ -1,6 +1,5 @@
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
@@ -11,23 +10,17 @@ from app.core.security import (
     expire_existing_password_reset_tokens,
     expire_existing_registration_tokens,
 )
-from app.models.database.access_request import AccessRequest, AccessRequestStatus
 from app.models.database.registration_token import RegistrationToken
 from app.models.database.user import User
+from app.tests.core.security.utilities import create_access_request
+from app.tests.core.utilities import get_admin
 
 # _expire_existing_tokens tests use RegistrationToken
 # PasswordResetToken behavior is identical
 # wrappers are tested separately
 
 
-async def get_admin(session: AsyncSession, settings: Settings) -> User:
-    result = await session.execute(
-        select(User).where(User.username == settings.admin.username)
-    )
-    return result.scalar_one()
-
-
-async def create_user(session: AsyncSession, email: str, username: str) -> User:
+async def _create_user(session: AsyncSession, email: str, username: str) -> User:
     user = User(
         email=email,
         username=username,
@@ -40,19 +33,7 @@ async def create_user(session: AsyncSession, email: str, username: str) -> User:
     return user
 
 
-async def create_access_request(session: AsyncSession, email: str) -> AccessRequest:
-    access_request = AccessRequest(
-        email=email,
-        first_name="Test",
-        last_name="User",
-        status=AccessRequestStatus.APPROVED,
-    )
-    session.add(access_request)
-    await session.flush()
-    return access_request
-
-
-async def test_expire_existing_tokens_registration_expires_active_tokens(
+async def test_expire_existing_tokens_registration(
     session: AsyncSession,
 ):
     access_request = await create_access_request(session, "expire@example.com")
@@ -78,7 +59,7 @@ async def test_expire_existing_tokens_registration_expires_active_tokens(
     assert expired_token.expires_at == previous_expired_value
 
 
-async def test_expire_existing_tokens_registration_uses_where_clause(
+async def test_expire_existing_tokens_registration_condition(
     session: AsyncSession,
 ):
     target_request = await create_access_request(session, "target-expire@example.com")
@@ -104,7 +85,7 @@ async def test_expire_existing_tokens_registration_uses_where_clause(
     assert other_token.expires_at > now
 
 
-async def test_expire_existing_registration_tokens_expires_tokens_for_access_request(
+async def test_expire_existing_registration_tokens(
     session: AsyncSession,
 ):
     target_request = await create_access_request(session, "wrapper-target@example.com")
@@ -126,12 +107,12 @@ async def test_expire_existing_registration_tokens_expires_tokens_for_access_req
     assert other_token.expires_at > now
 
 
-async def test_expire_existing_password_reset_tokens_expires_tokens_for_user(
+async def test_expire_existing_password_reset_tokens(
     session: AsyncSession,
     settings: Settings,
 ):
     admin = await get_admin(session, settings)
-    other_user = await create_user(
+    other_user = await _create_user(
         session,
         email="other-user@example.com",
         username="otheruser",

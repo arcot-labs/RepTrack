@@ -9,7 +9,7 @@ from app.models.errors import InvalidToken, UsernameAlreadyRegistered
 from app.tests.api.utilities import HttpMethod, make_http_request
 
 
-async def make_request(client: AsyncClient, token: str, username: str, password: str):
+async def _make_request(client: AsyncClient, token: str, username: str, password: str):
     return await make_http_request(
         client,
         method=HttpMethod.POST,
@@ -22,7 +22,7 @@ async def make_request(client: AsyncClient, token: str, username: str, password:
     )
 
 
-async def create_approved_request_with_token(session: AsyncSession) -> tuple[str, str]:
+async def _create_approved_request_with_token(session: AsyncSession) -> tuple[str, str]:
     access_request = AccessRequest(
         email="approved@example.com",
         first_name="Approved",
@@ -41,9 +41,9 @@ async def create_approved_request_with_token(session: AsyncSession) -> tuple[str
 
 # 204
 async def test_register(client: AsyncClient, session: AsyncSession):
-    _, token_str = await create_approved_request_with_token(session)
+    _, token_str = await _create_approved_request_with_token(session)
 
-    resp = await make_request(
+    resp = await _make_request(
         client,
         token=token_str,
         username="newuser",
@@ -55,7 +55,7 @@ async def test_register(client: AsyncClient, session: AsyncSession):
 
 # 400
 async def test_register_invalid_token(client: AsyncClient):
-    resp = await make_request(
+    resp = await _make_request(
         client,
         token="invalid_token",
         username="newuser",
@@ -71,9 +71,9 @@ async def test_register_invalid_token(client: AsyncClient):
 async def test_register_username_already_registered(
     client: AsyncClient, session: AsyncSession, settings: Settings
 ):
-    _, token_str = await create_approved_request_with_token(session)
+    _, token_str = await _create_approved_request_with_token(session)
 
-    resp = await make_request(
+    resp = await _make_request(
         client,
         token=token_str,
         username=settings.admin.username,
@@ -87,7 +87,7 @@ async def test_register_username_already_registered(
 
 # 422
 async def test_register_invalid_body(client: AsyncClient):
-    resp = await make_request(
+    resp = await _make_request(
         client,
         token="some_token",
         username="newuser",

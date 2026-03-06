@@ -1,7 +1,7 @@
 from app.core.dependencies import get_sessionmaker
 
 
-def test_get_sessionmaker_is_cached():
+def test_get_sessionmaker_cached():
     db_url = "postgresql+asyncpg://user:pw@localhost:5432/db"
 
     sessionmaker_a = get_sessionmaker(db_url, False)
@@ -10,7 +10,7 @@ def test_get_sessionmaker_is_cached():
     assert sessionmaker_a is sessionmaker_b
 
 
-def test_get_sessionmaker_cache_key_includes_arguments():
+def test_get_sessionmaker_cache_key():
     db_url = "postgresql+asyncpg://user:pw@localhost:5432/db"
 
     non_prod_sessionmaker = get_sessionmaker(db_url, is_prod=False)

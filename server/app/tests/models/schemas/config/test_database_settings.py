@@ -1,7 +1,7 @@
 from app.models.schemas.config import DatabaseSettings
 
 
-def test_database_settings_url_is_computed_from_fields():
+def test_database_settings():
     settings = DatabaseSettings(
         host="db",
         port=5432,

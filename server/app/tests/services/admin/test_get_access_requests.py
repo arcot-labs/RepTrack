@@ -10,7 +10,30 @@ from app.models.schemas.access_request import AccessRequestPublic, ReviewerPubli
 from app.services.admin import get_access_requests
 
 
-async def test_get_access_requests_orders_by_status_priority(session: AsyncSession):
+async def test_get_access_requests(
+    session: AsyncSession,
+):
+    access_request = AccessRequest(
+        email="shape@example.com",
+        first_name="Shape",
+        last_name="Test",
+        status=AccessRequestStatus.PENDING,
+    )
+    session.add(access_request)
+    await session.commit()
+
+    result = await get_access_requests(session)
+
+    assert isinstance(result[0], AccessRequestPublic)
+    assert result[0].email == "shape@example.com"
+    assert result[0].first_name == "Shape"
+    assert result[0].last_name == "Test"
+    assert result[0].status == AccessRequestStatus.PENDING
+    assert result[0].reviewer is None
+    assert result[0].reviewed_at is None
+
+
+async def test_get_access_requests_status_ordering(session: AsyncSession):
     pending = AccessRequest(
         email="pending@example.com",
         first_name="Pending",
@@ -43,7 +66,7 @@ async def test_get_access_requests_orders_by_status_priority(session: AsyncSessi
     ]
 
 
-async def test_get_access_requests_orders_by_updated_at_desc(session: AsyncSession):
+async def test_get_access_requests_updated_at_ordering(session: AsyncSession):
     now = datetime.now(UTC)
     ar1 = AccessRequest(
         email="user1@example.com",
@@ -70,7 +93,7 @@ async def test_get_access_requests_orders_by_updated_at_desc(session: AsyncSessi
     assert result[0].updated_at > result[1].updated_at
 
 
-async def test_get_access_requests_orders_by_id_desc(session: AsyncSession):
+async def test_get_access_requests_id_ordering(session: AsyncSession):
     now = datetime.now(UTC)
     ar1 = AccessRequest(
         email="user1@example.com",
@@ -96,30 +119,7 @@ async def test_get_access_requests_orders_by_id_desc(session: AsyncSession):
     assert result[1].id == ar1.id
 
 
-async def test_get_access_requests_returns_access_request_public_shape(
-    session: AsyncSession,
-):
-    access_request = AccessRequest(
-        email="shape@example.com",
-        first_name="Shape",
-        last_name="Test",
-        status=AccessRequestStatus.PENDING,
-    )
-    session.add(access_request)
-    await session.commit()
-
-    result = await get_access_requests(session)
-
-    assert isinstance(result[0], AccessRequestPublic)
-    assert result[0].email == "shape@example.com"
-    assert result[0].first_name == "Shape"
-    assert result[0].last_name == "Test"
-    assert result[0].status == AccessRequestStatus.PENDING
-    assert result[0].reviewer is None
-    assert result[0].reviewed_at is None
-
-
-async def test_get_access_requests_maps_reviewer_when_present(session: AsyncSession):
+async def test_get_access_requests_reviewer(session: AsyncSession):
     reviewer = (
         await session.execute(select(User).where(User.username == "admin"))
     ).scalar_one()
@@ -143,7 +143,7 @@ async def test_get_access_requests_maps_reviewer_when_present(session: AsyncSess
     assert result[0].reviewed_at is not None
 
 
-async def test_get_access_requests_is_read_only(session: AsyncSession):
+async def test_get_access_requests_read_only(session: AsyncSession):
     before_count = await session.scalar(select(func.count()).select_from(AccessRequest))
 
     _ = await get_access_requests(session)

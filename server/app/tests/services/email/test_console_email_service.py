@@ -3,7 +3,7 @@ from _pytest.logging import LogCaptureFixture
 from app.services.email import ConsoleEmailService
 
 
-async def test_console_email_service_logs_email(
+async def test_console_email_service_send(
     anyio_backend: str, caplog: LogCaptureFixture
 ):
     _ = anyio_backend

@@ -11,7 +11,7 @@ from app.services.github import (
 from .utilities import api_settings
 
 
-def test_get_github_service_returns_api_service(
+def test_get_github_service_api(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     settings = api_settings(override_settings)
@@ -20,7 +20,7 @@ def test_get_github_service_returns_api_service(
     assert isinstance(service, ApiGitHubService)
 
 
-def test_get_github_service_returns_console_service(
+def test_get_github_service_console(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     settings = override_settings(

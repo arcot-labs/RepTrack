@@ -13,9 +13,7 @@ from app.core.security import (
 # wrappers are tested separately
 
 
-def test_create_jwt_returns_string_with_expected_payload(
-    anyio_backend: str, settings: Settings
-):
+def test_create_jwt_payload(anyio_backend: str, settings: Settings):
     _ = anyio_backend
     username = settings.admin.username
     expires_delta = timedelta(minutes=7)
@@ -39,7 +37,7 @@ def test_create_jwt_returns_string_with_expected_payload(
     assert "exp" in payload
 
 
-def test_create_jwt_respects_expiry_delta(anyio_backend: str, settings: Settings):
+def test_create_jwt_expiry_delta(anyio_backend: str, settings: Settings):
     _ = anyio_backend
     expires_delta = timedelta(minutes=5)
     before_create = datetime.now(UTC)
@@ -64,7 +62,7 @@ def test_create_jwt_respects_expiry_delta(anyio_backend: str, settings: Settings
     assert earliest_expected <= expires_at <= latest_expected
 
 
-def test_create_access_jwt_returns_access_token(anyio_backend: str, settings: Settings):
+def test_create_access_jwt(anyio_backend: str, settings: Settings):
     _ = anyio_backend
     username = settings.admin.username
     token = create_access_jwt(username, settings)
@@ -81,9 +79,7 @@ def test_create_access_jwt_returns_access_token(anyio_backend: str, settings: Se
     assert "exp" in payload
 
 
-def test_create_refresh_jwt_returns_refresh_token(
-    anyio_backend: str, settings: Settings
-):
+def test_create_refresh_jwt(anyio_backend: str, settings: Settings):
     _ = anyio_backend
     username = settings.admin.username
     token = create_refresh_jwt(username, settings)

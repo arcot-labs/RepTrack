@@ -8,9 +8,7 @@ from app.models.errors import InvalidCredentials
 from app.services.auth import refresh
 
 
-async def test_refresh_returns_new_access_token(
-    session: AsyncSession, settings: Settings
-):
+async def test_refresh(session: AsyncSession, settings: Settings):
     token = create_refresh_jwt(settings.admin.username, settings)
     new_access_token = await refresh(session, token, settings)
 
@@ -23,17 +21,13 @@ async def test_refresh_returns_new_access_token(
     assert "exp" in payload
 
 
-async def test_refresh_raises_when_user_not_found(
-    session: AsyncSession, settings: Settings
-):
+async def test_refresh_user_not_found(session: AsyncSession, settings: Settings):
     token = create_refresh_jwt("missing_user", settings)
 
     with pytest.raises(InvalidCredentials):
         await refresh(session, token, settings)
 
 
-async def test_refresh_raises_when_token_invalid(
-    session: AsyncSession, settings: Settings
-):
+async def test_refresh_invalid_token(session: AsyncSession, settings: Settings):
     with pytest.raises(InvalidCredentials):
         await refresh(session, "invalid-token", settings)

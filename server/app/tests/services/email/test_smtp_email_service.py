@@ -6,7 +6,7 @@ from app.core.config import EmailLocalSettings, EmailSmtpSettings, Settings
 from app.services.email import SmtpEmailService
 
 
-async def test_smtp_email_service_send_uses_tls_and_auth_for_smtp_backend(
+async def test_smtp_email_service_smtp_backend_send(
     anyio_backend: str,
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
@@ -47,7 +47,7 @@ async def test_smtp_email_service_send_uses_tls_and_auth_for_smtp_backend(
     )
 
 
-async def test_smtp_email_service_send_disables_tls_for_local_backend(
+async def test_smtp_email_service_local_backend_send(
     anyio_backend: str,
     override_settings: Callable[[dict[str, Any]], Settings],
 ):

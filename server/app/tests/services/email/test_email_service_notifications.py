@@ -8,7 +8,7 @@ from app.services.email import EmailService
 
 
 @dataclass
-class SendCall:
+class _SendCall:
     to: str
     subject: str
     text: str
@@ -18,7 +18,7 @@ class SendCall:
 class _SpyEmailService(EmailService):
     def __init__(self, raise_error: bool = False):
         self.raise_error = raise_error
-        self.calls: list[SendCall] = []
+        self.calls: list[_SendCall] = []
 
     async def send(
         self,
@@ -30,7 +30,7 @@ class _SpyEmailService(EmailService):
     ) -> None:
         if self.raise_error:
             raise RuntimeError()
-        self.calls.append(SendCall(to=to, subject=subject, text=text, html=html))
+        self.calls.append(_SendCall(to=to, subject=subject, text=text, html=html))
 
 
 def _access_request() -> AccessRequest:
@@ -43,9 +43,7 @@ def _access_request() -> AccessRequest:
     return access_request
 
 
-async def test_send_access_request_notification_calls_send(
-    anyio_backend: str, settings: Settings
-):
+async def test_send_access_request_notification(anyio_backend: str, settings: Settings):
     _ = anyio_backend
     service = _SpyEmailService()
 
@@ -63,7 +61,7 @@ async def test_send_access_request_notification_calls_send(
     assert sent.html is None
 
 
-async def test_send_access_request_approved_email_calls_send(
+async def test_send_access_request_approved_email(
     anyio_backend: str, settings: Settings
 ):
     _ = anyio_backend
@@ -84,7 +82,7 @@ async def test_send_access_request_approved_email_calls_send(
     assert "register" in sent.html
 
 
-async def test_send_access_request_rejected_email_calls_send(
+async def test_send_access_request_rejected_email(
     anyio_backend: str, settings: Settings
 ):
     _ = anyio_backend
@@ -103,9 +101,7 @@ async def test_send_access_request_rejected_email_calls_send(
     assert sent.html is None
 
 
-async def test_send_password_reset_email_calls_send(
-    anyio_backend: str, settings: Settings
-):
+async def test_send_password_reset_email(anyio_backend: str, settings: Settings):
     _ = anyio_backend
     service = _SpyEmailService()
 
@@ -124,7 +120,7 @@ async def test_send_password_reset_email_calls_send(
     assert "reset your password" in sent.html.lower()
 
 
-async def test_notification_methods_swallow_send_errors(
+async def test_send_error(
     anyio_backend: str, settings: Settings, caplog: LogCaptureFixture
 ):
     _ = anyio_backend

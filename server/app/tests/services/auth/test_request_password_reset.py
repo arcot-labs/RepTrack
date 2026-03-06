@@ -11,7 +11,7 @@ from app.models.database.user import User
 from app.services.auth import request_password_reset
 
 
-async def test_request_password_reset_creates_token_and_schedules_email(
+async def test_request_password_reset(
     session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     user = User(
@@ -53,7 +53,7 @@ async def test_request_password_reset_creates_token_and_schedules_email(
     assert isinstance(task.args[2], str)
 
 
-async def test_request_password_reset_adds_no_tasks_for_unregistered_email(
+async def test_request_password_reset_unregistered_email(
     session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     background_tasks = BackgroundTasks()
