@@ -2,7 +2,6 @@ import logging
 from datetime import UTC, datetime
 
 from fastapi import BackgroundTasks
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
@@ -30,6 +29,8 @@ from app.models.errors import (
     InvalidToken,
     UsernameAlreadyRegistered,
 )
+from app.services.access_request import get_latest_access_request_by_email
+from app.services.user import get_admin_users, get_user_by_email, get_user_by_username
 
 from .email import EmailService
 
@@ -48,20 +49,11 @@ async def request_access(
     """Returns True if access was already approved, False otherwise"""
     logger.info(f"Requesting access for email: {email}")
 
-    existing_user = (
-        await db.execute(select(User).where(User.email == email))
-    ).scalar_one_or_none()
+    existing_user = await get_user_by_email(email, db)
     if existing_user:
         raise EmailAlreadyRegistered()
 
-    existing_request = (
-        await db.execute(
-            select(AccessRequest)
-            .where(AccessRequest.email == email)
-            .order_by(AccessRequest.created_at.desc())
-            .limit(1)
-        )
-    ).scalar_one_or_none()
+    existing_request = await get_latest_access_request_by_email(email, db)
     if existing_request:
         logger.info(
             f"Found existing access request for email {email} with id {existing_request.id}"
@@ -95,7 +87,7 @@ async def request_access(
     db.add(access_request)
     await db.commit()
 
-    admins = (await db.execute(select(User).where(User.is_admin))).scalars().all()
+    admins = await get_admin_users(db)
     for admin in admins:
         background_tasks.add_task(
             email_svc.send_access_request_notification,
@@ -123,9 +115,7 @@ async def register(
     if access_request.status != AccessRequestStatus.APPROVED:
         raise InvalidToken()
 
-    existing_user = (
-        await db.execute(select(User).where(User.username == username))
-    ).scalar_one_or_none()
+    existing_user = await get_user_by_username(username, db)
     if existing_user:
         raise UsernameAlreadyRegistered()
 
@@ -152,9 +142,7 @@ async def request_password_reset(
 ) -> None:
     logger.info(f"Requesting password reset for email: {email}")
 
-    user = (
-        await db.execute(select(User).where(User.email == email))
-    ).scalar_one_or_none()
+    user = await get_user_by_email(email, db)
     if not user:
         logger.info(f"Password reset requested for unregistered email: {email}")
         return
@@ -214,9 +202,7 @@ async def refresh(db: AsyncSession, token: str, settings: Settings) -> str:
     logger.info("Refreshing access token")
 
     username = verify_jwt(token, settings)
-    user = (
-        await db.execute(select(User).where(User.username == username))
-    ).scalar_one_or_none()
+    user = await get_user_by_username(username, db)
     if not user:
         raise InvalidCredentials()
 

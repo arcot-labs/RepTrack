@@ -5,9 +5,8 @@ from typing import Any
 
 import jwt
 from pwdlib import PasswordHash
-from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import InstrumentedAttribute, selectinload
+from sqlalchemy.orm import InstrumentedAttribute
 
 from app.core.config import Settings
 from app.models.database.password_reset_token import PasswordResetToken
@@ -15,6 +14,8 @@ from app.models.database.registration_token import RegistrationToken
 from app.models.database.user import User
 from app.models.errors import InvalidCredentials
 from app.models.schemas.user import JWTData
+from app.services.token import expire_tokens, get_tokens_by_prefix
+from app.services.user import get_user_by_username
 
 logger = logging.getLogger(__name__)
 
@@ -32,20 +33,7 @@ async def _get_token[T: (RegistrationToken, PasswordResetToken)](
     db: AsyncSession,
 ) -> T | None:
     token_prefix = token_str[:TOKEN_PREFIX_LENGTH]
-    tokens = (
-        (
-            await db.execute(
-                select(model)
-                .options(selectinload(load_option))
-                .where(model.token_prefix == token_prefix)
-                .where(model.used_at.is_(None))
-                .where(model.expires_at > func.now())
-                .order_by(model.created_at.desc())
-            )
-        )
-        .scalars()
-        .all()
-    )
+    tokens = await get_tokens_by_prefix(model, load_option, token_prefix, db)
     for token in tokens:
         if PASSWORD_HASH.verify(token_str, token.token_hash):
             return token
@@ -75,18 +63,6 @@ async def get_password_reset_token(
     )
 
 
-async def _expire_existing_tokens[T: (RegistrationToken, PasswordResetToken)](
-    model: type[T],
-    where_clause: list[Any],
-    db: AsyncSession,
-) -> None:
-    await db.execute(
-        update(model)
-        .where(*where_clause, model.expires_at > func.now())
-        .values(expires_at=func.now())
-    )
-
-
 async def expire_existing_registration_tokens(
     access_request_id: int,
     db: AsyncSession,
@@ -94,7 +70,7 @@ async def expire_existing_registration_tokens(
     logger.info(
         f"Expiring existing registration tokens for access request {access_request_id}"
     )
-    await _expire_existing_tokens(
+    await expire_tokens(
         RegistrationToken,
         [RegistrationToken.access_request_id == access_request_id],
         db,
@@ -106,7 +82,7 @@ async def expire_existing_password_reset_tokens(
     db: AsyncSession,
 ) -> None:
     logger.info(f"Expiring existing password reset tokens for user {user_id}")
-    await _expire_existing_tokens(
+    await expire_tokens(
         PasswordResetToken,
         [PasswordResetToken.user_id == user_id],
         db,
@@ -152,8 +128,7 @@ async def authenticate_user(
     password: str,
     db: AsyncSession,
 ) -> User | None:
-    result = await db.execute(select(User).where(User.username == username))
-    user = result.scalar_one_or_none()
+    user = await get_user_by_username(username, db)
     if not user or not PASSWORD_HASH.verify(password, user.password_hash):
         return None
     return user

@@ -5,14 +5,13 @@ from typing import Annotated
 
 from fastapi import Depends
 from fastapi.security import APIKeyCookie
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import Settings, get_settings
 from app.core.security import ACCESS_JWT_KEY, REFRESH_JWT_KEY, verify_jwt
-from app.models.database.user import User
 from app.models.errors import InsufficientPermissions, InvalidCredentials
 from app.models.schemas.user import UserPublic
+from app.services.user import get_user_by_username
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +52,7 @@ async def get_current_user(
     logger.info("Getting current user using jwt")
 
     username = verify_jwt(token, settings)
-    user = (
-        await db.execute(select(User).where(User.username == username))
-    ).scalar_one_or_none()
+    user = await get_user_by_username(username, db)
     if not user:
         raise InvalidCredentials()
 

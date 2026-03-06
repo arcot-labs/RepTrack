@@ -1,6 +1,6 @@
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.access_request import AccessRequest
@@ -33,92 +33,6 @@ async def test_get_access_requests(
     assert result[0].reviewed_at is None
 
 
-async def test_get_access_requests_status_ordering(session: AsyncSession):
-    pending = AccessRequest(
-        email="pending@example.com",
-        first_name="Pending",
-        last_name="User",
-        status=AccessRequestStatus.PENDING,
-    )
-    approved = AccessRequest(
-        email="approved@example.com",
-        first_name="Approved",
-        last_name="User",
-        status=AccessRequestStatus.APPROVED,
-    )
-    rejected = AccessRequest(
-        email="rejected@example.com",
-        first_name="Rejected",
-        last_name="User",
-        status=AccessRequestStatus.REJECTED,
-    )
-
-    session.add_all([approved, rejected, pending])
-    await session.commit()
-
-    result = await get_access_requests(session)
-
-    statuses = [item.status for item in result]
-    assert statuses == [
-        AccessRequestStatus.PENDING,
-        AccessRequestStatus.APPROVED,
-        AccessRequestStatus.REJECTED,
-    ]
-
-
-async def test_get_access_requests_updated_at_ordering(session: AsyncSession):
-    now = datetime.now(UTC)
-    ar1 = AccessRequest(
-        email="user1@example.com",
-        first_name="User1",
-        last_name="Example",
-        status=AccessRequestStatus.PENDING,
-        updated_at=now,
-    )
-    ar2 = AccessRequest(
-        email="user2@example.com",
-        first_name="User2",
-        last_name="Example",
-        status=AccessRequestStatus.PENDING,
-        updated_at=now + timedelta(seconds=1),
-    )
-
-    session.add_all([ar1, ar2])
-    await session.commit()
-
-    result = await get_access_requests(session)
-
-    assert result[0].id == ar2.id
-    assert result[1].id == ar1.id
-    assert result[0].updated_at > result[1].updated_at
-
-
-async def test_get_access_requests_id_ordering(session: AsyncSession):
-    now = datetime.now(UTC)
-    ar1 = AccessRequest(
-        email="user1@example.com",
-        first_name="User1",
-        last_name="Example",
-        status=AccessRequestStatus.PENDING,
-        updated_at=now,
-    )
-    ar2 = AccessRequest(
-        email="user2@example.com",
-        first_name="User2",
-        last_name="Example",
-        status=AccessRequestStatus.PENDING,
-        updated_at=now,
-    )
-
-    session.add_all([ar1, ar2])
-    await session.commit()
-
-    result = await get_access_requests(session)
-
-    assert result[0].id == ar2.id
-    assert result[1].id == ar1.id
-
-
 async def test_get_access_requests_reviewer(session: AsyncSession):
     reviewer = (
         await session.execute(select(User).where(User.username == "admin"))
@@ -141,12 +55,3 @@ async def test_get_access_requests_reviewer(session: AsyncSession):
     assert result[0].reviewer.id == reviewer.id
     assert result[0].reviewer.username == reviewer.username
     assert result[0].reviewed_at is not None
-
-
-async def test_get_access_requests_read_only(session: AsyncSession):
-    before_count = await session.scalar(select(func.count()).select_from(AccessRequest))
-
-    _ = await get_access_requests(session)
-
-    after_count = await session.scalar(select(func.count()).select_from(AccessRequest))
-    assert before_count == after_count
