@@ -102,7 +102,7 @@ async def test_request_access_existing_user(
     assert len(background_tasks.tasks) == 0
 
 
-async def test_request_access_email_matches_existing_username(
+async def test_request_access_email_matches_username(
     session: AsyncSession,
     mock_email_svc: AsyncMock,
     settings: Settings,

@@ -87,7 +87,7 @@ async def test_register_username_already_registered(
 
 
 # 409
-async def test_register_username_matches_existing_email(
+async def test_register_username_matches_email(
     client: AsyncClient,
     session: AsyncSession,
 ):
@@ -132,7 +132,7 @@ async def test_register_invalid_body(client: AsyncClient):
 
 
 # 422
-async def test_register_username_cannot_be_email(client: AsyncClient):
+async def test_register_username_is_email(client: AsyncClient):
     resp = await _make_request(
         client,
         token="some_token",

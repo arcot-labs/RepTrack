@@ -135,7 +135,7 @@ async def test_request_access_existing_user(client: AsyncClient, session: AsyncS
 
 
 # 409
-async def test_request_access_email_matches_existing_username(
+async def test_request_access_email_matches_username(
     client: AsyncClient,
     session: AsyncSession,
 ):

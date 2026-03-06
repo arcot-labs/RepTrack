@@ -160,7 +160,7 @@ async def test_register_username_exists(session: AsyncSession):
         )
 
 
-async def test_register_username_matches_existing_email(session: AsyncSession):
+async def test_register_username_matches_email(session: AsyncSession):
     collision_identifier = "identifier_collision"
     session.add(
         User(
