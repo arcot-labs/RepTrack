@@ -136,7 +136,10 @@ async def login_endpoint(
     res: Response,
 ):
     result = await login(
-        username=req.username, password=req.password, db=db, settings=settings
+        identifier=req.identifier,
+        password=req.password,
+        db=db,
+        settings=settings,
     )
     res.set_cookie(
         key=ACCESS_JWT_KEY,

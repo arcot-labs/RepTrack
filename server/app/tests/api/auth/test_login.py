@@ -16,9 +16,26 @@ async def test_login(client: AsyncClient, settings: Settings):
     assert REFRESH_JWT_KEY in resp.cookies
 
 
+# 204
+async def test_login_with_email(client: AsyncClient, settings: Settings):
+    resp = await login(
+        client,
+        email=settings.admin.email,
+        password=settings.admin.password,
+    )
+
+    assert resp.status_code == status.HTTP_204_NO_CONTENT
+    assert ACCESS_JWT_KEY in resp.cookies
+    assert REFRESH_JWT_KEY in resp.cookies
+
+
 # 401
-async def test_login_non_existent_user(client: AsyncClient):
-    resp = await login(client, username="non_existent_user", password="some_password")
+async def test_login_user_not_found(client: AsyncClient):
+    resp = await login(
+        client,
+        username="non_existent_user",
+        password="some_password",
+    )
 
     assert resp.status_code == InvalidCredentials.status_code
     body = resp.json()
@@ -28,7 +45,9 @@ async def test_login_non_existent_user(client: AsyncClient):
 # 401
 async def test_login_invalid_password(client: AsyncClient, settings: Settings):
     resp = await login(
-        client, username=settings.admin.username, password="some_password"
+        client,
+        username=settings.admin.username,
+        password="some_password",
     )
 
     assert resp.status_code == InvalidCredentials.status_code
@@ -37,10 +56,23 @@ async def test_login_invalid_password(client: AsyncClient, settings: Settings):
 
 
 # 422
-async def test_login_invalid_body(client: AsyncClient):
-    resp = await login(client, username=None, password=None)  # type: ignore
+async def test_login_missing_identifier(client: AsyncClient, settings: Settings):
+    resp = await login(
+        client,
+        password=settings.admin.password,
+    )
 
     assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     body = resp.json()
-    assert body["detail"][0]["loc"] == ["body", "username"]
-    assert body["detail"][1]["loc"] == ["body", "password"]
+    assert (
+        "At least one of username or email must be provided" in body["detail"][0]["msg"]
+    )
+
+
+# 422
+async def test_login_missing_password(client: AsyncClient):
+    resp = await login(client)
+
+    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    body = resp.json()
+    assert body["detail"][0]["loc"] == ["body", "password"]

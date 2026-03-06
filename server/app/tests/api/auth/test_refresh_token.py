@@ -7,7 +7,7 @@ from app.models.errors import InvalidCredentials
 from app.tests.api.utilities import HttpMethod, login_admin, make_http_request
 
 
-async def make_request(client: AsyncClient):
+async def _make_request(client: AsyncClient):
     return await make_http_request(
         client,
         method=HttpMethod.POST,
@@ -18,7 +18,7 @@ async def make_request(client: AsyncClient):
 # 204
 async def test_refresh_token(client: AsyncClient, settings: Settings):
     await login_admin(client, settings)
-    resp = await make_request(client)
+    resp = await _make_request(client)
 
     assert resp.status_code == status.HTTP_204_NO_CONTENT
     assert ACCESS_JWT_KEY in resp.cookies
@@ -28,7 +28,7 @@ async def test_refresh_token(client: AsyncClient, settings: Settings):
 # 401
 async def test_refresh_token_invalid_token(client: AsyncClient):
     client.cookies.set(REFRESH_JWT_KEY, "invalid_token")
-    resp = await make_request(client)
+    resp = await _make_request(client)
 
     assert resp.status_code == InvalidCredentials.status_code
     body = resp.json()

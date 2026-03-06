@@ -6,7 +6,7 @@ import pytest
 import app
 
 
-def test_main_import_calls_create_app_and_exposes_instances(
+def test_main(
     monkeypatch: pytest.MonkeyPatch,
 ):
     expected_fastapi_app = object()

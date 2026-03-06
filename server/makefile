@@ -12,7 +12,7 @@ test:
 	uv run pytest -v
 
 cov:
-	uv run pytest -v --cov=app --cov-config=pyproject.toml --cov-report=term-missing --cov-report=html
+	uv run pytest -v --cov --cov-report=term --cov-report=html
 
 open-cov:
 	open -a "Google Chrome" htmlcov/index.html

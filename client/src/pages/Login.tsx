@@ -20,7 +20,22 @@ import { useLocation, useNavigate } from 'react-router'
 import { Link } from 'react-router-dom'
 import { z } from 'zod'
 
-type LoginForm = z.infer<typeof zLoginRequest>
+const loginFormSchema = z.object({
+    identifier: z
+        .string()
+        .trim()
+        .refine((value) => {
+            const isEmailValid =
+                zLoginRequest.shape.email.safeParse(value).success
+            const isUsernameValid =
+                zLoginRequest.shape.username.safeParse(value).success
+            return isEmailValid || isUsernameValid
+        }, 'Enter a valid username or email'),
+    password: zLoginRequest.shape.password,
+})
+
+type LoginForm = z.infer<typeof loginFormSchema>
+type LoginRequestBody = z.infer<typeof zLoginRequest>
 
 export function Login() {
     const { refresh } = useSession()
@@ -36,13 +51,20 @@ export function Login() {
         formState: { errors, isSubmitting },
         reset,
     } = useForm({
-        resolver: zodResolver(zLoginRequest),
+        resolver: zodResolver(loginFormSchema),
         mode: 'onSubmit',
         reValidateMode: 'onChange',
     })
 
     const onSubmit = async (form: LoginForm) => {
-        const { error } = await AuthService.login({ body: form })
+        const identifier = form.identifier.trim()
+        const isEmail = z.email().safeParse(identifier).success
+        const body: LoginRequestBody = zLoginRequest.parse(
+            isEmail
+                ? { email: identifier, password: form.password }
+                : { username: identifier, password: form.password }
+        )
+        const { error } = await AuthService.login({ body })
         if (error) {
             await handleApiError(error, {
                 fallbackMessage: 'Failed to log in',
@@ -72,19 +94,23 @@ export function Login() {
                         }}
                     >
                         <div className="space-y-1">
-                            <Label htmlFor="username">Username</Label>
+                            <Label htmlFor="identifier">
+                                Username or Email
+                            </Label>
                             <Input
-                                id="username"
+                                id="identifier"
                                 autoComplete="username"
-                                aria-invalid={!!errors.username}
+                                aria-invalid={!!errors.identifier}
                                 className={
-                                    errors.username ? 'border-destructive' : ''
+                                    errors.identifier
+                                        ? 'border-destructive'
+                                        : ''
                                 }
-                                {...register('username')}
+                                {...register('identifier')}
                             />
-                            {errors.username && (
+                            {errors.identifier && (
                                 <p className="text-sm text-destructive">
-                                    {errors.username.message}
+                                    {errors.identifier.message}
                                 </p>
                             )}
                         </div>

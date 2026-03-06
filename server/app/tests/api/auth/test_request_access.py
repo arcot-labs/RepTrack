@@ -16,7 +16,7 @@ from app.models.errors import (
 from app.tests.api.utilities import HttpMethod, make_http_request
 
 
-async def make_request(
+async def _make_request(
     client: AsyncClient, email: str, first_name: str, last_name: str
 ):
     return await make_http_request(
@@ -33,7 +33,7 @@ async def make_request(
 
 # 200
 async def test_request_access(client: AsyncClient):
-    resp = await make_request(
+    resp = await _make_request(
         client, email="new_user@example.com", first_name="New", last_name="User"
     )
 
@@ -43,7 +43,9 @@ async def test_request_access(client: AsyncClient):
 
 
 # 200
-async def test_request_access_approved(client: AsyncClient, session: AsyncSession):
+async def test_request_access_status_approved(
+    client: AsyncClient, session: AsyncSession
+):
     approved_email = "approved@example.com"
     req = AccessRequest(
         email=approved_email,
@@ -54,7 +56,7 @@ async def test_request_access_approved(client: AsyncClient, session: AsyncSessio
     session.add(req)
     await session.commit()
 
-    resp = await make_request(
+    resp = await _make_request(
         client, email=approved_email, first_name="Test", last_name="User"
     )
 
@@ -64,7 +66,9 @@ async def test_request_access_approved(client: AsyncClient, session: AsyncSessio
 
 
 # 403
-async def test_request_access_rejected(client: AsyncClient, session: AsyncSession):
+async def test_request_access_status_rejected(
+    client: AsyncClient, session: AsyncSession
+):
     rejected_email = "rejected@example.com"
     req = AccessRequest(
         email=rejected_email,
@@ -75,13 +79,36 @@ async def test_request_access_rejected(client: AsyncClient, session: AsyncSessio
     session.add(req)
     await session.commit()
 
-    resp = await make_request(
+    resp = await _make_request(
         client, email=rejected_email, first_name="Test", last_name="User"
     )
 
     assert resp.status_code == AccessRequestRejected.status_code
     body = resp.json()
     assert body["detail"] == AccessRequestRejected.detail
+
+
+# 409
+async def test_request_access_status_pending(
+    client: AsyncClient, session: AsyncSession
+):
+    pending_email = "pending@example.com"
+    req = AccessRequest(
+        email=pending_email,
+        first_name="Pending",
+        last_name="User",
+        status=AccessRequestStatus.PENDING,
+    )
+    session.add(req)
+    await session.commit()
+
+    resp = await _make_request(
+        client, email=pending_email, first_name="Test", last_name="User"
+    )
+
+    assert resp.status_code == AccessRequestPending.status_code
+    body = resp.json()
+    assert body["detail"] == AccessRequestPending.detail
 
 
 # 409
@@ -98,7 +125,7 @@ async def test_request_access_existing_user(client: AsyncClient, session: AsyncS
     session.add(user)
     await session.commit()
 
-    resp = await make_request(
+    resp = await _make_request(
         client, email=existing_email, first_name="Test", last_name="User"
     )
 
@@ -108,24 +135,33 @@ async def test_request_access_existing_user(client: AsyncClient, session: AsyncS
 
 
 # 409
-async def test_request_access_pending(client: AsyncClient, session: AsyncSession):
-    pending_email = "pending@example.com"
-    req = AccessRequest(
-        email=pending_email,
-        first_name="Pending",
-        last_name="User",
-        status=AccessRequestStatus.PENDING,
+async def test_request_access_email_matches_username(
+    client: AsyncClient,
+    session: AsyncSession,
+):
+    collision_identifier = "existing@example.com"
+    session.add(
+        User(
+            email="different@example.com",
+            username=collision_identifier,
+            first_name="Existing",
+            last_name="User",
+            password_hash="hash",
+            is_admin=False,
+        )
     )
-    session.add(req)
     await session.commit()
 
-    resp = await make_request(
-        client, email=pending_email, first_name="Test", last_name="User"
+    resp = await _make_request(
+        client,
+        email=collision_identifier,
+        first_name="Test",
+        last_name="User",
     )
 
-    assert resp.status_code == AccessRequestPending.status_code
+    assert resp.status_code == EmailAlreadyRegistered.status_code
     body = resp.json()
-    assert body["detail"] == AccessRequestPending.detail
+    assert body["detail"] == EmailAlreadyRegistered.detail
 
 
 # 422

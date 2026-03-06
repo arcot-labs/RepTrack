@@ -1,5 +1,5 @@
 import logging
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
 import pytest
 from fastapi import FastAPI
@@ -35,13 +35,13 @@ async def client(
     transaction: AsyncTransaction,
     mock_email_svc: EmailService,
     mock_github_svc: GitHubService,
-) -> AsyncGenerator[AsyncClient, None]:
+) -> AsyncGenerator[AsyncClient]:
     logger.info("Setting up test client")
 
     async def override_get_settings() -> Settings:
         return settings
 
-    async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
+    async def override_get_db() -> AsyncGenerator[AsyncSession]:
         async_session = AsyncSession(
             bind=connection,
             join_transaction_mode="create_savepoint",

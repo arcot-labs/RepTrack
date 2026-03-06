@@ -1,4 +1,5 @@
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import pytest
 
@@ -21,7 +22,7 @@ def _revalidate_settings(settings: Settings) -> Settings:
     return Settings.model_validate(settings.model_dump(warnings=False))
 
 
-def test_dev_config(
+def test_dev_settings(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     overrides: dict[str, Any] = {
@@ -49,7 +50,7 @@ def test_dev_config(
     assert settings.log_dir.is_absolute()
 
 
-def test_test_config(
+def test_test_settings(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     overrides: dict[str, Any] = {
@@ -83,7 +84,7 @@ def test_test_config(
     assert settings.log_dir.is_absolute()
 
 
-def test_stage_config(
+def test_stage_settings(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     overrides: dict[str, Any] = {
@@ -125,7 +126,7 @@ def test_stage_config(
     assert settings.log_dir.is_absolute()
 
 
-def test_prod_config(
+def test_prod_settings(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     overrides: dict[str, Any] = {
@@ -167,7 +168,7 @@ def test_prod_config(
     assert settings.log_dir.is_absolute()
 
 
-def test_prod_gh_validator_raises_for_wrong_backend(
+def test_prod_gh_validator_wrong_backend(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     overrides: dict[str, Any] = {
@@ -188,7 +189,7 @@ def test_prod_gh_validator_raises_for_wrong_backend(
         _revalidate_settings(settings)
 
 
-def test_prod_email_validator_raises_for_wrong_backend(
+def test_prod_email_validator_wrong_backend(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     overrides: dict[str, Any] = {
@@ -207,7 +208,7 @@ def test_prod_email_validator_raises_for_wrong_backend(
         _revalidate_settings(settings)
 
 
-def test_gh_backend_fails_with_missing_properties(
+def test_gh_backend_missing_properties(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     overrides: dict[str, Any] = {
@@ -221,7 +222,7 @@ def test_gh_backend_fails_with_missing_properties(
         _revalidate_settings(settings)
 
 
-def test_email_backend_fails_with_missing_properties(
+def test_email_backend_missing_properties(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     overrides: dict[str, Any] = {
@@ -248,7 +249,7 @@ def test_extra_field_ignored(
     assert not hasattr(settings, "extra_field")
 
 
-def test_get_settings_returns_settings_instance(
+def test_get_settings(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr("app.core.config.Settings", lambda: TEST_SETTINGS)
@@ -259,7 +260,7 @@ def test_get_settings_returns_settings_instance(
     assert isinstance(settings, Settings)
 
 
-def test_get_settings_is_cached(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_get_settings_cached(monkeypatch: pytest.MonkeyPatch) -> None:
     call_count = 0
 
     def fake_settings() -> Settings:

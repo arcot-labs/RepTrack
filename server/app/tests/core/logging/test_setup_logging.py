@@ -12,7 +12,7 @@ from app.core.logging import setup_logging
 logger = logging.getLogger(__name__)
 
 
-def test_setup_logging_configures_root_handlers(
+def test_setup_logging_handlers(
     anyio_backend: str,
     settings: Settings,
     tmp_path: Path,
@@ -44,7 +44,7 @@ def test_setup_logging_configures_root_handlers(
     assert file_handler.backupCount == 5
 
 
-def test_setup_logging_writes_json_logs_to_file(
+def test_setup_logging_file(
     anyio_backend: str,
     tmp_path: Path,
     settings: Settings,

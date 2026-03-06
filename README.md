@@ -1,3 +1,7 @@
+[![CI / Test Server](https://github.com/arcot-labs/RepTrack/actions/workflows/test-server.yml/badge.svg)](https://github.com/arcot-labs/RepTrack/actions/workflows/test-server.yml)
+[![CI / Build Images](https://github.com/arcot-labs/RepTrack/actions/workflows/build.yml/badge.svg)](https://github.com/arcot-labs/RepTrack/actions/workflows/build.yml)
+[![CD / Deploy Application](https://github.com/arcot-labs/RepTrack/actions/workflows/deploy.yml/badge.svg)](https://github.com/arcot-labs/RepTrack/actions/workflows/deploy.yml)
+
 ### Local Development
 
 Copy `.env.example` to `.env` & populate variables

@@ -1,24 +1,23 @@
-"""remove feedback table defaults
+"""
+remove feedback table defaults
 
 Revision ID: 5460f1eac74c
 Revises: 10750c61592f
 Create Date: 2026-01-23 12:47:29.459961-06:00
-
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic import op
 
 revision: str = "5460f1eac74c"
-down_revision: Union[str, Sequence[str], None] = "10750c61592f"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "10750c61592f"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    """Upgrade schema."""
     op.alter_column(
         "feedbacks",
         "url",
@@ -43,7 +42,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Downgrade schema."""
     op.alter_column(
         "feedbacks",
         "description",

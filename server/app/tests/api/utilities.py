@@ -1,15 +1,18 @@
 import logging
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from httpx import AsyncClient
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
+from app.models.database.user import User
 
 logger = logging.getLogger(__name__)
 
 
-class HttpMethod(str, Enum):
+class HttpMethod(StrEnum):
     GET = "get"
     POST = "post"
     DELETE = "delete"
@@ -39,6 +42,29 @@ async def make_http_request(
     return await client.send(request)
 
 
+async def login(
+    client: AsyncClient,
+    *,
+    username: str | None = None,
+    email: str | None = None,
+    password: str | None = None,
+):
+    payload: dict[str, Any] = {}
+    if username is not None:
+        payload["username"] = username
+    if email is not None:
+        payload["email"] = email
+    if password is not None:
+        payload["password"] = password
+
+    return await make_http_request(
+        client,
+        method=HttpMethod.POST,
+        endpoint="/api/auth/login",
+        json=payload,
+    )
+
+
 async def login_admin(client: AsyncClient, settings: Settings):
     return await login(
         client,
@@ -47,18 +73,8 @@ async def login_admin(client: AsyncClient, settings: Settings):
     )
 
 
-async def login(
-    client: AsyncClient,
-    *,
-    username: str,
-    password: str,
-):
-    return await make_http_request(
-        client,
-        method=HttpMethod.POST,
-        endpoint="/api/auth/login",
-        json={
-            "username": username,
-            "password": password,
-        },
+async def get_admin(session: AsyncSession, settings: Settings) -> User:
+    result = await session.execute(
+        select(User).where(User.username == settings.admin.username)
     )
+    return result.scalar_one()

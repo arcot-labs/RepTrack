@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import jwt
 import pytest
@@ -9,18 +9,18 @@ from app.core.security import verify_jwt
 from app.models.errors import InvalidCredentials
 
 
-def make_token(payload: dict[str, object], secret: str, algorithm: str) -> str:
+def _create_jwt(payload: dict[str, object], secret: str, algorithm: str) -> str:
     token = jwt.encode(payload, secret, algorithm=algorithm)
     return str(token)
 
 
-def test_verify_jwt_returns_username(anyio_backend: str, settings: Settings):
+def test_verify_jwt(anyio_backend: str, settings: Settings):
     _ = anyio_backend
     username = settings.admin.username
-    token = make_token(
+    token = _create_jwt(
         {
             "sub": username,
-            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+            "exp": datetime.now(UTC) + timedelta(minutes=5),
         },
         secret=settings.jwt.secret_key,
         algorithm=settings.jwt.algorithm,
@@ -30,12 +30,12 @@ def test_verify_jwt_returns_username(anyio_backend: str, settings: Settings):
     assert result == username
 
 
-def test_verify_jwt_raises_on_decode_error(anyio_backend: str, settings: Settings):
+def test_verify_jwt_wrong_secret(anyio_backend: str, settings: Settings):
     _ = anyio_backend
-    token = make_token(
+    token = _create_jwt(
         {
             "sub": settings.admin.username,
-            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+            "exp": datetime.now(UTC) + timedelta(minutes=5),
         },
         secret="wrong-jwt-secret-key-at-least-32-bytes",
         algorithm=settings.jwt.algorithm,
@@ -45,10 +45,10 @@ def test_verify_jwt_raises_on_decode_error(anyio_backend: str, settings: Setting
         verify_jwt(token, settings)
 
 
-def test_verify_jwt_raises_for_missing_sub(anyio_backend: str, settings: Settings):
+def test_verify_jwt_missing_sub(anyio_backend: str, settings: Settings):
     _ = anyio_backend
-    token = make_token(
-        {"exp": datetime.now(timezone.utc) + timedelta(minutes=5)},
+    token = _create_jwt(
+        {"exp": datetime.now(UTC) + timedelta(minutes=5)},
         secret=settings.jwt.secret_key,
         algorithm=settings.jwt.algorithm,
     )
@@ -57,14 +57,12 @@ def test_verify_jwt_raises_for_missing_sub(anyio_backend: str, settings: Setting
         verify_jwt(token, settings)
 
 
-def test_verify_jwt_raises_for_invalid_sub_shape(
-    anyio_backend: str, settings: Settings
-):
+def test_verify_jwt_invalid_sub(anyio_backend: str, settings: Settings):
     _ = anyio_backend
-    token = make_token(
+    token = _create_jwt(
         {
             "sub": [settings.admin.username],
-            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+            "exp": datetime.now(UTC) + timedelta(minutes=5),
         },
         secret=settings.jwt.secret_key,
         algorithm=settings.jwt.algorithm,
@@ -74,14 +72,14 @@ def test_verify_jwt_raises_for_invalid_sub_shape(
         verify_jwt(token, settings)
 
 
-def test_verify_jwt_raises_on_jwtdata_validation_error(
+def test_verify_jwt_validation_error(
     anyio_backend: str, settings: Settings, monkeypatch: pytest.MonkeyPatch
 ):
     _ = anyio_backend
-    token = make_token(
+    token = _create_jwt(
         {
             "sub": settings.admin.username,
-            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+            "exp": datetime.now(UTC) + timedelta(minutes=5),
         },
         secret=settings.jwt.secret_key,
         algorithm=settings.jwt.algorithm,

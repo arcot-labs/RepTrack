@@ -1,4 +1,4 @@
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
 import pytest
 from alembic import context
@@ -63,7 +63,7 @@ async def engine(anyio_backend: str) -> AsyncGenerator[AsyncEngine]:
 
 
 @pytest.fixture(scope="session")
-async def connection(engine: AsyncEngine) -> AsyncGenerator[AsyncConnection, None]:
+async def connection(engine: AsyncEngine) -> AsyncGenerator[AsyncConnection]:
     async with engine.connect() as connection:
         yield connection
 
@@ -71,7 +71,7 @@ async def connection(engine: AsyncEngine) -> AsyncGenerator[AsyncConnection, Non
 @pytest.fixture()
 async def transaction(
     connection: AsyncConnection,
-) -> AsyncGenerator[AsyncTransaction, None]:
+) -> AsyncGenerator[AsyncTransaction]:
     async with connection.begin() as transaction:
         yield transaction
 
@@ -79,7 +79,7 @@ async def transaction(
 @pytest.fixture()
 async def session(
     connection: AsyncConnection, transaction: AsyncTransaction
-) -> AsyncGenerator[AsyncSession, None]:
+) -> AsyncGenerator[AsyncSession]:
     async_session = AsyncSession(
         bind=connection,
         join_transaction_mode="create_savepoint",

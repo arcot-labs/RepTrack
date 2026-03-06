@@ -1,47 +1,25 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
-from pwdlib import PasswordHash
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
 from app.core.security import (
+    PASSWORD_HASH,
     _get_token,  # pyright: ignore[reportPrivateUsage]
     create_password_reset_token,
     create_registration_token,
 )
-from app.models.database.access_request import AccessRequest, AccessRequestStatus
 from app.models.database.password_reset_token import PasswordResetToken
 from app.models.database.registration_token import RegistrationToken
-from app.models.database.user import User
+from app.tests.core.security.utilities import create_access_request
+from app.tests.core.utilities import get_admin
 
 # _get_token tests use RegistrationToken
 # PasswordResetToken behavior is identical
 # wrappers are tested separately
 
-PASSWORD_HASH = PasswordHash.recommended()
 
-
-async def get_admin(session: AsyncSession, settings: Settings) -> User:
-    result = await session.execute(
-        select(User).where(User.username == settings.admin.username)
-    )
-    return result.scalar_one()
-
-
-async def create_access_request(session: AsyncSession, email: str) -> AccessRequest:
-    access_request = AccessRequest(
-        email=email,
-        first_name="Test",
-        last_name="User",
-        status=AccessRequestStatus.APPROVED,
-    )
-    session.add(access_request)
-    await session.flush()
-    return access_request
-
-
-async def test_get_token_registration_returns_token(session: AsyncSession):
+async def test_get_token_registration(session: AsyncSession):
     access_request = await create_access_request(session, "token-user@example.com")
     token_str, _token = create_registration_token(access_request.id)
     session.add(_token)
@@ -59,7 +37,7 @@ async def test_get_token_registration_returns_token(session: AsyncSession):
     assert token.access_request.id == access_request.id
 
 
-async def test_get_token_registration_returns_none_for_invalid_token(
+async def test_get_token_registration_invalid_token(
     session: AsyncSession,
 ):
     token = await _get_token(
@@ -71,12 +49,12 @@ async def test_get_token_registration_returns_none_for_invalid_token(
     assert token is None
 
 
-async def test_get_token_registration_returns_none_for_used_token(
+async def test_get_token_registration_used_token(
     session: AsyncSession,
 ):
     access_request = await create_access_request(session, "used@example.com")
     token_str, _token = create_registration_token(access_request.id)
-    _token.used_at = datetime.now(timezone.utc)
+    _token.used_at = datetime.now(UTC)
     session.add(_token)
     await session.commit()
 
@@ -89,12 +67,12 @@ async def test_get_token_registration_returns_none_for_used_token(
     assert token is None
 
 
-async def test_get_token_registration_returns_none_for_expired_token(
+async def test_get_token_registration_expired_token(
     session: AsyncSession,
 ):
     access_request = await create_access_request(session, "expired@example.com")
     token_str, _token = create_registration_token(access_request.id)
-    _token.expires_at = datetime.now(timezone.utc) - timedelta(minutes=1)
+    _token.expires_at = datetime.now(UTC) - timedelta(minutes=1)
     session.add(_token)
     await session.commit()
 
@@ -107,7 +85,7 @@ async def test_get_token_registration_returns_none_for_expired_token(
     assert token is None
 
 
-async def test_get_token_registration_returns_none_for_invalid_hash(
+async def test_get_token_registration_invalid_hash(
     session: AsyncSession,
 ):
     access_request = await create_access_request(session, "invalid-hash@example.com")
@@ -125,7 +103,7 @@ async def test_get_token_registration_returns_none_for_invalid_hash(
     assert token is None
 
 
-async def test_get_registration_token_returns_token(session: AsyncSession):
+async def test_get_registration_token(session: AsyncSession):
     access_request = await create_access_request(session, "registered@example.com")
     token_str, _token = create_registration_token(access_request.id)
     session.add(_token)
@@ -143,9 +121,7 @@ async def test_get_registration_token_returns_token(session: AsyncSession):
     assert token.access_request.id == access_request.id
 
 
-async def test_get_password_reset_token_returns_token(
-    session: AsyncSession, settings: Settings
-):
+async def test_get_password_reset_token(session: AsyncSession, settings: Settings):
     admin = await get_admin(session, settings)
     token_str, _token = create_password_reset_token(admin.id)
     session.add(_token)

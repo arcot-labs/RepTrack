@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import jwt
 
@@ -13,9 +13,7 @@ from app.core.security import (
 # wrappers are tested separately
 
 
-def test_create_jwt_returns_string_with_expected_payload(
-    anyio_backend: str, settings: Settings
-):
+def test_create_jwt_payload(anyio_backend: str, settings: Settings):
     _ = anyio_backend
     username = settings.admin.username
     expires_delta = timedelta(minutes=7)
@@ -39,10 +37,10 @@ def test_create_jwt_returns_string_with_expected_payload(
     assert "exp" in payload
 
 
-def test_create_jwt_respects_expiry_delta(anyio_backend: str, settings: Settings):
+def test_create_jwt_expiry_delta(anyio_backend: str, settings: Settings):
     _ = anyio_backend
     expires_delta = timedelta(minutes=5)
-    before_create = datetime.now(timezone.utc)
+    before_create = datetime.now(UTC)
 
     token = _create_jwt(
         username="delta_user",
@@ -56,15 +54,15 @@ def test_create_jwt_respects_expiry_delta(anyio_backend: str, settings: Settings
         settings.jwt.secret_key,
         algorithms=[settings.jwt.algorithm],
     )
-    expires_at = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
-    after_create = datetime.now(timezone.utc)
+    expires_at = datetime.fromtimestamp(payload["exp"], tz=UTC)
+    after_create = datetime.now(UTC)
 
     earliest_expected = before_create + expires_delta - timedelta(seconds=2)
     latest_expected = after_create + expires_delta + timedelta(seconds=2)
     assert earliest_expected <= expires_at <= latest_expected
 
 
-def test_create_access_jwt_returns_access_token(anyio_backend: str, settings: Settings):
+def test_create_access_jwt(anyio_backend: str, settings: Settings):
     _ = anyio_backend
     username = settings.admin.username
     token = create_access_jwt(username, settings)
@@ -81,9 +79,7 @@ def test_create_access_jwt_returns_access_token(anyio_backend: str, settings: Se
     assert "exp" in payload
 
 
-def test_create_refresh_jwt_returns_refresh_token(
-    anyio_backend: str, settings: Settings
-):
+def test_create_refresh_jwt(anyio_backend: str, settings: Settings):
     _ = anyio_backend
     username = settings.admin.username
     token = create_refresh_jwt(username, settings)

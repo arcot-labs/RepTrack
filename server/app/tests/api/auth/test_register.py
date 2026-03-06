@@ -5,11 +5,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import Settings
 from app.core.security import create_registration_token
 from app.models.database.access_request import AccessRequest, AccessRequestStatus
+from app.models.database.user import User
 from app.models.errors import InvalidToken, UsernameAlreadyRegistered
 from app.tests.api.utilities import HttpMethod, make_http_request
 
 
-async def make_request(client: AsyncClient, token: str, username: str, password: str):
+async def _make_request(client: AsyncClient, token: str, username: str, password: str):
     return await make_http_request(
         client,
         method=HttpMethod.POST,
@@ -22,7 +23,7 @@ async def make_request(client: AsyncClient, token: str, username: str, password:
     )
 
 
-async def create_approved_request_with_token(session: AsyncSession) -> tuple[str, str]:
+async def _create_approved_request_with_token(session: AsyncSession) -> tuple[str, str]:
     access_request = AccessRequest(
         email="approved@example.com",
         first_name="Approved",
@@ -41,9 +42,9 @@ async def create_approved_request_with_token(session: AsyncSession) -> tuple[str
 
 # 204
 async def test_register(client: AsyncClient, session: AsyncSession):
-    _, token_str = await create_approved_request_with_token(session)
+    _, token_str = await _create_approved_request_with_token(session)
 
-    resp = await make_request(
+    resp = await _make_request(
         client,
         token=token_str,
         username="newuser",
@@ -55,7 +56,7 @@ async def test_register(client: AsyncClient, session: AsyncSession):
 
 # 400
 async def test_register_invalid_token(client: AsyncClient):
-    resp = await make_request(
+    resp = await _make_request(
         client,
         token="invalid_token",
         username="newuser",
@@ -71,9 +72,9 @@ async def test_register_invalid_token(client: AsyncClient):
 async def test_register_username_already_registered(
     client: AsyncClient, session: AsyncSession, settings: Settings
 ):
-    _, token_str = await create_approved_request_with_token(session)
+    _, token_str = await _create_approved_request_with_token(session)
 
-    resp = await make_request(
+    resp = await _make_request(
         client,
         token=token_str,
         username=settings.admin.username,
@@ -85,9 +86,40 @@ async def test_register_username_already_registered(
     assert body["detail"] == UsernameAlreadyRegistered.detail
 
 
+# 409
+async def test_register_username_matches_email(
+    client: AsyncClient,
+    session: AsyncSession,
+):
+    collision_identifier = "identifier_collision"
+    session.add(
+        User(
+            email=collision_identifier,
+            username="existing_user",
+            first_name="Existing",
+            last_name="User",
+            password_hash="hash",
+            is_admin=False,
+        )
+    )
+    await session.commit()
+
+    _, token_str = await _create_approved_request_with_token(session)
+    resp = await _make_request(
+        client,
+        token=token_str,
+        username=collision_identifier,
+        password="Password123",
+    )
+
+    assert resp.status_code == UsernameAlreadyRegistered.status_code
+    body = resp.json()
+    assert body["detail"] == UsernameAlreadyRegistered.detail
+
+
 # 422
 async def test_register_invalid_body(client: AsyncClient):
-    resp = await make_request(
+    resp = await _make_request(
         client,
         token="some_token",
         username="newuser",
@@ -97,3 +129,18 @@ async def test_register_invalid_body(client: AsyncClient):
     assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     body = resp.json()
     assert body["detail"][0]["loc"] == ["body", "password"]
+
+
+# 422
+async def test_register_username_is_email(client: AsyncClient):
+    resp = await _make_request(
+        client,
+        token="some_token",
+        username="user@example.com",
+        password="Password123",
+    )
+
+    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    body = resp.json()
+    assert body["detail"][0]["loc"] == ["body", "username"]
+    assert "Username cannot be an email address" in body["detail"][0]["msg"]

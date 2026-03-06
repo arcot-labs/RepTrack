@@ -2,43 +2,31 @@ import logging
 from typing import Literal
 
 from fastapi import BackgroundTasks
-from sqlalchemy import case, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import func
 
 from app.core.config import Settings
-from app.models.database.access_request import AccessRequest
-from app.models.database.user import User
+from app.core.security import create_registration_token
 from app.models.enums import AccessRequestStatus
 from app.models.errors import AccessRequestStatusError, NotFound
 from app.models.schemas.access_request import AccessRequestPublic
 from app.models.schemas.user import UserPublic
-from app.services.auth import create_registration_token
+from app.services.access_request import (
+    get_access_request_by_id,
+    get_access_requests_with_reviewer,
+)
 from app.services.email import EmailService
+from app.services.user import get_users_ordered_by_username
 
 logger = logging.getLogger(__name__)
-
-status_priority = case(
-    (AccessRequest.status == AccessRequestStatus.PENDING, 1),
-    (AccessRequest.status == AccessRequestStatus.APPROVED, 2),
-    (AccessRequest.status == AccessRequestStatus.REJECTED, 3),
-)
 
 
 async def get_access_requests(db: AsyncSession) -> list[AccessRequestPublic]:
     logger.info("Getting access requests")
 
-    result = await db.execute(
-        select(AccessRequest)
-        .options(selectinload(AccessRequest.reviewer))
-        .order_by(status_priority)
-        .order_by(AccessRequest.updated_at.desc())
-        .order_by(AccessRequest.id.desc())
-    )
+    requests = await get_access_requests_with_reviewer(db)
     return [
-        AccessRequestPublic.model_validate(ar, from_attributes=True)
-        for ar in result.scalars().all()
+        AccessRequestPublic.model_validate(r, from_attributes=True) for r in requests
     ]
 
 
@@ -53,11 +41,7 @@ async def update_access_request_status(
 ) -> None:
     logger.info(f"Updating access request {access_request_id} to status {status}")
 
-    access_request = (
-        await db.execute(
-            select(AccessRequest).where(AccessRequest.id == access_request_id)
-        )
-    ).scalar_one_or_none()
+    access_request = await get_access_request_by_id(access_request_id, db)
 
     if not access_request:
         logger.error(f"Access request {access_request_id} not found")
@@ -70,11 +54,15 @@ async def update_access_request_status(
     access_request.reviewed_at = func.now()
     access_request.reviewed_by = user.id
 
-    token_str, token = create_registration_token(access_request.id)
-    db.add(token)
+    token_str: str | None = None
+    if status == AccessRequestStatus.APPROVED:
+        token_str, token = create_registration_token(access_request.id)
+        db.add(token)
+
     await db.commit()
 
     if status == AccessRequestStatus.APPROVED:
+        assert token_str is not None
         background_tasks.add_task(
             email_svc.send_access_request_approved_email,
             settings,
@@ -90,13 +78,5 @@ async def update_access_request_status(
 async def get_users(db: AsyncSession) -> list[UserPublic]:
     logger.info("Getting users")
 
-    result = await db.execute(
-        select(User)
-        .order_by(User.username.asc())
-        .order_by(User.updated_at.desc())
-        .order_by(User.id.desc())
-    )
-    return [
-        UserPublic.model_validate(user, from_attributes=True)
-        for user in result.scalars().all()
-    ]
+    users = await get_users_ordered_by_username(db)
+    return [UserPublic.model_validate(user, from_attributes=True) for user in users]
