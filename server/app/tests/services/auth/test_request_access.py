@@ -102,6 +102,38 @@ async def test_request_access_existing_user(
     assert len(background_tasks.tasks) == 0
 
 
+async def test_request_access_email_matches_username(
+    session: AsyncSession,
+    mock_email_svc: AsyncMock,
+    settings: Settings,
+):
+    collision_identifier = "existing@example.com"
+    session.add(
+        User(
+            email="different@example.com",
+            username=collision_identifier,
+            first_name="Existing",
+            last_name="User",
+            password_hash="fakehash",
+        )
+    )
+    await session.commit()
+
+    background_tasks = BackgroundTasks()
+    with pytest.raises(EmailAlreadyRegistered):
+        await request_access(
+            email=collision_identifier,
+            first_name="Test",
+            last_name="User",
+            background_tasks=background_tasks,
+            db=session,
+            email_svc=mock_email_svc,
+            settings=settings,
+        )
+
+    assert len(background_tasks.tasks) == 0
+
+
 async def test_request_access_pending(
     session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):

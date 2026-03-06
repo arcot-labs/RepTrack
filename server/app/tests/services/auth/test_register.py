@@ -158,3 +158,37 @@ async def test_register_username_exists(session: AsyncSession):
             password="new_password",
             db=session,
         )
+
+
+async def test_register_username_matches_email(session: AsyncSession):
+    collision_identifier = "identifier_collision"
+    session.add(
+        User(
+            email=collision_identifier,
+            username="existing_user",
+            first_name="Existing",
+            last_name="User",
+            password_hash=PASSWORD_HASH.hash("password"),
+        )
+    )
+
+    access_request = AccessRequest(
+        email="approved@example.com",
+        first_name="Approved",
+        last_name="User",
+        status=AccessRequestStatus.APPROVED,
+    )
+    session.add(access_request)
+    await session.flush()
+
+    token_str, token = create_registration_token(access_request.id)
+    session.add(token)
+    await session.commit()
+
+    with pytest.raises(UsernameAlreadyRegistered):
+        await register(
+            token_str=token_str,
+            username=collision_identifier,
+            password="new_password",
+            db=session,
+        )

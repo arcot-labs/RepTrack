@@ -66,4 +66,24 @@ async def test_request_password_reset_unregistered_email(
         settings=settings,
     )
 
+    tokens = (await session.execute(select(PasswordResetToken))).scalars().all()
+    assert len(tokens) == 0
+    assert len(background_tasks.tasks) == 0
+
+
+async def test_request_password_reset_admin_email(
+    session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+):
+    background_tasks = BackgroundTasks()
+
+    await request_password_reset(
+        email=settings.admin.email,
+        background_tasks=background_tasks,
+        db=session,
+        email_svc=mock_email_svc,
+        settings=settings,
+    )
+
+    tokens = (await session.execute(select(PasswordResetToken))).scalars().all()
+    assert len(tokens) == 0
     assert len(background_tasks.tasks) == 0

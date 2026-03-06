@@ -39,14 +39,15 @@ export const zCreateFeedbackRequest = z.object({
  * ForgotPasswordRequest
  */
 export const zForgotPasswordRequest = z.object({
-    email: z.email()
+    email: z.email().max(255)
 });
 
 /**
  * LoginRequest
  */
 export const zLoginRequest = z.object({
-    username: z.string().min(3).max(50),
+    username: z.string().min(3).max(50).nullish(),
+    email: z.email().max(255).nullish(),
     password: z.string().min(8).max(64)
 });
 
@@ -63,7 +64,7 @@ export const zRegisterRequest = z.object({
  * RequestAccessRequest
  */
 export const zRequestAccessRequest = z.object({
-    email: z.email(),
+    email: z.email().max(255),
     first_name: z.string().min(1).max(50),
     last_name: z.string().min(1).max(50)
 });

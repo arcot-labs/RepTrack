@@ -154,6 +154,7 @@ export const ForgotPasswordRequestSchema = {
     properties: {
         email: {
             type: 'string',
+            maxLength: 255,
             format: 'email',
             title: 'Email'
         }
@@ -182,10 +183,30 @@ export const HTTPValidationErrorSchema = {
 export const LoginRequestSchema = {
     properties: {
         username: {
-            type: 'string',
-            maxLength: 50,
-            minLength: 3,
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50,
+                    minLength: 3
+                },
+                {
+                    type: 'null'
+                }
+            ],
             title: 'Username'
+        },
+        email: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255,
+                    format: 'email'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Email'
         },
         password: {
             type: 'string',
@@ -196,7 +217,6 @@ export const LoginRequestSchema = {
     },
     type: 'object',
     required: [
-        'username',
         'password'
     ],
     title: 'LoginRequest'
@@ -236,6 +256,7 @@ export const RequestAccessRequestSchema = {
     properties: {
         email: {
             type: 'string',
+            maxLength: 255,
             format: 'email',
             title: 'Email'
         },
