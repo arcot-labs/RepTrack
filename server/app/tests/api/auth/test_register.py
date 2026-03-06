@@ -97,3 +97,18 @@ async def test_register_invalid_body(client: AsyncClient):
     assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     body = resp.json()
     assert body["detail"][0]["loc"] == ["body", "password"]
+
+
+# 422
+async def test_register_username_cannot_be_email(client: AsyncClient):
+    resp = await _make_request(
+        client,
+        token="some_token",
+        username="user@example.com",
+        password="Password123",
+    )
+
+    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    body = resp.json()
+    assert body["detail"][0]["loc"] == ["body", "username"]
+    assert "Username cannot be an email address" in body["detail"][0]["msg"]

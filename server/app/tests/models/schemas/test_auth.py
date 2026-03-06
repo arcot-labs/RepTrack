@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from app.models.schemas.auth import LoginRequest
+from app.models.schemas.auth import LoginRequest, RegisterRequest
 
 
 def test_login_request_accepts_username():
@@ -22,3 +22,12 @@ def test_login_request_requires_username_or_email():
         match="At least one of username or email must be provided",
     ):
         LoginRequest(password="some_password")
+
+
+def test_register_request_rejects_email_like_username():
+    with pytest.raises(ValidationError, match="Username cannot be an email address"):
+        RegisterRequest(
+            token="some_token",
+            username="user@example.com",
+            password="some_password",
+        )
