@@ -20,17 +20,16 @@ import { useLocation, useNavigate } from 'react-router'
 import { Link } from 'react-router-dom'
 import { z } from 'zod'
 
-const dummyPassword = 'dummypassword'
 const loginFormSchema = z.object({
     identifier: z
         .string()
         .trim()
         .refine((value) => {
-            const isEmail = z.email().safeParse(value).success
-            const payload = isEmail
-                ? { email: value, password: dummyPassword }
-                : { username: value, password: dummyPassword }
-            return zLoginRequest.safeParse(payload).success
+            const isEmailValid =
+                zLoginRequest.shape.email.safeParse(value).success
+            const isUsernameValid =
+                zLoginRequest.shape.username.safeParse(value).success
+            return isEmailValid || isUsernameValid
         }, 'Enter a valid username or email'),
     password: zLoginRequest.shape.password,
 })
