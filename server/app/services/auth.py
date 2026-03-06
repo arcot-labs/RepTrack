@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
 from app.core.security import (
-    PASSWORD_HASH,
     authenticate_user,
     create_access_jwt,
     create_password_reset_token,
@@ -16,6 +15,7 @@ from app.core.security import (
     expire_existing_registration_tokens,
     get_password_reset_token,
     get_registration_token,
+    hash_secret,
     verify_jwt,
 )
 from app.models.api import LoginResult
@@ -127,7 +127,7 @@ async def register(
         email=access_request.email,
         first_name=access_request.first_name,
         last_name=access_request.last_name,
-        password_hash=PASSWORD_HASH.hash(password),
+        password_hash=hash_secret(password),
     )
     db.add(user)
     await db.commit()
@@ -176,7 +176,7 @@ async def reset_password(
     token.used_at = datetime.now(UTC)
     await expire_existing_password_reset_tokens(user.id, db)
 
-    user.password_hash = PASSWORD_HASH.hash(password)
+    user.password_hash = hash_secret(password)
     await db.commit()
 
 

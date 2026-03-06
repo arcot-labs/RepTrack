@@ -26,6 +26,18 @@ ACCESS_JWT_KEY = "access_token"
 REFRESH_JWT_KEY = "refresh_token"
 
 
+def hash_secret(secret: str) -> str:
+    return PASSWORD_HASH.hash(secret)
+
+
+def verify_secret(secret: str, secret_hash: str) -> bool:
+    try:
+        return PASSWORD_HASH.verify(secret, secret_hash)
+    except Exception as e:
+        logger.error(f"Secret verification error: {e}")
+        return False
+
+
 async def _get_token[T: (RegistrationToken, PasswordResetToken)](
     token_str: str,
     model: type[T],
@@ -35,7 +47,7 @@ async def _get_token[T: (RegistrationToken, PasswordResetToken)](
     token_prefix = token_str[:TOKEN_PREFIX_LENGTH]
     tokens = await get_tokens_by_prefix(model, load_option, token_prefix, db)
     for token in tokens:
-        if PASSWORD_HASH.verify(token_str, token.token_hash):
+        if verify_secret(token_str, token.token_hash):
             return token
 
 
@@ -93,7 +105,7 @@ def _create_token[T: (RegistrationToken, PasswordResetToken)](
     model: type[T], **fields: Any
 ) -> tuple[str, T]:
     token_str = secrets.token_urlsafe(TOKEN_URLSAFE_SIZE)
-    token_hash = PASSWORD_HASH.hash(token_str)
+    token_hash = hash_secret(token_str)
 
     token: T = model(
         token_prefix=token_str[:TOKEN_PREFIX_LENGTH],
@@ -129,7 +141,7 @@ async def authenticate_user(
     db: AsyncSession,
 ) -> User | None:
     user = await get_user_by_username(username, db)
-    if not user or not PASSWORD_HASH.verify(password, user.password_hash):
+    if not user or not verify_secret(password, user.password_hash):
         return None
     return user
 
