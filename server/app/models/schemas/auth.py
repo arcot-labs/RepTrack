@@ -2,16 +2,18 @@ from typing import Self
 
 from pydantic import (
     BaseModel,
-    EmailStr,
-    TypeAdapter,
-    ValidationError,
     field_validator,
     model_validator,
 )
 
-from app.models.schemas.types import Email, Name, Password, Token, Username
-
-EMAIL_TYPE_ADAPTER: TypeAdapter[EmailStr] = TypeAdapter(EmailStr)
+from app.models.schemas.types import (
+    Email,
+    Name,
+    Password,
+    Token,
+    Username,
+    is_email_identifier,
+)
 
 
 class RequestAccessRequest(BaseModel):
@@ -28,11 +30,9 @@ class RegisterRequest(BaseModel):
     @field_validator("username")
     @classmethod
     def validate_username_not_email(cls, value: str) -> str:
-        try:
-            EMAIL_TYPE_ADAPTER.validate_python(value)
-        except ValidationError:
-            return value
-        raise ValueError("Username cannot be an email address")
+        if is_email_identifier(value):
+            raise ValueError("Username cannot be an email address")
+        return value
 
 
 class ForgotPasswordRequest(BaseModel):
