@@ -5,7 +5,7 @@ from app.models.schemas.config import (
 )
 
 
-def test_email_local_settings_computed_fields_return_none():
+def test_email_local_settings():
     settings = EmailLocalSettings(
         backend="local",
         email_from="noreply@example.com",
@@ -17,7 +17,7 @@ def test_email_local_settings_computed_fields_return_none():
     assert settings.smtp_password is None
 
 
-def test_email_console_settings_computed_fields_return_none():
+def test_email_console_settings():
     settings = EmailConsoleSettings(backend="console")
 
     assert settings.email_from is None
@@ -27,7 +27,7 @@ def test_email_console_settings_computed_fields_return_none():
     assert settings.smtp_password is None
 
 
-def test_email_disabled_settings_computed_fields_return_none():
+def test_email_disabled_settings():
     settings = EmailDisabledSettings(backend="disabled")
 
     assert settings.email_from is None

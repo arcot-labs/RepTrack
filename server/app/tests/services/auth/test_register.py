@@ -12,7 +12,7 @@ from app.models.errors import InvalidToken, UsernameAlreadyRegistered
 from app.services.auth import register
 
 
-async def test_register_creates_user_and_updates_token(session: AsyncSession):
+async def test_register(session: AsyncSession):
     access_request = AccessRequest(
         email="approved2@example.com",
         first_name="Approved",
@@ -46,7 +46,7 @@ async def test_register_creates_user_and_updates_token(session: AsyncSession):
     assert token.is_expired()
 
 
-async def test_register_raises_for_invalid_token(session: AsyncSession):
+async def test_register_invalid_token(session: AsyncSession):
     with pytest.raises(InvalidToken):
         await register(
             token_str="invalid-token",
@@ -56,7 +56,7 @@ async def test_register_raises_for_invalid_token(session: AsyncSession):
         )
 
 
-async def test_register_raises_for_used_token(session: AsyncSession):
+async def test_register_used_token(session: AsyncSession):
     access_request = AccessRequest(
         email="approved@example.com",
         first_name="Approved",
@@ -80,7 +80,7 @@ async def test_register_raises_for_used_token(session: AsyncSession):
         )
 
 
-async def test_register_raises_for_expired_token(session: AsyncSession):
+async def test_register_expired_token(session: AsyncSession):
     access_request = AccessRequest(
         email="approved@example.com",
         first_name="Approved",
@@ -104,7 +104,7 @@ async def test_register_raises_for_expired_token(session: AsyncSession):
         )
 
 
-async def test_register_raises_when_access_request_not_approved(session: AsyncSession):
+async def test_register_access_request_not_approved(session: AsyncSession):
     access_request = AccessRequest(
         email="pending@example.com",
         first_name="Pending",
@@ -127,7 +127,7 @@ async def test_register_raises_when_access_request_not_approved(session: AsyncSe
         )
 
 
-async def test_register_raises_when_username_already_exists(session: AsyncSession):
+async def test_register_username_exists(session: AsyncSession):
     session.add(
         User(
             email="existing@example.com",

@@ -7,25 +7,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
 from app.models.database.feedback import Feedback
-from app.models.database.user import User
 from app.models.schemas.feedback import CreateFeedbackRequest, FeedbackType
 from app.models.schemas.storage import StoredFile
-from app.models.schemas.user import UserPublic
 from app.services.feedback import create_feedback
+from app.tests.services.utilities import get_admin_user_public
 
 
-async def _get_admin_user_public(
-    session: AsyncSession, settings: Settings
-) -> UserPublic:
-    result = await session.execute(
-        select(User).where(User.username == settings.admin.username)
-    )
-    admin = result.scalar_one()
-
-    return UserPublic.model_validate(admin, from_attributes=True)
-
-
-async def test_create_feedback_persists_feedback_and_calls_github(
+async def test_create_feedback(
     session: AsyncSession,
     mock_github_svc: AsyncMock,
     settings: Settings,
@@ -41,7 +29,7 @@ async def test_create_feedback_persists_feedback_and_calls_github(
     store_files_mock = AsyncMock(return_value=stored_files)
     monkeypatch.setattr("app.services.feedback.store_files", store_files_mock)
 
-    user = await _get_admin_user_public(session, settings)
+    user = await get_admin_user_public(session, settings)
     upload_file = UploadFile(filename="screen.png", file=AsyncMock())
     request = CreateFeedbackRequest(
         type=FeedbackType.feedback,
@@ -79,7 +67,7 @@ async def test_create_feedback_persists_feedback_and_calls_github(
     )
 
 
-async def test_create_feedback_stores_empty_files_when_none_uploaded(
+async def test_create_feedback_no_files(
     session: AsyncSession,
     mock_github_svc: AsyncMock,
     settings: Settings,
@@ -88,7 +76,7 @@ async def test_create_feedback_stores_empty_files_when_none_uploaded(
     store_files_mock = AsyncMock(return_value=[])
     monkeypatch.setattr("app.services.feedback.store_files", store_files_mock)
 
-    user = await _get_admin_user_public(session, settings)
+    user = await get_admin_user_public(session, settings)
     request = CreateFeedbackRequest(
         type=FeedbackType.feature,
         url="https://example.com/feature",

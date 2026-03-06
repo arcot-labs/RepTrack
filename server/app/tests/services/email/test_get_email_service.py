@@ -16,7 +16,7 @@ from app.services.email import (
 )
 
 
-def test_get_email_service_returns_smtp_service_for_smtp_backend(
+def test_get_email_service_smtp_backend(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     settings = override_settings(
@@ -36,7 +36,7 @@ def test_get_email_service_returns_smtp_service_for_smtp_backend(
     assert isinstance(service, SmtpEmailService)
 
 
-def test_get_email_service_returns_smtp_service_for_local_backend(
+def test_get_email_service_local_backend(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     settings = override_settings(
@@ -54,7 +54,7 @@ def test_get_email_service_returns_smtp_service_for_local_backend(
     assert isinstance(service, SmtpEmailService)
 
 
-def test_get_email_service_returns_console_service(
+def test_get_email_service_console_backend(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     settings = override_settings(
@@ -67,7 +67,7 @@ def test_get_email_service_returns_console_service(
     assert isinstance(service, ConsoleEmailService)
 
 
-def test_get_email_service_returns_disabled_service(
+def test_get_email_service_disabled_backend(
     override_settings: Callable[[dict[str, Any]], Settings],
 ):
     settings = override_settings(

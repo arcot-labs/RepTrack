@@ -3,8 +3,11 @@ from enum import StrEnum
 from typing import Any
 
 from httpx import AsyncClient
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
+from app.models.database.user import User
 
 logger = logging.getLogger(__name__)
 
@@ -39,14 +42,6 @@ async def make_http_request(
     return await client.send(request)
 
 
-async def login_admin(client: AsyncClient, settings: Settings):
-    return await login(
-        client,
-        username=settings.admin.username,
-        password=settings.admin.password,
-    )
-
-
 async def login(
     client: AsyncClient,
     *,
@@ -62,3 +57,18 @@ async def login(
             "password": password,
         },
     )
+
+
+async def login_admin(client: AsyncClient, settings: Settings):
+    return await login(
+        client,
+        username=settings.admin.username,
+        password=settings.admin.password,
+    )
+
+
+async def get_admin(session: AsyncSession, settings: Settings) -> User:
+    result = await session.execute(
+        select(User).where(User.username == settings.admin.username)
+    )
+    return result.scalar_one()

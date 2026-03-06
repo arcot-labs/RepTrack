@@ -5,7 +5,7 @@ from app.core.config import Settings
 from app.core.dependencies import get_db
 
 
-async def test_get_db_yields_async_session(anyio_backend: str, settings: Settings):
+async def test_get_db(anyio_backend: str, settings: Settings):
     _ = anyio_backend
     generator = get_db(settings)
 

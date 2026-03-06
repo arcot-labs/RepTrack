@@ -8,7 +8,7 @@ from app.models.enums import FeedbackType
 from app.models.schemas.feedback import CreateFeedbackRequest
 
 
-def test_create_feedback_request_accepts_files_within_limit():
+def test_create_feedback_request():
     small_file = UploadFile(
         filename="small.txt",
         file=BytesIO(b"small"),
@@ -27,7 +27,7 @@ def test_create_feedback_request_accepts_files_within_limit():
     assert request.files[0].filename == "small.txt"
 
 
-def test_create_feedback_request_rejects_file_larger_than_5_mib():
+def test_create_feedback_request_large_file():
     large_file = UploadFile(
         filename="large.bin",
         file=BytesIO(b"x"),

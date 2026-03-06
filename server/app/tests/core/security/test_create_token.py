@@ -12,10 +12,8 @@ from app.models.database.registration_token import RegistrationToken
 # PasswordResetToken behavior is identical
 # wrappers are tested separately
 
-# TODO validate
 
-
-def test_create_token_registration_returns_token_and_model():
+def test_create_token_registration():
     token_str, token = _create_token(RegistrationToken, access_request_id=123)
 
     assert isinstance(token_str, str)
@@ -27,7 +25,7 @@ def test_create_token_registration_returns_token_and_model():
     assert token.access_request_id == 123
 
 
-def test_create_token_registration_generates_unique_tokens():
+def test_create_token_registration_unique():
     token_str_1, token_1 = _create_token(RegistrationToken, access_request_id=1)
     token_str_2, token_2 = _create_token(RegistrationToken, access_request_id=1)
 
@@ -36,7 +34,7 @@ def test_create_token_registration_generates_unique_tokens():
     assert token_1.token_prefix != token_2.token_prefix
 
 
-def test_create_registration_token_returns_registration_token():
+def test_create_registration_token():
     token_str, token = create_registration_token(access_request_id=999)
 
     assert isinstance(token_str, str)
@@ -48,7 +46,7 @@ def test_create_registration_token_returns_registration_token():
     assert token.access_request_id == 999
 
 
-def test_create_password_reset_token_returns_password_reset_token():
+def test_create_password_reset_token():
     token_str, token = create_password_reset_token(user_id=777)
 
     assert isinstance(token_str, str)

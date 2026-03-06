@@ -7,9 +7,7 @@ from fastapi import UploadFile
 from app.services.storage import store_files
 
 
-async def test_store_files_writes_file_and_returns_metadata(
-    anyio_backend: str, tmp_path: Path
-):
+async def test_store_files(anyio_backend: str, tmp_path: Path):
     _ = anyio_backend
     base_storage_dir = tmp_path / "feedback"
     file = UploadFile(filename="file.txt", file=BytesIO(b"hello"))
@@ -27,9 +25,7 @@ async def test_store_files_writes_file_and_returns_metadata(
     assert (base_storage_dir / stored.path).read_bytes() == b"hello"
 
 
-async def test_store_files_defaults_missing_filename(
-    anyio_backend: str, tmp_path: Path
-):
+async def test_store_files_missing_filename(anyio_backend: str, tmp_path: Path):
     _ = anyio_backend
     base_storage_dir = tmp_path / "feedback"
     file = UploadFile(filename=None, file=BytesIO(b"x"))
@@ -44,9 +40,7 @@ async def test_store_files_defaults_missing_filename(
     assert "/" in stored.path
 
 
-async def test_store_files_returns_empty_list_for_no_files(
-    anyio_backend: str, tmp_path: Path
-):
+async def test_store_files_no_files(anyio_backend: str, tmp_path: Path):
     _ = anyio_backend
     base_storage_dir = tmp_path / "feedback"
 

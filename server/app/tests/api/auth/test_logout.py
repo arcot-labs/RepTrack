@@ -6,7 +6,7 @@ from app.core.security import ACCESS_JWT_KEY, REFRESH_JWT_KEY
 from app.tests.api.utilities import HttpMethod, login_admin, make_http_request
 
 
-async def make_request(client: AsyncClient):
+async def _make_request(client: AsyncClient):
     return await make_http_request(
         client, method=HttpMethod.POST, endpoint="/api/auth/logout"
     )
@@ -15,7 +15,7 @@ async def make_request(client: AsyncClient):
 # 204
 async def test_logout(client: AsyncClient, settings: Settings):
     await login_admin(client, settings)
-    resp = await make_request(client)
+    resp = await _make_request(client)
 
     assert resp.status_code == status.HTTP_204_NO_CONTENT
     assert ACCESS_JWT_KEY not in resp.cookies
@@ -24,7 +24,7 @@ async def test_logout(client: AsyncClient, settings: Settings):
 
 # 204
 async def test_logout_not_logged_in(client: AsyncClient):
-    resp = await make_request(client)
+    resp = await _make_request(client)
 
     assert resp.status_code == status.HTTP_204_NO_CONTENT
     assert ACCESS_JWT_KEY not in resp.cookies
