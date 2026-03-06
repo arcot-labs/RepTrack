@@ -16,7 +16,7 @@ def test_verify_secret_failure_invalid_hash():
 
 
 def test_verify_secret_failure_exception_path(monkeypatch: pytest.MonkeyPatch):
-    def raise_verify_error():
+    def raise_verify_error(_secret: str, _secret_hash: str):
         raise RuntimeError("forced verify failure")
 
     monkeypatch.setattr(PASSWORD_HASH, "verify", raise_verify_error)
