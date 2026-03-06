@@ -49,8 +49,9 @@ async def request_access(
     """Returns True if access was already approved, False otherwise"""
     logger.info(f"Requesting access for email: {email}")
 
-    existing_user = await get_user_by_email(email, db)
-    if existing_user:
+    existing_user_by_email = await get_user_by_email(email, db)
+    existing_user_by_username = await get_user_by_username(email, db)
+    if existing_user_by_email or existing_user_by_username:
         raise EmailAlreadyRegistered()
 
     existing_request = await get_latest_access_request_by_email(email, db)
@@ -115,8 +116,9 @@ async def register(
     if access_request.status != AccessRequestStatus.APPROVED:
         raise InvalidToken()
 
-    existing_user = await get_user_by_username(username, db)
-    if existing_user:
+    existing_user_by_username = await get_user_by_username(username, db)
+    existing_user_by_email = await get_user_by_email(username, db)
+    if existing_user_by_username or existing_user_by_email:
         raise UsernameAlreadyRegistered()
 
     token.used_at = datetime.now(UTC)

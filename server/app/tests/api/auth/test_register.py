@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import Settings
 from app.core.security import create_registration_token
 from app.models.database.access_request import AccessRequest, AccessRequestStatus
+from app.models.database.user import User
 from app.models.errors import InvalidToken, UsernameAlreadyRegistered
 from app.tests.api.utilities import HttpMethod, make_http_request
 
@@ -77,6 +78,37 @@ async def test_register_username_already_registered(
         client,
         token=token_str,
         username=settings.admin.username,
+        password="Password123",
+    )
+
+    assert resp.status_code == UsernameAlreadyRegistered.status_code
+    body = resp.json()
+    assert body["detail"] == UsernameAlreadyRegistered.detail
+
+
+# 409
+async def test_register_username_matches_existing_email(
+    client: AsyncClient,
+    session: AsyncSession,
+):
+    collision_identifier = "identifier_collision"
+    session.add(
+        User(
+            email=collision_identifier,
+            username="existing_user",
+            first_name="Existing",
+            last_name="User",
+            password_hash="hash",
+            is_admin=False,
+        )
+    )
+    await session.commit()
+
+    _, token_str = await _create_approved_request_with_token(session)
+    resp = await _make_request(
+        client,
+        token=token_str,
+        username=collision_identifier,
         password="Password123",
     )
 

@@ -134,6 +134,36 @@ async def test_request_access_existing_user(client: AsyncClient, session: AsyncS
     assert body["detail"] == EmailAlreadyRegistered.detail
 
 
+# 409
+async def test_request_access_email_matches_existing_username(
+    client: AsyncClient,
+    session: AsyncSession,
+):
+    collision_identifier = "existing@example.com"
+    session.add(
+        User(
+            email="different@example.com",
+            username=collision_identifier,
+            first_name="Existing",
+            last_name="User",
+            password_hash="hash",
+            is_admin=False,
+        )
+    )
+    await session.commit()
+
+    resp = await _make_request(
+        client,
+        email=collision_identifier,
+        first_name="Test",
+        last_name="User",
+    )
+
+    assert resp.status_code == EmailAlreadyRegistered.status_code
+    body = resp.json()
+    assert body["detail"] == EmailAlreadyRegistered.detail
+
+
 # 422
 async def test_request_access_invalid_email(client: AsyncClient):
     resp = await make_http_request(
