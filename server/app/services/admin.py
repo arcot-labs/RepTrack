@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import func
 
 from app.core.config import Settings
+from app.core.security import create_registration_token
 from app.models.enums import AccessRequestStatus
 from app.models.errors import AccessRequestStatusError, NotFound
 from app.models.schemas.access_request import AccessRequestPublic
@@ -14,7 +15,6 @@ from app.services.access_request import (
     get_access_request_by_id,
     get_access_requests_with_reviewer,
 )
-from app.core.security import create_registration_token
 from app.services.email import EmailService
 from app.services.user import get_users_ordered_by_username
 
