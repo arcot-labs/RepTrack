@@ -14,7 +14,7 @@ from app.services.access_request import (
     get_access_request_by_id,
     get_access_requests_with_reviewer,
 )
-from app.services.auth import create_registration_token
+from app.core.security import create_registration_token
 from app.services.email import EmailService
 from app.services.user import get_users_ordered_by_username
 
