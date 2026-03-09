@@ -32,7 +32,7 @@ export const zCreateFeedbackRequest = z.object({
     url: z.string().min(1).max(1000),
     title: z.string().min(1).max(100),
     description: z.string().min(1).max(10000),
-    files: z.array(z.string()).optional().default([])
+    files: z.array(z.string()).optional()
 });
 
 /**

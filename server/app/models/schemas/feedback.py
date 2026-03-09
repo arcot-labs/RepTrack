@@ -11,7 +11,7 @@ class CreateFeedbackRequest(BaseModel):
     url: str = Field(min_length=1, max_length=1000)
     title: str = Field(min_length=1, max_length=100)
     description: str = Field(min_length=1, max_length=10000)
-    files: list[Annotated[UploadFile, File()]] = []
+    files: list[Annotated[UploadFile, File()]] = Field(default_factory=list[UploadFile])
 
     @model_validator(mode="after")
     def check_files(self) -> Self:

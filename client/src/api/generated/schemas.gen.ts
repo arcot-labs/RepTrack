@@ -108,8 +108,7 @@ export const CreateFeedbackRequestSchema = {
                 format: 'binary'
             },
             type: 'array',
-            title: 'Files',
-            default: []
+            title: 'Files'
         }
     },
     type: 'object',
