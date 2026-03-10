@@ -2,7 +2,7 @@ import { useSession } from '@/auth/session'
 import { Loading } from '@/components/Loading'
 import type { LocationState } from '@/models/location'
 import type { JSX } from 'react'
-import { Navigate, useLocation } from 'react-router'
+import { Navigate, useLocation } from 'react-router-dom'
 
 export function RequireGuest({ children }: { children: JSX.Element }) {
     const { loading, authenticated } = useSession()

@@ -1,7 +1,7 @@
 import { Mermaid } from '@/components/docs/Mermaid'
 import { getDoc } from '@/lib/docs'
 import Markdown from 'react-markdown'
-import { useParams } from 'react-router'
+import { useParams } from 'react-router-dom'
 import rehypeHighlight from 'rehype-highlight'
 import remarkGfm from 'remark-gfm'
 

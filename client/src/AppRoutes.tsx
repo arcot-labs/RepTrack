@@ -11,7 +11,7 @@ import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
 import { RequestAccess } from '@/pages/RequestAccess'
 import { ResetPassword } from '@/pages/ResetPassword'
-import { Navigate, Route, Routes } from 'react-router'
+import { Navigate, Route, Routes } from 'react-router-dom'
 
 export function AppRoutes() {
     return (
