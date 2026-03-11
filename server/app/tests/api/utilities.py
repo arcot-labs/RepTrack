@@ -28,6 +28,7 @@ async def make_http_request(
     headers: dict[str, str] | None = None,
     json: dict[str, Any] | None = None,
     data: dict[str, Any] | None = None,
+    files: list[tuple[str, bytes, str]] | None = None,
 ):
     request = client.build_request(
         method=method.value,
@@ -35,6 +36,7 @@ async def make_http_request(
         headers=headers,
         json=json,
         data=data,
+        files=[("files", file) for file in files] if files is not None else [],
     )
     logger.debug(
         f"Making HTTP request: {method.value.upper()} {endpoint} with headers={headers}, json={json}, data={data}"

@@ -7,7 +7,8 @@ from app.core.config import Settings
 from app.models.database.user import User
 from app.models.errors import InsufficientPermissions
 from app.models.schemas.user import UserPublic
-from app.tests.api.utilities import HttpMethod, login_admin, make_http_request
+
+from ..utilities import HttpMethod, login_admin, make_http_request
 
 
 async def _make_request(client: AsyncClient):

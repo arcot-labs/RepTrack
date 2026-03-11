@@ -7,7 +7,8 @@ from app.core.security import create_registration_token
 from app.models.database.access_request import AccessRequest, AccessRequestStatus
 from app.models.database.user import User
 from app.models.errors import InvalidToken, UsernameAlreadyRegistered
-from app.tests.api.utilities import HttpMethod, make_http_request
+
+from ..utilities import HttpMethod, make_http_request
 
 
 async def _make_request(client: AsyncClient, token: str, username: str, password: str):

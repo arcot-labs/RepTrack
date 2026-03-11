@@ -8,7 +8,8 @@ from app.core.security import ACCESS_JWT_KEY
 from app.models.database.user import User
 from app.models.errors import InvalidCredentials
 from app.models.schemas.user import UserPublic
-from app.tests.api.utilities import HttpMethod, login_admin, make_http_request
+
+from ..utilities import HttpMethod, login_admin, make_http_request
 
 
 async def _make_request(client: AsyncClient):

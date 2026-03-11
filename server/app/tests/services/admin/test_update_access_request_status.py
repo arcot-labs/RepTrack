@@ -12,7 +12,8 @@ from app.models.database.registration_token import RegistrationToken
 from app.models.enums import AccessRequestStatus
 from app.models.errors import AccessRequestStatusError, NotFound
 from app.services.admin import update_access_request_status
-from app.tests.services.utilities import get_admin_user_public
+
+from ..utilities import get_admin_user_public
 
 
 async def test_update_access_request_status_approved(

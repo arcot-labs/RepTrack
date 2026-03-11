@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import Settings
 from app.core.security import create_password_reset_token
 from app.models.errors import InvalidToken
-from app.tests.api.utilities import HttpMethod, get_admin, make_http_request
+
+from ..utilities import HttpMethod, get_admin, make_http_request
 
 
 async def _make_request(client: AsyncClient, *, token: str, password: str):

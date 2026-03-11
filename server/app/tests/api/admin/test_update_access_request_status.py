@@ -12,7 +12,8 @@ from app.models.errors import (
     InsufficientPermissions,
     NotFound,
 )
-from app.tests.api.utilities import (
+
+from ..utilities import (
     HttpMethod,
     get_admin,
     login_admin,

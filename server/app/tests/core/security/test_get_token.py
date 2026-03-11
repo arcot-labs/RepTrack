@@ -12,7 +12,8 @@ from app.core.security import (
 from app.models.database.password_reset_token import PasswordResetToken
 from app.models.database.registration_token import RegistrationToken
 from app.tests.core.security.utilities import create_access_request
-from app.tests.core.utilities import get_admin
+
+from ..utilities import get_admin
 
 # _get_token tests use RegistrationToken
 # PasswordResetToken behavior is identical

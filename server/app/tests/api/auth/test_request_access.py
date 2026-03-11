@@ -13,7 +13,8 @@ from app.models.errors import (
     AccessRequestRejected,
     EmailAlreadyRegistered,
 )
-from app.tests.api.utilities import HttpMethod, make_http_request
+
+from ..utilities import HttpMethod, make_http_request
 
 
 async def _make_request(

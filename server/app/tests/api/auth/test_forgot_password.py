@@ -2,7 +2,8 @@ from fastapi import status
 from httpx import AsyncClient
 
 from app.core.config import Settings
-from app.tests.api.utilities import HttpMethod, make_http_request
+
+from ..utilities import HttpMethod, make_http_request
 
 
 async def _make_request(client: AsyncClient, email: str):
