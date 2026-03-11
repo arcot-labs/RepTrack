@@ -8,7 +8,7 @@ from app.core.security import PASSWORD_HASH, create_registration_token
 from app.models.database.access_request import AccessRequest
 from app.models.database.user import User
 from app.models.enums import AccessRequestStatus
-from app.models.errors import InvalidToken, UsernameAlreadyRegistered
+from app.models.errors import InvalidToken, UsernameTaken
 from app.services.auth import register
 
 
@@ -127,7 +127,7 @@ async def test_register_access_request_not_approved(session: AsyncSession):
         )
 
 
-async def test_register_username_exists(session: AsyncSession):
+async def test_register_username_taken(session: AsyncSession):
     session.add(
         User(
             email="existing@example.com",
@@ -151,7 +151,7 @@ async def test_register_username_exists(session: AsyncSession):
     session.add(token)
     await session.commit()
 
-    with pytest.raises(UsernameAlreadyRegistered):
+    with pytest.raises(UsernameTaken):
         await register(
             token_str=token_str,
             username="taken",
@@ -185,7 +185,7 @@ async def test_register_username_matches_email(session: AsyncSession):
     session.add(token)
     await session.commit()
 
-    with pytest.raises(UsernameAlreadyRegistered):
+    with pytest.raises(UsernameTaken):
         await register(
             token_str=token_str,
             username=collision_identifier,

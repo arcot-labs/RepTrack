@@ -88,13 +88,13 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def check_github_config(self):
         if self.is_prod_like and self.gh.backend != "api":
-            raise ValueError("github.backend must be 'api' in production")
+            raise ValueError("github backend must be 'api' in production")
         return self
 
     @model_validator(mode="after")
     def check_email_config(self):
         if self.is_prod_like and self.email.backend != "smtp":
-            raise ValueError("email.backend must be 'smtp' in production")
+            raise ValueError("email backend must be 'smtp' in production")
         return self
 
     model_config = SettingsConfigDict(

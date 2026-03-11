@@ -10,7 +10,7 @@ from app.core.config import Settings
 from app.models.database.access_request import AccessRequest
 from app.models.database.registration_token import RegistrationToken
 from app.models.enums import AccessRequestStatus
-from app.models.errors import AccessRequestStatusError, NotFound
+from app.models.errors import AccessRequestNotFound, AccessRequestNotPending
 from app.services.admin import update_access_request_status
 
 from ..utilities import get_admin_user_public
@@ -119,7 +119,7 @@ async def test_update_access_request_status_rejected(
 async def test_update_access_request_status_not_found(
     session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
-    with pytest.raises(NotFound):
+    with pytest.raises(AccessRequestNotFound):
         await update_access_request_status(
             access_request_id=9999,
             status=AccessRequestStatus.APPROVED,
@@ -143,7 +143,7 @@ async def test_update_access_request_status_not_pending(
     session.add(access_request)
     await session.commit()
 
-    with pytest.raises(AccessRequestStatusError):
+    with pytest.raises(AccessRequestNotPending):
         await update_access_request_status(
             access_request_id=access_request.id,
             status=AccessRequestStatus.REJECTED,

@@ -62,7 +62,7 @@ export function Register() {
                         reset({ token: '', confirmPassword: '' })
                         setSearchParams({})
                     },
-                    username_already_registered: (err) => {
+                    username_taken: (err) => {
                         notify.error(err.detail)
                         reset({ username: '', confirmPassword: '' })
                     },
