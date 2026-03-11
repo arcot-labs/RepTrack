@@ -14,7 +14,12 @@ class Exercise(Base):
     __tablename__ = "exercises"
     __table_args__ = (
         Index("ix_exercises_user_id", "user_id"),
-        UniqueConstraint("user_id", "name", name="uq_exercises_user_name"),
+        UniqueConstraint(
+            "user_id",
+            "name",
+            name="uq_exercises_user_name",
+            postgresql_nulls_not_distinct=True,
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
