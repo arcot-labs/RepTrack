@@ -26,7 +26,10 @@ class WorkoutExercise(Base):
         CheckConstraint("position > 0", name="ck_workout_exercises_position_positive"),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True,
+    )
     workout_id: Mapped[int] = mapped_column(
         ForeignKey("workouts.id", ondelete="CASCADE"),
         nullable=False,
@@ -35,8 +38,13 @@ class WorkoutExercise(Base):
         ForeignKey("exercises.id", ondelete="RESTRICT"),
         nullable=False,
     )
-    position: Mapped[int] = mapped_column(Integer, nullable=False)
-    notes: Mapped[str | None] = mapped_column(TEXT)
+    position: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+    notes: Mapped[str | None] = mapped_column(
+        TEXT,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

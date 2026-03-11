@@ -25,7 +25,10 @@ class ExerciseMuscleGroup(Base):
         ),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True,
+    )
     exercise_id: Mapped[int] = mapped_column(
         ForeignKey("exercises.id", ondelete="CASCADE"), nullable=False
     )

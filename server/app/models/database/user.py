@@ -14,7 +14,10 @@ class User(Base):
         Index("ix_users_email", "email"),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True,
+    )
     username: Mapped[str] = mapped_column(
         String(255),
         unique=True,

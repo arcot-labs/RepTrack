@@ -13,7 +13,10 @@ class Workout(Base):
         Index("ix_workouts_started_at", "started_at"),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True,
+    )
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
@@ -25,7 +28,9 @@ class Workout(Base):
     ended_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
     )
-    notes: Mapped[str | None] = mapped_column(TEXT)
+    notes: Mapped[str | None] = mapped_column(
+        TEXT,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
