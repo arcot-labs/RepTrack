@@ -126,6 +126,24 @@ export type LoginRequest = {
 };
 
 /**
+ * MuscleGroupPublic
+ */
+export type MuscleGroupPublic = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description: string;
+};
+
+/**
  * RegisterRequest
  */
 export type RegisterRequest = {
@@ -617,6 +635,33 @@ export type GetDbHealthResponses = {
 };
 
 export type GetDbHealthResponse = GetDbHealthResponses[keyof GetDbHealthResponses];
+
+export type GetMuscleGroupsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/muscle-groups';
+};
+
+export type GetMuscleGroupsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+};
+
+export type GetMuscleGroupsError = GetMuscleGroupsErrors[keyof GetMuscleGroupsErrors];
+
+export type GetMuscleGroupsResponses = {
+    /**
+     * Response Getmusclegroups
+     *
+     * Successful Response
+     */
+    200: Array<MuscleGroupPublic>;
+};
+
+export type GetMuscleGroupsResponse = GetMuscleGroupsResponses[keyof GetMuscleGroupsResponses];
 
 export type GetCurrentUserData = {
     body?: never;

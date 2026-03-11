@@ -52,6 +52,15 @@ export const zLoginRequest = z.object({
 });
 
 /**
+ * MuscleGroupPublic
+ */
+export const zMuscleGroupPublic = z.object({
+    id: z.int(),
+    name: z.string(),
+    description: z.string()
+});
+
+/**
  * RegisterRequest
  */
 export const zRegisterRequest = z.object({
@@ -286,6 +295,19 @@ export const zGetDbHealthData = z.object({
  * Successful Response
  */
 export const zGetDbHealthResponse = z.string();
+
+export const zGetMuscleGroupsData = z.object({
+    body: z.never().optional(),
+    path: z.never().optional(),
+    query: z.never().optional()
+});
+
+/**
+ * Response Getmusclegroups
+ *
+ * Successful Response
+ */
+export const zGetMuscleGroupsResponse = z.array(zMuscleGroupPublic);
 
 export const zGetCurrentUserData = z.object({
     body: z.never().optional(),

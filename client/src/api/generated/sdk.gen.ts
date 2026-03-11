@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { CreateFeedbackData, CreateFeedbackErrors, CreateFeedbackResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetAccessRequestsData, GetAccessRequestsErrors, GetAccessRequestsResponses, GetCurrentUserData, GetCurrentUserErrors, GetCurrentUserResponses, GetDbHealthData, GetDbHealthResponses, GetHealthData, GetHealthResponses, GetUsersData, GetUsersErrors, GetUsersResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, RequestAccessData, RequestAccessErrors, RequestAccessResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, UpdateAccessRequestStatusData, UpdateAccessRequestStatusErrors, UpdateAccessRequestStatusResponses } from './types.gen';
+import type { CreateFeedbackData, CreateFeedbackErrors, CreateFeedbackResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetAccessRequestsData, GetAccessRequestsErrors, GetAccessRequestsResponses, GetCurrentUserData, GetCurrentUserErrors, GetCurrentUserResponses, GetDbHealthData, GetDbHealthResponses, GetHealthData, GetHealthResponses, GetMuscleGroupsData, GetMuscleGroupsErrors, GetMuscleGroupsResponses, GetUsersData, GetUsersErrors, GetUsersResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, RequestAccessData, RequestAccessErrors, RequestAccessResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, UpdateAccessRequestStatusData, UpdateAccessRequestStatusErrors, UpdateAccessRequestStatusResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -208,6 +208,24 @@ export class HealthService {
         return (options?.client ?? client).get<GetDbHealthResponses, unknown, ThrowOnError>({
             responseType: 'json',
             url: '/api/health/db',
+            ...options
+        });
+    }
+}
+
+export class MuscleGroupsService {
+    /**
+     * Get Muscle Groups Endpoint
+     */
+    public static getMuscleGroups<ThrowOnError extends boolean = false>(options?: Options<GetMuscleGroupsData, ThrowOnError>) {
+        return (options?.client ?? client).get<GetMuscleGroupsResponses, GetMuscleGroupsErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{
+                    in: 'cookie',
+                    name: 'access_token',
+                    type: 'apiKey'
+                }],
+            url: '/api/muscle-groups',
             ...options
         });
     }

@@ -221,6 +221,30 @@ export const LoginRequestSchema = {
     title: 'LoginRequest'
 } as const;
 
+export const MuscleGroupPublicSchema = {
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        description: {
+            type: 'string',
+            title: 'Description'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'name',
+        'description'
+    ],
+    title: 'MuscleGroupPublic'
+} as const;
+
 export const RegisterRequestSchema = {
     properties: {
         token: {
