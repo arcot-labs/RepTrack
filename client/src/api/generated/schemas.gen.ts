@@ -79,6 +79,41 @@ export const AccessRequestStatusSchema = {
     title: 'AccessRequestStatus'
 } as const;
 
+export const CreateExerciseRequestSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        muscle_group_ids: {
+            items: {
+                type: 'integer'
+            },
+            type: 'array',
+            title: 'Muscle Group Ids',
+            default: []
+        }
+    },
+    type: 'object',
+    required: [
+        'name'
+    ],
+    title: 'CreateExerciseRequest'
+} as const;
+
 export const CreateFeedbackRequestSchema = {
     properties: {
         type: {
@@ -138,6 +173,69 @@ export const ErrorResponseSchema = {
         'code'
     ],
     title: 'ErrorResponse'
+} as const;
+
+export const ExercisePublicSchema = {
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id'
+        },
+        user_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'User Id'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        muscle_groups: {
+            items: {
+                $ref: '#/components/schemas/MuscleGroupPublic'
+            },
+            type: 'array',
+            title: 'Muscle Groups'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'user_id',
+        'name',
+        'description',
+        'muscle_groups',
+        'created_at',
+        'updated_at'
+    ],
+    title: 'ExercisePublic'
 } as const;
 
 export const FeedbackTypeSchema = {
@@ -363,6 +461,51 @@ export const UpdateAccessRequestStatusRequestSchema = {
         'status'
     ],
     title: 'UpdateAccessRequestStatusRequest'
+} as const;
+
+export const UpdateExerciseRequestSchema = {
+    properties: {
+        name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255,
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        muscle_group_ids: {
+            anyOf: [
+                {
+                    items: {
+                        type: 'integer'
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Muscle Group Ids'
+        }
+    },
+    type: 'object',
+    title: 'UpdateExerciseRequest'
 } as const;
 
 export const UserPublicSchema = {

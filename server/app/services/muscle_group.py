@@ -14,3 +14,15 @@ async def get_muscle_groups_ordered_by_name(
         MuscleGroupPublic.model_validate(mg, from_attributes=True)
         for mg in muscle_groups
     ]
+
+
+async def get_muscle_groups_by_ids(
+    ids: list[int],
+    db: AsyncSession,
+) -> list[MuscleGroup]:
+    if not ids:
+        return []
+    result = await db.execute(
+        select(MuscleGroup).where(MuscleGroup.id.in_(ids)),
+    )
+    return list(result.scalars().all())

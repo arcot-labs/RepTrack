@@ -46,6 +46,24 @@ export type AccessRequestPublic = {
 export type AccessRequestStatus = 'pending' | 'approved' | 'rejected';
 
 /**
+ * CreateExerciseRequest
+ */
+export type CreateExerciseRequest = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Muscle Group Ids
+     */
+    muscle_group_ids?: Array<number>;
+};
+
+/**
  * CreateFeedbackRequest
  */
 export type CreateFeedbackRequest = {
@@ -80,6 +98,40 @@ export type ErrorResponse = {
      * Code
      */
     code: string;
+};
+
+/**
+ * ExercisePublic
+ */
+export type ExercisePublic = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * User Id
+     */
+    user_id: number | null;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description: string | null;
+    /**
+     * Muscle Groups
+     */
+    muscle_groups: Array<MuscleGroupPublic>;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
 };
 
 /**
@@ -215,6 +267,24 @@ export type UpdateAccessRequestStatusRequest = {
      * Status
      */
     status: 'approved' | 'rejected';
+};
+
+/**
+ * UpdateExerciseRequest
+ */
+export type UpdateExerciseRequest = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Muscle Group Ids
+     */
+    muscle_group_ids?: Array<number> | null;
 };
 
 /**
@@ -572,6 +642,196 @@ export type LogoutResponses = {
 };
 
 export type LogoutResponse = LogoutResponses[keyof LogoutResponses];
+
+export type GetExercisesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/exercises';
+};
+
+export type GetExercisesErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+};
+
+export type GetExercisesError = GetExercisesErrors[keyof GetExercisesErrors];
+
+export type GetExercisesResponses = {
+    /**
+     * Response Getexercises
+     *
+     * Successful Response
+     */
+    200: Array<ExercisePublic>;
+};
+
+export type GetExercisesResponse = GetExercisesResponses[keyof GetExercisesResponses];
+
+export type CreateExerciseData = {
+    body: CreateExerciseRequest;
+    path?: never;
+    query?: never;
+    url: '/api/exercises';
+};
+
+export type CreateExerciseErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateExerciseError = CreateExerciseErrors[keyof CreateExerciseErrors];
+
+export type CreateExerciseResponses = {
+    /**
+     * Successful Response
+     */
+    201: ExercisePublic;
+};
+
+export type CreateExerciseResponse = CreateExerciseResponses[keyof CreateExerciseResponses];
+
+export type DeleteExerciseData = {
+    body?: never;
+    path: {
+        /**
+         * Exercise Id
+         */
+        exercise_id: number;
+    };
+    query?: never;
+    url: '/api/exercises/{exercise_id}';
+};
+
+export type DeleteExerciseErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteExerciseError = DeleteExerciseErrors[keyof DeleteExerciseErrors];
+
+export type DeleteExerciseResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteExerciseResponse = DeleteExerciseResponses[keyof DeleteExerciseResponses];
+
+export type GetExerciseData = {
+    body?: never;
+    path: {
+        /**
+         * Exercise Id
+         */
+        exercise_id: number;
+    };
+    query?: never;
+    url: '/api/exercises/{exercise_id}';
+};
+
+export type GetExerciseErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetExerciseError = GetExerciseErrors[keyof GetExerciseErrors];
+
+export type GetExerciseResponses = {
+    /**
+     * Successful Response
+     */
+    200: ExercisePublic;
+};
+
+export type GetExerciseResponse = GetExerciseResponses[keyof GetExerciseResponses];
+
+export type UpdateExerciseData = {
+    body: UpdateExerciseRequest;
+    path: {
+        /**
+         * Exercise Id
+         */
+        exercise_id: number;
+    };
+    query?: never;
+    url: '/api/exercises/{exercise_id}';
+};
+
+export type UpdateExerciseErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateExerciseError = UpdateExerciseErrors[keyof UpdateExerciseErrors];
+
+export type UpdateExerciseResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type UpdateExerciseResponse = UpdateExerciseResponses[keyof UpdateExerciseResponses];
 
 export type CreateFeedbackData = {
     body: CreateFeedbackRequest;

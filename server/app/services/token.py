@@ -28,11 +28,11 @@ async def get_tokens_by_prefix[T: (RegistrationToken, PasswordResetToken)](
 
 async def expire_tokens[T: (RegistrationToken, PasswordResetToken)](
     model: type[T],
-    where_clause: list[Any],
+    where_clauses: list[Any],
     db: AsyncSession,
 ) -> None:
     await db.execute(
         update(model)
-        .where(*where_clause, model.expires_at > func.now())
+        .where(*where_clauses, model.expires_at > func.now())
         .values(expires_at=func.now())
     )

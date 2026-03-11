@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { CreateFeedbackData, CreateFeedbackErrors, CreateFeedbackResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetAccessRequestsData, GetAccessRequestsErrors, GetAccessRequestsResponses, GetCurrentUserData, GetCurrentUserErrors, GetCurrentUserResponses, GetDbHealthData, GetDbHealthResponses, GetHealthData, GetHealthResponses, GetMuscleGroupsData, GetMuscleGroupsErrors, GetMuscleGroupsResponses, GetUsersData, GetUsersErrors, GetUsersResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, RequestAccessData, RequestAccessErrors, RequestAccessResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, UpdateAccessRequestStatusData, UpdateAccessRequestStatusErrors, UpdateAccessRequestStatusResponses } from './types.gen';
+import type { CreateExerciseData, CreateExerciseErrors, CreateExerciseResponses, CreateFeedbackData, CreateFeedbackErrors, CreateFeedbackResponses, DeleteExerciseData, DeleteExerciseErrors, DeleteExerciseResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetAccessRequestsData, GetAccessRequestsErrors, GetAccessRequestsResponses, GetCurrentUserData, GetCurrentUserErrors, GetCurrentUserResponses, GetDbHealthData, GetDbHealthResponses, GetExerciseData, GetExerciseErrors, GetExerciseResponses, GetExercisesData, GetExercisesErrors, GetExercisesResponses, GetHealthData, GetHealthResponses, GetMuscleGroupsData, GetMuscleGroupsErrors, GetMuscleGroupsResponses, GetUsersData, GetUsersErrors, GetUsersResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, RequestAccessData, RequestAccessErrors, RequestAccessResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, UpdateAccessRequestStatusData, UpdateAccessRequestStatusErrors, UpdateAccessRequestStatusResponses, UpdateExerciseData, UpdateExerciseErrors, UpdateExerciseResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -163,6 +163,94 @@ export class AuthService {
      */
     public static logout<ThrowOnError extends boolean = false>(options?: Options<LogoutData, ThrowOnError>) {
         return (options?.client ?? client).post<LogoutResponses, unknown, ThrowOnError>({ url: '/api/auth/logout', ...options });
+    }
+}
+
+export class ExercisesService {
+    /**
+     * Get Exercises Endpoint
+     */
+    public static getExercises<ThrowOnError extends boolean = false>(options?: Options<GetExercisesData, ThrowOnError>) {
+        return (options?.client ?? client).get<GetExercisesResponses, GetExercisesErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{
+                    in: 'cookie',
+                    name: 'access_token',
+                    type: 'apiKey'
+                }],
+            url: '/api/exercises',
+            ...options
+        });
+    }
+    
+    /**
+     * Create Exercise Endpoint
+     */
+    public static createExercise<ThrowOnError extends boolean = false>(options: Options<CreateExerciseData, ThrowOnError>) {
+        return (options.client ?? client).post<CreateExerciseResponses, CreateExerciseErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{
+                    in: 'cookie',
+                    name: 'access_token',
+                    type: 'apiKey'
+                }],
+            url: '/api/exercises',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Delete Exercise Endpoint
+     */
+    public static deleteExercise<ThrowOnError extends boolean = false>(options: Options<DeleteExerciseData, ThrowOnError>) {
+        return (options.client ?? client).delete<DeleteExerciseResponses, DeleteExerciseErrors, ThrowOnError>({
+            security: [{
+                    in: 'cookie',
+                    name: 'access_token',
+                    type: 'apiKey'
+                }],
+            url: '/api/exercises/{exercise_id}',
+            ...options
+        });
+    }
+    
+    /**
+     * Get Exercise Endpoint
+     */
+    public static getExercise<ThrowOnError extends boolean = false>(options: Options<GetExerciseData, ThrowOnError>) {
+        return (options.client ?? client).get<GetExerciseResponses, GetExerciseErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{
+                    in: 'cookie',
+                    name: 'access_token',
+                    type: 'apiKey'
+                }],
+            url: '/api/exercises/{exercise_id}',
+            ...options
+        });
+    }
+    
+    /**
+     * Update Exercise Endpoint
+     */
+    public static updateExercise<ThrowOnError extends boolean = false>(options: Options<UpdateExerciseData, ThrowOnError>) {
+        return (options.client ?? client).patch<UpdateExerciseResponses, UpdateExerciseErrors, ThrowOnError>({
+            security: [{
+                    in: 'cookie',
+                    name: 'access_token',
+                    type: 'apiKey'
+                }],
+            url: '/api/exercises/{exercise_id}',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
     }
 }
 

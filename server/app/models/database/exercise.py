@@ -1,9 +1,13 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import TEXT, DateTime, ForeignKey, Index, String, UniqueConstraint, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+
+if TYPE_CHECKING:
+    from app.models.database.exercise_muscle_group import ExerciseMuscleGroup
 
 
 class Exercise(Base):
@@ -31,4 +35,8 @@ class Exercise(Base):
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
+    )
+
+    muscle_groups: Mapped[list[ExerciseMuscleGroup]] = relationship(
+        "ExerciseMuscleGroup",
     )
