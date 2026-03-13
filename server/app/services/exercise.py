@@ -147,6 +147,10 @@ async def update_exercise(
     if exercise.user_id != user_id:
         raise ExerciseUpdateNotAllowed()
 
+    if req.name is None and req.description is None and req.muscle_group_ids is None:
+        logger.info("No changes provided, skipping update")
+        return
+
     if req.name is not None:
         exercise.name = req.name
     if req.description is not None:
