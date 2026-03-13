@@ -34,7 +34,7 @@ async def test_get_exercise_system_exercise(session: AsyncSession):
     assert result.user_id is None
 
 
-async def test_get_exercise_invalid_exercise(session: AsyncSession):
+async def test_get_exercise_not_found(session: AsyncSession):
     user = await create_user(session)
 
     with pytest.raises(ExerciseNotFound):

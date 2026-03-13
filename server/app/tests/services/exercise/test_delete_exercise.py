@@ -25,7 +25,7 @@ async def test_delete_exercise(session: AsyncSession):
     assert result.scalar_one_or_none() is None
 
 
-async def test_delete_exercise_invalid_exercise(session: AsyncSession):
+async def test_delete_exercise_not_found(session: AsyncSession):
     user = await create_user(session)
 
     with pytest.raises(ExerciseNotFound):

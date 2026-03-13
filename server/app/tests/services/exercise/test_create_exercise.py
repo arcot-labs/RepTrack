@@ -30,7 +30,7 @@ async def test_create_exercise(session: AsyncSession):
     ]
 
 
-async def test_create_exercise_invalid_muscle_group(session: AsyncSession):
+async def test_create_exercise_muscle_group_not_found(session: AsyncSession):
     user = await create_user(session)
 
     with pytest.raises(MuscleGroupNotFound):
