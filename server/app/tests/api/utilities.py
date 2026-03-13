@@ -36,7 +36,7 @@ async def make_http_request(
         headers=headers,
         json=json,
         data=data,
-        files=[("files", file) for file in files] if files is not None else [],
+        files=[("files", file) for file in files] if files is not None else None,
     )
     logger.debug(
         f"Making HTTP request: {method.value.upper()} {endpoint} with headers={headers}, json={json}, data={data}"
