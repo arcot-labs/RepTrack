@@ -8,7 +8,7 @@ from sqlalchemy.sql import func
 from app.core.config import Settings
 from app.core.security import create_registration_token
 from app.models.enums import AccessRequestStatus
-from app.models.errors import AccessRequestStatusError, NotFound
+from app.models.errors import AccessRequestNotFound, AccessRequestNotPending
 from app.models.schemas.access_request import AccessRequestPublic
 from app.models.schemas.user import UserPublic
 from app.services.access_request import (
@@ -45,10 +45,10 @@ async def update_access_request_status(
 
     if not access_request:
         logger.error(f"Access request {access_request_id} not found")
-        raise NotFound()
+        raise AccessRequestNotFound()
 
     if access_request.status != AccessRequestStatus.PENDING:
-        raise AccessRequestStatusError()
+        raise AccessRequestNotPending()
 
     access_request.status = status
     access_request.reviewed_at = func.now()

@@ -11,7 +11,8 @@ from app.core.security import (
 )
 from app.models.database.user import User
 from app.tests.core.security.utilities import create_access_request
-from app.tests.core.utilities import get_admin
+
+from ..utilities import get_admin
 
 
 async def _create_user(session: AsyncSession, email: str, username: str) -> User:

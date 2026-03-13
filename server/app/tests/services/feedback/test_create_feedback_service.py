@@ -10,7 +10,8 @@ from app.models.database.feedback import Feedback
 from app.models.schemas.feedback import CreateFeedbackRequest, FeedbackType
 from app.models.schemas.storage import StoredFile
 from app.services.feedback import create_feedback
-from app.tests.services.utilities import get_admin_user_public
+
+from ..utilities import get_admin_user_public
 
 
 async def test_create_feedback(

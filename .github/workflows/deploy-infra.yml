@@ -72,7 +72,7 @@ jobs:
 
             - name: create pg admin config
               working-directory: scripts
-              run: ./generate_pg_admin_config.sh
+              run: ./generate_pg_admin_config.sh ${{ vars.ENV }}
 
             - name: start containers
               working-directory: config/infra

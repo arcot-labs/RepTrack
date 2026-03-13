@@ -20,7 +20,10 @@ class AccessRequest(Base):
         Index("ix_access_requests_status", "status"),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True,
+    )
     # allow multiple requests from same email
     email: Mapped[str] = mapped_column(
         String(255),

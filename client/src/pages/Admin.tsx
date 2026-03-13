@@ -30,9 +30,7 @@ export function Admin() {
             logger.info('Fetched access requests', data)
             setRequests(data)
         } finally {
-            setTimeout(() => {
-                setLoadingRequests(false)
-            }, 250)
+            setLoadingRequests(false)
         }
     }
 
@@ -56,9 +54,7 @@ export function Admin() {
             logger.info('Fetched users', data)
             setUsers(data)
         } finally {
-            setTimeout(() => {
-                setLoadingUsers(false)
-            }, 250)
+            setLoadingUsers(false)
         }
     }
 

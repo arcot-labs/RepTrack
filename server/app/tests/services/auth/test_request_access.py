@@ -10,7 +10,7 @@ from app.models.database.user import User
 from app.models.errors import (
     AccessRequestPending,
     AccessRequestRejected,
-    EmailAlreadyRegistered,
+    EmailInUse,
 )
 from app.services.auth import request_access
 
@@ -88,7 +88,7 @@ async def test_request_access_existing_user(
     await session.commit()
 
     background_tasks = BackgroundTasks()
-    with pytest.raises(EmailAlreadyRegistered):
+    with pytest.raises(EmailInUse):
         await request_access(
             email="existing@example.com",
             first_name="Test",
@@ -120,7 +120,7 @@ async def test_request_access_email_matches_username(
     await session.commit()
 
     background_tasks = BackgroundTasks()
-    with pytest.raises(EmailAlreadyRegistered):
+    with pytest.raises(EmailInUse):
         await request_access(
             email=collision_identifier,
             first_name="Test",

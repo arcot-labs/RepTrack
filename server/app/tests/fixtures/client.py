@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 
 @pytest.fixture(scope="session")
 def fastapi_app(settings: Settings) -> FastAPI:
-
     logger.info("Setting up test app")
     fastapi_app, _ = create_app(settings)
     return fastapi_app

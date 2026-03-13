@@ -9,10 +9,10 @@ dev:
 		--reload-include '.env'
 
 test:
-	uv run pytest -v
+	uv run pytest
 
 cov:
-	uv run pytest -v --cov --cov-report=term --cov-report=html
+	uv run pytest --cov --cov-report=term --cov-report=html
 
 open-cov:
 	open -a "Google Chrome" htmlcov/index.html

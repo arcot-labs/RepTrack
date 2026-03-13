@@ -38,7 +38,7 @@ export function RequestAccess() {
         if (error) {
             await handleApiError(error, {
                 httpErrorHandlers: {
-                    email_already_registered: (err) => {
+                    email_in_use: (err) => {
                         notify.error(err.detail)
                         void navigate('/login', { replace: true })
                     },

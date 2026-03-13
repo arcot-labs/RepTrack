@@ -7,8 +7,14 @@ class HTTPError(HTTPException):
     detail: str
 
     def __init__(self):
+        if not hasattr(self, "status_code"):
+            raise RuntimeError(f"{self.__class__.__name__} must define status_code")
+
         if not hasattr(self, "code"):
             raise RuntimeError(f"{self.__class__.__name__} must define code")
+
+        if not hasattr(self, "detail"):
+            raise RuntimeError(f"{self.__class__.__name__} must define detail")
 
         super().__init__(
             status_code=self.status_code,
@@ -19,39 +25,9 @@ class HTTPError(HTTPException):
         )
 
 
-class NotFound(HTTPError):
-    status_code = status.HTTP_404_NOT_FOUND
-    code = "not_found"
-    detail = "Resource not found"
-
-
-class UsernameAlreadyRegistered(HTTPError):
-    status_code = status.HTTP_409_CONFLICT
-    code = "username_already_registered"
-    detail = "Username already registered. Choose a different username"
-
-
-class EmailAlreadyRegistered(HTTPError):
-    status_code = status.HTTP_409_CONFLICT
-    code = "email_already_registered"
-    detail = "Email already registered. Log in"
-
-
-class AccessRequestPending(HTTPError):
-    status_code = status.HTTP_409_CONFLICT
-    code = "access_request_pending"
-    detail = "Access already requested. Wait for admin approval"
-
-
-class AccessRequestRejected(HTTPError):
-    status_code = status.HTTP_403_FORBIDDEN
-    code = "access_request_rejected"
-    detail = "Access previously rejected"
-
-
-class AccessRequestStatusError(HTTPError):
+class AccessRequestNotPending(HTTPError):
     status_code = status.HTTP_400_BAD_REQUEST
-    code = "access_request_status_error"
+    code = "access_request_not_pending"
     detail = "Access request is not pending"
 
 
@@ -71,3 +47,57 @@ class InsufficientPermissions(HTTPError):
     status_code = status.HTTP_403_FORBIDDEN
     code = "insufficient_permissions"
     detail = "Insufficient permissions"
+
+
+class AccessRequestRejected(HTTPError):
+    status_code = status.HTTP_403_FORBIDDEN
+    code = "access_request_rejected"
+    detail = "Existing access request rejected"
+
+
+class ExerciseUpdateNotAllowed(HTTPError):
+    status_code = status.HTTP_403_FORBIDDEN
+    code = "exercise_update_not_allowed"
+    detail = "You do not have permission to update this exercise"
+
+
+class AccessRequestNotFound(HTTPError):
+    status_code = status.HTTP_404_NOT_FOUND
+    code = "access_request_not_found"
+    detail = "Access request not found"
+
+
+class MuscleGroupNotFound(HTTPError):
+    status_code = status.HTTP_404_NOT_FOUND
+    code = "muscle_group_not_found"
+    detail = "One or more muscle groups not found"
+
+
+class ExerciseNotFound(HTTPError):
+    status_code = status.HTTP_404_NOT_FOUND
+    code = "exercise_not_found"
+    detail = "Exercise not found"
+
+
+class UsernameTaken(HTTPError):
+    status_code = status.HTTP_409_CONFLICT
+    code = "username_taken"
+    detail = "Username taken. Choose another"
+
+
+class EmailInUse(HTTPError):
+    status_code = status.HTTP_409_CONFLICT
+    code = "email_in_use"
+    detail = "Email in use. Log in"
+
+
+class AccessRequestPending(HTTPError):
+    status_code = status.HTTP_409_CONFLICT
+    code = "access_request_pending"
+    detail = "Existing access request pending. Wait for approval"
+
+
+class ExerciseNameConflict(HTTPError):
+    status_code = status.HTTP_409_CONFLICT
+    code = "exercise_name_conflict"
+    detail = "Exercise with this name already exists"

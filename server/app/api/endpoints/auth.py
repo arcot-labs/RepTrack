@@ -28,7 +28,10 @@ from app.services.auth import (
 )
 from app.services.email import EmailService, get_email_service
 
-api_router = APIRouter(prefix="/auth", tags=["Auth"])
+api_router = APIRouter(
+    prefix="/auth",
+    tags=["Auth"],
+)
 
 
 @api_router.post(

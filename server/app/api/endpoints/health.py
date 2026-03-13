@@ -6,7 +6,10 @@ from sqlalchemy.sql import text
 
 from app.core.dependencies import get_db
 
-api_router = APIRouter(prefix="/health", tags=["Health"])
+api_router = APIRouter(
+    prefix="/health",
+    tags=["Health"],
+)
 
 
 @api_router.get("", operation_id="getHealth")

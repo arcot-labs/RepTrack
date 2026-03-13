@@ -4,7 +4,8 @@ from httpx import AsyncClient
 from app.core.config import Settings
 from app.core.security import ACCESS_JWT_KEY, REFRESH_JWT_KEY
 from app.models.errors import InvalidCredentials
-from app.tests.api.utilities import login, login_admin
+
+from ..utilities import login, login_admin
 
 
 # 204

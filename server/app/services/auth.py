@@ -24,10 +24,10 @@ from app.models.database.user import User
 from app.models.errors import (
     AccessRequestPending,
     AccessRequestRejected,
-    EmailAlreadyRegistered,
+    EmailInUse,
     InvalidCredentials,
     InvalidToken,
-    UsernameAlreadyRegistered,
+    UsernameTaken,
 )
 from app.services.access_request import get_latest_access_request_by_email
 from app.services.user import get_admin_users, get_user_by_email, get_user_by_username
@@ -52,7 +52,7 @@ async def request_access(
     existing_user_by_email = await get_user_by_email(email, db)
     existing_user_by_username = await get_user_by_username(email, db)
     if existing_user_by_email or existing_user_by_username:
-        raise EmailAlreadyRegistered()
+        raise EmailInUse()
 
     existing_request = await get_latest_access_request_by_email(email, db)
     if existing_request:
@@ -119,7 +119,7 @@ async def register(
     existing_user_by_username = await get_user_by_username(username, db)
     existing_user_by_email = await get_user_by_email(username, db)
     if existing_user_by_username or existing_user_by_email:
-        raise UsernameAlreadyRegistered()
+        raise UsernameTaken()
 
     token.used_at = datetime.now(UTC)
     await expire_existing_registration_tokens(access_request.id, db)

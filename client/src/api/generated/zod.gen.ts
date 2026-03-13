@@ -12,6 +12,15 @@ export const zAccessRequestStatus = z.enum([
 ]);
 
 /**
+ * CreateExerciseRequest
+ */
+export const zCreateExerciseRequest = z.object({
+    name: z.string().min(1).max(255),
+    description: z.string().nullish(),
+    muscle_group_ids: z.array(z.int()).optional()
+});
+
+/**
  * ErrorResponse
  */
 export const zErrorResponse = z.object({
@@ -32,7 +41,7 @@ export const zCreateFeedbackRequest = z.object({
     url: z.string().min(1).max(1000),
     title: z.string().min(1).max(100),
     description: z.string().min(1).max(10000),
-    files: z.array(z.string()).optional().default([])
+    files: z.array(z.string()).optional()
 });
 
 /**
@@ -49,6 +58,28 @@ export const zLoginRequest = z.object({
     username: z.string().min(3).max(50).nullish(),
     email: z.email().max(255).nullish(),
     password: z.string().min(8).max(64)
+});
+
+/**
+ * MuscleGroupPublic
+ */
+export const zMuscleGroupPublic = z.object({
+    id: z.int(),
+    name: z.string(),
+    description: z.string()
+});
+
+/**
+ * ExercisePublic
+ */
+export const zExercisePublic = z.object({
+    id: z.int(),
+    user_id: z.int().nullable(),
+    name: z.string(),
+    description: z.string().nullable(),
+    muscle_groups: z.array(zMuscleGroupPublic),
+    created_at: z.iso.datetime(),
+    updated_at: z.iso.datetime()
 });
 
 /**
@@ -105,6 +136,15 @@ export const zAccessRequestPublic = z.object({
  */
 export const zUpdateAccessRequestStatusRequest = z.object({
     status: z.enum(['approved', 'rejected'])
+});
+
+/**
+ * UpdateExerciseRequest
+ */
+export const zUpdateExerciseRequest = z.object({
+    name: z.string().min(1).max(255).nullish(),
+    description: z.string().nullish(),
+    muscle_group_ids: z.array(z.int()).nullish()
 });
 
 /**
@@ -255,6 +295,69 @@ export const zLogoutData = z.object({
  */
 export const zLogoutResponse = z.void();
 
+export const zGetExercisesData = z.object({
+    body: z.never().optional(),
+    path: z.never().optional(),
+    query: z.never().optional()
+});
+
+/**
+ * Response Getexercises
+ *
+ * Successful Response
+ */
+export const zGetExercisesResponse = z.array(zExercisePublic);
+
+export const zCreateExerciseData = z.object({
+    body: zCreateExerciseRequest,
+    path: z.never().optional(),
+    query: z.never().optional()
+});
+
+/**
+ * Successful Response
+ */
+export const zCreateExerciseResponse = zExercisePublic;
+
+export const zDeleteExerciseData = z.object({
+    body: z.never().optional(),
+    path: z.object({
+        exercise_id: z.int()
+    }),
+    query: z.never().optional()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteExerciseResponse = z.void();
+
+export const zGetExerciseData = z.object({
+    body: z.never().optional(),
+    path: z.object({
+        exercise_id: z.int()
+    }),
+    query: z.never().optional()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetExerciseResponse = zExercisePublic;
+
+export const zUpdateExerciseData = z.object({
+    body: zUpdateExerciseRequest,
+    path: z.object({
+        exercise_id: z.int()
+    }),
+    query: z.never().optional()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateExerciseResponse = z.void();
+
 export const zCreateFeedbackData = z.object({
     body: zCreateFeedbackRequest,
     path: z.never().optional(),
@@ -286,6 +389,19 @@ export const zGetDbHealthData = z.object({
  * Successful Response
  */
 export const zGetDbHealthResponse = z.string();
+
+export const zGetMuscleGroupsData = z.object({
+    body: z.never().optional(),
+    path: z.never().optional(),
+    query: z.never().optional()
+});
+
+/**
+ * Response Getmusclegroups
+ *
+ * Successful Response
+ */
+export const zGetMuscleGroupsResponse = z.array(zMuscleGroupPublic);
 
 export const zGetCurrentUserData = z.object({
     body: z.never().optional(),

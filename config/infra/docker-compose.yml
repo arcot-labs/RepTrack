@@ -32,8 +32,8 @@ services:
 
         volumes:
             - pg-admin-data:/var/lib/pgadmin
-            - ../env/servers.json:/pgadmin4/servers.json:ro
-            - ../env/pgpass:/pgpass:ro
+            - $HOME/.local/share/reptrack-${ENV?}/servers.json:/pgadmin4/servers.json:ro
+            - $HOME/.local/share/reptrack-${ENV?}/pgpass:/pgpass:ro
         environment:
             - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL?}
             - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD?}

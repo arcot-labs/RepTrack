@@ -34,16 +34,30 @@ class Set(Base):
         ),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True,
+    )
     workout_exercise_id: Mapped[int] = mapped_column(
         ForeignKey("workout_exercises.id", ondelete="CASCADE"),
         nullable=False,
     )
-    set_number: Mapped[int] = mapped_column(Integer, nullable=False)
-    reps: Mapped[int | None] = mapped_column(Integer)
-    weight: Mapped[float | None] = mapped_column(Numeric(6, 2))
-    unit: Mapped[str | None] = mapped_column(String(255))
-    notes: Mapped[str | None] = mapped_column(TEXT)
+    set_number: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+    reps: Mapped[int | None] = mapped_column(
+        Integer,
+    )
+    weight: Mapped[float | None] = mapped_column(
+        Numeric(6, 2),
+    )
+    unit: Mapped[str | None] = mapped_column(
+        String(255),
+    )
+    notes: Mapped[str | None] = mapped_column(
+        TEXT,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

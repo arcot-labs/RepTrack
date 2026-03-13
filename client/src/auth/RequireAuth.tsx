@@ -1,7 +1,7 @@
 import { useSession } from '@/auth/session'
 import { Loading } from '@/components/Loading'
 import { type JSX } from 'react'
-import { Navigate, useLocation } from 'react-router'
+import { Navigate, useLocation } from 'react-router-dom'
 
 interface RequireAuthProps {
     children: JSX.Element

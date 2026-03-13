@@ -1,6 +1,6 @@
 import { getAllDocs } from '@/lib/docs'
 import { cn } from '@/lib/utils'
-import { NavLink, Outlet } from 'react-router'
+import { NavLink, Outlet } from 'react-router-dom'
 
 export function Docs() {
     const items = getAllDocs()
