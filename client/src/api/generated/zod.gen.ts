@@ -17,7 +17,7 @@ export const zAccessRequestStatus = z.enum([
 export const zCreateExerciseRequest = z.object({
     name: z.string().min(1).max(255),
     description: z.string().nullish(),
-    muscle_group_ids: z.array(z.int()).optional().default([])
+    muscle_group_ids: z.array(z.int()).optional()
 });
 
 /**

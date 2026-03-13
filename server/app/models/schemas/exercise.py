@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .muscle_group import MuscleGroupPublic
 from .types import ExerciseName
@@ -19,7 +19,7 @@ class ExercisePublic(BaseModel):
 class CreateExerciseRequest(BaseModel):
     name: ExerciseName
     description: str | None = None
-    muscle_group_ids: list[int] = []
+    muscle_group_ids: list[int] = Field(default_factory=list[int])
 
 
 class UpdateExerciseRequest(BaseModel):

@@ -103,8 +103,7 @@ export const CreateExerciseRequestSchema = {
                 type: 'integer'
             },
             type: 'array',
-            title: 'Muscle Group Ids',
-            default: []
+            title: 'Muscle Group Ids'
         }
     },
     type: 'object',
