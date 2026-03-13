@@ -6,7 +6,8 @@ from fastapi import status
 from httpx import AsyncClient
 
 from app.core.config import Settings
-from app.tests.api.utilities import HttpMethod, login_admin
+
+from ..utilities import HttpMethod, login_admin, make_http_request
 
 _MOCK_DATA = {
     "type": "feedback",
@@ -24,13 +25,13 @@ async def _make_request(
 ):
     if files is None:
         files = [_MOCK_FILE]
-    request = client.build_request(
-        method=HttpMethod.POST.value,
-        url="/api/feedback",
+    return await make_http_request(
+        client,
+        method=HttpMethod.POST,
+        endpoint="/api/feedback",
         data=data,
-        files=[("files", file) for file in files],
+        files=files,
     )
-    return await client.send(request)
 
 
 # 202

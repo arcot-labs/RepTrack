@@ -114,9 +114,15 @@ services:
                   target: /src/index.html
                 - path: ../../client/Dockerfile
                   action: rebuild
-                - path: ../../client/package*.json
+                - path: ../../client/package-lock.json
                   action: rebuild
-                - path: ../../client/tsconfig*.json
+                - path: ../../client/package.json
+                  action: rebuild
+                - path: ../../client/tsconfig.app.json
+                  action: rebuild
+                - path: ../../client/tsconfig.json
+                  action: rebuild
+                - path: ../../client/tsconfig.node.json
                   action: rebuild
                 - path: ../../client/vite.config.ts
                   action: rebuild

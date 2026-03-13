@@ -1,10 +1,14 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, Index, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from app.core.database import Base
+
+if TYPE_CHECKING:
+    from app.models.database.muscle_group import MuscleGroup
 
 
 class ExerciseMuscleGroup(Base):
@@ -21,7 +25,10 @@ class ExerciseMuscleGroup(Base):
         ),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True,
+    )
     exercise_id: Mapped[int] = mapped_column(
         ForeignKey("exercises.id", ondelete="CASCADE"), nullable=False
     )
@@ -38,4 +45,8 @@ class ExerciseMuscleGroup(Base):
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
+    )
+
+    muscle_group: Mapped[MuscleGroup] = relationship(
+        "MuscleGroup",
     )

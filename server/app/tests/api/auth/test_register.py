@@ -6,8 +6,9 @@ from app.core.config import Settings
 from app.core.security import create_registration_token
 from app.models.database.access_request import AccessRequest, AccessRequestStatus
 from app.models.database.user import User
-from app.models.errors import InvalidToken, UsernameAlreadyRegistered
-from app.tests.api.utilities import HttpMethod, make_http_request
+from app.models.errors import InvalidToken, UsernameTaken
+
+from ..utilities import HttpMethod, make_http_request
 
 
 async def _make_request(client: AsyncClient, token: str, username: str, password: str):
@@ -69,7 +70,7 @@ async def test_register_invalid_token(client: AsyncClient):
 
 
 # 409
-async def test_register_username_already_registered(
+async def test_register_username_taken(
     client: AsyncClient, session: AsyncSession, settings: Settings
 ):
     _, token_str = await _create_approved_request_with_token(session)
@@ -81,9 +82,9 @@ async def test_register_username_already_registered(
         password="Password123",
     )
 
-    assert resp.status_code == UsernameAlreadyRegistered.status_code
+    assert resp.status_code == UsernameTaken.status_code
     body = resp.json()
-    assert body["detail"] == UsernameAlreadyRegistered.detail
+    assert body["detail"] == UsernameTaken.detail
 
 
 # 409
@@ -112,9 +113,9 @@ async def test_register_username_matches_email(
         password="Password123",
     )
 
-    assert resp.status_code == UsernameAlreadyRegistered.status_code
+    assert resp.status_code == UsernameTaken.status_code
     body = resp.json()
-    assert body["detail"] == UsernameAlreadyRegistered.detail
+    assert body["detail"] == UsernameTaken.detail
 
 
 # 422

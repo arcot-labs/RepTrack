@@ -126,9 +126,9 @@ export function AccessRequestsTable({
             if (error) {
                 await handleApiError(error, {
                     httpErrorHandlers: {
-                        access_request_status_error: async () => {
+                        access_request_not_pending: async () => {
                             notify.warning(
-                                'This access request has already been reviewed. Reloading the latest data'
+                                'Access request has already been reviewed. Reloading data'
                             )
                             await onReloadRequests()
                         },

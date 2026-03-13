@@ -22,32 +22,38 @@ down_revision: str | Sequence[str] | None = "1e1a6b37847d"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
-testing = context.config.attributes.get("is_testing", False)
-if testing:
-    logger.info("Running in testing mode - using test settings for admin user")
 
-    username = "admin"
-    email = "admin@example.com"
-    first_name = "Admin"
-    last_name = "User"
-    password = "password"
-else:
-    logger.info("Running in non-testing mode")
+def get_admin_user():
+    testing = context.config.attributes.get("is_testing", False)
+    if testing:
+        logger.info("Running in testing mode - using test settings for admin user")
 
-    load_dotenv("../config/env/.env")
-    username = os.getenv("ADMIN__USERNAME")
-    email = os.getenv("ADMIN__EMAIL")
-    first_name = os.getenv("ADMIN__FIRST_NAME")
-    last_name = os.getenv("ADMIN__LAST_NAME")
-    password = os.getenv("ADMIN__PASSWORD")
+        username = "admin"
+        email = "admin@example.com"
+        first_name = "Admin"
+        last_name = "User"
+        password = "password"
 
-if not all([username, email, first_name, last_name, password]):
-    raise ValueError("Admin user environment variables are not fully set")
+    else:
+        logger.info("Running in non-testing mode")
 
-password_hash = PasswordHash.recommended()
+        load_dotenv("../config/env/.env")
+        username = os.getenv("ADMIN__USERNAME")
+        email = os.getenv("ADMIN__EMAIL")
+        first_name = os.getenv("ADMIN__FIRST_NAME")
+        last_name = os.getenv("ADMIN__LAST_NAME")
+        password = os.getenv("ADMIN__PASSWORD")
+
+    if not all([username, email, first_name, last_name, password]):
+        raise ValueError("Admin user environment variables are not fully set")
+
+    return username, email, first_name, last_name, password
 
 
 def upgrade() -> None:
+    username, email, first_name, last_name, password = get_admin_user()
+    password_hash = PasswordHash.recommended()
+
     connection = op.get_bind()
     connection.execute(
         sa.text(
@@ -75,6 +81,8 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    _, email, _, _, _ = get_admin_user()
+
     connection = op.get_bind()
     connection.execute(
         sa.text("DELETE FROM users WHERE email = :email"),

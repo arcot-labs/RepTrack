@@ -12,7 +12,9 @@ from app.services.feedback import create_feedback
 from app.services.github import GitHubService, get_github_service
 
 api_router = APIRouter(
-    prefix="/feedback", tags=["Feedback"], dependencies=[Depends(get_current_user)]
+    prefix="/feedback",
+    tags=["Feedback"],
+    dependencies=[Depends(get_current_user)],
 )
 
 

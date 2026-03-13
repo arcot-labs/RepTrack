@@ -19,7 +19,10 @@ class PasswordResetToken(Base):
         Index("ix_password_reset_tokens_token_hash", "token_hash"),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True,
+    )
     user_id: Mapped[int] = mapped_column(
         ForeignKey(
             "users.id",

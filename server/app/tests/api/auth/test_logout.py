@@ -3,7 +3,8 @@ from httpx import AsyncClient
 
 from app.core.config import Settings
 from app.core.security import ACCESS_JWT_KEY, REFRESH_JWT_KEY
-from app.tests.api.utilities import HttpMethod, login_admin, make_http_request
+
+from ..utilities import HttpMethod, login_admin, make_http_request
 
 
 async def _make_request(client: AsyncClient):

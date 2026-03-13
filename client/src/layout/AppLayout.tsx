@@ -5,7 +5,7 @@ import { ModeToggle } from '@/components/ModeToggle'
 import { Button } from '@/components/ui/button'
 import { NavItem } from '@/lib/nav'
 import { notify } from '@/lib/notify'
-import { NavLink, Outlet, useNavigate } from 'react-router'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 
 export function AppLayout() {
     const { refresh, user } = useSession()

@@ -6,7 +6,11 @@ from app.core.dependencies import get_current_user
 from app.models.schemas.errors import ErrorResponseModel
 from app.models.schemas.user import UserPublic
 
-api_router = APIRouter(prefix="/users", tags=["User"])
+api_router = APIRouter(
+    prefix="/users",
+    tags=["User"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @api_router.get(

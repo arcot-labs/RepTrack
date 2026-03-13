@@ -11,7 +11,7 @@ from app.tests.core.security.utilities import create_access_request
 # PasswordResetToken behavior is identical
 
 
-async def test_expire_existing_tokens_registration(
+async def test_expire_tokens_registration(
     session: AsyncSession,
 ):
     access_request = await create_access_request(session, "expire@example.com")
@@ -37,7 +37,7 @@ async def test_expire_existing_tokens_registration(
     assert expired_token.expires_at == previous_expired_value
 
 
-async def test_expire_existing_tokens_registration_condition(
+async def test_expire_tokens_registration_condition(
     session: AsyncSession,
 ):
     target_request = await create_access_request(session, "target-expire@example.com")

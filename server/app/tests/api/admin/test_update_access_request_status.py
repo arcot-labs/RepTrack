@@ -8,11 +8,12 @@ from app.models.database.access_request import AccessRequest, AccessRequestStatu
 from app.models.database.feedback import FeedbackType
 from app.models.database.user import User
 from app.models.errors import (
-    AccessRequestStatusError,
+    AccessRequestNotFound,
+    AccessRequestNotPending,
     InsufficientPermissions,
-    NotFound,
 )
-from app.tests.api.utilities import (
+
+from ..utilities import (
     HttpMethod,
     get_admin,
     login_admin,
@@ -75,9 +76,9 @@ async def test_update_access_request_status_not_pending(
     await login_admin(client, settings)
     resp = await _make_request(client, access_request.id, AccessRequestStatus.REJECTED)
 
-    assert resp.status_code == AccessRequestStatusError.status_code
+    assert resp.status_code == AccessRequestNotPending.status_code
     body = resp.json()
-    assert body["detail"] == AccessRequestStatusError.detail
+    assert body["detail"] == AccessRequestNotPending.detail
 
 
 # 401
@@ -115,9 +116,9 @@ async def test_update_access_request_status_not_found(
     await login_admin(client, settings)
     resp = await _make_request(client, 1, AccessRequestStatus.APPROVED)
 
-    assert resp.status_code == NotFound.status_code
+    assert resp.status_code == AccessRequestNotFound.status_code
     body = resp.json()
-    assert body["detail"] == NotFound.detail
+    assert body["detail"] == AccessRequestNotFound.detail
 
 
 # 422

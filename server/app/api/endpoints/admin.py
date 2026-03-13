@@ -19,7 +19,9 @@ from app.services.admin import (
 from app.services.email import EmailService, get_email_service
 
 api_router = APIRouter(
-    prefix="/admin", tags=["Admin"], dependencies=[Depends(get_current_admin)]
+    prefix="/admin",
+    tags=["Admin"],
+    dependencies=[Depends(get_current_admin)],
 )
 
 

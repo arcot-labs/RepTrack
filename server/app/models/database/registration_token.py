@@ -24,7 +24,10 @@ class RegistrationToken(Base):
         Index("ix_registration_tokens_token_hash", "token_hash"),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True,
+    )
     access_request_id: Mapped[int] = mapped_column(
         ForeignKey(
             "access_requests.id",

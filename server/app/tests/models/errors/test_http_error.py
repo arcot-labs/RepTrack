@@ -18,6 +18,17 @@ def test_http_error():
     }
 
 
+def test_http_error_missing_status_code():
+    class MissingStatusCodeError(HTTPError):
+        code = "missing_status_code"
+        detail = "missing status code"
+
+    with pytest.raises(
+        RuntimeError, match="MissingStatusCodeError must define status_code"
+    ):
+        MissingStatusCodeError()
+
+
 def test_http_error_missing_code():
     class MissingCodeError(HTTPError):
         status_code = 400
@@ -25,3 +36,12 @@ def test_http_error_missing_code():
 
     with pytest.raises(RuntimeError, match="MissingCodeError must define code"):
         MissingCodeError()
+
+
+def test_http_error_missing_detail():
+    class MissingDetailError(HTTPError):
+        status_code = 400
+        code = "missing_detail"
+
+    with pytest.raises(RuntimeError, match="MissingDetailError must define detail"):
+        MissingDetailError()

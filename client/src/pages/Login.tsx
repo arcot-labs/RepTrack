@@ -16,8 +16,7 @@ import { notify } from '@/lib/notify'
 import type { LocationState } from '@/models/location'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { useLocation, useNavigate } from 'react-router'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 const loginFormSchema = z.object({

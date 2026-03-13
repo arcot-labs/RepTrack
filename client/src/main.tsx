@@ -6,7 +6,7 @@ import { env } from '@/config/env'
 import '@/index.css'
 import { ThemeProvider } from 'next-themes'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router'
+import { BrowserRouter } from 'react-router-dom'
 import * as z from 'zod'
 import { en } from 'zod/locales'
 

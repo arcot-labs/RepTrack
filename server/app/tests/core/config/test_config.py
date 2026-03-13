@@ -185,7 +185,7 @@ def test_prod_gh_validator_wrong_backend(
     }
     settings = override_settings(overrides)
 
-    with pytest.raises(ValueError, match="github.backend must be 'api' in production"):
+    with pytest.raises(ValueError, match="github backend must be 'api' in production"):
         _revalidate_settings(settings)
 
 
@@ -204,7 +204,7 @@ def test_prod_email_validator_wrong_backend(
     }
     settings = override_settings(overrides)
 
-    with pytest.raises(ValueError, match="email.backend must be 'smtp' in production"):
+    with pytest.raises(ValueError, match="email backend must be 'smtp' in production"):
         _revalidate_settings(settings)
 
 

@@ -11,9 +11,10 @@ from app.models.database.user import User
 from app.models.errors import (
     AccessRequestPending,
     AccessRequestRejected,
-    EmailAlreadyRegistered,
+    EmailInUse,
 )
-from app.tests.api.utilities import HttpMethod, make_http_request
+
+from ..utilities import HttpMethod, make_http_request
 
 
 async def _make_request(
@@ -129,9 +130,9 @@ async def test_request_access_existing_user(client: AsyncClient, session: AsyncS
         client, email=existing_email, first_name="Test", last_name="User"
     )
 
-    assert resp.status_code == EmailAlreadyRegistered.status_code
+    assert resp.status_code == EmailInUse.status_code
     body = resp.json()
-    assert body["detail"] == EmailAlreadyRegistered.detail
+    assert body["detail"] == EmailInUse.detail
 
 
 # 409
@@ -159,9 +160,9 @@ async def test_request_access_email_matches_username(
         last_name="User",
     )
 
-    assert resp.status_code == EmailAlreadyRegistered.status_code
+    assert resp.status_code == EmailInUse.status_code
     body = resp.json()
-    assert body["detail"] == EmailAlreadyRegistered.detail
+    assert body["detail"] == EmailInUse.detail
 
 
 # 422
