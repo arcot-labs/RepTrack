@@ -11,13 +11,13 @@ import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHe
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
 import { createSelectColumn } from '@/components/data-table/DataTableSelectColumn'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/overrides/button'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import {

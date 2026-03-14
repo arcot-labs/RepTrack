@@ -1,6 +1,5 @@
 import { FeedbackService } from '@/api/generated'
 import { zCreateFeedbackRequest } from '@/api/generated/zod.gen'
-import { Button } from '@/components/ui/button'
 import {
     Dialog,
     DialogClose,
@@ -13,6 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/overrides/button'
 import { Textarea } from '@/components/ui/textarea'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'

@@ -3,8 +3,8 @@ import { X } from 'lucide-react'
 
 import { DataTableFacetedFilter } from '@/components/data-table/DataTableFacetedFilter'
 import { DataTableViewOptions } from '@/components/data-table/DataTableViewOptions'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/overrides/button'
 import type { DataTableToolbarConfig } from '@/models/data-table'
 
 interface DataTableToolbarProps<TData> {

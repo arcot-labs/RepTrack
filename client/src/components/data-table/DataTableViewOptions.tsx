@@ -2,7 +2,6 @@ import { DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { type Table } from '@tanstack/react-table'
 import { Settings2 } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -10,6 +9,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/overrides/button'
 import { formatIdentifier } from '@/lib/text'
 
 interface DataTableColumnMeta {

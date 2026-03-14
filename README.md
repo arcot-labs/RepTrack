@@ -43,8 +43,18 @@ Run a specific job:
 act -j {job-id}
 ```
 
-## Database
+## Database Conventions
 
 All writes should go through SQLAlchemy
 
 Alembic updates & bulk SQLAlchemy updates must explicitly set `updated_at`
+
+## Shadcn Component Conventions
+
+shadcn adds components under `client/src/components/ui/`
+
+To ensure custom styles & behavior survive component updates, follow these conventions:
+
+- Create custom component overrides under `client/src/components/ui/overrides/`
+- Import override components in app code instead of generated shadcn components
+- Add ESLint rules to prevent direct imports of generated components & point to override paths
