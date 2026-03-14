@@ -101,6 +101,7 @@ export const columns: ColumnDef<User>[] = [
     },
     {
         accessorKey: 'status',
+        meta: { viewLabel: 'Status' },
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Status" />
         ),
@@ -114,6 +115,9 @@ export const columns: ColumnDef<User>[] = [
         cell: ({ row }) => <DataTableRowActions row={row} config={userRowActionsConfig} />,
     },
 ]
+
+// To customize labels shown in the "View" column toggle menu,
+// set `meta.viewLabel` on each column definition.
 ```
 
 ### 3. Configure Toolbar

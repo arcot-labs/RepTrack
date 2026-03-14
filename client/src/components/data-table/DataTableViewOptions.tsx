@@ -10,6 +10,16 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
+import { formatIdentifier } from '@/lib/text'
+
+interface DataTableColumnMeta {
+    viewLabel?: string
+}
+
+function getColumnViewLabel(columnId: string, meta?: unknown): string {
+    const resolvedMeta = meta as DataTableColumnMeta | undefined
+    return resolvedMeta?.viewLabel ?? formatIdentifier(columnId)
+}
 
 export function DataTableViewOptions<TData>({
     table,
@@ -39,16 +49,19 @@ export function DataTableViewOptions<TData>({
                             column.getCanHide()
                     )
                     .map((column) => {
+                        const columnLabel = getColumnViewLabel(
+                            column.id,
+                            column.columnDef.meta
+                        )
                         return (
                             <DropdownMenuCheckboxItem
                                 key={column.id}
-                                className="capitalize"
                                 checked={column.getIsVisible()}
                                 onCheckedChange={(value) => {
                                     column.toggleVisibility(value)
                                 }}
                             >
-                                {column.id}
+                                {columnLabel}
                             </DropdownMenuCheckboxItem>
                         )
                     })}
