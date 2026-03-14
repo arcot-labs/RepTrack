@@ -37,7 +37,7 @@ type MenuItemType = 'separator' | 'radio-group' | 'action'
 
 interface MenuItemConfig {
     type: MenuItemType
-    label: string
+    label?: string
     shortcut?: string
     value?: string
     options?: { value: string; label: string }[]

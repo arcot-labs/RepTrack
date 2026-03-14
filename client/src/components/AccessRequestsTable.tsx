@@ -165,7 +165,6 @@ export function AccessRequestsTable({
             return [
                 {
                     type: 'action',
-                    label: 'Approve',
                     className: greenText,
                     icon: Check,
                     onSelect: () => {
@@ -176,7 +175,6 @@ export function AccessRequestsTable({
                 {
                     type: 'action',
                     className: redText,
-                    label: 'Reject',
                     icon: X,
                     onSelect: () => {
                         handleShowConfirmDialog(row, 'rejected')

@@ -47,7 +47,6 @@ export function ExercisesTable({
             return [
                 {
                     type: 'action',
-                    label: 'Edit',
                     icon: Pencil,
                     onSelect: () => {
                         // TODO implement
@@ -59,7 +58,6 @@ export function ExercisesTable({
                 {
                     type: 'action',
                     className: redText,
-                    label: 'Delete',
                     icon: Trash2,
                     onSelect: () => {
                         // TODO implement
