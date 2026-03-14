@@ -1,7 +1,6 @@
 import type { UserPublic } from '@/api/generated/types.gen'
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
-import { createSelectColumn } from '@/components/data-table/DataTableSelectColumn'
 import { Badge } from '@/components/ui/badge'
 import {
     blueText,
@@ -30,7 +29,6 @@ function getRoleFilterOptions(): FilterOption[] {
 }
 
 const columns: ColumnDef<UserPublic>[] = [
-    createSelectColumn<UserPublic>(),
     {
         id: 'name',
         accessorFn: (row) => `${row.first_name} ${row.last_name}`,

@@ -9,7 +9,6 @@ import { useSession } from '@/auth/session'
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
-import { createSelectColumn } from '@/components/data-table/DataTableSelectColumn'
 import { Badge } from '@/components/ui/badge'
 import {
     Dialog,
@@ -180,7 +179,6 @@ export function AccessRequestsTable({
     }
 
     const columns: ColumnDef<AccessRequestPublic>[] = [
-        createSelectColumn<AccessRequestPublic>(),
         {
             id: 'name',
             accessorFn: (row) => `${row.first_name} ${row.last_name}`,

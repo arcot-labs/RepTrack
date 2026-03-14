@@ -3,7 +3,6 @@ import { zExercisePublic } from '@/api/generated/zod.gen'
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
-import { createSelectColumn } from '@/components/data-table/DataTableSelectColumn'
 import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncatedCell'
 import { blueText, redText } from '@/lib/styles'
 import { capitalizeWords } from '@/lib/text'
@@ -70,7 +69,6 @@ export function ExercisesTable({
     }
 
     const columns: ColumnDef<ExercisePublic>[] = [
-        createSelectColumn<ExercisePublic>(),
         {
             accessorKey: 'name',
             header: ({ column }) => (
