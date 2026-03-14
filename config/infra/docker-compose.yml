@@ -92,15 +92,18 @@ services:
 
             - EMAIL__BACKEND=${EMAIL__BACKEND?}
             - EMAIL__EMAIL_FROM=${EMAIL__EMAIL_FROM?}
+            # internal host
             - EMAIL__SMTP_HOST=host.docker.internal
             - EMAIL__SMTP_PORT=${EMAIL__SMTP_PORT?}
-            - EMAIL__SMTP_USERNAME=${EMAIL__SMTP_USERNAME?}
-            - EMAIL__SMTP_PASSWORD=${EMAIL__SMTP_PASSWORD?}
+            # not required for non-smtp backends
+            - EMAIL__SMTP_USERNAME=${EMAIL__SMTP_USERNAME}
+            - EMAIL__SMTP_PASSWORD=${EMAIL__SMTP_PASSWORD}
 
             - GH__BACKEND=${GH__BACKEND?}
-            - GH__REPO_OWNER=${GH__REPO_OWNER?}
-            - GH__TOKEN=${GH__TOKEN?}
-            - GH__ISSUE_ASSIGNEE=${GH__ISSUE_ASSIGNEE?}
+            # not required for console backend
+            - GH__REPO_OWNER=${GH__REPO_OWNER}
+            - GH__TOKEN=${GH__TOKEN}
+            - GH__ISSUE_ASSIGNEE=${GH__ISSUE_ASSIGNEE}
 
         command: alembic upgrade head
 
@@ -149,15 +152,18 @@ services:
 
             - EMAIL__BACKEND=${EMAIL__BACKEND?}
             - EMAIL__EMAIL_FROM=${EMAIL__EMAIL_FROM?}
+            # internal host
             - EMAIL__SMTP_HOST=host.docker.internal
             - EMAIL__SMTP_PORT=${EMAIL__SMTP_PORT?}
-            - EMAIL__SMTP_USERNAME=${EMAIL__SMTP_USERNAME?}
-            - EMAIL__SMTP_PASSWORD=${EMAIL__SMTP_PASSWORD?}
+            # not required for non-smtp backends
+            - EMAIL__SMTP_USERNAME=${EMAIL__SMTP_USERNAME}
+            - EMAIL__SMTP_PASSWORD=${EMAIL__SMTP_PASSWORD}
 
             - GH__BACKEND=${GH__BACKEND?}
-            - GH__REPO_OWNER=${GH__REPO_OWNER?}
-            - GH__TOKEN=${GH__TOKEN?}
-            - GH__ISSUE_ASSIGNEE=${GH__ISSUE_ASSIGNEE?}
+            # not required for console backend
+            - GH__REPO_OWNER=${GH__REPO_OWNER}
+            - GH__TOKEN=${GH__TOKEN}
+            - GH__ISSUE_ASSIGNEE=${GH__ISSUE_ASSIGNEE}
 
         healthcheck:
             test:
