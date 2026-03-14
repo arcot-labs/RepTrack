@@ -4,14 +4,7 @@ import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
 import { createSelectColumn } from '@/components/data-table/DataTableSelectColumn'
-import { Badge } from '@/components/ui/badge'
-import {
-    blueText,
-    greenText,
-    lightBlueBackground,
-    lightGreenBackground,
-    redText,
-} from '@/lib/styles'
+import { blueText, redText } from '@/lib/styles'
 import { capitalizeWords } from '@/lib/text'
 import type {
     DataTableRowActionsConfig,
@@ -19,18 +12,8 @@ import type {
     FilterOption,
 } from '@/models/data-table'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Lock, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-
-const blueBadgeClassName = `${lightBlueBackground} ${blueText}`
-const greenBadgeClassName = `${lightGreenBackground} ${greenText}`
-
-function TypeBadge({ userId }: { userId: number | null }) {
-    if (userId === null) {
-        return <Badge className={blueBadgeClassName}>System</Badge>
-    }
-    return <Badge className={greenBadgeClassName}>Custom</Badge>
-}
 
 function getTypeFilterOptions(): FilterOption[] {
     return [
@@ -94,6 +77,14 @@ export function ExercisesTable({
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Name" />
             ),
+            cell: ({ row }) => (
+                <div className="flex items-center gap-1.5">
+                    {row.original.user_id === null && (
+                        <Lock className={`size-3 shrink-0 ${blueText}`} />
+                    )}
+                    {row.original.name}
+                </div>
+            ),
             enableHiding: false,
         },
         {
@@ -124,18 +115,10 @@ export function ExercisesTable({
         },
         {
             id: 'type',
+            meta: { filterOnly: true },
             accessorFn: (row) => (row.user_id === null ? 'system' : 'custom'),
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Type" />
-            ),
-            cell: ({ row }) => (
-                <div className="-ml-2">
-                    <TypeBadge userId={row.original.user_id} />
-                </div>
-            ),
             filterFn: (row, id, filterValues: string[]) =>
                 filterValues.includes(row.getValue(id)),
-            enableHiding: false,
         },
         {
             id: 'actions',
@@ -215,6 +198,7 @@ export function ExercisesTable({
                 pageSize={10}
                 isLoading={isLoading}
                 toolbarConfig={toolbarConfig}
+                initialColumnVisibility={{ type: false }}
             />
         </>
     )
