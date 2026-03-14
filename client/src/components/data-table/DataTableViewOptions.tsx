@@ -14,6 +14,7 @@ import { formatIdentifier } from '@/lib/text'
 
 interface DataTableColumnMeta {
     viewLabel?: string
+    filterOnly?: boolean
 }
 
 function getColumnViewLabel(columnId: string, meta?: unknown): string {
@@ -46,7 +47,12 @@ export function DataTableViewOptions<TData>({
                     .filter(
                         (column) =>
                             typeof column.accessorFn !== 'undefined' &&
-                            column.getCanHide()
+                            column.getCanHide() &&
+                            !(
+                                column.columnDef.meta as
+                                    | DataTableColumnMeta
+                                    | undefined
+                            )?.filterOnly
                     )
                     .map((column) => {
                         const columnLabel = getColumnViewLabel(

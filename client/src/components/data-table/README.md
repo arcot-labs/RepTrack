@@ -118,6 +118,14 @@ export const columns: ColumnDef<User>[] = [
 
 // To customize labels shown in the "View" column toggle menu,
 // set `meta.viewLabel` on each column definition.
+//
+// To use a column purely for filtering (hidden, not in View options),
+// set `meta.filterOnly: true`.
+// Pass its id with `false` via `initialColumnVisibility` on <DataTable>.
+//
+// Example:
+//   { id: 'role', meta: { filterOnly: true }, accessorFn: ..., filterFn: ... }
+//   <DataTable ... initialColumnVisibility={{ role: false }} />
 ```
 
 ### 3. Configure Toolbar

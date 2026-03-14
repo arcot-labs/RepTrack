@@ -32,6 +32,7 @@ interface DataTableProps<TData, TValue> {
     pageSize?: number
     isLoading: boolean
     toolbarConfig?: DataTableToolbarConfig
+    initialColumnVisibility?: VisibilityState
 }
 
 export function DataTable<TData, TValue>({
@@ -40,10 +41,11 @@ export function DataTable<TData, TValue>({
     pageSize = 10,
     isLoading,
     toolbarConfig,
+    initialColumnVisibility,
 }: DataTableProps<TData, TValue>) {
     const [rowSelection, setRowSelection] = useState({})
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-        {}
+        initialColumnVisibility ?? {}
     )
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [sorting, setSorting] = useState<SortingState>([])
