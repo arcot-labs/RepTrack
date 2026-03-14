@@ -4,6 +4,7 @@ import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
 import { createSelectColumn } from '@/components/data-table/DataTableSelectColumn'
+import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncatedCell'
 import { blueText, redText } from '@/lib/styles'
 import { capitalizeWords } from '@/lib/text'
 import type {
@@ -82,7 +83,10 @@ export function ExercisesTable({
                     {row.original.user_id === null && (
                         <Lock className={`size-3 shrink-0 ${blueText}`} />
                     )}
-                    {row.original.name}
+                    <DataTableTruncatedCell
+                        value={row.original.name}
+                        className="max-w-48"
+                    />
                 </div>
             ),
             enableHiding: false,
@@ -92,7 +96,15 @@ export function ExercisesTable({
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Description" />
             ),
-            cell: ({ row }) => row.original.description ?? '—',
+            cell: ({ row }) =>
+                row.original.description ? (
+                    <DataTableTruncatedCell
+                        value={row.original.description}
+                        className="max-w-64"
+                    />
+                ) : (
+                    '—'
+                ),
             enableHiding: true,
         },
         {
@@ -109,7 +121,14 @@ export function ExercisesTable({
                 const names = row.original.muscle_groups.map((group) =>
                     capitalizeWords(group.name)
                 )
-                return names.length ? names.join(', ') : '—'
+                return names.length ? (
+                    <DataTableTruncatedCell
+                        value={names.join(', ')}
+                        className="max-w-48"
+                    />
+                ) : (
+                    '—'
+                )
             },
             enableHiding: true,
         },
