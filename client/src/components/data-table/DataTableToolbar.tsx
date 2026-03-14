@@ -75,7 +75,7 @@ export function DataTableToolbar<TData>({
                         variant={action.variant ?? 'default'}
                         onClick={() => void action.onClick()}
                     >
-                        {action.icon && <action.icon className="mr-2 size-4" />}
+                        {action.icon && <action.icon className="size-4" />}
                         {action.label}
                     </Button>
                 ))}

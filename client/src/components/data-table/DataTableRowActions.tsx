@@ -81,7 +81,7 @@ export function DataTableRowActions<TData>({
                             onSelect={() => void item.onSelect?.(rowData)}
                             disabled={item.disabled}
                         >
-                            {item.icon && <item.icon className="mr-2 size-4" />}
+                            {item.icon && <item.icon className="size-4" />}
                             {item.label}
                             {item.shortcut && (
                                 <DropdownMenuShortcut>
