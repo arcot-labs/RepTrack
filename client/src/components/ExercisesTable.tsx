@@ -32,7 +32,7 @@ interface ExercisesTableProps {
 
 export function ExercisesTable({
     exercises,
-    // muscleGroups,
+    muscleGroups,
     isLoading,
     // onReloadExercises,
 }: ExercisesTableProps) {
@@ -130,6 +130,13 @@ export function ExercisesTable({
                     '—'
                 )
             },
+            filterFn: (row, _id, filterValues: string[]) => {
+                if (!filterValues.length) return true
+                const rowGroupIds = new Set(
+                    row.original.muscle_groups.map((group) => String(group.id))
+                )
+                return filterValues.every((groupId) => rowGroupIds.has(groupId))
+            },
             enableHiding: true,
         },
         {
@@ -193,6 +200,14 @@ export function ExercisesTable({
                 columnId: 'type',
                 title: 'Type',
                 options: getTypeFilterOptions(),
+            },
+            {
+                columnId: 'muscle_groups',
+                title: 'Muscle Groups',
+                options: muscleGroups.map((group) => ({
+                    label: capitalizeWords(group.name),
+                    value: String(group.id),
+                })),
             },
         ],
         actions: [
