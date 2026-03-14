@@ -17,6 +17,11 @@ export function DataTableToolbar<TData>({
     config,
 }: DataTableToolbarProps<TData>) {
     const isFiltered = table.getState().columnFilters.length > 0
+    const searchColumn = config.search
+        ? table.getColumn(config.search.columnId)
+        : undefined
+    const searchValue =
+        (searchColumn?.getFilterValue() as string | undefined) ?? ''
 
     return (
         <div className="flex items-center justify-between">
@@ -24,16 +29,9 @@ export function DataTableToolbar<TData>({
                 {config.search && (
                     <Input
                         placeholder={config.search.placeholder}
-                        value={
-                            table
-                                .getColumn(config.search.columnId)
-                                ?.getFilterValue() as string
-                        }
+                        value={searchValue}
                         onChange={(event) =>
-                            table
-                                // @ts-expect-error searchConfig is defined
-                                .getColumn(config.search.columnId)
-                                ?.setFilterValue(event.target.value)
+                            searchColumn?.setFilterValue(event.target.value)
                         }
                         className={
                             config.search.className ?? 'h-8 w-37.5 lg:w-62.5'
