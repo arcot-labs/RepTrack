@@ -2,7 +2,7 @@ import type { UserPublic } from '@/api/generated'
 
 export interface SessionContextType {
     user: UserPublic | null
-    loading: boolean
+    isLoading: boolean
     authenticated: boolean
     refresh: () => Promise<void>
 }

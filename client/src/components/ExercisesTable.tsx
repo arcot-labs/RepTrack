@@ -36,14 +36,14 @@ export function ExercisesTable({
     isLoading,
     // onReloadExercises,
 }: ExercisesTableProps) {
-    const [loadingExerciseIds] = useState<Set<number>>(new Set())
+    const [isLoadingExerciseIds] = useState<Set<number>>(new Set())
 
     const rowActionsConfig: DataTableRowActionsConfig<ExercisePublic> = {
         schema: zExercisePublic,
         menuItems: (row) => {
             if (row.user_id === null) return []
 
-            const isRowLoading = loadingExerciseIds.has(row.id)
+            const isRowLoading = isLoadingExerciseIds.has(row.id)
             return [
                 {
                     type: 'action',

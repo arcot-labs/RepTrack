@@ -73,7 +73,7 @@ export function AccessRequestsTable({
     onReloadRequests,
 }: AccessRequestsTableProps) {
     const { user } = useSession()
-    const [loadingRequestIds, setLoadingRequestIds] = useState<Set<number>>(
+    const [isLoadingRequestIds, setIsLoadingRequestIds] = useState<Set<number>>(
         new Set()
     )
     const [confirmDialog, setConfirmDialog] = useState<{
@@ -107,7 +107,7 @@ export function AccessRequestsTable({
         request: AccessRequestPublic,
         status: 'approved' | 'rejected'
     ) => {
-        setLoadingRequestIds((prev) => new Set(prev).add(request.id))
+        setIsLoadingRequestIds((prev) => new Set(prev).add(request.id))
         try {
             const { error } = await AdminService.updateAccessRequestStatus({
                 path: {
@@ -142,7 +142,7 @@ export function AccessRequestsTable({
             }
             onRequestUpdated(updatedRequest)
         } finally {
-            setLoadingRequestIds((prev) => {
+            setIsLoadingRequestIds((prev) => {
                 const next = new Set(prev)
                 next.delete(request.id)
                 return next
@@ -155,7 +155,7 @@ export function AccessRequestsTable({
         menuItems: (row) => {
             if (row.status !== 'pending') return []
 
-            const isRowLoading = loadingRequestIds.has(row.id)
+            const isRowLoading = isLoadingRequestIds.has(row.id)
             return [
                 {
                     type: 'action',

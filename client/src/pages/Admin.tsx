@@ -13,11 +13,11 @@ import { useEffect, useState } from 'react'
 export function Admin() {
     const [requests, setRequests] = useState<AccessRequestPublic[]>([])
     const [users, setUsers] = useState<UserPublic[]>([])
-    const [loadingRequests, setLoadingRequests] = useState(true)
-    const [loadingUsers, setLoadingUsers] = useState(true)
+    const [isLoadingRequests, setIsLoadingRequests] = useState(true)
+    const [isLoadingUsers, setIsLoadingUsers] = useState(true)
 
     const loadAccessRequests = async () => {
-        setLoadingRequests(true)
+        setIsLoadingRequests(true)
         try {
             const { data, error } = await AdminService.getAccessRequests()
             if (error) {
@@ -30,7 +30,7 @@ export function Admin() {
             logger.info('Fetched access requests', data)
             setRequests(data)
         } finally {
-            setLoadingRequests(false)
+            setIsLoadingRequests(false)
         }
     }
 
@@ -41,7 +41,7 @@ export function Admin() {
     }
 
     const loadUsers = async () => {
-        setLoadingUsers(true)
+        setIsLoadingUsers(true)
         try {
             const { data, error } = await AdminService.getUsers()
             if (error) {
@@ -54,7 +54,7 @@ export function Admin() {
             logger.info('Fetched users', data)
             setUsers(data)
         } finally {
-            setLoadingUsers(false)
+            setIsLoadingUsers(false)
         }
     }
 
@@ -74,7 +74,7 @@ export function Admin() {
                 <CardContent>
                     <AccessRequestsTable
                         requests={requests}
-                        isLoading={loadingRequests}
+                        isLoading={isLoadingRequests}
                         onRequestUpdated={handleRequestUpdated}
                         onReloadRequests={loadAccessRequests}
                     />
@@ -87,7 +87,7 @@ export function Admin() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <UsersTable users={users} isLoading={loadingUsers} />
+                    <UsersTable users={users} isLoading={isLoadingUsers} />
                 </CardContent>
             </Card>
         </div>

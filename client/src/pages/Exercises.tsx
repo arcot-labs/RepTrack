@@ -13,11 +13,11 @@ import { useEffect, useState } from 'react'
 export function Exercises() {
     const [exercises, setExercises] = useState<ExercisePublic[]>([])
     const [muscleGroups, setMuscleGroups] = useState<MuscleGroupPublic[]>([])
-    const [loadingExercises, setLoadingExercises] = useState(true)
-    const [loadingMuscleGroups, setLoadingMuscleGroups] = useState(true)
+    const [isLoadingExercises, setIsLoadingExercises] = useState(true)
+    const [isLoadingMuscleGroups, setIsLoadingMuscleGroups] = useState(true)
 
     const loadExercises = async () => {
-        setLoadingExercises(true)
+        setIsLoadingExercises(true)
         try {
             const { data, error } = await ExercisesService.getExercises()
             if (error) {
@@ -30,12 +30,12 @@ export function Exercises() {
             logger.info('Fetched exercises', data)
             setExercises(data)
         } finally {
-            setLoadingExercises(false)
+            setIsLoadingExercises(false)
         }
     }
 
     const loadMuscleGroups = async () => {
-        setLoadingMuscleGroups(true)
+        setIsLoadingMuscleGroups(true)
         try {
             const { data, error } = await MuscleGroupsService.getMuscleGroups()
             if (error) {
@@ -48,7 +48,7 @@ export function Exercises() {
             logger.info('Fetched muscle groups', data)
             setMuscleGroups(data)
         } finally {
-            setLoadingMuscleGroups(false)
+            setIsLoadingMuscleGroups(false)
         }
     }
 
@@ -68,7 +68,7 @@ export function Exercises() {
                 <ExercisesTable
                     exercises={exercises}
                     muscleGroups={muscleGroups}
-                    isLoading={loadingExercises || loadingMuscleGroups}
+                    isLoading={isLoadingExercises || isLoadingMuscleGroups}
                     onReloadExercises={loadExercises}
                 />
             </CardContent>
