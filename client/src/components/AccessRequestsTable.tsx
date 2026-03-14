@@ -22,14 +22,10 @@ import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import {
     blueText,
-    greenBackground,
-    greenBackgroundHover,
     greenText,
     lightBlueBackground,
     lightGreenBackground,
     lightRedBackground,
-    redBackground,
-    redBackgroundHover,
     redText,
 } from '@/lib/styles'
 import type {
@@ -44,8 +40,6 @@ import { useState } from 'react'
 const blueBadgeClassName = `${lightBlueBackground} ${blueText}`
 const greenBadgeClassName = `${lightGreenBackground} ${greenText}`
 const redBadgeClassName = `${lightRedBackground} ${redText}`
-const greenButtonClassName = `${greenBackground} ${greenBackgroundHover}`
-const redButtonClassName = `${redBackground} ${redBackgroundHover}`
 
 function StatusBadge({ status }: { status: AccessRequestStatus }) {
     switch (status) {
@@ -327,7 +321,6 @@ export function AccessRequestsTable({
                     </div>
                     <div className="flex justify-end gap-2">
                         <Button
-                            variant="outline"
                             onClick={() => {
                                 setConfirmDialog({
                                     ...confirmDialog,
@@ -339,10 +332,10 @@ export function AccessRequestsTable({
                         </Button>
                         <Button
                             onClick={handleConfirmAction}
-                            className={
+                            variant={
                                 confirmDialog.action === 'approved'
-                                    ? greenButtonClassName
-                                    : redButtonClassName
+                                    ? 'success'
+                                    : 'destructive'
                             }
                         >
                             {confirmDialog.action === 'approved'
