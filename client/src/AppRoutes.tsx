@@ -6,6 +6,7 @@ import { AppLayout } from '@/layout/AppLayout'
 import { Admin } from '@/pages/Admin'
 import { Dashboard } from '@/pages/Dashboard'
 import { Docs } from '@/pages/Docs'
+import { Exercises } from '@/pages/Exercises'
 import { ForgotPassword } from '@/pages/ForgotPassword'
 import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
@@ -25,6 +26,7 @@ export function AppRoutes() {
                 }
             >
                 <Route index element={<Dashboard />} />
+                <Route path="exercises" element={<Exercises />} />
                 <Route path="docs" element={<Docs />}>
                     <Route index element={<DocsIndex />} />
                     <Route path=":slug" element={<Doc />} />

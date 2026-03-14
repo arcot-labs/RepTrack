@@ -32,6 +32,7 @@ export function AppLayout() {
                         </NavLink>
                         <nav className="flex items-center gap-4">
                             <NavItem to="/">Dashboard</NavItem>
+                            <NavItem to="/exercises">Exercises</NavItem>
                             <NavItem to="/docs">Docs</NavItem>
                             {user?.is_admin && (
                                 <NavItem to="/admin">Admin</NavItem>
