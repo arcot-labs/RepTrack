@@ -267,20 +267,12 @@ export function ExercisesTable({
             accessorKey: 'updated_at',
             meta: { viewLabel: 'Updated At' },
             header: ({ column }) => (
-                <DataTableColumnHeader
-                    column={column}
-                    title="Updated At"
-                    className="justify-center"
-                />
+                <DataTableColumnHeader column={column} title="Updated At" />
             ),
             cell: ({ row }) =>
-                row.original.user_id !== null ? (
-                    <div className="text-center">
-                        {new Date(row.original.updated_at).toLocaleString()}
-                    </div>
-                ) : (
-                    <div className="text-center">—</div>
-                ),
+                row.original.user_id !== null
+                    ? new Date(row.original.updated_at).toLocaleString()
+                    : '—',
             enableHiding: true,
         },
     ]
