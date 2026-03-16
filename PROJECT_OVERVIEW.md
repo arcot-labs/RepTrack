@@ -88,6 +88,11 @@ Basic relationships:
 - **Exercise Library**: Authenticated users can browse system exercises, create their own exercises, and tag them with muscle groups.
 - **Feedback**: Authenticated users submit feedback; server stores entry and can open a GitHub issue.
 
+## Current Implementation Status
+
+- ✅ Exercise API + client CRUD flow is implemented (`/api/exercises`, `/api/muscle-groups`, `/exercises` page).
+- 🚧 Workout API + client workflow is the primary remaining feature area.
+
 ## API Surface (Current)
 
 - `POST /api/auth/*`: request-access, register, login, refresh-token, logout, forgot/reset-password

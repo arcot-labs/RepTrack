@@ -9,9 +9,9 @@ interface RequireAuthProps {
 }
 
 export function RequireAuth({ children, requireAdmin }: RequireAuthProps) {
-    const { loading, authenticated, user } = useSession()
+    const { isLoading, authenticated, user } = useSession()
     const location = useLocation()
-    if (loading) return <Loading />
+    if (isLoading) return <Loading />
     if (!authenticated)
         return <Navigate to="/login" replace state={{ from: location }} />
     if (requireAdmin && !user?.is_admin) return <Navigate to="/" replace />

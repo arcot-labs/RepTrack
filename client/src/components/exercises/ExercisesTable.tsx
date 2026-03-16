@@ -1,0 +1,385 @@
+import {
+    ExercisesService,
+    type ExercisePublic,
+    type MuscleGroupPublic,
+} from '@/api/generated'
+import { zExercisePublic } from '@/api/generated/zod.gen'
+import { DataTable } from '@/components/data-table/DataTable'
+import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
+import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
+import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncatedCell'
+import { ExerciseFormDialog } from '@/components/exercises/ExerciseFormDialog'
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/overrides/button'
+import { handleApiError } from '@/lib/http'
+import { notify } from '@/lib/notify'
+import { blueText, redText } from '@/lib/styles'
+import { capitalizeWords } from '@/lib/text'
+import type {
+    DataTableRowActionsConfig,
+    DataTableToolbarConfig,
+    FilterOption,
+} from '@/models/data-table'
+import type { ColumnDef } from '@tanstack/react-table'
+import { Lock, Pencil, Plus, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+
+function getTypeFilterOptions(): FilterOption[] {
+    return [
+        { label: 'System', value: 'system' },
+        { label: 'Custom', value: 'custom' },
+    ]
+}
+
+interface ExercisesTableProps {
+    exercises: ExercisePublic[]
+    muscleGroups: MuscleGroupPublic[]
+    isLoading: boolean
+    onReloadExercises: () => Promise<void>
+    onReloadMuscleGroups: () => Promise<void>
+}
+
+export function ExercisesTable({
+    exercises,
+    muscleGroups,
+    isLoading,
+    onReloadExercises,
+    onReloadMuscleGroups,
+}: ExercisesTableProps) {
+    const [isLoadingExerciseIds, setIsLoadingExerciseIds] = useState<
+        Set<number>
+    >(new Set())
+    const [isDeleting, setIsDeleting] = useState(false)
+
+    const [formDialog, setFormDialog] = useState<{
+        isOpen: boolean
+        mode: 'create' | 'edit'
+        exercise: ExercisePublic | null
+    }>({
+        isOpen: false,
+        mode: 'create',
+        exercise: null,
+    })
+
+    const [deleteDialog, setDeleteDialog] = useState<{
+        isOpen: boolean
+        exercise: ExercisePublic | null
+    }>({
+        isOpen: false,
+        exercise: null,
+    })
+
+    const openCreateDialog = () => {
+        setFormDialog({ isOpen: true, mode: 'create', exercise: null })
+    }
+
+    const openEditDialog = (exercise: ExercisePublic) => {
+        setFormDialog({ isOpen: true, mode: 'edit', exercise })
+    }
+
+    const openDeleteDialog = (exercise: ExercisePublic) => {
+        setDeleteDialog({ isOpen: true, exercise })
+    }
+
+    const closeDeleteDialog = () => {
+        setDeleteDialog({ isOpen: false, exercise: null })
+    }
+
+    const setExerciseRowLoading = (exerciseId: number, isLoading: boolean) => {
+        setIsLoadingExerciseIds((prev) => {
+            const next = new Set(prev)
+            if (isLoading) next.add(exerciseId)
+            else next.delete(exerciseId)
+            return next
+        })
+    }
+
+    const handleDeleteExercise = async () => {
+        const exercise = deleteDialog.exercise
+        if (!exercise) return
+
+        setIsDeleting(true)
+        setExerciseRowLoading(exercise.id, true)
+        try {
+            const { error } = await ExercisesService.deleteExercise({
+                path: { exercise_id: exercise.id },
+            })
+            if (error) {
+                await handleApiError(error, {
+                    httpErrorHandlers: {
+                        exercise_update_not_allowed: async () => {
+                            notify.error(
+                                'You cannot delete this exercise. Reloading data'
+                            )
+                            await onReloadExercises()
+                        },
+                        exercise_not_found: async () => {
+                            notify.error(
+                                'Exercise no longer exists. Reloading data'
+                            )
+                            await onReloadExercises()
+                        },
+                    },
+                    fallbackMessage: 'Failed to delete exercise',
+                })
+                closeDeleteDialog()
+                return
+            }
+            notify.success('Exercise deleted')
+            await onReloadExercises()
+            closeDeleteDialog()
+        } finally {
+            setExerciseRowLoading(exercise.id, false)
+            setIsDeleting(false)
+        }
+    }
+
+    const rowActionsConfig: DataTableRowActionsConfig<ExercisePublic> = {
+        schema: zExercisePublic,
+        menuItems: (row) => {
+            if (row.user_id === null) return []
+
+            const isRowLoading = isLoadingExerciseIds.has(row.id)
+            return [
+                {
+                    type: 'action',
+                    icon: Pencil,
+                    onSelect: () => {
+                        openEditDialog(row)
+                    },
+                    disabled: isRowLoading,
+                },
+                {
+                    type: 'action',
+                    className: redText,
+                    icon: Trash2,
+                    onSelect: () => {
+                        openDeleteDialog(row)
+                    },
+                },
+            ]
+        },
+    }
+
+    const columns: ColumnDef<ExercisePublic>[] = [
+        {
+            id: 'actions',
+            header: ({ column }) => (
+                <DataTableColumnHeader
+                    column={column}
+                    title="Actions"
+                    className="justify-center"
+                />
+            ),
+            cell: ({ row }) => {
+                const menuItems = rowActionsConfig.menuItems(row.original)
+                return menuItems.length > 0 ? (
+                    <DataTableInlineRowActions
+                        row={row}
+                        config={rowActionsConfig}
+                    />
+                ) : (
+                    <div className="text-center">—</div>
+                )
+            },
+            enableHiding: false,
+        },
+        {
+            accessorKey: 'name',
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Name" />
+            ),
+            cell: ({ row }) => (
+                <div className="flex items-center gap-1.5">
+                    {row.original.user_id === null && (
+                        <Lock className={`size-3 shrink-0 ${blueText}`} />
+                    )}
+                    <DataTableTruncatedCell
+                        value={row.original.name}
+                        className="max-w-48"
+                    />
+                </div>
+            ),
+            enableHiding: false,
+        },
+        {
+            accessorKey: 'description',
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Description" />
+            ),
+            cell: ({ row }) =>
+                row.original.description ? (
+                    <DataTableTruncatedCell
+                        value={row.original.description}
+                        className="max-w-64"
+                    />
+                ) : (
+                    '—'
+                ),
+            enableHiding: true,
+        },
+        {
+            id: 'muscle_groups',
+            meta: { viewLabel: 'Muscle Groups' },
+            accessorFn: (row) =>
+                row.muscle_groups
+                    .map((group) => capitalizeWords(group.name))
+                    .join(', '),
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Muscle Groups" />
+            ),
+            cell: ({ row }) => {
+                const names = row.original.muscle_groups.map((group) =>
+                    capitalizeWords(group.name)
+                )
+                return names.length ? (
+                    <DataTableTruncatedCell
+                        value={names.join(', ')}
+                        className="max-w-48"
+                    />
+                ) : (
+                    '—'
+                )
+            },
+            filterFn: (row, _id, filterValues: string[]) => {
+                if (!filterValues.length) return true
+                const rowGroupIds = new Set(
+                    row.original.muscle_groups.map((group) => String(group.id))
+                )
+                return filterValues.every((groupId) => rowGroupIds.has(groupId))
+            },
+            enableHiding: true,
+        },
+        {
+            id: 'type',
+            meta: { filterOnly: true },
+            accessorFn: (row) => (row.user_id === null ? 'system' : 'custom'),
+            filterFn: (row, id, filterValues: string[]) =>
+                filterValues.includes(row.getValue(id)),
+        },
+        {
+            accessorKey: 'updated_at',
+            meta: { viewLabel: 'Updated At' },
+            header: ({ column }) => (
+                <DataTableColumnHeader
+                    column={column}
+                    title="Updated At"
+                    className="justify-center"
+                />
+            ),
+            cell: ({ row }) =>
+                row.original.user_id !== null ? (
+                    <div className="text-center">
+                        {new Date(row.original.updated_at).toLocaleString()}
+                    </div>
+                ) : (
+                    <div className="text-center">—</div>
+                ),
+            enableHiding: true,
+        },
+    ]
+
+    const toolbarConfig: DataTableToolbarConfig = {
+        search: {
+            columnId: 'name',
+            placeholder: 'Filter by name...',
+        },
+        filters: [
+            {
+                columnId: 'type',
+                title: 'Type',
+                options: getTypeFilterOptions(),
+            },
+            {
+                columnId: 'muscle_groups',
+                title: 'Muscle Groups',
+                options: muscleGroups.map((group) => ({
+                    label: capitalizeWords(group.name),
+                    value: String(group.id),
+                })),
+            },
+        ],
+        actions: [
+            {
+                label: 'Add Exercise',
+                icon: Plus,
+                onClick: () => {
+                    openCreateDialog()
+                },
+            },
+        ],
+        showViewOptions: true,
+    }
+
+    return (
+        <>
+            <DataTable
+                data={exercises}
+                columns={columns}
+                pageSize={10}
+                isLoading={isLoading}
+                toolbarConfig={toolbarConfig}
+                initialColumnVisibility={{ type: false }}
+            />
+            <ExerciseFormDialog
+                open={formDialog.isOpen}
+                mode={formDialog.mode}
+                exercise={formDialog.exercise}
+                muscleGroups={muscleGroups}
+                isRowLoading={isLoadingExerciseIds.has(
+                    formDialog.exercise?.id ?? -1
+                )}
+                onOpenChange={(isOpen) => {
+                    setFormDialog((prev) => ({ ...prev, isOpen }))
+                }}
+                onSuccess={onReloadExercises}
+                onReloadExercises={onReloadExercises}
+                onReloadMuscleGroups={onReloadMuscleGroups}
+                onRowLoadingChange={setExerciseRowLoading}
+            />
+            <Dialog
+                open={deleteDialog.isOpen}
+                onOpenChange={(isOpen) => {
+                    if (!isDeleting) {
+                        setDeleteDialog((prev) => ({ ...prev, isOpen }))
+                    }
+                }}
+            >
+                <DialogContent aria-describedby={undefined}>
+                    <DialogHeader>
+                        <DialogTitle>Delete Exercise</DialogTitle>
+                    </DialogHeader>
+                    <div className="text-sm">
+                        Are you sure you want to delete{' '}
+                        <span className="font-semibold">
+                            {deleteDialog.exercise?.name}
+                        </span>
+                        ?
+                        <div className="mt-2">This action is irreversible.</div>
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            onClick={closeDeleteDialog}
+                            disabled={isDeleting}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={() => void handleDeleteExercise()}
+                            disabled={isDeleting}
+                        >
+                            {isDeleting ? 'Deleting...' : 'Delete'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </>
+    )
+}

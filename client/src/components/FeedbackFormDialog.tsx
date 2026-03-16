@@ -1,6 +1,5 @@
 import { FeedbackService } from '@/api/generated'
 import { zCreateFeedbackRequest } from '@/api/generated/zod.gen'
-import { Button } from '@/components/ui/button'
 import {
     Dialog,
     DialogClose,
@@ -13,6 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/overrides/button'
 import { Textarea } from '@/components/ui/textarea'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
@@ -27,7 +27,7 @@ const feedbackFormSchema = zCreateFeedbackRequest.omit({
 })
 type FeedbackForm = z.infer<typeof feedbackFormSchema>
 
-export function Feedback() {
+export function FeedbackFormDialog() {
     const [open, setOpen] = useState(false)
     const [files, setFiles] = useState<File[]>([])
 
@@ -136,7 +136,9 @@ export function Feedback() {
                     }}
                 >
                     <div className="space-y-1">
+                        <Label htmlFor="title">Title</Label>
                         <Input
+                            id="title"
                             placeholder={'Enter a brief title...'}
                             aria-invalid={!!errors.title}
                             className={errors.title ? 'border-destructive' : ''}
@@ -149,7 +151,9 @@ export function Feedback() {
                         )}
                     </div>
                     <div className="space-y-1">
+                        <Label htmlFor="description">Description</Label>
                         <Textarea
+                            id="description"
                             placeholder={
                                 type === 'feedback'
                                     ? 'Describe your feedback...'
@@ -201,6 +205,7 @@ export function Feedback() {
                     <Button
                         form="feedback-form"
                         type="submit"
+                        variant="success"
                         disabled={
                             isSubmitting || !(isDirty || files.length > 0)
                         }

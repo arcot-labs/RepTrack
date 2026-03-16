@@ -2,7 +2,6 @@ import { DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { type Table } from '@tanstack/react-table'
 import { Settings2 } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -10,6 +9,18 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/overrides/button'
+import { formatIdentifier } from '@/lib/text'
+
+interface DataTableColumnMeta {
+    viewLabel?: string
+    filterOnly?: boolean
+}
+
+function getColumnViewLabel(columnId: string, meta?: unknown): string {
+    const resolvedMeta = meta as DataTableColumnMeta | undefined
+    return resolvedMeta?.viewLabel ?? formatIdentifier(columnId)
+}
 
 export function DataTableViewOptions<TData>({
     table,
@@ -36,19 +47,27 @@ export function DataTableViewOptions<TData>({
                     .filter(
                         (column) =>
                             typeof column.accessorFn !== 'undefined' &&
-                            column.getCanHide()
+                            column.getCanHide() &&
+                            !(
+                                column.columnDef.meta as
+                                    | DataTableColumnMeta
+                                    | undefined
+                            )?.filterOnly
                     )
                     .map((column) => {
+                        const columnLabel = getColumnViewLabel(
+                            column.id,
+                            column.columnDef.meta
+                        )
                         return (
                             <DropdownMenuCheckboxItem
                                 key={column.id}
-                                className="capitalize"
                                 checked={column.getIsVisible()}
                                 onCheckedChange={(value) => {
                                     column.toggleVisibility(value)
                                 }}
                             >
-                                {column.id}
+                                {columnLabel}
                             </DropdownMenuCheckboxItem>
                         )
                     })}

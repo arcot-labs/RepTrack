@@ -9,7 +9,7 @@
         "generate-api": "openapi-ts",
         "lint": "eslint --fix --max-warnings=0",
         "preview": "vite preview",
-        "update-components": "for file in src/components/ui/*.tsx; do npx shadcn@latest add -o $(basename \"$file\" .tsx); done"
+        "update-components": "for file in src/components/ui/*.tsx; do npx shadcn@latest add -o $(basename \"$file\" .tsx); done && cd .. && npx prettier --write client/src/components/ui"
     },
     "lint-staged": {
         "*": [

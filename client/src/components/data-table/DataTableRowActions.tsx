@@ -1,7 +1,6 @@
 import { type Row } from '@tanstack/react-table'
 import { MoreHorizontal } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -15,6 +14,7 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/overrides/button'
 import type { DataTableRowActionsConfig } from '@/models/data-table'
 
 interface DataTableRowActionsProps<TData> {
@@ -81,7 +81,7 @@ export function DataTableRowActions<TData>({
                             onSelect={() => void item.onSelect?.(rowData)}
                             disabled={item.disabled}
                         >
-                            {item.icon && <item.icon className="mr-2 size-4" />}
+                            {item.icon && <item.icon className="size-4" />}
                             {item.label}
                             {item.shortcut && (
                                 <DropdownMenuShortcut>

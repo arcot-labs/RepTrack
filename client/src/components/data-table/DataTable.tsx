@@ -32,6 +32,9 @@ interface DataTableProps<TData, TValue> {
     pageSize?: number
     isLoading: boolean
     toolbarConfig?: DataTableToolbarConfig
+    initialColumnVisibility?: VisibilityState
+    firstColumnPaddingExcludeIds?: string[]
+    lastColumnPaddingExcludeIds?: string[]
 }
 
 export function DataTable<TData, TValue>({
@@ -40,13 +43,45 @@ export function DataTable<TData, TValue>({
     pageSize = 10,
     isLoading,
     toolbarConfig,
+    initialColumnVisibility,
+    firstColumnPaddingExcludeIds = ['actions'],
+    lastColumnPaddingExcludeIds = ['actions'],
 }: DataTableProps<TData, TValue>) {
     const [rowSelection, setRowSelection] = useState({})
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-        {}
+        initialColumnVisibility ?? {}
     )
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [sorting, setSorting] = useState<SortingState>([])
+
+    const shouldPadFirstColumn = (idx: number, columnId: string) =>
+        idx === 0 && !firstColumnPaddingExcludeIds.includes(columnId)
+
+    const shouldPadLastColumn = (
+        idx: number,
+        lastIdx: number,
+        columnId: string
+    ) => idx === lastIdx && !lastColumnPaddingExcludeIds.includes(columnId)
+
+    const getEdgePaddingClassName = (
+        idx: number,
+        lastIdx: number,
+        columnId: string,
+        baseClassName?: string
+    ) => {
+        const paddingClasses = []
+        if (shouldPadFirstColumn(idx, columnId)) {
+            paddingClasses.push('pl-4')
+        }
+        if (shouldPadLastColumn(idx, lastIdx, columnId)) {
+            paddingClasses.push('pr-4')
+        }
+        if (paddingClasses.length === 0) return baseClassName
+
+        return baseClassName
+            ? `${baseClassName} ${paddingClasses.join(' ')}`
+            : paddingClasses.join(' ')
+    }
 
     // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
@@ -89,22 +124,31 @@ export function DataTable<TData, TValue>({
                         <TableHeader>
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <TableRow key={headerGroup.id}>
-                                    {headerGroup.headers.map((header) => {
-                                        return (
-                                            <TableHead
-                                                key={header.id}
-                                                colSpan={header.colSpan}
-                                            >
-                                                {header.isPlaceholder
-                                                    ? null
-                                                    : flexRender(
-                                                          header.column
-                                                              .columnDef.header,
-                                                          header.getContext()
-                                                      )}
-                                            </TableHead>
-                                        )
-                                    })}
+                                    {headerGroup.headers.map(
+                                        (header, headerIdx) => {
+                                            return (
+                                                <TableHead
+                                                    key={header.id}
+                                                    colSpan={header.colSpan}
+                                                    className={getEdgePaddingClassName(
+                                                        headerIdx,
+                                                        headerGroup.headers
+                                                            .length - 1,
+                                                        header.column.id
+                                                    )}
+                                                >
+                                                    {header.isPlaceholder
+                                                        ? null
+                                                        : flexRender(
+                                                              header.column
+                                                                  .columnDef
+                                                                  .header,
+                                                              header.getContext()
+                                                          )}
+                                                </TableHead>
+                                            )
+                                        }
+                                    )}
                                 </TableRow>
                             ))}
                         </TableHeader>
@@ -117,17 +161,25 @@ export function DataTable<TData, TValue>({
                                             row.getIsSelected() && 'selected'
                                         }
                                     >
-                                        {row.getVisibleCells().map((cell) => (
-                                            <TableCell
-                                                key={cell.id}
-                                                className="h-10"
-                                            >
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext()
-                                                )}
-                                            </TableCell>
-                                        ))}
+                                        {row
+                                            .getVisibleCells()
+                                            .map((cell, cellIdx, cells) => (
+                                                <TableCell
+                                                    key={cell.id}
+                                                    className={getEdgePaddingClassName(
+                                                        cellIdx,
+                                                        cells.length - 1,
+                                                        cell.column.id,
+                                                        'h-10'
+                                                    )}
+                                                >
+                                                    {flexRender(
+                                                        cell.column.columnDef
+                                                            .cell,
+                                                        cell.getContext()
+                                                    )}
+                                                </TableCell>
+                                            ))}
                                     </TableRow>
                                 ))
                             ) : (

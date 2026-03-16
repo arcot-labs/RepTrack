@@ -5,10 +5,10 @@ import { type ReactNode, useEffect, useState } from 'react'
 
 export function SessionProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<UserPublic | null>(null)
-    const [loading, setLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(true)
 
     const loadSession = async () => {
-        setLoading(true)
+        setIsLoading(true)
         try {
             const { data, error } = await UserService.getCurrentUser()
             if (error) {
@@ -18,7 +18,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             logger.info('Fetched current user', data)
             setUser(data)
         } finally {
-            setLoading(false)
+            setIsLoading(false)
         }
     }
 
@@ -30,7 +30,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         <SessionContext.Provider
             value={{
                 user,
-                loading,
+                isLoading: isLoading,
                 authenticated: user !== null,
                 refresh: loadSession,
             }}

@@ -5,10 +5,10 @@ import type { JSX } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 
 export function RequireGuest({ children }: { children: JSX.Element }) {
-    const { loading, authenticated } = useSession()
+    const { isLoading, authenticated } = useSession()
     const location = useLocation()
     const state = location.state as LocationState | null
-    if (loading) return <Loading />
+    if (isLoading) return <Loading />
     if (authenticated) {
         const to = state?.from?.pathname ?? '/'
         return <Navigate to={to} replace />
