@@ -136,7 +136,9 @@ export function FeedbackFormDialog() {
                     }}
                 >
                     <div className="space-y-1">
+                        <Label htmlFor="title">Title</Label>
                         <Input
+                            id="title"
                             placeholder={'Enter a brief title...'}
                             aria-invalid={!!errors.title}
                             className={errors.title ? 'border-destructive' : ''}
@@ -149,7 +151,9 @@ export function FeedbackFormDialog() {
                         )}
                     </div>
                     <div className="space-y-1">
+                        <Label htmlFor="description">Description</Label>
                         <Textarea
+                            id="description"
                             placeholder={
                                 type === 'feedback'
                                     ? 'Describe your feedback...'
