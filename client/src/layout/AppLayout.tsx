@@ -1,6 +1,6 @@
 import { AuthService } from '@/api/generated'
 import { useSession } from '@/auth/session'
-import { Feedback } from '@/components/Feedback'
+import { FeedbackFormDialog } from '@/components/FeedbackFormDialog'
 import { ModeToggle } from '@/components/ModeToggle'
 import { Button } from '@/components/ui/overrides/button'
 import { NavItem } from '@/lib/nav'
@@ -41,7 +41,7 @@ export function AppLayout() {
                     </div>
                     <div className="flex items-center gap-2">
                         <ModeToggle />
-                        <Feedback />
+                        <FeedbackFormDialog />
                         <Button
                             variant="destructive"
                             onClick={() => void handleLogout()}

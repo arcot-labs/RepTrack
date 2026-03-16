@@ -27,7 +27,7 @@ const feedbackFormSchema = zCreateFeedbackRequest.omit({
 })
 type FeedbackForm = z.infer<typeof feedbackFormSchema>
 
-export function Feedback() {
+export function FeedbackFormDialog() {
     const [open, setOpen] = useState(false)
     const [files, setFiles] = useState<File[]>([])
 
