@@ -99,7 +99,10 @@ def downgrade() -> None:
             ('shoulders', 'Muscles surrounding the shoulder joint responsible for arm abduction, rotation, and stabilization.'),
             ('core', 'Muscles of the trunk responsible for spinal stability, posture, and force transfer between upper and lower body.'),
             ('legs', 'Muscles of the hips, thighs, and lower legs responsible for locomotion, squatting, and lower-body force production.')
-        ON CONFLICT (name) DO NOTHING
+        ON CONFLICT (name)
+        DO UPDATE SET
+            description = EXCLUDED.description,
+            updated_at = NOW()
         """
     )
 
