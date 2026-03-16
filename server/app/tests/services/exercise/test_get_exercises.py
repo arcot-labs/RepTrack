@@ -2,10 +2,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.exercise import get_exercises
 
-from .utilities import create_exercise, create_user
+from .utilities import clear_exercises, create_exercise, create_user
 
 
 async def test_get_exercises(session: AsyncSession):
+    await clear_exercises(session)
+
     user = await create_user(session)
     user_2 = await create_user(session, username="user_2")
 

@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.exercise import Exercise
@@ -46,6 +46,11 @@ async def create_exercise(
 
     await session.commit()
     return exercise
+
+
+async def clear_exercises(session: AsyncSession):
+    await session.execute(delete(Exercise))
+    await session.commit()
 
 
 async def get_muscle_group_id(session: AsyncSession, name: str) -> int:
