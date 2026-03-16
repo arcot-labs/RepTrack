@@ -1,6 +1,5 @@
 import { AuthService } from '@/api/generated'
 import { zForgotPasswordRequest } from '@/api/generated/zod.gen'
-import { Button } from '@/components/ui/button'
 import {
     Card,
     CardContent,
@@ -10,6 +9,7 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/overrides/button'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import { zodResolver } from '@hookform/resolvers/zod'

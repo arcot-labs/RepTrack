@@ -53,10 +53,6 @@ services:
         volumes:
             - ../../server/data:/src/data
             - ../../server/logs:/src/logs
-        environment:
-            - EMAIL__BACKEND=local
-            - EMAIL__SMTP_PORT=${EMAIL__SMTP_PORT?}
-            - GH__BACKEND=console
 
         develop:
             watch:

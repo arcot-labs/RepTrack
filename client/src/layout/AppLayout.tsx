@@ -1,8 +1,8 @@
 import { AuthService } from '@/api/generated'
 import { useSession } from '@/auth/session'
-import { Feedback } from '@/components/Feedback'
+import { FeedbackFormDialog } from '@/components/FeedbackFormDialog'
 import { ModeToggle } from '@/components/ModeToggle'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/overrides/button'
 import { NavItem } from '@/lib/nav'
 import { notify } from '@/lib/notify'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
@@ -32,6 +32,7 @@ export function AppLayout() {
                         </NavLink>
                         <nav className="flex items-center gap-4">
                             <NavItem to="/">Dashboard</NavItem>
+                            <NavItem to="/exercises">Exercises</NavItem>
                             <NavItem to="/docs">Docs</NavItem>
                             {user?.is_admin && (
                                 <NavItem to="/admin">Admin</NavItem>
@@ -40,7 +41,7 @@ export function AppLayout() {
                     </div>
                     <div className="flex items-center gap-2">
                         <ModeToggle />
-                        <Feedback />
+                        <FeedbackFormDialog />
                         <Button
                             variant="destructive"
                             onClick={() => void handleLogout()}

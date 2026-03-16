@@ -8,6 +8,7 @@ from sqlalchemy.sql import func
 from app.core.database import Base
 
 if TYPE_CHECKING:
+    from app.models.database.exercise import Exercise
     from app.models.database.muscle_group import MuscleGroup
 
 
@@ -47,6 +48,10 @@ class ExerciseMuscleGroup(Base):
         nullable=False,
     )
 
+    exercise: Mapped[Exercise] = relationship(
+        "Exercise",
+        back_populates="muscle_groups",
+    )
     muscle_group: Mapped[MuscleGroup] = relationship(
         "MuscleGroup",
     )

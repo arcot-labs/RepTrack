@@ -47,6 +47,11 @@ export default defineConfig([
                     ],
                     paths: [
                         {
+                            name: '@/components/ui/button',
+                            message:
+                                'Use Button from @/components/ui/overrides/button',
+                        },
+                        {
                             name: 'sonner',
                             importNames: ['toast'],
                             message:

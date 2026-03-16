@@ -1,6 +1,6 @@
 import { type Row } from '@tanstack/react-table'
 
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/overrides/button'
 import type { DataTableRowActionsConfig } from '@/models/data-table'
 
 interface DataTableInlineRowActionsProps<TData> {

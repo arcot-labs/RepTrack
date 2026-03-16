@@ -33,3 +33,6 @@ auto_migration:
 
 migrate:
 	uv run alembic upgrade head
+
+downgrade:
+	uv run alembic downgrade -1

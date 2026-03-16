@@ -5,11 +5,11 @@ from app.services.muscle_group import get_muscle_groups_by_ids
 
 
 async def test_get_muscle_groups_by_ids(session: AsyncSession):
-    result = await get_muscle_groups_by_ids([1, 3], session)
+    result = await get_muscle_groups_by_ids([7, 8], session)
 
     assert len(result) == 2
     assert all(isinstance(muscle_group, MuscleGroup) for muscle_group in result)
-    assert {muscle_group.id for muscle_group in result} == {1, 3}
+    assert {muscle_group.id for muscle_group in result} == {7, 8}
 
 
 async def test_get_muscle_groups_by_ids_missing_ids(session: AsyncSession):

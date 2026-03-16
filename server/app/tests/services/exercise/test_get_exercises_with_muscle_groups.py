@@ -7,7 +7,12 @@ from app.services.exercise import (
     _get_exercises_with_muscle_groups,  # pyright: ignore[reportPrivateUsage]
 )
 
-from .utilities import create_exercise, create_user, get_muscle_group_id
+from .utilities import (
+    clear_exercises,
+    create_exercise,
+    create_user,
+    get_muscle_group_id,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +20,8 @@ logger = logging.getLogger(__name__)
 async def test_get_exercises_with_muscle_groups_no_where_clause(
     session: AsyncSession,
 ):
+    await clear_exercises(session)
+
     user_1 = await create_user(session, username="user_1")
     user_2 = await create_user(session, username="user_2")
 

@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/overrides/button'
 import { Spinner } from '@/components/ui/spinner'
 
 export function Loading() {
