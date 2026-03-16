@@ -8,10 +8,10 @@ import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
 import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncatedCell'
+import { ExerciseFormDialog } from '@/components/exercises/ExerciseFormDialog'
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
@@ -41,8 +41,8 @@ interface ExercisesTableProps {
     exercises: ExercisePublic[]
     muscleGroups: MuscleGroupPublic[]
     isLoading: boolean
-    // TODO onExerciseUpdated: (exercise: ExercisePublic) => void
     onReloadExercises: () => Promise<void>
+    onReloadMuscleGroups: () => Promise<void>
 }
 
 export function ExercisesTable({
@@ -50,11 +50,22 @@ export function ExercisesTable({
     muscleGroups,
     isLoading,
     onReloadExercises,
+    onReloadMuscleGroups,
 }: ExercisesTableProps) {
     const [isLoadingExerciseIds, setIsLoadingExerciseIds] = useState<
         Set<number>
     >(new Set())
     const [isDeleting, setIsDeleting] = useState(false)
+
+    const [formDialog, setFormDialog] = useState<{
+        isOpen: boolean
+        mode: 'create' | 'edit'
+        exercise: ExercisePublic | null
+    }>({
+        isOpen: false,
+        mode: 'create',
+        exercise: null,
+    })
 
     const [deleteDialog, setDeleteDialog] = useState<{
         isOpen: boolean
@@ -64,6 +75,14 @@ export function ExercisesTable({
         exercise: null,
     })
 
+    const openCreateDialog = () => {
+        setFormDialog({ isOpen: true, mode: 'create', exercise: null })
+    }
+
+    const openEditDialog = (exercise: ExercisePublic) => {
+        setFormDialog({ isOpen: true, mode: 'edit', exercise })
+    }
+
     const openDeleteDialog = (exercise: ExercisePublic) => {
         setDeleteDialog({ isOpen: true, exercise })
     }
@@ -72,12 +91,21 @@ export function ExercisesTable({
         setDeleteDialog({ isOpen: false, exercise: null })
     }
 
+    const setExerciseRowLoading = (exerciseId: number, isLoading: boolean) => {
+        setIsLoadingExerciseIds((prev) => {
+            const next = new Set(prev)
+            if (isLoading) next.add(exerciseId)
+            else next.delete(exerciseId)
+            return next
+        })
+    }
+
     const handleDeleteExercise = async () => {
         const exercise = deleteDialog.exercise
         if (!exercise) return
 
         setIsDeleting(true)
-        setIsLoadingExerciseIds((prev) => new Set(prev).add(exercise.id))
+        setExerciseRowLoading(exercise.id, true)
         try {
             const { error } = await ExercisesService.deleteExercise({
                 path: { exercise_id: exercise.id },
@@ -90,14 +118,12 @@ export function ExercisesTable({
                                 'You cannot delete this exercise. Reloading data'
                             )
                             await onReloadExercises()
-                            closeDeleteDialog()
                         },
                         exercise_not_found: async () => {
                             notify.error(
                                 'Exercise no longer exists. Reloading data'
                             )
                             await onReloadExercises()
-                            closeDeleteDialog()
                         },
                     },
                     fallbackMessage: 'Failed to delete exercise',
@@ -109,11 +135,7 @@ export function ExercisesTable({
             await onReloadExercises()
             closeDeleteDialog()
         } finally {
-            setIsLoadingExerciseIds((prev) => {
-                const next = new Set(prev)
-                next.delete(exercise.id)
-                return next
-            })
+            setExerciseRowLoading(exercise.id, false)
             setIsDeleting(false)
         }
     }
@@ -129,8 +151,7 @@ export function ExercisesTable({
                     type: 'action',
                     icon: Pencil,
                     onSelect: () => {
-                        // TODO implement
-                        // openEditDialog(row)
+                        openEditDialog(row)
                     },
                     disabled: isRowLoading,
                 },
@@ -289,8 +310,7 @@ export function ExercisesTable({
                 label: 'Add Exercise',
                 icon: Plus,
                 onClick: () => {
-                    // TODO implement
-                    // openCreateDialog()
+                    openCreateDialog()
                 },
             },
         ],
@@ -307,6 +327,22 @@ export function ExercisesTable({
                 toolbarConfig={toolbarConfig}
                 initialColumnVisibility={{ type: false }}
             />
+            <ExerciseFormDialog
+                open={formDialog.isOpen}
+                mode={formDialog.mode}
+                exercise={formDialog.exercise}
+                muscleGroups={muscleGroups}
+                isRowLoading={isLoadingExerciseIds.has(
+                    formDialog.exercise?.id ?? -1
+                )}
+                onOpenChange={(isOpen) => {
+                    setFormDialog((prev) => ({ ...prev, isOpen }))
+                }}
+                onSuccess={onReloadExercises}
+                onReloadExercises={onReloadExercises}
+                onReloadMuscleGroups={onReloadMuscleGroups}
+                onRowLoadingChange={setExerciseRowLoading}
+            />
             <Dialog
                 open={deleteDialog.isOpen}
                 onOpenChange={(isOpen) => {
@@ -318,14 +354,15 @@ export function ExercisesTable({
                 <DialogContent aria-describedby={undefined}>
                     <DialogHeader>
                         <DialogTitle>Delete Exercise</DialogTitle>
-                        <DialogDescription>
-                            Are you sure you want to delete{' '}
-                            <span className="font-semibold">
-                                {deleteDialog.exercise?.name}
-                            </span>
-                            ? This action is irreversible.
-                        </DialogDescription>
                     </DialogHeader>
+                    <div className="text-sm">
+                        Are you sure you want to delete{' '}
+                        <span className="font-semibold">
+                            {deleteDialog.exercise?.name}
+                        </span>
+                        ?
+                        <div className="mt-2">This action is irreversible.</div>
+                    </div>
                     <DialogFooter>
                         <Button
                             onClick={closeDeleteDialog}

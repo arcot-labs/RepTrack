@@ -4,7 +4,7 @@ import {
     type MuscleGroupPublic,
     MuscleGroupsService,
 } from '@/api/generated'
-import { ExercisesTable } from '@/components/ExercisesTable'
+import { ExercisesTable } from '@/components/exercises/ExercisesTable'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { handleApiError } from '@/lib/http'
 import { logger } from '@/lib/logger'
@@ -70,6 +70,7 @@ export function Exercises() {
                     muscleGroups={muscleGroups}
                     isLoading={isLoadingExercises || isLoadingMuscleGroups}
                     onReloadExercises={loadExercises}
+                    onReloadMuscleGroups={loadMuscleGroups}
                 />
             </CardContent>
         </Card>
