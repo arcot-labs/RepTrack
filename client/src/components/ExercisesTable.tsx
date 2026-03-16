@@ -1,9 +1,24 @@
-import { type ExercisePublic, type MuscleGroupPublic } from '@/api/generated'
+import {
+    ExercisesService,
+    type ExercisePublic,
+    type MuscleGroupPublic,
+} from '@/api/generated'
 import { zExercisePublic } from '@/api/generated/zod.gen'
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
 import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncatedCell'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/overrides/button'
+import { handleApiError } from '@/lib/http'
+import { notify } from '@/lib/notify'
 import { blueText, redText } from '@/lib/styles'
 import { capitalizeWords } from '@/lib/text'
 import type {
@@ -26,6 +41,7 @@ interface ExercisesTableProps {
     exercises: ExercisePublic[]
     muscleGroups: MuscleGroupPublic[]
     isLoading: boolean
+    // TODO onExerciseUpdated: (exercise: ExercisePublic) => void
     onReloadExercises: () => Promise<void>
 }
 
@@ -33,9 +49,74 @@ export function ExercisesTable({
     exercises,
     muscleGroups,
     isLoading,
-    // onReloadExercises,
+    onReloadExercises,
 }: ExercisesTableProps) {
-    const [isLoadingExerciseIds] = useState<Set<number>>(new Set())
+    const [isLoadingExerciseIds, setIsLoadingExerciseIds] = useState<
+        Set<number>
+    >(new Set())
+    const [isDeleting, setIsDeleting] = useState(false)
+
+    const [deleteDialog, setDeleteDialog] = useState<{
+        isOpen: boolean
+        exercise: ExercisePublic | null
+    }>({
+        isOpen: false,
+        exercise: null,
+    })
+
+    const openDeleteDialog = (exercise: ExercisePublic) => {
+        setDeleteDialog({ isOpen: true, exercise })
+    }
+
+    const closeDeleteDialog = () => {
+        setDeleteDialog({ isOpen: false, exercise: null })
+    }
+
+    const handleDeleteExercise = async () => {
+        const exercise = deleteDialog.exercise
+        if (!exercise) return
+
+        setIsDeleting(true)
+        setIsLoadingExerciseIds((prev) => new Set(prev).add(exercise.id))
+        try {
+            const { error } = await ExercisesService.deleteExercise({
+                path: { exercise_id: exercise.id },
+            })
+            if (error) {
+                await handleApiError(error, {
+                    httpErrorHandlers: {
+                        exercise_update_not_allowed: async () => {
+                            notify.error(
+                                'You cannot delete this exercise. Reloading data'
+                            )
+                            await onReloadExercises()
+                            closeDeleteDialog()
+                        },
+                        exercise_not_found: async () => {
+                            notify.error(
+                                'Exercise no longer exists. Reloading data'
+                            )
+                            await onReloadExercises()
+                            closeDeleteDialog()
+                        },
+                    },
+                    fallbackMessage: 'Failed to delete exercise',
+                })
+                closeDeleteDialog()
+                return
+            }
+            notify.success('Exercise deleted')
+            await onReloadExercises()
+            closeDeleteDialog()
+        } finally {
+            setIsLoadingExerciseIds((prev) => {
+                const next = new Set(prev)
+                next.delete(exercise.id)
+                return next
+            })
+            setIsDeleting(false)
+        }
+    }
 
     const rowActionsConfig: DataTableRowActionsConfig<ExercisePublic> = {
         schema: zExercisePublic,
@@ -49,8 +130,7 @@ export function ExercisesTable({
                     icon: Pencil,
                     onSelect: () => {
                         // TODO implement
-                        // eslint-disable-next-line no-console
-                        console.log('Edit', row)
+                        // openEditDialog(row)
                     },
                     disabled: isRowLoading,
                 },
@@ -59,9 +139,7 @@ export function ExercisesTable({
                     className: redText,
                     icon: Trash2,
                     onSelect: () => {
-                        // TODO implement
-                        // eslint-disable-next-line no-console
-                        console.log('Delete', row)
+                        openDeleteDialog(row)
                     },
                 },
             ]
@@ -69,6 +147,28 @@ export function ExercisesTable({
     }
 
     const columns: ColumnDef<ExercisePublic>[] = [
+        {
+            id: 'actions',
+            header: ({ column }) => (
+                <DataTableColumnHeader
+                    column={column}
+                    title="Actions"
+                    className="justify-center"
+                />
+            ),
+            cell: ({ row }) => {
+                const menuItems = rowActionsConfig.menuItems(row.original)
+                return menuItems.length > 0 ? (
+                    <DataTableInlineRowActions
+                        row={row}
+                        config={rowActionsConfig}
+                    />
+                ) : (
+                    <div className="text-center">—</div>
+                )
+            },
+            enableHiding: false,
+        },
         {
             accessorKey: 'name',
             header: ({ column }) => (
@@ -143,28 +243,6 @@ export function ExercisesTable({
                 filterValues.includes(row.getValue(id)),
         },
         {
-            id: 'actions',
-            header: ({ column }) => (
-                <DataTableColumnHeader
-                    column={column}
-                    title="Actions"
-                    className="justify-center"
-                />
-            ),
-            cell: ({ row }) => {
-                const menuItems = rowActionsConfig.menuItems(row.original)
-                return menuItems.length > 0 ? (
-                    <DataTableInlineRowActions
-                        row={row}
-                        config={rowActionsConfig}
-                    />
-                ) : (
-                    <div className="text-center">—</div>
-                )
-            },
-            enableHiding: false,
-        },
-        {
             accessorKey: 'updated_at',
             meta: { viewLabel: 'Updated At' },
             header: ({ column }) => (
@@ -212,8 +290,7 @@ export function ExercisesTable({
                 icon: Plus,
                 onClick: () => {
                     // TODO implement
-                    // eslint-disable-next-line no-console
-                    console.log('Add Exercise')
+                    // openCreateDialog()
                 },
             },
         ],
@@ -230,6 +307,42 @@ export function ExercisesTable({
                 toolbarConfig={toolbarConfig}
                 initialColumnVisibility={{ type: false }}
             />
+            <Dialog
+                open={deleteDialog.isOpen}
+                onOpenChange={(isOpen) => {
+                    if (!isDeleting) {
+                        setDeleteDialog((prev) => ({ ...prev, isOpen }))
+                    }
+                }}
+            >
+                <DialogContent aria-describedby={undefined}>
+                    <DialogHeader>
+                        <DialogTitle>Delete Exercise</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete{' '}
+                            <span className="font-semibold">
+                                {deleteDialog.exercise?.name}
+                            </span>
+                            ? This action is irreversible.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            onClick={closeDeleteDialog}
+                            disabled={isDeleting}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={() => void handleDeleteExercise()}
+                            disabled={isDeleting}
+                        >
+                            {isDeleting ? 'Deleting...' : 'Delete'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     )
 }
