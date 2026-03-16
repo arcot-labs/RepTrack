@@ -64,3 +64,28 @@ def test_to_exercise_public_with_muscle_groups() -> None:
     assert result.muscle_groups[1].id == 2
     assert result.muscle_groups[1].name == "triceps"
     assert result.muscle_groups[1].description == "Triceps muscles"
+
+
+def test_to_exercise_public_muscle_groups_ordering() -> None:
+    back = MuscleGroup(id=3, name="back", description="Back muscles")
+    arms = MuscleGroup(id=4, name="arms", description="Arm muscles")
+
+    exercise = Exercise(
+        id=12,
+        user_id=None,
+        name="Row",
+        description=None,
+        created_at=datetime(2026, 1, 5, tzinfo=UTC),
+        updated_at=datetime(2026, 1, 6, tzinfo=UTC),
+    )
+    exercise.muscle_groups = [
+        ExerciseMuscleGroup(exercise_id=12, muscle_group_id=3, muscle_group=back),
+        ExerciseMuscleGroup(exercise_id=12, muscle_group_id=4, muscle_group=arms),
+    ]
+
+    result = _to_exercise_public(exercise)
+
+    assert [muscle_group.name for muscle_group in result.muscle_groups] == [
+        "arms",
+        "back",
+    ]

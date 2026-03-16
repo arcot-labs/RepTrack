@@ -44,6 +44,10 @@ async def _get_exercises_with_muscle_groups(
 
 
 def _to_exercise_public(exercise: Exercise) -> ExercisePublic:
+    sorted_muscle_groups = sorted(
+        exercise.muscle_groups,
+        key=lambda emg: emg.muscle_group.name,
+    )
     return ExercisePublic(
         id=exercise.id,
         user_id=exercise.user_id,
@@ -51,7 +55,7 @@ def _to_exercise_public(exercise: Exercise) -> ExercisePublic:
         description=exercise.description,
         muscle_groups=[
             MuscleGroupPublic.model_validate(emg.muscle_group, from_attributes=True)
-            for emg in exercise.muscle_groups
+            for emg in sorted_muscle_groups
         ],
         created_at=exercise.created_at,
         updated_at=exercise.updated_at,
