@@ -51,7 +51,7 @@ async def test_update_exercise(
 ):
     await login_admin(client, settings)
     created = await create_exercise_via_api(client, name="Old Name")
-    muscle_group_id = await get_muscle_group_id(session, name="back")
+    muscle_group_id = await get_muscle_group_id(session, name="chest")
 
     resp = await _make_request(
         client,

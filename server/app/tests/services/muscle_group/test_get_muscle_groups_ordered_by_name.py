@@ -13,7 +13,7 @@ async def test_get_muscle_groups_ordered_by_name(session: AsyncSession):
     assert item is not None
     assert isinstance(item, MuscleGroupPublic)
     assert item.name == "chest"
-    assert "upper torso" in item.description
+    assert "pushing and pressing" in item.description
 
 
 async def test_get_muscle_groups_ordered_by_name_ordering(session: AsyncSession):
@@ -22,8 +22,8 @@ async def test_get_muscle_groups_ordered_by_name_ordering(session: AsyncSession)
     names = [mg.name for mg in result]
     # case-insensitive sorting to match db
     assert names == sorted(names, key=str.lower)
-    assert names[0] == "arms"
-    assert names[-1] == "shoulders"
+    assert names[0] == "abductors"
+    assert names[-1] == "upper traps"
 
 
 async def test_read_only(session: AsyncSession):
