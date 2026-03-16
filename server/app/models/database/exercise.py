@@ -52,4 +52,7 @@ class Exercise(Base):
 
     muscle_groups: Mapped[list[ExerciseMuscleGroup]] = relationship(
         "ExerciseMuscleGroup",
+        back_populates="exercise",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
