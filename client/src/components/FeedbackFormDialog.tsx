@@ -205,6 +205,7 @@ export function FeedbackFormDialog() {
                     <Button
                         form="feedback-form"
                         type="submit"
+                        variant="success"
                         disabled={
                             isSubmitting || !(isDirty || files.length > 0)
                         }
