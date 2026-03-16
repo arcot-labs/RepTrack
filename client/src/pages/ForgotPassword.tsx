@@ -1,5 +1,6 @@
 import { AuthService } from '@/api/generated'
 import { zForgotPasswordRequest } from '@/api/generated/zod.gen'
+import { Field } from '@/components/forms/Field'
 import {
     Card,
     CardContent,
@@ -8,7 +9,6 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/overrides/button'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
@@ -61,8 +61,11 @@ export function ForgotPassword() {
                             void handleSubmit(onSubmit)(e)
                         }}
                     >
-                        <div className="space-y-1">
-                            <Label htmlFor="email">Email</Label>
+                        <Field
+                            label="Email"
+                            htmlFor="email"
+                            error={errors.email?.message}
+                        >
                             <Input
                                 id="email"
                                 type="email"
@@ -73,12 +76,7 @@ export function ForgotPassword() {
                                 }
                                 {...register('email')}
                             />
-                            {errors.email && (
-                                <p className="text-sm text-destructive">
-                                    {errors.email.message}
-                                </p>
-                            )}
-                        </div>
+                        </Field>
                     </form>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-3">

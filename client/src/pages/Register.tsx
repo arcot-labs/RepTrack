@@ -1,5 +1,6 @@
 import { AuthService } from '@/api/generated'
 import { zRegisterRequest } from '@/api/generated/zod.gen'
+import { Field } from '@/components/forms/Field'
 import {
     Card,
     CardContent,
@@ -8,7 +9,6 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/overrides/button'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
@@ -91,8 +91,11 @@ export function Register() {
                             void handleSubmit(onSubmit)(e)
                         }}
                     >
-                        <div className="space-y-1">
-                            <Label htmlFor="token">Token</Label>
+                        <Field
+                            label="Token"
+                            htmlFor="token"
+                            error={errors.token?.message}
+                        >
                             <Input
                                 id="token"
                                 disabled={tokenSet}
@@ -102,14 +105,12 @@ export function Register() {
                                 }
                                 {...register('token')}
                             />
-                            {errors.token && (
-                                <p className="text-sm text-destructive">
-                                    {errors.token.message}
-                                </p>
-                            )}
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="username">Username</Label>
+                        </Field>
+                        <Field
+                            label="Username"
+                            htmlFor="username"
+                            error={errors.username?.message}
+                        >
                             <Input
                                 id="username"
                                 autoComplete="username"
@@ -119,14 +120,12 @@ export function Register() {
                                 }
                                 {...register('username')}
                             />
-                            {errors.username && (
-                                <p className="text-sm text-destructive">
-                                    {errors.username.message}
-                                </p>
-                            )}
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="password">Password</Label>
+                        </Field>
+                        <Field
+                            label="Password"
+                            htmlFor="password"
+                            error={errors.password?.message}
+                        >
                             <Input
                                 id="password"
                                 type="password"
@@ -137,16 +136,12 @@ export function Register() {
                                 }
                                 {...register('password')}
                             />
-                            {errors.password && (
-                                <p className="text-sm text-destructive">
-                                    {errors.password.message}
-                                </p>
-                            )}
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="confirmPassword">
-                                Confirm Password
-                            </Label>
+                        </Field>
+                        <Field
+                            label="Confirm Password"
+                            htmlFor="confirmPassword"
+                            error={errors.confirmPassword?.message}
+                        >
                             <Input
                                 id="confirmPassword"
                                 type="password"
@@ -159,12 +154,7 @@ export function Register() {
                                 }
                                 {...register('confirmPassword')}
                             />
-                            {errors.confirmPassword && (
-                                <p className="text-sm text-destructive">
-                                    {errors.confirmPassword.message}
-                                </p>
-                            )}
-                        </div>
+                        </Field>
                     </form>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-3">
