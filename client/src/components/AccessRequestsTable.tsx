@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import {
     Dialog,
     DialogContent,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
@@ -85,13 +86,7 @@ export function AccessRequestsTable({
         action: null,
     })
 
-    const handleConfirmAction = () => {
-        if (confirmDialog.request && confirmDialog.action)
-            void handleUpdateStatus(confirmDialog.request, confirmDialog.action)
-        setConfirmDialog({ isOpen: false, request: null, action: null })
-    }
-
-    const handleShowConfirmDialog = (
+    const openConfirmDialog = (
         request: AccessRequestPublic,
         action: 'approved' | 'rejected'
     ) => {
@@ -100,6 +95,20 @@ export function AccessRequestsTable({
             request,
             action,
         })
+    }
+
+    const closeConfirmDialog = () => {
+        setConfirmDialog({
+            isOpen: false,
+            request: null,
+            action: null,
+        })
+    }
+
+    const handleConfirmAction = () => {
+        if (confirmDialog.request && confirmDialog.action)
+            void handleUpdateStatus(confirmDialog.request, confirmDialog.action)
+        closeConfirmDialog()
     }
 
     const handleUpdateStatus = async (
@@ -161,7 +170,7 @@ export function AccessRequestsTable({
                     className: greenText,
                     icon: Check,
                     onSelect: () => {
-                        handleShowConfirmDialog(row, 'approved')
+                        openConfirmDialog(row, 'approved')
                     },
                     disabled: isRowLoading,
                 },
@@ -170,7 +179,7 @@ export function AccessRequestsTable({
                     className: redText,
                     icon: X,
                     onSelect: () => {
-                        handleShowConfirmDialog(row, 'rejected')
+                        openConfirmDialog(row, 'rejected')
                     },
                     disabled: isRowLoading,
                 },
@@ -317,17 +326,8 @@ export function AccessRequestsTable({
                         ?
                         <div className="mt-2">This action is irreversible.</div>
                     </div>
-                    <div className="flex justify-end gap-2">
-                        <Button
-                            onClick={() => {
-                                setConfirmDialog({
-                                    ...confirmDialog,
-                                    isOpen: false,
-                                })
-                            }}
-                        >
-                            Cancel
-                        </Button>
+                    <DialogFooter>
+                        <Button onClick={closeConfirmDialog}>Cancel</Button>
                         <Button
                             onClick={handleConfirmAction}
                             variant={
@@ -340,7 +340,7 @@ export function AccessRequestsTable({
                                 ? 'Approve'
                                 : 'Reject'}
                         </Button>
-                    </div>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </>
