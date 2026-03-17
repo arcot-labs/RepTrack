@@ -52,6 +52,11 @@ export default defineConfig([
                                 'Use Button from @/components/ui/overrides/button',
                         },
                         {
+                            name: '@/components/ui/tooltip',
+                            message:
+                                'Use Tooltip from @/components/ui/overrides/tooltip',
+                        },
+                        {
                             name: 'sonner',
                             importNames: ['toast'],
                             message:
