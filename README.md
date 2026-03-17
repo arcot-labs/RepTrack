@@ -4,7 +4,7 @@
 
 # RepTrack
 
-## Local Development
+## Development
 
 Copy `.env.example` to `.env` & populate variables
 
@@ -27,7 +27,7 @@ Start containers:
 ./scripts/dev.sh
 ```
 
-## Local GitHub Actions Testing
+## Testing GitHub Actions Workflows
 
 Use `act` to run workflows locally for quick validation.
 
@@ -43,13 +43,7 @@ Run a specific job:
 act -j {job-id}
 ```
 
-## Database Conventions
-
-All writes should go through SQLAlchemy
-
-Alembic updates & bulk SQLAlchemy updates must explicitly set `updated_at`
-
-## Shadcn Component Conventions
+## Shadcn Components
 
 shadcn adds components under `client/src/components/ui/`
 
@@ -58,3 +52,15 @@ To ensure custom styles & behavior survive component updates, follow these conve
 - Create custom component overrides under `client/src/components/ui/overrides/`
 - Import override components in app code instead of generated shadcn components
 - Add ESLint rules to prevent direct imports of generated components & point to override paths
+
+## Database
+
+### Conventions
+
+All writes should go through SQLAlchemy
+
+Alembic updates & bulk SQLAlchemy updates must explicitly set `updated_at`
+
+### Database ER Diagram
+
+![diagram](db_erd.png 'Database ER Diagram')
