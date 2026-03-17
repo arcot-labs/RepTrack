@@ -202,7 +202,7 @@ export function ExercisesTable({
                     )}
                     <DataTableTruncatedCell
                         value={row.original.name}
-                        className="max-w-48"
+                        className="max-w-40 min-w-25"
                     />
                 </div>
             ),
@@ -217,7 +217,7 @@ export function ExercisesTable({
                 row.original.description ? (
                     <DataTableTruncatedCell
                         value={row.original.description}
-                        className="max-w-64"
+                        className="max-w-60 min-w-25"
                     />
                 ) : (
                     '—'
@@ -241,7 +241,7 @@ export function ExercisesTable({
                 return names.length ? (
                     <DataTableTruncatedCell
                         value={names.join(', ')}
-                        className="max-w-48"
+                        className="max-w-100 min-w-25"
                     />
                 ) : (
                     '—'
