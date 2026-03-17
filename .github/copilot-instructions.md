@@ -1,4 +1,4 @@
-# RepTrack – Copilot Instructions
+# RepTrack – Agent Instructions
 
 RepTrack is a full-stack strength-training tracker:
 
