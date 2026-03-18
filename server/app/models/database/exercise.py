@@ -13,7 +13,10 @@ if TYPE_CHECKING:
 class Exercise(Base):
     __tablename__ = "exercises"
     __table_args__ = (
-        Index("ix_exercises_user_id", "user_id"),
+        Index(
+            "ix_exercises_user_id",
+            "user_id",
+        ),
         UniqueConstraint(
             "user_id",
             "name",
