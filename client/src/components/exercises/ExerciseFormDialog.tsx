@@ -227,13 +227,6 @@ export function ExerciseFormDialog({
             if (error) {
                 await handleApiError(error, {
                     httpErrorHandlers: {
-                        exercise_update_not_allowed: async () => {
-                            notify.error(
-                                'You cannot update this exercise. Reloading data'
-                            )
-                            closeDialog()
-                            await onReloadExercises()
-                        },
                         exercise_not_found: async () => {
                             notify.error('Exercise not found. Reloading data')
                             closeDialog()

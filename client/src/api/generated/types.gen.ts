@@ -121,10 +121,6 @@ export type ExercisePublic = {
      */
     description: string | null;
     /**
-     * Muscle Groups
-     */
-    muscle_groups: Array<MuscleGroupPublic>;
-    /**
      * Created At
      */
     created_at: string;
@@ -132,6 +128,10 @@ export type ExercisePublic = {
      * Updated At
      */
     updated_at: string;
+    /**
+     * Muscle Groups
+     */
+    muscle_groups: Array<MuscleGroupPublic>;
 };
 
 /**
@@ -702,7 +702,7 @@ export type CreateExerciseResponses = {
     /**
      * Successful Response
      */
-    201: ExercisePublic;
+    204: void;
 };
 
 export type CreateExerciseResponse = CreateExerciseResponses[keyof CreateExerciseResponses];

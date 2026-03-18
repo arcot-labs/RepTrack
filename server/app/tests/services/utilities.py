@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import Settings
 from app.models.database.user import User
 from app.models.schemas.user import UserPublic
+from app.services.user import to_user_public
 
 
 async def get_admin_user_public(
@@ -14,4 +15,4 @@ async def get_admin_user_public(
     )
     admin = result.scalar_one()
 
-    return UserPublic.model_validate(admin, from_attributes=True)
+    return to_user_public(admin)

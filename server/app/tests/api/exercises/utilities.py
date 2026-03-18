@@ -7,6 +7,10 @@ from app.models.database.exercise import Exercise
 from app.models.database.muscle_group import MuscleGroup
 from app.models.database.user import User
 from app.models.schemas.exercise import ExercisePublic
+from app.services.exercise import (  # pyright: ignore[reportPrivateUsage]
+    _get_exercises_with_muscle_groups,
+    to_exercise_public,
+)
 
 from ..utilities import HttpMethod, make_http_request
 
@@ -39,11 +43,12 @@ async def create_user(
 
 async def create_exercise_via_api(
     client: AsyncClient,
+    session: AsyncSession,
     name: str,
     description: str | None = None,
     muscle_group_ids: list[int] | None = None,
 ) -> ExercisePublic:
-    resp = await make_http_request(
+    await make_http_request(
         client,
         method=HttpMethod.POST,
         endpoint="/api/exercises",
@@ -53,7 +58,11 @@ async def create_exercise_via_api(
             "muscle_group_ids": muscle_group_ids or [],
         },
     )
-    return ExercisePublic.model_validate(resp.json())
+    exercises = await _get_exercises_with_muscle_groups(
+        session,
+        Exercise.name == name,
+    )
+    return to_exercise_public(exercises[0])
 
 
 async def create_system_exercise(

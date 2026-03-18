@@ -55,12 +55,6 @@ class AccessRequestRejected(HTTPError):
     detail = "Existing access request rejected"
 
 
-class ExerciseUpdateNotAllowed(HTTPError):
-    status_code = status.HTTP_403_FORBIDDEN
-    code = "exercise_update_not_allowed"
-    detail = "You do not have permission to update this exercise"
-
-
 class AccessRequestNotFound(HTTPError):
     status_code = status.HTTP_404_NOT_FOUND
     code = "access_request_not_found"

@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.exercise import Exercise
 from app.models.database.exercise_muscle_group import ExerciseMuscleGroup
-from app.models.errors import ExerciseNotFound, ExerciseUpdateNotAllowed
+from app.models.errors import ExerciseNotFound
 from app.services.exercise import delete_exercise
 
 from .utilities import create_exercise, create_user, get_muscle_group_id
@@ -52,5 +52,5 @@ async def test_delete_exercise_not_allowed(session: AsyncSession):
         user_id=user.id,
     )
 
-    with pytest.raises(ExerciseUpdateNotAllowed):
+    with pytest.raises(ExerciseNotFound):
         await delete_exercise(exercise.id, user_2.id, session)

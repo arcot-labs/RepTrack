@@ -206,13 +206,6 @@ export const ExercisePublicSchema = {
             ],
             title: 'Description'
         },
-        muscle_groups: {
-            items: {
-                $ref: '#/components/schemas/MuscleGroupPublic'
-            },
-            type: 'array',
-            title: 'Muscle Groups'
-        },
         created_at: {
             type: 'string',
             format: 'date-time',
@@ -222,6 +215,13 @@ export const ExercisePublicSchema = {
             type: 'string',
             format: 'date-time',
             title: 'Updated At'
+        },
+        muscle_groups: {
+            items: {
+                $ref: '#/components/schemas/MuscleGroupPublic'
+            },
+            type: 'array',
+            title: 'Muscle Groups'
         }
     },
     type: 'object',
@@ -230,9 +230,9 @@ export const ExercisePublicSchema = {
         'user_id',
         'name',
         'description',
-        'muscle_groups',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'muscle_groups'
     ],
     title: 'ExercisePublic'
 } as const;

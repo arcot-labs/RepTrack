@@ -31,7 +31,7 @@ async def test_get_exercises(
     user = await create_user(session, username="user", password="password")
 
     await create_system_exercise(session, name="System Exercise")
-    await create_exercise_via_api(client, name="User Exercise")
+    await create_exercise_via_api(client, session, name="User Exercise")
     await create_exercise(
         session,
         name="Another User's Exercise",

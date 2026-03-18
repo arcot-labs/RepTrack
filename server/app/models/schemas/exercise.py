@@ -11,9 +11,10 @@ class ExercisePublic(BaseModel):
     user_id: int | None
     name: str
     description: str | None
-    muscle_groups: list[MuscleGroupPublic]
     created_at: datetime
     updated_at: datetime
+
+    muscle_groups: list[MuscleGroupPublic]
 
 
 class CreateExerciseRequest(BaseModel):

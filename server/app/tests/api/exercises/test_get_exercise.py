@@ -21,10 +21,11 @@ async def _make_request(client: AsyncClient, exercise_id: int):
 # 200
 async def test_get_exercise(
     client: AsyncClient,
+    session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    created = await create_exercise_via_api(client, name="Bench Press")
+    created = await create_exercise_via_api(client, session, name="Bench Press")
 
     resp = await _make_request(client, created.id)
 

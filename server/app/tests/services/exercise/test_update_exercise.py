@@ -4,7 +4,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.errors import (
     ExerciseNameConflict,
     ExerciseNotFound,
-    ExerciseUpdateNotAllowed,
     MuscleGroupNotFound,
 )
 from app.models.schemas.exercise import UpdateExerciseRequest
@@ -64,7 +63,7 @@ async def test_update_exercise_not_allowed(session: AsyncSession):
         user_id=user.id,
     )
 
-    with pytest.raises(ExerciseUpdateNotAllowed):
+    with pytest.raises(ExerciseNotFound):
         await update_exercise(
             exercise.id,
             user_2.id,

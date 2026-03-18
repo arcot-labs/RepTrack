@@ -188,7 +188,6 @@ export class ExercisesService {
      */
     public static createExercise<ThrowOnError extends boolean = false>(options: Options<CreateExerciseData, ThrowOnError>) {
         return (options.client ?? client).post<CreateExerciseResponses, CreateExerciseErrors, ThrowOnError>({
-            responseType: 'json',
             security: [{
                     in: 'cookie',
                     name: 'access_token',

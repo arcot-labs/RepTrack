@@ -7,6 +7,7 @@ from app.core.dependencies import get_current_admin
 from app.models.database.user import User
 from app.models.errors import InsufficientPermissions
 from app.models.schemas.user import UserPublic
+from app.services.user import to_user_public
 
 
 async def _get_admin(session: AsyncSession, settings: Settings) -> UserPublic:
@@ -14,7 +15,7 @@ async def _get_admin(session: AsyncSession, settings: Settings) -> UserPublic:
         select(User).where(User.username == settings.admin.username)
     )
     admin = result.scalar_one()
-    adminPublic = UserPublic.model_validate(admin, from_attributes=True)
+    adminPublic = to_user_public(admin)
     return adminPublic
 
 

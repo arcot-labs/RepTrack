@@ -77,9 +77,9 @@ export const zExercisePublic = z.object({
     user_id: z.int().nullable(),
     name: z.string(),
     description: z.string().nullable(),
-    muscle_groups: z.array(zMuscleGroupPublic),
     created_at: z.iso.datetime(),
-    updated_at: z.iso.datetime()
+    updated_at: z.iso.datetime(),
+    muscle_groups: z.array(zMuscleGroupPublic)
 });
 
 /**
@@ -317,7 +317,7 @@ export const zCreateExerciseData = z.object({
 /**
  * Successful Response
  */
-export const zCreateExerciseResponse = zExercisePublic;
+export const zCreateExerciseResponse = z.void();
 
 export const zDeleteExerciseData = z.object({
     body: z.never().optional(),
