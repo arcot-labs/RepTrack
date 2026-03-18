@@ -18,10 +18,9 @@ from app.models.errors import (
 from app.models.schemas.exercise import (
     CreateExerciseRequest,
     ExercisePublic,
-    MuscleGroupPublic,
     UpdateExerciseRequest,
 )
-from app.services.muscle_group import get_muscle_groups_by_ids
+from app.services.muscle_group import get_muscle_groups_by_ids, to_muscle_group_public
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +42,7 @@ async def _get_exercises_with_muscle_groups(
     return result.scalars().all()
 
 
-def _to_exercise_public(exercise: Exercise) -> ExercisePublic:
+def to_exercise_public(exercise: Exercise) -> ExercisePublic:
     sorted_muscle_groups = sorted(
         exercise.muscle_groups,
         key=lambda emg: emg.muscle_group.name,
@@ -54,8 +53,7 @@ def _to_exercise_public(exercise: Exercise) -> ExercisePublic:
         name=exercise.name,
         description=exercise.description,
         muscle_groups=[
-            MuscleGroupPublic.model_validate(emg.muscle_group, from_attributes=True)
-            for emg in sorted_muscle_groups
+            to_muscle_group_public(emg.muscle_group) for emg in sorted_muscle_groups
         ],
         created_at=exercise.created_at,
         updated_at=exercise.updated_at,
@@ -100,7 +98,7 @@ async def create_exercise(
         db,
         Exercise.id == exercise.id,
     )
-    return _to_exercise_public(exercises[0])
+    return to_exercise_public(exercises[0])
 
 
 async def get_exercises(
@@ -113,7 +111,7 @@ async def get_exercises(
         db,
         (Exercise.user_id.is_(None)) | (Exercise.user_id == user_id),
     )
-    return [_to_exercise_public(e) for e in exercises]
+    return [to_exercise_public(e) for e in exercises]
 
 
 async def get_exercise(
@@ -130,7 +128,7 @@ async def get_exercise(
     )
     if not exercises:
         raise ExerciseNotFound()
-    return _to_exercise_public(exercises[0])
+    return to_exercise_public(exercises[0])
 
 
 async def update_exercise(
