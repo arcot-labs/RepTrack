@@ -2,13 +2,11 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security import PASSWORD_HASH
 from app.models.database.exercise import Exercise
 from app.models.database.muscle_group import MuscleGroup
-from app.models.database.user import User
 from app.models.schemas.exercise import ExercisePublic
-from app.services.exercise import (  # pyright: ignore[reportPrivateUsage]
-    _get_exercises_with_muscle_groups,
+from app.services.exercise import (
+    _get_exercises_with_muscle_groups,  # pyright: ignore[reportPrivateUsage]
     to_exercise_public,
 )
 
@@ -21,24 +19,6 @@ async def get_muscle_group_id(session: AsyncSession, name: str) -> int:
     )
     muscle_group = result.scalar_one()
     return muscle_group.id
-
-
-async def create_user(
-    session: AsyncSession,
-    username: str,
-    password: str,
-) -> User:
-    user = User(
-        username=username,
-        email=f"{username}@example.com",
-        first_name=username.capitalize(),
-        last_name="Test",
-        password_hash=PASSWORD_HASH.hash(password),
-        is_admin=False,
-    )
-    session.add(user)
-    await session.commit()
-    return user
 
 
 async def create_exercise_via_api(

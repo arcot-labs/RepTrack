@@ -73,22 +73,8 @@ async def test_update_exercise_not_logged_in(
     resp = await _make_request(client, system_ex.id, name="Renamed")
 
     assert resp.status_code == status.HTTP_401_UNAUTHORIZED
-
-
-# 403
-async def test_update_exercise_not_allowed(
-    client: AsyncClient,
-    session: AsyncSession,
-    settings: Settings,
-):
-    await login_admin(client, settings)
-    system_ex = await create_system_exercise(session, name="System Row")
-
-    resp = await _make_request(client, system_ex.id, name="Attempted Rename")
-
-    assert resp.status_code == ExerciseNotFound.status_code
     body = resp.json()
-    assert body["detail"] == ExerciseNotFound.detail
+    assert body["detail"] == "Not authenticated"
 
 
 # 404
@@ -119,6 +105,22 @@ async def test_update_exercise_muscle_group_not_found(
     assert resp.status_code == MuscleGroupNotFound.status_code
     body = resp.json()
     assert body["detail"] == MuscleGroupNotFound.detail
+
+
+# 404
+async def test_update_exercise_not_allowed(
+    client: AsyncClient,
+    session: AsyncSession,
+    settings: Settings,
+):
+    await login_admin(client, settings)
+    system_ex = await create_system_exercise(session, name="System Row")
+
+    resp = await _make_request(client, system_ex.id, name="Attempted Rename")
+
+    assert resp.status_code == ExerciseNotFound.status_code
+    body = resp.json()
+    assert body["detail"] == ExerciseNotFound.detail
 
 
 # 409

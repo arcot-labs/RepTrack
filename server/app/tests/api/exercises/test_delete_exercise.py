@@ -47,9 +47,23 @@ async def test_delete_exercise_not_logged_in(
     resp = await _make_request(client, system_ex.id)
 
     assert resp.status_code == status.HTTP_401_UNAUTHORIZED
+    body = resp.json()
+    assert body["detail"] == "Not authenticated"
 
 
-# 403
+# 404
+async def test_delete_exercise_not_found(
+    client: AsyncClient,
+    settings: Settings,
+):
+    await login_admin(client, settings)
+
+    resp = await _make_request(client, 99999)
+
+    assert resp.status_code == ExerciseNotFound.status_code
+
+
+# 404
 async def test_delete_exercise_not_allowed(
     client: AsyncClient,
     session: AsyncSession,
@@ -63,15 +77,3 @@ async def test_delete_exercise_not_allowed(
     assert resp.status_code == ExerciseNotFound.status_code
     body = resp.json()
     assert body["detail"] == ExerciseNotFound.detail
-
-
-# 404
-async def test_delete_exercise_not_found(
-    client: AsyncClient,
-    settings: Settings,
-):
-    await login_admin(client, settings)
-
-    resp = await _make_request(client, 99999)
-
-    assert resp.status_code == ExerciseNotFound.status_code

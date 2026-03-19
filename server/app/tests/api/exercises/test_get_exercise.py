@@ -53,20 +53,6 @@ async def test_get_exercise_system_exercise(
     assert body["user_id"] is None
 
 
-# 404
-async def test_get_exercise_not_found(
-    client: AsyncClient,
-    settings: Settings,
-):
-    await login_admin(client, settings)
-
-    resp = await _make_request(client, 99999)
-
-    assert resp.status_code == ExerciseNotFound.status_code
-    body = resp.json()
-    assert body["detail"] == ExerciseNotFound.detail
-
-
 # 401
 async def test_get_exercise_not_logged_in(
     client: AsyncClient,
@@ -79,3 +65,17 @@ async def test_get_exercise_not_logged_in(
     assert resp.status_code == status.HTTP_401_UNAUTHORIZED
     body = resp.json()
     assert body["detail"] == "Not authenticated"
+
+
+# 404
+async def test_get_exercise_not_found(
+    client: AsyncClient,
+    settings: Settings,
+):
+    await login_admin(client, settings)
+
+    resp = await _make_request(client, 99999)
+
+    assert resp.status_code == ExerciseNotFound.status_code
+    body = resp.json()
+    assert body["detail"] == ExerciseNotFound.detail

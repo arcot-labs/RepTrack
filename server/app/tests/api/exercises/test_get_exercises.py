@@ -8,10 +8,9 @@ from app.tests.api.exercises.utilities import (
     create_exercise,
     create_exercise_via_api,
     create_system_exercise,
-    create_user,
 )
 
-from ..utilities import HttpMethod, login_admin, make_http_request
+from ..utilities import HttpMethod, create_user, login_admin, make_http_request
 
 
 async def _make_request(client: AsyncClient):
@@ -22,13 +21,14 @@ async def _make_request(client: AsyncClient):
     )
 
 
+# 200
 async def test_get_exercises(
     client: AsyncClient,
     session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    user = await create_user(session, username="user", password="password")
+    user = await create_user(session)
 
     await create_system_exercise(session, name="System Exercise")
     await create_exercise_via_api(client, session, name="User Exercise")
