@@ -95,3 +95,9 @@ class ExerciseNameConflict(HTTPError):
     status_code = status.HTTP_409_CONFLICT
     code = "exercise_name_conflict"
     detail = "Exercise with this name already exists"
+
+
+class WorkoutNotFound(HTTPError):
+    status_code = status.HTTP_404_NOT_FOUND
+    code = "workout_not_found"
+    detail = "Workout not found"

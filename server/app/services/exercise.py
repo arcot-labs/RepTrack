@@ -16,6 +16,7 @@ from app.models.errors import (
 )
 from app.models.schemas.exercise import (
     CreateExerciseRequest,
+    ExerciseBase,
     ExercisePublic,
     UpdateExerciseRequest,
 )
@@ -55,6 +56,10 @@ async def _get_owned_exercise(
     if not exercise or user_id != exercise.user_id:
         raise ExerciseNotFound()
     return exercise
+
+
+def to_exercise_base(exercise: Exercise) -> ExerciseBase:
+    return ExerciseBase.model_validate(exercise, from_attributes=True)
 
 
 def to_exercise_public(exercise: Exercise) -> ExercisePublic:

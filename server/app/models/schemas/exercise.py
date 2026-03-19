@@ -6,7 +6,7 @@ from .muscle_group import MuscleGroupPublic
 from .types import ExerciseName
 
 
-class ExercisePublic(BaseModel):
+class ExerciseBase(BaseModel):
     id: int
     user_id: int | None
     name: str
@@ -14,6 +14,8 @@ class ExercisePublic(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+
+class ExercisePublic(ExerciseBase):
     muscle_groups: list[MuscleGroupPublic]
 
 
