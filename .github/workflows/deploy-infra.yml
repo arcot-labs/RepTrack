@@ -33,9 +33,6 @@ jobs:
                   echo "DOCKER_REGISTRY=${{ secrets.DOCKER_REGISTRY }}" >> .env
                   echo "TAG=${{ inputs.tag }}" >> .env
 
-                  echo "PGADMIN_EMAIL=${{ secrets.PGADMIN_EMAIL }}" >> .env
-                  echo "PGADMIN_PASSWORD=${{ secrets.PGADMIN_PASSWORD }}" >> .env
-
                   echo "TRAEFIK_NETWORK=${{ github.ref_name == 'main' && 'traefik-public' || 'traefik-stage-public' }}" >> .env
 
                   echo "ENV=${{ vars.ENV }}" >> .env
@@ -69,10 +66,6 @@ jobs:
                   echo "GH__REPO_OWNER=${{ secrets.GH__REPO_OWNER }}" >> .env
                   echo "GH__TOKEN=${{ secrets.GH__TOKEN }}" >> .env
                   echo "GH__ISSUE_ASSIGNEE=${{ secrets.GH__ISSUE_ASSIGNEE }}" >> .env
-
-            - name: create pg admin config
-              working-directory: scripts
-              run: ./generate_pg_admin_config.sh
 
             - name: start containers
               working-directory: config/infra

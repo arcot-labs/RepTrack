@@ -40,9 +40,6 @@ cleanup() {
 }
 trap cleanup EXIT
 
-cd "$SCRIPT_DIR"
-./generate_pg_admin_config.sh
-
 cd "$INFRA_DIR"
 if [ "$INCLUDE_CLIENT_SERVER" = true ]; then
     echo "Starting Docker Compose with client and server"

@@ -60,7 +60,7 @@ cp config/env/.env.example config/env/.env    # fill in values
 ./scripts/dev.sh -o                           # omit client/server containers
 ```
 
-Docker Compose runs postgres, pgadmin, migrations, server (uvicorn), and client (Vite) with hot reload.
+Docker Compose runs postgres, adminer, migrations, server (uvicorn), and client (Vite) with hot reload.
 
 ---
 

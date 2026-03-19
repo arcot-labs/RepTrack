@@ -4,17 +4,14 @@ services:
         ports:
             - ${DB__PORT?}:5432
 
-    pg-admin:
+    adminer:
         restart: no
         ports:
-            - 8081:80
-
-        environment:
-            - PGADMIN_CONFIG_SERVER_MODE=False
+            - 8081:8080
 
         labels:
-            - traefik.http.routers.${PROJECT?}-${ENV?}-pg-admin.rule=Host(`db.${DOMAIN?}`)
-            - traefik.http.routers.${PROJECT?}-${ENV?}-pg-admin.entrypoints=web
+            - traefik.http.routers.${PROJECT?}-${ENV?}-adminer.rule=Host(`db.${DOMAIN?}`)
+            - traefik.http.routers.${PROJECT?}-${ENV?}-adminer.entrypoints=web
 
     mailcatcher:
         image: dockage/mailcatcher:0.9.0
