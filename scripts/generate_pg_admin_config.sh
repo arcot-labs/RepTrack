@@ -25,7 +25,7 @@ mkdir -p "$CONFIG_DIR"
 
 envsubst < "$SERVERS_TEMPLATE" > "$CONFIG_DIR/$SERVERS_FILE"
 envsubst < "$PGPASS_TEMPLATE" > "$CONFIG_DIR/$PGPASS_FILE"
-chmod 600 "$CONFIG_DIR/$PGPASS_FILE"
+chmod 644 "$CONFIG_DIR/$PGPASS_FILE"
 
 # symlinks for convenience
 ln -sf "$CONFIG_DIR/$SERVERS_FILE" "$ENV_DIR/$SERVERS_FILE"
