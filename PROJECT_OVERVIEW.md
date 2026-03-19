@@ -28,7 +28,7 @@ Browser
 - `client/`: React app (Vite, Tailwind). Pages, auth guards, and generated API client.
 - `server/`: FastAPI app with SQLAlchemy models, services, and tests.
 - `config/infra/`: Docker Compose for local/dev and deployment.
-- `config/env/`: `.env` template and PgAdmin config templates.
+- `config/env/`: `.env` template.
 - `scripts/`: Dev bootstrap and API client generation.
 
 ## Client (Frontend)
@@ -128,7 +128,7 @@ Basic relationships:
 
 - **Docker Compose** in `config/infra/` provides:
     - Postgres 18
-    - PgAdmin
+    - Adminer 5
     - Server container
     - Client container
     - Migrations job

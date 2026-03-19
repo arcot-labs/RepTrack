@@ -22,38 +22,23 @@ services:
             retries: 3
             interval: 1m
 
-    pg-admin:
-        image: dpage/pgadmin4:9
-        container_name: ${PROJECT?}-${ENV?}-pg-admin
+    adminer:
+        image: adminer:5
+        container_name: ${PROJECT?}-${ENV?}-adminer
         restart: unless-stopped
         networks:
             - traefik-public
             - default
 
-        volumes:
-            - pg-admin-data:/var/lib/pgadmin
-            - $HOME/.local/share/reptrack-${ENV?}/servers.json:/pgadmin4/servers.json:ro
-            - $HOME/.local/share/reptrack-${ENV?}/pgpass:/pgpass:ro
         environment:
-            - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL?}
-            - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD?}
-            - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
-            - PGADMIN_CONFIG_WTF_CSRF_CHECK_DEFAULT=False
-            - PGADMIN_CONFIG_WTF_CSRF_ENABLED=False
-
-        entrypoint: |
-            /bin/sh -c "
-                USER_DIR=$(printf "%s" "$PGADMIN_EMAIL" | tr "@" "_");
-                mkdir -p /var/lib/pgadmin/storage/$$USER_DIR;
-                cp -f /pgpass /var/lib/pgadmin/storage/$$USER_DIR;
-                /entrypoint.sh
-            "
+            - ADMINER_DESIGN=dracula
+            - ADMINER_DEFAULT_SERVER=database
 
         labels:
             - traefik.enable=true
             - traefik.prod=${PROD?}
-            - traefik.http.routers.${PROJECT?}-${ENV?}-pg-admin.rule=Host(`db-${DOMAIN?}`)
-            - traefik.http.routers.${PROJECT?}-${ENV?}-pg-admin.entrypoints=websecure
+            - traefik.http.routers.${PROJECT?}-${ENV?}-adminer.rule=Host(`db-${DOMAIN?}`)
+            - traefik.http.routers.${PROJECT?}-${ENV?}-adminer.entrypoints=websecure
 
     migrations:
         image: ${DOCKER_REGISTRY?}/${PROJECT?}-${ENV?}-server:${TAG?}
@@ -202,7 +187,6 @@ services:
 
 volumes:
     pg-data:
-    pg-admin-data:
     server-data:
     server-logs:
 
