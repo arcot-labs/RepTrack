@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.workout import Workout
 from app.models.schemas.workout import CreateWorkoutRequest
-from app.services.workout import (  # pyright: ignore[reportPrivateUsage]
-    _get_workouts,
+from app.services.workout import (
+    _get_workouts,  # pyright: ignore[reportPrivateUsage]
     create_workout,
 )
 

@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.database.exercise import Exercise
 from app.models.errors import ExerciseNameConflict, MuscleGroupNotFound
 from app.models.schemas.exercise import CreateExerciseRequest
-from app.services.exercise import (  # pyright: ignore[reportPrivateUsage]
-    _get_exercises_with_muscle_groups,
+from app.services.exercise import (
+    _get_exercises_with_muscle_groups,  # pyright: ignore[reportPrivateUsage]
     create_exercise,
 )
 
