@@ -14,8 +14,8 @@ async def create_exercise(
     muscle_group_ids: list[int] | None = None,
 ) -> Exercise:
     exercise = Exercise(
-        name=name,
         user_id=user_id,
+        name=name,
         description=description,
     )
     session.add(exercise)

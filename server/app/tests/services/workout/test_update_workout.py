@@ -166,3 +166,32 @@ async def test_update_workout_no_notes(session: AsyncSession):
     assert workout.started_at == new_started_at
     assert workout.ended_at == new_ended_at
     assert workout.notes == "Test workout"
+
+
+async def test_update_workout_null_values(session: AsyncSession):
+    user = await create_user(session)
+    started_at = datetime(2024, 1, 1, tzinfo=UTC)
+    ended_at = datetime(2024, 1, 1, 1, tzinfo=UTC)
+    workout = await create_workout(
+        session,
+        user_id=user.id,
+        started_at=started_at,
+        ended_at=ended_at,
+        notes="Test workout",
+    )
+
+    await update_workout(
+        workout.id,
+        user.id,
+        UpdateWorkoutRequest(
+            ended_at=None,
+            notes=None,
+        ),
+        session,
+    )
+
+    workout = await get_workout(workout.id, user.id, session)
+
+    assert workout.started_at == started_at
+    assert workout.ended_at is None
+    assert workout.notes is None

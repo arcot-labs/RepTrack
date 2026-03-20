@@ -130,15 +130,18 @@ async def update_workout(
 
     workout = await _get_owned_workout(workout_id, user_id, db)
 
-    if req.started_at is None and req.ended_at is None and req.notes is None:
+    if not req.model_fields_set:
         logger.info("No changes provided, skipping update")
         return
 
-    if req.started_at is not None:
+    if "started_at" in req.model_fields_set:
+        assert req.started_at is not None
         workout.started_at = req.started_at
-    if req.ended_at is not None:
+
+    if "ended_at" in req.model_fields_set:
         workout.ended_at = req.ended_at
-    if req.notes is not None:
+
+    if "notes" in req.model_fields_set:
         workout.notes = req.notes
 
     await db.commit()

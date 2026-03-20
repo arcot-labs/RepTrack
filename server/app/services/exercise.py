@@ -155,15 +155,19 @@ async def update_exercise(
 
     exercise = await _get_owned_exercise(exercise_id, user_id, db)
 
-    if req.name is None and req.description is None and req.muscle_group_ids is None:
+    if not req.model_fields_set:
         logger.info("No changes provided, skipping update")
         return
 
-    if req.name is not None:
+    if "name" in req.model_fields_set:
+        assert req.name is not None
         exercise.name = req.name
-    if req.description is not None:
+
+    if "description" in req.model_fields_set:
         exercise.description = req.description
-    if req.muscle_group_ids is not None:
+
+    if "muscle_group_ids" in req.model_fields_set:
+        assert req.muscle_group_ids is not None
         muscle_groups = await get_muscle_groups_by_ids(req.muscle_group_ids, db)
         if len(muscle_groups) != len(req.muscle_group_ids):
             raise MuscleGroupNotFound()
