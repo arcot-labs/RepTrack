@@ -67,10 +67,7 @@ def to_workout_public(workout: Workout) -> WorkoutPublic:
         notes=workout.notes,
         created_at=workout.created_at,
         updated_at=workout.updated_at,
-        exercises=[
-            to_workout_exercise_public(workout_exercise)
-            for workout_exercise in workout.exercises
-        ],
+        exercises=[to_workout_exercise_public(we) for we in workout.exercises],
     )
 
 

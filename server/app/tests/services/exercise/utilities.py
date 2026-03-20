@@ -4,21 +4,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.database.exercise import Exercise
 from app.models.database.exercise_muscle_group import ExerciseMuscleGroup
 from app.models.database.muscle_group import MuscleGroup
-from app.models.database.user import User
-
-
-async def create_user(session: AsyncSession, *, username: str = "user") -> User:
-    user = User(
-        username=username,
-        email=f"{username}@example.com",
-        first_name="Test",
-        last_name="User",
-        password_hash="hash",
-        is_admin=False,
-    )
-    session.add(user)
-    await session.commit()
-    return user
 
 
 async def create_exercise(

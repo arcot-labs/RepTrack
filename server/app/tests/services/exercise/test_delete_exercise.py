@@ -7,7 +7,8 @@ from app.models.database.exercise_muscle_group import ExerciseMuscleGroup
 from app.models.errors import ExerciseNotFound
 from app.services.exercise import delete_exercise
 
-from .utilities import create_exercise, create_user, get_muscle_group_id
+from ..utilities import create_user
+from .utilities import create_exercise, get_muscle_group_id
 
 
 async def test_delete_exercise(session: AsyncSession):

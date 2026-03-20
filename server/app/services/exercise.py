@@ -185,7 +185,11 @@ async def update_exercise(
         raise ExerciseNameConflict()
 
 
-async def delete_exercise(exercise_id: int, user_id: int, db: AsyncSession) -> None:
+async def delete_exercise(
+    exercise_id: int,
+    user_id: int,
+    db: AsyncSession,
+) -> None:
     logger.info(f"Deleting exercise {exercise_id} for user {user_id}")
 
     exercise = await _get_owned_exercise(exercise_id, user_id, db)

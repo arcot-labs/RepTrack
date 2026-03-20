@@ -27,9 +27,9 @@ def test_to_exercise_public_no_muscle_groups() -> None:
     assert result.user_id == 2
     assert result.name == "Bench Press"
     assert result.description == "Flat bench"
-    assert result.muscle_groups == []
     assert result.created_at == created_at
     assert result.updated_at == updated_at
+    assert result.muscle_groups == []
 
 
 def test_to_exercise_public_with_muscle_groups() -> None:

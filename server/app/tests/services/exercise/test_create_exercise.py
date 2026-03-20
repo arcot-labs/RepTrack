@@ -9,7 +9,8 @@ from app.services.exercise import (  # pyright: ignore[reportPrivateUsage]
     create_exercise,
 )
 
-from .utilities import create_user, get_muscle_group_id
+from ..utilities import create_user
+from .utilities import get_muscle_group_id
 
 
 async def test_create_exercise(session: AsyncSession):
