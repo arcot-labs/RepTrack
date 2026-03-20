@@ -2,7 +2,7 @@ import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
-} from '@/components/ui/tooltip'
+} from '@/components/ui/overrides/tooltip'
 import { cn } from '@/lib/utils'
 import { useRef, useState } from 'react'
 

@@ -11,7 +11,7 @@ from app.core.config import Settings, get_settings
 from app.core.security import ACCESS_JWT_KEY, REFRESH_JWT_KEY, verify_jwt
 from app.models.errors import InsufficientPermissions, InvalidCredentials
 from app.models.schemas.user import UserPublic
-from app.services.user import get_user_by_username
+from app.services.user import get_user_by_username, to_user_public
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ async def get_current_user(
     if not user:
         raise InvalidCredentials()
 
-    return UserPublic.model_validate(user, from_attributes=True)
+    return to_user_public(user)
 
 
 async def get_current_admin(

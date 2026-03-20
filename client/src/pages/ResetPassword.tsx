@@ -1,5 +1,6 @@
 import { AuthService } from '@/api/generated'
 import { zResetPasswordRequest } from '@/api/generated/zod.gen'
+import { Field } from '@/components/forms/Field'
 import {
     Card,
     CardContent,
@@ -8,7 +9,6 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/overrides/button'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
@@ -86,8 +86,11 @@ export function ResetPassword() {
                             void handleSubmit(onSubmit)(e)
                         }}
                     >
-                        <div className="space-y-1">
-                            <Label htmlFor="token">Token</Label>
+                        <Field
+                            label="Token"
+                            htmlFor="token"
+                            error={errors.token?.message}
+                        >
                             <Input
                                 id="token"
                                 autoComplete="off"
@@ -98,14 +101,12 @@ export function ResetPassword() {
                                 }
                                 {...register('token')}
                             />
-                            {errors.token && (
-                                <p className="text-sm text-destructive">
-                                    {errors.token.message}
-                                </p>
-                            )}
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="password">New Password</Label>
+                        </Field>
+                        <Field
+                            label="New Password"
+                            htmlFor="password"
+                            error={errors.password?.message}
+                        >
                             <Input
                                 id="password"
                                 type="password"
@@ -116,16 +117,12 @@ export function ResetPassword() {
                                 }
                                 {...register('password')}
                             />
-                            {errors.password && (
-                                <p className="text-sm text-destructive">
-                                    {errors.password.message}
-                                </p>
-                            )}
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="confirmPassword">
-                                Confirm Password
-                            </Label>
+                        </Field>
+                        <Field
+                            label="Confirm Password"
+                            htmlFor="confirmPassword"
+                            error={errors.confirmPassword?.message}
+                        >
                             <Input
                                 id="confirmPassword"
                                 type="password"
@@ -138,12 +135,7 @@ export function ResetPassword() {
                                 }
                                 {...register('confirmPassword')}
                             />
-                            {errors.confirmPassword && (
-                                <p className="text-sm text-destructive">
-                                    {errors.confirmPassword.message}
-                                </p>
-                            )}
-                        </div>
+                        </Field>
                     </form>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-3">

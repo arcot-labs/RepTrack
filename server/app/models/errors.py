@@ -55,12 +55,6 @@ class AccessRequestRejected(HTTPError):
     detail = "Existing access request rejected"
 
 
-class ExerciseUpdateNotAllowed(HTTPError):
-    status_code = status.HTTP_403_FORBIDDEN
-    code = "exercise_update_not_allowed"
-    detail = "You do not have permission to update this exercise"
-
-
 class AccessRequestNotFound(HTTPError):
     status_code = status.HTTP_404_NOT_FOUND
     code = "access_request_not_found"
@@ -101,3 +95,9 @@ class ExerciseNameConflict(HTTPError):
     status_code = status.HTTP_409_CONFLICT
     code = "exercise_name_conflict"
     detail = "Exercise with this name already exists"
+
+
+class WorkoutNotFound(HTTPError):
+    status_code = status.HTTP_404_NOT_FOUND
+    code = "workout_not_found"
+    detail = "Workout not found"

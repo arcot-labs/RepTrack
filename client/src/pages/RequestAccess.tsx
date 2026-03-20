@@ -1,5 +1,6 @@
 import { AuthService } from '@/api/generated'
 import { zRequestAccessRequest } from '@/api/generated/zod.gen'
+import { Field } from '@/components/forms/Field'
 import {
     Card,
     CardContent,
@@ -8,7 +9,6 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/overrides/button'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
@@ -75,8 +75,11 @@ export function RequestAccess() {
                             void handleSubmit(onSubmit)(e)
                         }}
                     >
-                        <div className="space-y-1">
-                            <Label htmlFor="first_name">First name</Label>
+                        <Field
+                            label="First name"
+                            htmlFor="first_name"
+                            error={errors.first_name?.message}
+                        >
                             <Input
                                 id="first_name"
                                 autoComplete="given-name"
@@ -88,14 +91,12 @@ export function RequestAccess() {
                                 }
                                 {...register('first_name')}
                             />
-                            {errors.first_name && (
-                                <p className="text-sm text-destructive">
-                                    {errors.first_name.message}
-                                </p>
-                            )}
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="last_name">Last name</Label>
+                        </Field>
+                        <Field
+                            label="Last name"
+                            htmlFor="last_name"
+                            error={errors.last_name?.message}
+                        >
                             <Input
                                 id="last_name"
                                 autoComplete="family-name"
@@ -105,14 +106,12 @@ export function RequestAccess() {
                                 }
                                 {...register('last_name')}
                             />
-                            {errors.last_name && (
-                                <p className="text-sm text-destructive">
-                                    {errors.last_name.message}
-                                </p>
-                            )}
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="email">Email</Label>
+                        </Field>
+                        <Field
+                            label="Email"
+                            htmlFor="email"
+                            error={errors.email?.message}
+                        >
                             <Input
                                 id="email"
                                 type="email"
@@ -123,12 +122,7 @@ export function RequestAccess() {
                                 }
                                 {...register('email')}
                             />
-                            {errors.email && (
-                                <p className="text-sm text-destructive">
-                                    {errors.email.message}
-                                </p>
-                            )}
-                        </div>
+                        </Field>
                     </form>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-3">

@@ -3,7 +3,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
-from app.models.errors import ExerciseNotFound, ExerciseUpdateNotAllowed
+from app.models.errors import ExerciseNotFound
 from app.tests.api.exercises.utilities import (
     create_exercise_via_api,
     create_system_exercise,
@@ -26,10 +26,11 @@ async def _make_request(
 # 204
 async def test_delete_exercise(
     client: AsyncClient,
+    session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    created = await create_exercise_via_api(client, name="Exercise")
+    created = await create_exercise_via_api(client, session, name="Exercise")
 
     resp = await _make_request(client, created.id)
 
@@ -46,22 +47,8 @@ async def test_delete_exercise_not_logged_in(
     resp = await _make_request(client, system_ex.id)
 
     assert resp.status_code == status.HTTP_401_UNAUTHORIZED
-
-
-# 403
-async def test_delete_exercise_not_allowed(
-    client: AsyncClient,
-    session: AsyncSession,
-    settings: Settings,
-):
-    await login_admin(client, settings)
-    system_ex = await create_system_exercise(session, name="System Exercise")
-
-    resp = await _make_request(client, system_ex.id)
-
-    assert resp.status_code == ExerciseUpdateNotAllowed.status_code
     body = resp.json()
-    assert body["detail"] == ExerciseUpdateNotAllowed.detail
+    assert body["detail"] == "Not authenticated"
 
 
 # 404
@@ -74,3 +61,19 @@ async def test_delete_exercise_not_found(
     resp = await _make_request(client, 99999)
 
     assert resp.status_code == ExerciseNotFound.status_code
+
+
+# 404
+async def test_delete_exercise_not_allowed(
+    client: AsyncClient,
+    session: AsyncSession,
+    settings: Settings,
+):
+    await login_admin(client, settings)
+    system_ex = await create_system_exercise(session, name="System Exercise")
+
+    resp = await _make_request(client, system_ex.id)
+
+    assert resp.status_code == ExerciseNotFound.status_code
+    body = resp.json()
+    assert body["detail"] == ExerciseNotFound.detail

@@ -7,6 +7,7 @@ import {
     zCreateExerciseRequest,
     zUpdateExerciseRequest,
 } from '@/api/generated/zod.gen'
+import { Field } from '@/components/forms/Field'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
     Dialog,
@@ -18,13 +19,12 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/overrides/button'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import { capitalizeWords } from '@/lib/text'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, type ReactNode } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -41,23 +41,6 @@ const defaultUpdateExerciseFormValues: UpdateExerciseForm = {
     name: '',
     description: '',
     muscle_group_ids: [],
-}
-
-interface FieldProps {
-    label: string
-    htmlFor: string
-    error?: string
-    children: ReactNode
-}
-
-function Field({ label, htmlFor, error, children }: FieldProps) {
-    return (
-        <div className="space-y-1">
-            <Label htmlFor={htmlFor}>{label}</Label>
-            {children}
-            {error && <p className="text-sm text-destructive">{error}</p>}
-        </div>
-    )
 }
 
 interface ExerciseFormDialogProps {
@@ -244,13 +227,6 @@ export function ExerciseFormDialog({
             if (error) {
                 await handleApiError(error, {
                     httpErrorHandlers: {
-                        exercise_update_not_allowed: async () => {
-                            notify.error(
-                                'You cannot update this exercise. Reloading data'
-                            )
-                            closeDialog()
-                            await onReloadExercises()
-                        },
                         exercise_not_found: async () => {
                             notify.error('Exercise not found. Reloading data')
                             closeDialog()
@@ -344,8 +320,10 @@ export function ExerciseFormDialog({
                                 : registerEdit('description'))}
                         />
                     </Field>
-                    <div className="space-y-1">
-                        <Label>Muscle Groups</Label>
+                    <Field
+                        label="Muscle Groups"
+                        error={errors.muscle_group_ids?.message}
+                    >
                         <div className="max-h-50 space-y-2 overflow-y-auto rounded-md border p-3">
                             {muscleGroups.map((group) => {
                                 const checked = selectedMuscleGroupIds.includes(
@@ -379,7 +357,7 @@ export function ExerciseFormDialog({
                                 )
                             })}
                         </div>
-                    </div>
+                    </Field>
                 </form>
                 <DialogFooter>
                     <DialogClose asChild>

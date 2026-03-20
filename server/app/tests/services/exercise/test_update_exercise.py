@@ -4,13 +4,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.errors import (
     ExerciseNameConflict,
     ExerciseNotFound,
-    ExerciseUpdateNotAllowed,
     MuscleGroupNotFound,
 )
 from app.models.schemas.exercise import UpdateExerciseRequest
 from app.services.exercise import get_exercise, update_exercise
 
-from .utilities import create_exercise, create_user, get_muscle_group_id
+from ..utilities import create_user
+from .utilities import create_exercise, get_muscle_group_id
 
 
 async def test_update_exercise(session: AsyncSession):
@@ -33,11 +33,11 @@ async def test_update_exercise(session: AsyncSession):
         session,
     )
 
-    result = await get_exercise(exercise.id, user.id, session)
+    exercise = await get_exercise(exercise.id, user.id, session)
 
-    assert result.name == "Incline Bench"
-    assert result.description == "Updated description"
-    assert [muscle_group.id for muscle_group in result.muscle_groups] == [
+    assert exercise.name == "Incline Bench"
+    assert exercise.description == "Updated description"
+    assert [muscle_group.id for muscle_group in exercise.muscle_groups] == [
         muscle_group_id
     ]
 
@@ -64,7 +64,7 @@ async def test_update_exercise_not_allowed(session: AsyncSession):
         user_id=user.id,
     )
 
-    with pytest.raises(ExerciseUpdateNotAllowed):
+    with pytest.raises(ExerciseNotFound):
         await update_exercise(
             exercise.id,
             user_2.id,
@@ -88,11 +88,11 @@ async def test_update_exercise_no_changes(session: AsyncSession):
         session,
     )
 
-    result = await get_exercise(exercise.id, user.id, session)
+    exercise = await get_exercise(exercise.id, user.id, session)
 
-    assert result.name == "Bench"
-    assert result.description is None
-    assert len(result.muscle_groups) == 0
+    assert exercise.name == "Bench"
+    assert exercise.description is None
+    assert len(exercise.muscle_groups) == 0
 
 
 async def test_update_exercise_no_name(session: AsyncSession):
@@ -110,6 +110,12 @@ async def test_update_exercise_no_name(session: AsyncSession):
         session,
     )
 
+    exercise = await get_exercise(exercise.id, user.id, session)
+
+    assert exercise.name == "Bench"
+    assert exercise.description == "Updated description"
+    assert len(exercise.muscle_groups) == 0
+
 
 async def test_update_exercise_no_description(session: AsyncSession):
     user = await create_user(session)
@@ -125,6 +131,35 @@ async def test_update_exercise_no_description(session: AsyncSession):
         UpdateExerciseRequest(name="Incline Bench"),
         session,
     )
+
+    exercise = await get_exercise(exercise.id, user.id, session)
+
+    assert exercise.name == "Incline Bench"
+    assert exercise.description is None
+    assert len(exercise.muscle_groups) == 0
+
+
+async def test_update_exercise_null_values(session: AsyncSession):
+    user = await create_user(session)
+    exercise = await create_exercise(
+        session,
+        name="Bench",
+        user_id=user.id,
+        description="Initial description",
+    )
+
+    await update_exercise(
+        exercise.id,
+        user.id,
+        UpdateExerciseRequest(description=None),
+        session,
+    )
+
+    exercise = await get_exercise(exercise.id, user.id, session)
+
+    assert exercise.name == "Bench"
+    assert exercise.description is None
+    assert len(exercise.muscle_groups) == 0
 
 
 async def test_update_exercise_muscle_group_not_found(session: AsyncSession):

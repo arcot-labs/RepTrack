@@ -1,4 +1,3 @@
-import logging
 from collections.abc import Callable
 from typing import Any
 
@@ -6,8 +5,6 @@ import pytest
 
 from app.core.config import EmailSettings, Settings
 from app.services.email import EmailService, get_email_service
-
-logger = logging.getLogger(__name__)
 
 
 @pytest.fixture

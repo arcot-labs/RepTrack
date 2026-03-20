@@ -8,7 +8,6 @@ from app.core.config import Settings
 from app.models.errors import (
     ExerciseNameConflict,
     ExerciseNotFound,
-    ExerciseUpdateNotAllowed,
     MuscleGroupNotFound,
 )
 from app.tests.api.exercises.utilities import (
@@ -50,7 +49,7 @@ async def test_update_exercise(
     settings: Settings,
 ):
     await login_admin(client, settings)
-    created = await create_exercise_via_api(client, name="Old Name")
+    created = await create_exercise_via_api(client, session, name="Old Name")
     muscle_group_id = await get_muscle_group_id(session, name="chest")
 
     resp = await _make_request(
@@ -74,22 +73,8 @@ async def test_update_exercise_not_logged_in(
     resp = await _make_request(client, system_ex.id, name="Renamed")
 
     assert resp.status_code == status.HTTP_401_UNAUTHORIZED
-
-
-# 403
-async def test_update_exercise_not_allowed(
-    client: AsyncClient,
-    session: AsyncSession,
-    settings: Settings,
-):
-    await login_admin(client, settings)
-    system_ex = await create_system_exercise(session, name="System Row")
-
-    resp = await _make_request(client, system_ex.id, name="Attempted Rename")
-
-    assert resp.status_code == ExerciseUpdateNotAllowed.status_code
     body = resp.json()
-    assert body["detail"] == ExerciseUpdateNotAllowed.detail
+    assert body["detail"] == "Not authenticated"
 
 
 # 404
@@ -109,10 +94,11 @@ async def test_update_exercise_not_found(
 # 404
 async def test_update_exercise_muscle_group_not_found(
     client: AsyncClient,
+    session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    created = await create_exercise_via_api(client, name="Flye")
+    created = await create_exercise_via_api(client, session, name="Flye")
 
     resp = await _make_request(client, created.id, muscle_group_ids=[99999])
 
@@ -121,15 +107,32 @@ async def test_update_exercise_muscle_group_not_found(
     assert body["detail"] == MuscleGroupNotFound.detail
 
 
+# 404
+async def test_update_exercise_not_allowed(
+    client: AsyncClient,
+    session: AsyncSession,
+    settings: Settings,
+):
+    await login_admin(client, settings)
+    system_ex = await create_system_exercise(session, name="System Row")
+
+    resp = await _make_request(client, system_ex.id, name="Attempted Rename")
+
+    assert resp.status_code == ExerciseNotFound.status_code
+    body = resp.json()
+    assert body["detail"] == ExerciseNotFound.detail
+
+
 # 409
 async def test_update_exercise_name_conflict(
     client: AsyncClient,
+    session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
 
-    await create_exercise_via_api(client, name="Taken Name")
-    other = await create_exercise_via_api(client, name="To Rename")
+    await create_exercise_via_api(client, session, name="Taken Name")
+    other = await create_exercise_via_api(client, session, name="To Rename")
 
     resp = await _make_request(client, other.id, name="Taken Name")
 

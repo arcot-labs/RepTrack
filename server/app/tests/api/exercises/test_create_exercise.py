@@ -4,7 +4,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
 from app.models.errors import ExerciseNameConflict, MuscleGroupNotFound
-from app.models.schemas.exercise import ExercisePublic
 from app.tests.api.exercises.utilities import get_muscle_group_id
 
 from ..utilities import HttpMethod, login_admin, make_http_request
@@ -28,7 +27,7 @@ async def _make_request(
     )
 
 
-# 201
+# 204
 async def test_create_exercise(
     client: AsyncClient,
     session: AsyncSession,
@@ -44,15 +43,7 @@ async def test_create_exercise(
         muscle_group_ids=[muscle_group_id],
     )
 
-    assert resp.status_code == status.HTTP_201_CREATED
-
-    body = resp.json()
-    ExercisePublic.model_validate(body)
-    assert body["name"] == "Overhead Press"
-    assert body["description"] == "Pressing movement for shoulders"
-    assert body["user_id"] is not None
-    assert len(body["muscle_groups"]) == 1
-    assert body["muscle_groups"][0]["id"] == muscle_group_id
+    assert resp.status_code == status.HTTP_204_NO_CONTENT
 
 
 # 401

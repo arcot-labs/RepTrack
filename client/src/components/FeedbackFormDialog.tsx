@@ -1,5 +1,6 @@
 import { FeedbackService } from '@/api/generated'
 import { zCreateFeedbackRequest } from '@/api/generated/zod.gen'
+import { Field } from '@/components/forms/Field'
 import {
     Dialog,
     DialogClose,
@@ -11,7 +12,6 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/overrides/button'
 import { Textarea } from '@/components/ui/textarea'
 import { handleApiError } from '@/lib/http'
@@ -135,8 +135,11 @@ export function FeedbackFormDialog() {
                         void handleSubmit(onSubmit)(e)
                     }}
                 >
-                    <div className="space-y-1">
-                        <Label htmlFor="title">Title</Label>
+                    <Field
+                        label="Title"
+                        htmlFor="title"
+                        error={errors.title?.message}
+                    >
                         <Input
                             id="title"
                             placeholder={'Enter a brief title...'}
@@ -144,14 +147,12 @@ export function FeedbackFormDialog() {
                             className={errors.title ? 'border-destructive' : ''}
                             {...register('title')}
                         />
-                        {errors.title && (
-                            <p className="text-sm text-destructive">
-                                {errors.title.message}
-                            </p>
-                        )}
-                    </div>
-                    <div className="space-y-1">
-                        <Label htmlFor="description">Description</Label>
+                    </Field>
+                    <Field
+                        label="Description"
+                        htmlFor="description"
+                        error={errors.description?.message}
+                    >
                         <Textarea
                             id="description"
                             placeholder={
@@ -166,14 +167,8 @@ export function FeedbackFormDialog() {
                             {...register('description')}
                             rows={4}
                         />
-                        {errors.description && (
-                            <p className="text-sm text-destructive">
-                                {errors.description.message}
-                            </p>
-                        )}
-                    </div>
-                    <div className="space-y-1">
-                        <Label htmlFor="files">Attach files (optional)</Label>
+                    </Field>
+                    <Field label="Attach files (optional)" htmlFor="files">
                         <Input
                             id="files"
                             type="file"
@@ -188,7 +183,7 @@ export function FeedbackFormDialog() {
                                 {files.length > 1 ? 's' : ''} selected
                             </p>
                         )}
-                    </div>
+                    </Field>
                 </form>
                 <DialogFooter>
                     <DialogClose asChild>

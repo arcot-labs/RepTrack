@@ -1,5 +1,3 @@
-import logging
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.exercise import Exercise
@@ -7,14 +5,8 @@ from app.services.exercise import (
     _get_exercises_with_muscle_groups,  # pyright: ignore[reportPrivateUsage]
 )
 
-from .utilities import (
-    clear_exercises,
-    create_exercise,
-    create_user,
-    get_muscle_group_id,
-)
-
-logger = logging.getLogger(__name__)
+from ..utilities import create_user
+from .utilities import clear_exercises, create_exercise, get_muscle_group_id
 
 
 async def test_get_exercises_with_muscle_groups_no_where_clause(

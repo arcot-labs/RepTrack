@@ -14,9 +14,10 @@ from app.models.schemas.user import UserPublic
 from app.services.access_request import (
     get_access_request_by_id,
     get_access_requests_with_reviewer,
+    to_access_request_public,
 )
 from app.services.email import EmailService
-from app.services.user import get_users_ordered_by_username
+from app.services.user import get_users_ordered_by_username, to_user_public
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +26,7 @@ async def get_access_requests(db: AsyncSession) -> list[AccessRequestPublic]:
     logger.info("Getting access requests")
 
     requests = await get_access_requests_with_reviewer(db)
-    return [
-        AccessRequestPublic.model_validate(r, from_attributes=True) for r in requests
-    ]
+    return [to_access_request_public(r) for r in requests]
 
 
 async def update_access_request_status(
@@ -79,4 +78,4 @@ async def get_users(db: AsyncSession) -> list[UserPublic]:
     logger.info("Getting users")
 
     users = await get_users_ordered_by_username(db)
-    return [UserPublic.model_validate(user, from_attributes=True) for user in users]
+    return [to_user_public(user) for user in users]

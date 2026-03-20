@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     TEXT,
@@ -12,9 +13,12 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+
+if TYPE_CHECKING:
+    from app.models.database.workout_exercise import WorkoutExercise
 
 
 class Set(Base):
@@ -68,4 +72,9 @@ class Set(Base):
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
+    )
+
+    workout_exercise: Mapped[WorkoutExercise] = relationship(
+        "WorkoutExercise",
+        back_populates="sets",
     )

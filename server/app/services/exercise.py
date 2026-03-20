@@ -12,16 +12,15 @@ from app.models.database.exercise_muscle_group import ExerciseMuscleGroup
 from app.models.errors import (
     ExerciseNameConflict,
     ExerciseNotFound,
-    ExerciseUpdateNotAllowed,
     MuscleGroupNotFound,
 )
 from app.models.schemas.exercise import (
     CreateExerciseRequest,
+    ExerciseBase,
     ExercisePublic,
-    MuscleGroupPublic,
     UpdateExerciseRequest,
 )
-from app.services.muscle_group import get_muscle_groups_by_ids
+from app.services.muscle_group import get_muscle_groups_by_ids, to_muscle_group_public
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +42,27 @@ async def _get_exercises_with_muscle_groups(
     return result.scalars().all()
 
 
-def _to_exercise_public(exercise: Exercise) -> ExercisePublic:
+async def _get_owned_exercise(
+    exercise_id: int,
+    user_id: int,
+    db: AsyncSession,
+) -> Exercise:
+    result = await db.execute(
+        select(Exercise).where(
+            Exercise.id == exercise_id,
+        )
+    )
+    exercise = result.scalar_one_or_none()
+    if not exercise or user_id != exercise.user_id:
+        raise ExerciseNotFound()
+    return exercise
+
+
+def to_exercise_base(exercise: Exercise) -> ExerciseBase:
+    return ExerciseBase.model_validate(exercise, from_attributes=True)
+
+
+def to_exercise_public(exercise: Exercise) -> ExercisePublic:
     sorted_muscle_groups = sorted(
         exercise.muscle_groups,
         key=lambda emg: emg.muscle_group.name,
@@ -53,12 +72,11 @@ def _to_exercise_public(exercise: Exercise) -> ExercisePublic:
         user_id=exercise.user_id,
         name=exercise.name,
         description=exercise.description,
-        muscle_groups=[
-            MuscleGroupPublic.model_validate(emg.muscle_group, from_attributes=True)
-            for emg in sorted_muscle_groups
-        ],
         created_at=exercise.created_at,
         updated_at=exercise.updated_at,
+        muscle_groups=[
+            to_muscle_group_public(emg.muscle_group) for emg in sorted_muscle_groups
+        ],
     )
 
 
@@ -66,7 +84,7 @@ async def create_exercise(
     user_id: int,
     req: CreateExerciseRequest,
     db: AsyncSession,
-) -> ExercisePublic:
+) -> None:
     logger.info(f"Creating exercise '{req.name}' for user {user_id}")
 
     muscle_groups = await get_muscle_groups_by_ids(req.muscle_group_ids, db)
@@ -96,12 +114,6 @@ async def create_exercise(
 
     await db.commit()
 
-    exercises = await _get_exercises_with_muscle_groups(
-        db,
-        Exercise.id == exercise.id,
-    )
-    return _to_exercise_public(exercises[0])
-
 
 async def get_exercises(
     user_id: int,
@@ -113,7 +125,7 @@ async def get_exercises(
         db,
         (Exercise.user_id.is_(None)) | (Exercise.user_id == user_id),
     )
-    return [_to_exercise_public(e) for e in exercises]
+    return [to_exercise_public(e) for e in exercises]
 
 
 async def get_exercise(
@@ -130,7 +142,7 @@ async def get_exercise(
     )
     if not exercises:
         raise ExerciseNotFound()
-    return _to_exercise_public(exercises[0])
+    return to_exercise_public(exercises[0])
 
 
 async def update_exercise(
@@ -141,25 +153,21 @@ async def update_exercise(
 ) -> None:
     logger.info(f"Updating exercise {exercise_id} for user {user_id}")
 
-    result = await db.execute(
-        select(Exercise).where(Exercise.id == exercise_id),
-    )
-    exercise = result.scalar_one_or_none()
+    exercise = await _get_owned_exercise(exercise_id, user_id, db)
 
-    if not exercise:
-        raise ExerciseNotFound()
-    if exercise.user_id != user_id:
-        raise ExerciseUpdateNotAllowed()
-
-    if req.name is None and req.description is None and req.muscle_group_ids is None:
+    if not req.model_fields_set:
         logger.info("No changes provided, skipping update")
         return
 
-    if req.name is not None:
+    if "name" in req.model_fields_set:
+        assert req.name is not None
         exercise.name = req.name
-    if req.description is not None:
+
+    if "description" in req.model_fields_set:
         exercise.description = req.description
-    if req.muscle_group_ids is not None:
+
+    if "muscle_group_ids" in req.model_fields_set:
+        assert req.muscle_group_ids is not None
         muscle_groups = await get_muscle_groups_by_ids(req.muscle_group_ids, db)
         if len(muscle_groups) != len(req.muscle_group_ids):
             raise MuscleGroupNotFound()
@@ -181,18 +189,13 @@ async def update_exercise(
         raise ExerciseNameConflict()
 
 
-async def delete_exercise(exercise_id: int, user_id: int, db: AsyncSession) -> None:
+async def delete_exercise(
+    exercise_id: int,
+    user_id: int,
+    db: AsyncSession,
+) -> None:
     logger.info(f"Deleting exercise {exercise_id} for user {user_id}")
 
-    result = await db.execute(
-        select(Exercise).where(Exercise.id == exercise_id),
-    )
-    exercise = result.scalar_one_or_none()
-
-    if not exercise:
-        raise ExerciseNotFound()
-    if exercise.user_id != user_id:
-        raise ExerciseUpdateNotAllowed()
-
+    exercise = await _get_owned_exercise(exercise_id, user_id, db)
     await db.delete(exercise)
     await db.commit()
