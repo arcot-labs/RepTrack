@@ -1,8 +1,8 @@
 import {
     type ExercisePublic,
-    ExercisesService,
+    ExerciseService,
     type MuscleGroupPublic,
-    MuscleGroupsService,
+    MuscleGroupService,
 } from '@/api/generated'
 import { ExercisesTable } from '@/components/exercises/ExercisesTable'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -19,7 +19,7 @@ export function Exercises() {
     const loadExercises = async () => {
         setIsLoadingExercises(true)
         try {
-            const { data, error } = await ExercisesService.getExercises()
+            const { data, error } = await ExerciseService.getExercises()
             if (error) {
                 await handleApiError(error, {
                     fallbackMessage: 'Failed to fetch exercises',
@@ -37,7 +37,7 @@ export function Exercises() {
     const loadMuscleGroups = async () => {
         setIsLoadingMuscleGroups(true)
         try {
-            const { data, error } = await MuscleGroupsService.getMuscleGroups()
+            const { data, error } = await MuscleGroupService.getMuscleGroups()
             if (error) {
                 await handleApiError(error, {
                     fallbackMessage: 'Failed to fetch muscle groups',

@@ -166,7 +166,7 @@ export class AuthService {
     }
 }
 
-export class ExercisesService {
+export class ExerciseService {
     /**
      * Get Exercises Endpoint
      */
@@ -300,7 +300,7 @@ export class HealthService {
     }
 }
 
-export class MuscleGroupsService {
+export class MuscleGroupService {
     /**
      * Get Muscle Groups Endpoint
      */
@@ -336,7 +336,7 @@ export class UserService {
     }
 }
 
-export class WorkoutsService {
+export class WorkoutService {
     /**
      * Get Workouts Endpoint
      */
