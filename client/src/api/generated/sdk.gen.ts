@@ -444,7 +444,7 @@ export class WorkoutExerciseService {
     }
     
     /**
-     * Remove Workout Exercise Endpoint
+     * Delete Workout Exercise Endpoint
      */
     public static deleteWorkoutExercise<ThrowOnError extends boolean = false>(options: Options<DeleteWorkoutExerciseData, ThrowOnError>) {
         return (options.client ?? client).delete<DeleteWorkoutExerciseResponses, DeleteWorkoutExerciseErrors, ThrowOnError>({

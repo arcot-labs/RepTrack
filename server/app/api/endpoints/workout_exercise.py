@@ -11,7 +11,7 @@ from app.models.schemas.workout_exercise import (
 )
 from app.services.workout_exercise import (
     create_workout_exercise,
-    remove_workout_exercise,
+    delete_workout_exercise,
 )
 
 api_router = APIRouter(
@@ -48,10 +48,10 @@ async def create_workout_exercise_endpoint(
         status.HTTP_404_NOT_FOUND: ErrorResponseModel,
     },
 )
-async def remove_workout_exercise_endpoint(
+async def delete_workout_exercise_endpoint(
     workout_id: int,
     workout_exercise_id: int,
     user: Annotated[UserPublic, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
-    await remove_workout_exercise(workout_id, workout_exercise_id, user.id, db)
+    await delete_workout_exercise(workout_id, workout_exercise_id, user.id, db)

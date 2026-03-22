@@ -81,7 +81,7 @@ async def create_workout_exercise(
     await db.commit()
 
 
-async def remove_workout_exercise(
+async def delete_workout_exercise(
     workout_id: int,
     workout_exercise_id: int,
     user_id: int,
