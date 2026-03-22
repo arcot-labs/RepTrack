@@ -58,6 +58,7 @@ async def create_workout_exercise(
 ) -> None:
     logger.info(f"Adding exercise {req.exercise_id} to workout {workout_id}")
 
+    # validate workout existence & ownership
     await get_owned_workout(workout_id, user_id, db)
 
     exercises = await query_exercises(
@@ -89,6 +90,7 @@ async def delete_workout_exercise(
 ) -> None:
     logger.info(f"Removing workout exercise {workout_exercise_id} from {workout_id}")
 
+    # validate workout existence & ownership
     await get_owned_workout(workout_id, user_id, db)
 
     result = await db.execute(
