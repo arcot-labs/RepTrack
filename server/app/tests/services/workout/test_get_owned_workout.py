@@ -2,9 +2,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.errors import WorkoutNotFound
-from app.services.workout import (
-    _get_owned_workout,  # pyright: ignore[reportPrivateUsage]
-)
+from app.services.workout import get_owned_workout
 
 from ..utilities import create_user
 from .utilities import create_workout
@@ -16,7 +14,7 @@ async def test_get_owned_workouts(
     user = await create_user(session)
     workout = await create_workout(session, user.id)
 
-    result = await _get_owned_workout(workout.id, user.id, session)
+    result = await get_owned_workout(workout.id, user.id, session)
 
     assert result == workout
 
@@ -25,7 +23,7 @@ async def test_get_owned_workout_not_found(
     session: AsyncSession,
 ):
     with pytest.raises(WorkoutNotFound):
-        await _get_owned_workout(999, 1, session)
+        await get_owned_workout(999, 1, session)
 
 
 async def test_get_owned_workout_not_owned(
@@ -37,4 +35,4 @@ async def test_get_owned_workout_not_owned(
     workout = await create_workout(session, user_1.id)
 
     with pytest.raises(WorkoutNotFound):
-        await _get_owned_workout(workout.id, user_2.id, session)
+        await get_owned_workout(workout.id, user_2.id, session)

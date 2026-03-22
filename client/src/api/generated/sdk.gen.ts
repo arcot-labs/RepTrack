@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { CreateExerciseData, CreateExerciseErrors, CreateExerciseResponses, CreateFeedbackData, CreateFeedbackErrors, CreateFeedbackResponses, CreateWorkoutData, CreateWorkoutErrors, CreateWorkoutResponses, DeleteExerciseData, DeleteExerciseErrors, DeleteExerciseResponses, DeleteWorkoutData, DeleteWorkoutErrors, DeleteWorkoutResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetAccessRequestsData, GetAccessRequestsErrors, GetAccessRequestsResponses, GetCurrentUserData, GetCurrentUserErrors, GetCurrentUserResponses, GetDbHealthData, GetDbHealthResponses, GetExerciseData, GetExerciseErrors, GetExerciseResponses, GetExercisesData, GetExercisesErrors, GetExercisesResponses, GetHealthData, GetHealthResponses, GetMuscleGroupsData, GetMuscleGroupsErrors, GetMuscleGroupsResponses, GetUsersData, GetUsersErrors, GetUsersResponses, GetWorkoutData, GetWorkoutErrors, GetWorkoutResponses, GetWorkoutsData, GetWorkoutsErrors, GetWorkoutsResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, RequestAccessData, RequestAccessErrors, RequestAccessResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, UpdateAccessRequestStatusData, UpdateAccessRequestStatusErrors, UpdateAccessRequestStatusResponses, UpdateExerciseData, UpdateExerciseErrors, UpdateExerciseResponses, UpdateWorkoutData, UpdateWorkoutErrors, UpdateWorkoutResponses } from './types.gen';
+import type { CreateExerciseData, CreateExerciseErrors, CreateExerciseResponses, CreateFeedbackData, CreateFeedbackErrors, CreateFeedbackResponses, CreateWorkoutData, CreateWorkoutErrors, CreateWorkoutExerciseData, CreateWorkoutExerciseErrors, CreateWorkoutExerciseResponses, CreateWorkoutResponses, DeleteExerciseData, DeleteExerciseErrors, DeleteExerciseResponses, DeleteWorkoutData, DeleteWorkoutErrors, DeleteWorkoutExerciseData, DeleteWorkoutExerciseErrors, DeleteWorkoutExerciseResponses, DeleteWorkoutResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetAccessRequestsData, GetAccessRequestsErrors, GetAccessRequestsResponses, GetCurrentUserData, GetCurrentUserErrors, GetCurrentUserResponses, GetDbHealthData, GetDbHealthResponses, GetExerciseData, GetExerciseErrors, GetExerciseResponses, GetExercisesData, GetExercisesErrors, GetExercisesResponses, GetHealthData, GetHealthResponses, GetMuscleGroupsData, GetMuscleGroupsErrors, GetMuscleGroupsResponses, GetUsersData, GetUsersErrors, GetUsersResponses, GetWorkoutData, GetWorkoutErrors, GetWorkoutResponses, GetWorkoutsData, GetWorkoutsErrors, GetWorkoutsResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, RequestAccessData, RequestAccessErrors, RequestAccessResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, UpdateAccessRequestStatusData, UpdateAccessRequestStatusErrors, UpdateAccessRequestStatusResponses, UpdateExerciseData, UpdateExerciseErrors, UpdateExerciseResponses, UpdateWorkoutData, UpdateWorkoutErrors, UpdateWorkoutResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -419,6 +419,42 @@ export class WorkoutService {
                 'Content-Type': 'application/json',
                 ...options.headers
             }
+        });
+    }
+}
+
+export class WorkoutExerciseService {
+    /**
+     * Create Workout Exercise Endpoint
+     */
+    public static createWorkoutExercise<ThrowOnError extends boolean = false>(options: Options<CreateWorkoutExerciseData, ThrowOnError>) {
+        return (options.client ?? client).post<CreateWorkoutExerciseResponses, CreateWorkoutExerciseErrors, ThrowOnError>({
+            security: [{
+                    in: 'cookie',
+                    name: 'access_token',
+                    type: 'apiKey'
+                }],
+            url: '/api/workout-exercises/{workout_id}/exercises',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Remove Workout Exercise Endpoint
+     */
+    public static deleteWorkoutExercise<ThrowOnError extends boolean = false>(options: Options<DeleteWorkoutExerciseData, ThrowOnError>) {
+        return (options.client ?? client).delete<DeleteWorkoutExerciseResponses, DeleteWorkoutExerciseErrors, ThrowOnError>({
+            security: [{
+                    in: 'cookie',
+                    name: 'access_token',
+                    type: 'apiKey'
+                }],
+            url: '/api/workout-exercises/{workout_id}/exercises/{workout_exercise_id}',
+            ...options
         });
     }
 }

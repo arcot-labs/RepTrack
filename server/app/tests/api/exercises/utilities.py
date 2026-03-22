@@ -5,10 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.database.exercise import Exercise
 from app.models.database.muscle_group import MuscleGroup
 from app.models.schemas.exercise import ExercisePublic
-from app.services.exercise import (
-    _get_exercises_with_muscle_groups,  # pyright: ignore[reportPrivateUsage]
-    to_exercise_public,
-)
+from app.services.exercise import query_exercises, to_exercise_public
 
 from ..utilities import HttpMethod, make_http_request
 
@@ -38,8 +35,9 @@ async def create_exercise_via_api(
             "muscle_group_ids": muscle_group_ids or [],
         },
     )
-    exercises = await _get_exercises_with_muscle_groups(
+    exercises = await query_exercises(
         session,
+        False,
         Exercise.name == name,
     )
     return to_exercise_public(exercises[0])

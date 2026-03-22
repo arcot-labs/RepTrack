@@ -101,3 +101,9 @@ class WorkoutNotFound(HTTPError):
     status_code = status.HTTP_404_NOT_FOUND
     code = "workout_not_found"
     detail = "Workout not found"
+
+
+class WorkoutExerciseNotFound(HTTPError):
+    status_code = status.HTTP_404_NOT_FOUND
+    code = "workout_exercise_not_found"
+    detail = "Workout exercise not found"
