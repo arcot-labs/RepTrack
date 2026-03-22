@@ -10,7 +10,7 @@ from app.models.errors import (
     ExerciseNotFound,
     MuscleGroupNotFound,
 )
-from app.tests.api.exercises.utilities import (
+from app.tests.api.exercise.utilities import (
     create_exercise_via_api,
     create_system_exercise,
     get_muscle_group_id,
