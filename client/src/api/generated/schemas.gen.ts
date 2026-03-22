@@ -155,6 +155,31 @@ export const CreateFeedbackRequestSchema = {
     title: 'CreateFeedbackRequest'
 } as const;
 
+export const CreateWorkoutExerciseRequestSchema = {
+    properties: {
+        exercise_id: {
+            type: 'integer',
+            title: 'Exercise Id'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    required: [
+        'exercise_id'
+    ],
+    title: 'CreateWorkoutExerciseRequest'
+} as const;
+
 export const CreateWorkoutRequestSchema = {
     properties: {
         started_at: {

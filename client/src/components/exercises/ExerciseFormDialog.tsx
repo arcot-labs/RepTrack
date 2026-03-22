@@ -1,5 +1,5 @@
 import {
-    ExercisesService,
+    ExerciseService,
     type ExercisePublic,
     type MuscleGroupPublic,
 } from '@/api/generated'
@@ -166,7 +166,7 @@ export function ExerciseFormDialog({
         const name = form.name.trim()
         const desc = form.description?.trim() ?? ''
 
-        const { error } = await ExercisesService.createExercise({
+        const { error } = await ExerciseService.createExercise({
             body: {
                 name,
                 description: desc,
@@ -220,7 +220,7 @@ export function ExerciseFormDialog({
 
         onRowLoadingChange(exercise.id, true)
         try {
-            const { error } = await ExercisesService.updateExercise({
+            const { error } = await ExerciseService.updateExercise({
                 path: { exercise_id: exercise.id },
                 body,
             })

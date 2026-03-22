@@ -29,7 +29,7 @@ async def test_get_workout_not_found(session: AsyncSession):
         await get_workout(999, user.id, session)
 
 
-async def test_get_workout_other_user(session: AsyncSession):
+async def test_get_workout_not_allowed(session: AsyncSession):
     user = await create_user(session)
     user_2 = await create_user(session, username="user_2")
     workout = await create_workout(session, user.id)

@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
 from app.models.schemas.exercise import ExercisePublic
-from app.tests.api.exercises.utilities import (
+from app.tests.api.exercise.utilities import (
     create_exercise,
     create_exercise_via_api,
     create_system_exercise,

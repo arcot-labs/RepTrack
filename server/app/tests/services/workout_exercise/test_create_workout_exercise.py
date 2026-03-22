@@ -1,0 +1,101 @@
+import pytest
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models.database.workout_exercise import WorkoutExercise
+from app.models.errors import (
+    ExerciseNotFound,
+    WorkoutNotFound,
+)
+from app.models.schemas.workout_exercise import CreateWorkoutExerciseRequest
+from app.services.workout_exercise import (
+    create_workout_exercise,
+)
+
+from ..exercise.utilities import create_exercise
+from ..utilities import create_user
+from ..workout.utilities import create_workout
+
+
+async def test_create_workout_exercise(session: AsyncSession):
+    user = await create_user(session)
+    workout = await create_workout(session, user_id=user.id)
+    exercise = await create_exercise(session, name="Deadlift")
+
+    await create_workout_exercise(
+        workout.id,
+        user.id,
+        CreateWorkoutExerciseRequest(
+            exercise_id=exercise.id,
+            notes="Example exercise",
+        ),
+        session,
+    )
+
+    result = await session.execute(
+        select(WorkoutExercise).where(
+            WorkoutExercise.workout_id == workout.id,
+            WorkoutExercise.exercise_id == exercise.id,
+        )
+    )
+    workout_exercise = result.scalar_one()
+
+    assert workout_exercise.position == 1
+    assert workout_exercise.notes == "Example exercise"
+
+
+async def test_create_workout_exercise_workout_not_found(session: AsyncSession):
+    with pytest.raises(WorkoutNotFound):
+        await create_workout_exercise(
+            workout_id=1,
+            user_id=2,
+            req=CreateWorkoutExerciseRequest(exercise_id=3),
+            db=session,
+        )
+
+
+async def test_create_workout_exercise_workout_not_allowed(session: AsyncSession):
+    user_1 = await create_user(session, username="user_1")
+    user_2 = await create_user(session, username="user_2")
+    workout = await create_workout(session, user_id=user_2.id)
+    exercise = await create_exercise(session, name="Squat")
+
+    with pytest.raises(WorkoutNotFound):
+        await create_workout_exercise(
+            workout_id=workout.id,
+            user_id=user_1.id,
+            req=CreateWorkoutExerciseRequest(exercise_id=exercise.id),
+            db=session,
+        )
+
+
+async def test_create_workout_exercise_exercise_not_found(session: AsyncSession):
+    user = await create_user(session)
+    workout = await create_workout(session, user_id=user.id)
+
+    with pytest.raises(ExerciseNotFound):
+        await create_workout_exercise(
+            workout_id=workout.id,
+            user_id=user.id,
+            req=CreateWorkoutExerciseRequest(exercise_id=99999),
+            db=session,
+        )
+
+
+async def test_create_workout_exercise_exercise_not_allowed(session: AsyncSession):
+    user_1 = await create_user(session, username="user_1")
+    user_2 = await create_user(session, username="user_2")
+    workout = await create_workout(session, user_id=user_1.id)
+    exercise = await create_exercise(
+        session,
+        name="Owned by other",
+        user_id=user_2.id,
+    )
+
+    with pytest.raises(ExerciseNotFound):
+        await create_workout_exercise(
+            workout.id,
+            user_1.id,
+            CreateWorkoutExerciseRequest(exercise_id=exercise.id),
+            session,
+        )

@@ -17,3 +17,8 @@ class WorkoutExercisePublic(BaseModel):
 
     exercise: ExerciseBase
     sets: list[SetPublic]
+
+
+class CreateWorkoutExerciseRequest(BaseModel):
+    exercise_id: int
+    notes: str | None = None

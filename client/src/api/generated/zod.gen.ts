@@ -21,6 +21,14 @@ export const zCreateExerciseRequest = z.object({
 });
 
 /**
+ * CreateWorkoutExerciseRequest
+ */
+export const zCreateWorkoutExerciseRequest = z.object({
+    exercise_id: z.int(),
+    notes: z.string().nullish()
+});
+
+/**
  * CreateWorkoutRequest
  */
 export const zCreateWorkoutRequest = z.object({
@@ -563,3 +571,30 @@ export const zUpdateWorkoutData = z.object({
  * Successful Response
  */
 export const zUpdateWorkoutResponse = z.void();
+
+export const zCreateWorkoutExerciseData = z.object({
+    body: zCreateWorkoutExerciseRequest,
+    path: z.object({
+        workout_id: z.int()
+    }),
+    query: z.never().optional()
+});
+
+/**
+ * Successful Response
+ */
+export const zCreateWorkoutExerciseResponse = z.void();
+
+export const zDeleteWorkoutExerciseData = z.object({
+    body: z.never().optional(),
+    path: z.object({
+        workout_id: z.int(),
+        workout_exercise_id: z.int()
+    }),
+    query: z.never().optional()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteWorkoutExerciseResponse = z.void();
