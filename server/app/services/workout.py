@@ -16,29 +16,26 @@ from app.models.schemas.workout import (
     WorkoutBase,
     WorkoutPublic,
 )
-from app.services.workout_exercise import to_workout_exercise_public
 
 logger = logging.getLogger(__name__)
 
 
-async def _get_workouts(
+async def _query_workouts(
     db: AsyncSession,
     base: bool,
     *where_clauses: Any,
 ) -> Sequence[Workout]:
-    query = select(Workout)
+    query = select(Workout).where(*where_clauses).order_by(Workout.started_at.desc())
     if not base:
         query = query.options(
             selectinload(Workout.exercises).selectinload(WorkoutExercise.exercise),
             selectinload(Workout.exercises).selectinload(WorkoutExercise.sets),
         )
-    result = await db.execute(
-        query.where(*where_clauses).order_by(Workout.started_at.desc())
-    )
+    result = await db.execute(query)
     return result.scalars().all()
 
 
-async def _get_owned_workout(
+async def get_owned_workout(
     workout_id: int,
     user_id: int,
     db: AsyncSession,
@@ -59,6 +56,9 @@ def to_workout_base(workout: Workout) -> WorkoutBase:
 
 
 def to_workout_public(workout: Workout) -> WorkoutPublic:
+    # prevent circular import
+    from app.services.workout_exercise import to_workout_exercise_public
+
     return WorkoutPublic(
         id=workout.id,
         user_id=workout.user_id,
@@ -94,7 +94,7 @@ async def get_workouts(
 ) -> list[WorkoutBase]:
     logger.info(f"Getting workouts for user {user_id}")
 
-    workouts = await _get_workouts(
+    workouts = await _query_workouts(
         db,
         True,
         Workout.user_id == user_id,
@@ -109,7 +109,7 @@ async def get_workout(
 ) -> WorkoutPublic:
     logger.info(f"Getting workout {workout_id} for user {user_id}")
 
-    workouts = await _get_workouts(
+    workouts = await _query_workouts(
         db,
         False,
         Workout.id == workout_id,
@@ -128,7 +128,7 @@ async def update_workout(
 ) -> None:
     logger.info(f"Updating workout {workout_id} for user {user_id}")
 
-    workout = await _get_owned_workout(workout_id, user_id, db)
+    workout = await get_owned_workout(workout_id, user_id, db)
 
     if not req.model_fields_set:
         logger.info("No changes provided, skipping update")
@@ -154,6 +154,6 @@ async def delete_workout(
 ) -> None:
     logger.info(f"Deleting workout {workout_id} for user {user_id}")
 
-    workout = await _get_owned_workout(workout_id, user_id, db)
+    workout = await get_owned_workout(workout_id, user_id, db)
     await db.delete(workout)
     await db.commit()

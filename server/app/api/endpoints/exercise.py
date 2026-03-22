@@ -21,7 +21,7 @@ from app.services.exercise import (
 
 api_router = APIRouter(
     prefix="/exercises",
-    tags=["Exercises"],
+    tags=["Exercise"],
     dependencies=[Depends(get_current_user)],
 )
 

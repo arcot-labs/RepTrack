@@ -1,5 +1,5 @@
 import {
-    ExercisesService,
+    ExerciseService,
     type ExercisePublic,
     type MuscleGroupPublic,
 } from '@/api/generated'
@@ -107,7 +107,7 @@ export function ExercisesTable({
         setIsDeleting(true)
         setExerciseRowLoading(exercise.id, true)
         try {
-            const { error } = await ExercisesService.deleteExercise({
+            const { error } = await ExerciseService.deleteExercise({
                 path: { exercise_id: exercise.id },
             })
             if (error) {

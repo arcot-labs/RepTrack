@@ -25,20 +25,19 @@ from app.services.muscle_group import get_muscle_groups_by_ids, to_muscle_group_
 logger = logging.getLogger(__name__)
 
 
-async def _get_exercises_with_muscle_groups(
+async def query_exercises(
     db: AsyncSession,
+    base: bool,
     *where_clauses: Any,
 ) -> Sequence[Exercise]:
-    result = await db.execute(
-        select(Exercise)
-        .options(
+    query = select(Exercise).where(*where_clauses).order_by(Exercise.name)
+    if not base:
+        query = query.options(
             selectinload(Exercise.muscle_groups).selectinload(
                 ExerciseMuscleGroup.muscle_group
             )
         )
-        .where(*where_clauses)
-        .order_by(Exercise.name)
-    )
+    result = await db.execute(query)
     return result.scalars().all()
 
 
@@ -121,8 +120,9 @@ async def get_exercises(
 ) -> list[ExercisePublic]:
     logger.info(f"Getting exercises for user {user_id}")
 
-    exercises = await _get_exercises_with_muscle_groups(
+    exercises = await query_exercises(
         db,
+        False,
         (Exercise.user_id.is_(None)) | (Exercise.user_id == user_id),
     )
     return [to_exercise_public(e) for e in exercises]
@@ -135,8 +135,9 @@ async def get_exercise(
 ) -> ExercisePublic:
     logger.info(f"Getting exercise {exercise_id} for user {user_id}")
 
-    exercises = await _get_exercises_with_muscle_groups(
+    exercises = await query_exercises(
         db,
+        False,
         Exercise.id == exercise_id,
         (Exercise.user_id.is_(None)) | (Exercise.user_id == user_id),
     )

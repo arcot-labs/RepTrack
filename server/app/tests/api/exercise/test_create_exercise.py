@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
 from app.models.errors import ExerciseNameConflict, MuscleGroupNotFound
-from app.tests.api.exercises.utilities import get_muscle_group_id
+from app.tests.api.exercise.utilities import get_muscle_group_id
 
 from ..utilities import HttpMethod, login_admin, make_http_request
 

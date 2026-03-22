@@ -87,6 +87,20 @@ export type CreateFeedbackRequest = {
 };
 
 /**
+ * CreateWorkoutExerciseRequest
+ */
+export type CreateWorkoutExerciseRequest = {
+    /**
+     * Exercise Id
+     */
+    exercise_id: number;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+};
+
+/**
  * CreateWorkoutRequest
  */
 export type CreateWorkoutRequest = {
@@ -1336,3 +1350,83 @@ export type UpdateWorkoutResponses = {
 };
 
 export type UpdateWorkoutResponse = UpdateWorkoutResponses[keyof UpdateWorkoutResponses];
+
+export type CreateWorkoutExerciseData = {
+    body: CreateWorkoutExerciseRequest;
+    path: {
+        /**
+         * Workout Id
+         */
+        workout_id: number;
+    };
+    query?: never;
+    url: '/api/workout-exercises/{workout_id}/exercises';
+};
+
+export type CreateWorkoutExerciseErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateWorkoutExerciseError = CreateWorkoutExerciseErrors[keyof CreateWorkoutExerciseErrors];
+
+export type CreateWorkoutExerciseResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type CreateWorkoutExerciseResponse = CreateWorkoutExerciseResponses[keyof CreateWorkoutExerciseResponses];
+
+export type DeleteWorkoutExerciseData = {
+    body?: never;
+    path: {
+        /**
+         * Workout Id
+         */
+        workout_id: number;
+        /**
+         * Workout Exercise Id
+         */
+        workout_exercise_id: number;
+    };
+    query?: never;
+    url: '/api/workout-exercises/{workout_id}/exercises/{workout_exercise_id}';
+};
+
+export type DeleteWorkoutExerciseErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteWorkoutExerciseError = DeleteWorkoutExerciseErrors[keyof DeleteWorkoutExerciseErrors];
+
+export type DeleteWorkoutExerciseResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteWorkoutExerciseResponse = DeleteWorkoutExerciseResponses[keyof DeleteWorkoutExerciseResponses];

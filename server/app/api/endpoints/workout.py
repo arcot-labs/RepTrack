@@ -22,7 +22,7 @@ from app.services.workout import (
 
 api_router = APIRouter(
     prefix="/workouts",
-    tags=["Workouts"],
+    tags=["Workout"],
     dependencies=[Depends(get_current_user)],
 )
 

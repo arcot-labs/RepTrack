@@ -63,7 +63,6 @@ async def test_get_workout_not_logged_in(
 # 404
 async def test_get_workout_not_found(
     client: AsyncClient,
-    session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)

@@ -10,7 +10,7 @@ from app.services.muscle_group import get_muscle_groups_ordered_by_name
 
 api_router = APIRouter(
     prefix="/muscle-groups",
-    tags=["Muscle Groups"],
+    tags=["Muscle Group"],
     dependencies=[Depends(get_current_user)],
 )
 

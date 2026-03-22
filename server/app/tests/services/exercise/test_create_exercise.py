@@ -5,8 +5,8 @@ from app.models.database.exercise import Exercise
 from app.models.errors import ExerciseNameConflict, MuscleGroupNotFound
 from app.models.schemas.exercise import CreateExerciseRequest
 from app.services.exercise import (
-    _get_exercises_with_muscle_groups,  # pyright: ignore[reportPrivateUsage]
     create_exercise,
+    query_exercises,
 )
 
 from ..utilities import create_user
@@ -27,8 +27,9 @@ async def test_create_exercise(session: AsyncSession):
         session,
     )
 
-    exercises = await _get_exercises_with_muscle_groups(
+    exercises = await query_exercises(
         session,
+        False,
         Exercise.name == "Incline Bench",
     )
     exercise = exercises[0] if exercises else None
