@@ -9,4 +9,10 @@ export default defineConfig({
     resolve: {
         tsconfigPaths: true,
     },
+    server: {
+        forwardConsole: {
+            unhandledErrors: true,
+            logLevels: ['debug', 'log', 'info', 'warn', 'error'],
+        },
+    },
 })
