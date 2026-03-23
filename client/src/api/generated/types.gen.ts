@@ -1384,6 +1384,10 @@ export type CreateWorkoutExerciseErrors = {
      */
     404: ErrorResponse;
     /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
      * Validation Error
      */
     422: HttpValidationError;
