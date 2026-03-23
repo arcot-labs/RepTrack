@@ -6,17 +6,12 @@ from sqlalchemy.orm import selectinload
 
 from app.models.database.access_request import AccessRequest
 from app.models.enums import AccessRequestStatus
-from app.models.schemas.access_request import AccessRequestPublic
 
 STATUS_PRIORITY = case(
     (AccessRequest.status == AccessRequestStatus.PENDING, 1),
     (AccessRequest.status == AccessRequestStatus.APPROVED, 2),
     (AccessRequest.status == AccessRequestStatus.REJECTED, 3),
 )
-
-
-def to_access_request_public(access_request: AccessRequest) -> AccessRequestPublic:
-    return AccessRequestPublic.model_validate(access_request, from_attributes=True)
 
 
 async def get_latest_access_request_by_email(

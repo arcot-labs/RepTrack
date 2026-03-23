@@ -14,10 +14,10 @@ from app.models.schemas.user import UserPublic
 from app.services.access_request import (
     get_access_request_by_id,
     get_access_requests_with_reviewer,
-    to_access_request_public,
 )
 from app.services.email import EmailService
-from app.services.user import get_users_ordered_by_username, to_user_public
+from app.services.user import get_users_ordered_by_username
+from app.services.utilities.serializers import to_access_request_public, to_user_public
 
 logger = logging.getLogger(__name__)
 

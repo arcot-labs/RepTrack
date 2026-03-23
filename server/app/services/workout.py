@@ -16,6 +16,8 @@ from app.models.schemas.workout import (
     WorkoutBase,
     WorkoutPublic,
 )
+from app.services.utilities.queries import get_owned_workout
+from app.services.utilities.serializers import to_workout_base, to_workout_public
 
 logger = logging.getLogger(__name__)
 
@@ -33,42 +35,6 @@ async def _query_workouts(
         )
     result = await db.execute(query)
     return result.scalars().all()
-
-
-async def get_owned_workout(
-    workout_id: int,
-    user_id: int,
-    db: AsyncSession,
-) -> Workout:
-    result = await db.execute(
-        select(Workout).where(
-            Workout.id == workout_id,
-        ),
-    )
-    workout = result.scalar_one_or_none()
-    if not workout or workout.user_id != user_id:
-        raise WorkoutNotFound()
-    return workout
-
-
-def to_workout_base(workout: Workout) -> WorkoutBase:
-    return WorkoutBase.model_validate(workout, from_attributes=True)
-
-
-def to_workout_public(workout: Workout) -> WorkoutPublic:
-    # prevent circular import
-    from app.services.workout_exercise import to_workout_exercise_public
-
-    return WorkoutPublic(
-        id=workout.id,
-        user_id=workout.user_id,
-        started_at=workout.started_at,
-        ended_at=workout.ended_at,
-        notes=workout.notes,
-        created_at=workout.created_at,
-        updated_at=workout.updated_at,
-        exercises=[to_workout_exercise_public(we) for we in workout.exercises],
-    )
 
 
 async def create_workout(

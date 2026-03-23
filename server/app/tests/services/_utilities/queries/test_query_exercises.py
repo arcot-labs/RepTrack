@@ -3,12 +3,10 @@ from sqlalchemy.exc import MissingGreenlet
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.exercise import Exercise
-from app.services.exercise import (
-    query_exercises,
-)
+from app.services.utilities.queries import query_exercises
 
-from ..utilities import create_user
-from .utilities import create_exercise, get_muscle_group_id
+from ...exercise.utilities import create_exercise, get_muscle_group_id
+from ...utilities import create_user
 
 
 async def test_query_exercises_base(

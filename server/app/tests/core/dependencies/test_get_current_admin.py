@@ -7,7 +7,7 @@ from app.core.dependencies import get_current_admin
 from app.models.database.user import User
 from app.models.errors import InsufficientPermissions
 from app.models.schemas.user import UserPublic
-from app.services.user import to_user_public
+from app.services.utilities.serializers import to_user_public
 
 
 async def _get_admin(session: AsyncSession, settings: Settings) -> UserPublic:

@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 from app.models.database.set import Set
 from app.models.schemas.set import SetPublic
-from app.services.set import to_set_public
+from app.services.utilities.serializers import to_set_public
 
 
 def test_to_set_public() -> None:

@@ -2,10 +2,10 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.errors import WorkoutNotFound
-from app.services.workout import get_owned_workout
+from app.services.utilities.queries import get_owned_workout
 
-from ..utilities import create_user
-from .utilities import create_workout
+from ...utilities import create_user
+from ...workout.utilities import create_workout
 
 
 async def test_get_owned_workouts(

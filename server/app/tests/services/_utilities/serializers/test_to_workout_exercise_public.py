@@ -6,7 +6,7 @@ from app.models.database.workout_exercise import WorkoutExercise
 from app.models.schemas.exercise import ExerciseBase
 from app.models.schemas.set import SetPublic
 from app.models.schemas.workout_exercise import WorkoutExercisePublic
-from app.services.workout_exercise import to_workout_exercise_public
+from app.services.utilities.serializers import to_workout_exercise_public
 
 
 def test_to_workout_exercise_public_no_sets() -> None:

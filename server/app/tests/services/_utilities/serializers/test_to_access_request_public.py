@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from app.models.database.access_request import AccessRequest
 from app.models.enums import AccessRequestStatus
 from app.models.schemas.access_request import AccessRequestPublic
-from app.services.access_request import to_access_request_public
+from app.services.utilities.serializers import to_access_request_public
 
 
 def test_to_access_request_public() -> None:

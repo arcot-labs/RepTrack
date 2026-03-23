@@ -7,10 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.database.exercise import Exercise
 from app.models.errors import ExerciseNameConflict, MuscleGroupNotFound
 from app.models.schemas.exercise import CreateExerciseRequest
-from app.services.exercise import (
-    create_exercise,
-    query_exercises,
-)
+from app.services.exercise import create_exercise
+from app.services.utilities.queries import query_exercises
 
 from ..utilities import create_user
 from .utilities import get_muscle_group_id

@@ -5,7 +5,7 @@ from app.models.database.exercise_muscle_group import ExerciseMuscleGroup
 from app.models.database.muscle_group import MuscleGroup
 from app.models.schemas.exercise import ExercisePublic
 from app.models.schemas.muscle_group import MuscleGroupPublic
-from app.services.exercise import to_exercise_public
+from app.services.utilities.serializers import to_exercise_public
 
 
 def test_to_exercise_public_no_muscle_groups() -> None:

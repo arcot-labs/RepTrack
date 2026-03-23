@@ -1,11 +1,8 @@
 import logging
-from collections.abc import Sequence
-from typing import Any
 
 from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.core.database import is_unique_violation
 from app.models.database.exercise import EXERCISE_UNIQUE_CONSTRAINT, Exercise
@@ -17,29 +14,14 @@ from app.models.errors import (
 )
 from app.models.schemas.exercise import (
     CreateExerciseRequest,
-    ExerciseBase,
     ExercisePublic,
     UpdateExerciseRequest,
 )
-from app.services.muscle_group import get_muscle_groups_by_ids, to_muscle_group_public
+from app.services.muscle_group import get_muscle_groups_by_ids
+from app.services.utilities.queries import query_exercises
+from app.services.utilities.serializers import to_exercise_public
 
 logger = logging.getLogger(__name__)
-
-
-async def query_exercises(
-    db: AsyncSession,
-    base: bool,
-    *where_clauses: Any,
-) -> Sequence[Exercise]:
-    query = select(Exercise).where(*where_clauses).order_by(Exercise.name)
-    if not base:
-        query = query.options(
-            selectinload(Exercise.muscle_groups).selectinload(
-                ExerciseMuscleGroup.muscle_group
-            )
-        )
-    result = await db.execute(query)
-    return result.scalars().all()
 
 
 async def _get_owned_exercise(
@@ -56,28 +38,6 @@ async def _get_owned_exercise(
     if not exercise or user_id != exercise.user_id:
         raise ExerciseNotFound()
     return exercise
-
-
-def to_exercise_base(exercise: Exercise) -> ExerciseBase:
-    return ExerciseBase.model_validate(exercise, from_attributes=True)
-
-
-def to_exercise_public(exercise: Exercise) -> ExercisePublic:
-    sorted_muscle_groups = sorted(
-        exercise.muscle_groups,
-        key=lambda emg: emg.muscle_group.name,
-    )
-    return ExercisePublic(
-        id=exercise.id,
-        user_id=exercise.user_id,
-        name=exercise.name,
-        description=exercise.description,
-        created_at=exercise.created_at,
-        updated_at=exercise.updated_at,
-        muscle_groups=[
-            to_muscle_group_public(emg.muscle_group) for emg in sorted_muscle_groups
-        ],
-    )
 
 
 async def create_exercise(

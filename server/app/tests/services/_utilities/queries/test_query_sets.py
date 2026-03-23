@@ -1,13 +1,13 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.set import Set
-from app.services.set import query_sets
+from app.services.utilities.queries import query_sets
 
-from ..exercise.utilities import create_exercise
-from ..utilities import create_user
-from ..workout.utilities import create_workout
-from ..workout_exercise.utilities import create_workout_exercise
-from .utilities import create_set
+from ...exercise.utilities import create_exercise
+from ...set.utilities import create_set
+from ...utilities import create_user
+from ...workout.utilities import create_workout
+from ...workout_exercise.utilities import create_workout_exercise
 
 
 async def test_query_sets_no_where_clause(

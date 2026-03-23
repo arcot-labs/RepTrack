@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.database.exercise import Exercise
 from app.models.database.muscle_group import MuscleGroup
 from app.models.schemas.exercise import ExercisePublic
-from app.services.exercise import query_exercises, to_exercise_public
+from app.services.utilities.queries import query_exercises
+from app.services.utilities.serializers import to_exercise_public
 
 from ..utilities import HttpMethod, make_http_request
 

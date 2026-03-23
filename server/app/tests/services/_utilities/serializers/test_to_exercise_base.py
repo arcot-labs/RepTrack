@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 from app.models.database.exercise import Exercise
 from app.models.schemas.exercise import ExerciseBase
-from app.services.exercise import to_exercise_base
+from app.services.utilities.serializers import to_exercise_base
 
 
 def test_to_exercise_base() -> None:

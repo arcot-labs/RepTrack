@@ -1,11 +1,8 @@
 import logging
-from collections.abc import Sequence
-from typing import Any
 
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.core.database import is_unique_violation
 from app.models.database.exercise import Exercise
@@ -18,46 +15,10 @@ from app.models.errors import (
     WorkoutExerciseNotFound,
     WorkoutExercisePositionConflict,
 )
-from app.models.schemas.workout_exercise import (
-    CreateWorkoutExerciseRequest,
-    WorkoutExercisePublic,
-)
-from app.services.exercise import query_exercises, to_exercise_base
-from app.services.set import to_set_public
-from app.services.workout import get_owned_workout
+from app.models.schemas.workout_exercise import CreateWorkoutExerciseRequest
+from app.services.utilities.queries import get_owned_workout, query_exercises
 
 logger = logging.getLogger(__name__)
-
-
-def to_workout_exercise_public(
-    workout_exercise: WorkoutExercise,
-) -> WorkoutExercisePublic:
-    return WorkoutExercisePublic(
-        id=workout_exercise.id,
-        workout_id=workout_exercise.workout_id,
-        exercise_id=workout_exercise.exercise_id,
-        position=workout_exercise.position,
-        notes=workout_exercise.notes,
-        created_at=workout_exercise.created_at,
-        updated_at=workout_exercise.updated_at,
-        exercise=to_exercise_base(workout_exercise.exercise),
-        sets=[to_set_public(s) for s in workout_exercise.sets],
-    )
-
-
-async def query_workout_exercises(
-    db: AsyncSession,
-    *where_clauses: Any,
-) -> Sequence[WorkoutExercise]:
-    query = (
-        select(WorkoutExercise).where(*where_clauses).order_by(WorkoutExercise.position)
-    )
-    query = query.options(
-        selectinload(WorkoutExercise.exercise),
-        selectinload(WorkoutExercise.sets),
-    )
-    result = await db.execute(query)
-    return result.scalars().all()
 
 
 async def _get_next_workout_exercise_position(

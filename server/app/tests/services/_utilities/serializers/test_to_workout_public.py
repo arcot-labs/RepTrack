@@ -5,7 +5,7 @@ from app.models.database.workout import Workout
 from app.models.database.workout_exercise import WorkoutExercise
 from app.models.schemas.workout import WorkoutPublic
 from app.models.schemas.workout_exercise import WorkoutExercisePublic
-from app.services.workout import to_workout_public
+from app.services.utilities.serializers import to_workout_public
 
 
 def test_to_workout_public_no_exercises() -> None:

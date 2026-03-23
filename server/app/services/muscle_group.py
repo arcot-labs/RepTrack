@@ -3,10 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.muscle_group import MuscleGroup
 from app.models.schemas.muscle_group import MuscleGroupPublic
-
-
-def to_muscle_group_public(muscle_group: MuscleGroup) -> MuscleGroupPublic:
-    return MuscleGroupPublic.model_validate(muscle_group, from_attributes=True)
+from app.services.utilities.serializers import to_muscle_group_public
 
 
 async def get_muscle_groups_ordered_by_name(

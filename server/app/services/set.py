@@ -1,6 +1,4 @@
 import logging
-from collections.abc import Sequence
-from typing import Any
 
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -14,31 +12,14 @@ from app.models.errors import (
     SetNumberConflict,
     WorkoutExerciseNotFound,
 )
-from app.models.schemas.set import CreateSetRequest, SetPublic, UpdateSetRequest
-from app.services.workout import get_owned_workout
+from app.models.schemas.set import CreateSetRequest, UpdateSetRequest
+from app.services.utilities.queries import (
+    get_owned_workout,
+    query_sets,
+    query_workout_exercises,
+)
 
 logger = logging.getLogger(__name__)
-
-
-def to_set_public(set_: Set) -> SetPublic:
-    return SetPublic.model_validate(set_, from_attributes=True)
-
-
-async def query_sets(
-    db: AsyncSession,
-    *where_clauses: Any,
-) -> Sequence[Set]:
-    query = (
-        select(Set)
-        .join(
-            WorkoutExercise,
-            Set.workout_exercise_id == WorkoutExercise.id,
-        )
-        .where(*where_clauses)
-        .order_by(Set.set_number)
-    )
-    result = await db.execute(query)
-    return result.scalars().all()
 
 
 async def _get_next_set_number(
@@ -68,8 +49,6 @@ async def create_set(
 
     # validate workout existence & ownership
     await get_owned_workout(workout_id, user_id, db)
-
-    from app.services.workout_exercise import query_workout_exercises
 
     result = await query_workout_exercises(
         db,

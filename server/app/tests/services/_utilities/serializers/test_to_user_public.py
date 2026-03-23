@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 from app.models.database.user import User
 from app.models.schemas.user import UserPublic
-from app.services.user import to_user_public
+from app.services.utilities.serializers import to_user_public
 
 
 def test_to_user_public() -> None:
