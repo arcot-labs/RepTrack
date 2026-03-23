@@ -155,6 +155,59 @@ export const CreateFeedbackRequestSchema = {
     title: 'CreateFeedbackRequest'
 } as const;
 
+export const CreateSetRequestSchema = {
+    properties: {
+        reps: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reps'
+        },
+        weight: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Weight'
+        },
+        unit: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Unit'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    title: 'CreateSetRequest'
+} as const;
+
 export const CreateWorkoutExerciseRequestSchema = {
     properties: {
         exercise_id: {
@@ -711,6 +764,59 @@ export const UpdateExerciseRequestSchema = {
     },
     type: 'object',
     title: 'UpdateExerciseRequest'
+} as const;
+
+export const UpdateSetRequestSchema = {
+    properties: {
+        reps: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reps'
+        },
+        weight: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Weight'
+        },
+        unit: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Unit'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    title: 'UpdateSetRequest'
 } as const;
 
 export const UpdateWorkoutRequestSchema = {

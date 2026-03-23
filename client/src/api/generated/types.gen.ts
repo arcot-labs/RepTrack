@@ -87,6 +87,28 @@ export type CreateFeedbackRequest = {
 };
 
 /**
+ * CreateSetRequest
+ */
+export type CreateSetRequest = {
+    /**
+     * Reps
+     */
+    reps?: number | null;
+    /**
+     * Weight
+     */
+    weight?: number | null;
+    /**
+     * Unit
+     */
+    unit?: string | null;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+};
+
+/**
  * CreateWorkoutExerciseRequest
  */
 export type CreateWorkoutExerciseRequest = {
@@ -389,6 +411,28 @@ export type UpdateExerciseRequest = {
      * Muscle Group Ids
      */
     muscle_group_ids?: Array<number> | null;
+};
+
+/**
+ * UpdateSetRequest
+ */
+export type UpdateSetRequest = {
+    /**
+     * Reps
+     */
+    reps?: number | null;
+    /**
+     * Weight
+     */
+    weight?: number | null;
+    /**
+     * Unit
+     */
+    unit?: string | null;
+    /**
+     * Notes
+     */
+    notes?: string | null;
 };
 
 /**
@@ -1156,6 +1200,144 @@ export type GetMuscleGroupsResponses = {
 
 export type GetMuscleGroupsResponse = GetMuscleGroupsResponses[keyof GetMuscleGroupsResponses];
 
+export type CreateSetData = {
+    body: CreateSetRequest;
+    path: {
+        /**
+         * Workout Id
+         */
+        workout_id: number;
+        /**
+         * Workout Exercise Id
+         */
+        workout_exercise_id: number;
+    };
+    query?: never;
+    url: '/api/sets/{workout_id}/exercises/{workout_exercise_id}/sets';
+};
+
+export type CreateSetErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateSetError = CreateSetErrors[keyof CreateSetErrors];
+
+export type CreateSetResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type CreateSetResponse = CreateSetResponses[keyof CreateSetResponses];
+
+export type DeleteSetData = {
+    body?: never;
+    path: {
+        /**
+         * Workout Id
+         */
+        workout_id: number;
+        /**
+         * Workout Exercise Id
+         */
+        workout_exercise_id: number;
+        /**
+         * Set Id
+         */
+        set_id: number;
+    };
+    query?: never;
+    url: '/api/sets/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}';
+};
+
+export type DeleteSetErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteSetError = DeleteSetErrors[keyof DeleteSetErrors];
+
+export type DeleteSetResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteSetResponse = DeleteSetResponses[keyof DeleteSetResponses];
+
+export type UpdateSetData = {
+    body: UpdateSetRequest;
+    path: {
+        /**
+         * Workout Id
+         */
+        workout_id: number;
+        /**
+         * Workout Exercise Id
+         */
+        workout_exercise_id: number;
+        /**
+         * Set Id
+         */
+        set_id: number;
+    };
+    query?: never;
+    url: '/api/sets/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}';
+};
+
+export type UpdateSetErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateSetError = UpdateSetErrors[keyof UpdateSetErrors];
+
+export type UpdateSetResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type UpdateSetResponse = UpdateSetResponses[keyof UpdateSetResponses];
+
 export type GetCurrentUserData = {
     body?: never;
     path?: never;
@@ -1180,6 +1362,86 @@ export type GetCurrentUserResponses = {
 };
 
 export type GetCurrentUserResponse = GetCurrentUserResponses[keyof GetCurrentUserResponses];
+
+export type CreateWorkoutExerciseData = {
+    body: CreateWorkoutExerciseRequest;
+    path: {
+        /**
+         * Workout Id
+         */
+        workout_id: number;
+    };
+    query?: never;
+    url: '/api/workout-exercises/{workout_id}/exercises';
+};
+
+export type CreateWorkoutExerciseErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateWorkoutExerciseError = CreateWorkoutExerciseErrors[keyof CreateWorkoutExerciseErrors];
+
+export type CreateWorkoutExerciseResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type CreateWorkoutExerciseResponse = CreateWorkoutExerciseResponses[keyof CreateWorkoutExerciseResponses];
+
+export type DeleteWorkoutExerciseData = {
+    body?: never;
+    path: {
+        /**
+         * Workout Id
+         */
+        workout_id: number;
+        /**
+         * Workout Exercise Id
+         */
+        workout_exercise_id: number;
+    };
+    query?: never;
+    url: '/api/workout-exercises/{workout_id}/exercises/{workout_exercise_id}';
+};
+
+export type DeleteWorkoutExerciseErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteWorkoutExerciseError = DeleteWorkoutExerciseErrors[keyof DeleteWorkoutExerciseErrors];
+
+export type DeleteWorkoutExerciseResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteWorkoutExerciseResponse = DeleteWorkoutExerciseResponses[keyof DeleteWorkoutExerciseResponses];
 
 export type GetWorkoutsData = {
     body?: never;
@@ -1350,83 +1612,3 @@ export type UpdateWorkoutResponses = {
 };
 
 export type UpdateWorkoutResponse = UpdateWorkoutResponses[keyof UpdateWorkoutResponses];
-
-export type CreateWorkoutExerciseData = {
-    body: CreateWorkoutExerciseRequest;
-    path: {
-        /**
-         * Workout Id
-         */
-        workout_id: number;
-    };
-    query?: never;
-    url: '/api/workout-exercises/{workout_id}/exercises';
-};
-
-export type CreateWorkoutExerciseErrors = {
-    /**
-     * Unauthorized
-     */
-    401: ErrorResponse;
-    /**
-     * Not Found
-     */
-    404: ErrorResponse;
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateWorkoutExerciseError = CreateWorkoutExerciseErrors[keyof CreateWorkoutExerciseErrors];
-
-export type CreateWorkoutExerciseResponses = {
-    /**
-     * Successful Response
-     */
-    204: void;
-};
-
-export type CreateWorkoutExerciseResponse = CreateWorkoutExerciseResponses[keyof CreateWorkoutExerciseResponses];
-
-export type DeleteWorkoutExerciseData = {
-    body?: never;
-    path: {
-        /**
-         * Workout Id
-         */
-        workout_id: number;
-        /**
-         * Workout Exercise Id
-         */
-        workout_exercise_id: number;
-    };
-    query?: never;
-    url: '/api/workout-exercises/{workout_id}/exercises/{workout_exercise_id}';
-};
-
-export type DeleteWorkoutExerciseErrors = {
-    /**
-     * Unauthorized
-     */
-    401: ErrorResponse;
-    /**
-     * Not Found
-     */
-    404: ErrorResponse;
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type DeleteWorkoutExerciseError = DeleteWorkoutExerciseErrors[keyof DeleteWorkoutExerciseErrors];
-
-export type DeleteWorkoutExerciseResponses = {
-    /**
-     * Successful Response
-     */
-    204: void;
-};
-
-export type DeleteWorkoutExerciseResponse = DeleteWorkoutExerciseResponses[keyof DeleteWorkoutExerciseResponses];
