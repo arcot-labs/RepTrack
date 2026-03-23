@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import EmailStr, Field, StringConstraints, TypeAdapter, ValidationError
 
@@ -20,3 +20,7 @@ Token = Annotated[str, StringConstraints(min_length=1, max_length=64)]
 Email = Annotated[EmailStr, Field(max_length=255)]
 
 ExerciseName = Annotated[str, StringConstraints(min_length=1, max_length=255)]
+
+SetReps = Annotated[int, Field(ge=0)]
+SetWeight = Annotated[float, Field(ge=0)]
+SetUnit = Annotated[str, Literal["kg", "lb"]]

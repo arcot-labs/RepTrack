@@ -99,7 +99,8 @@ async def create_exercise(
 
     try:
         await db.flush()
-    except IntegrityError:
+    except IntegrityError as e:
+        logger.error(f"Integrity error creating exercise: {e}")
         await db.rollback()
         raise ExerciseNameConflict()
 
@@ -185,7 +186,8 @@ async def update_exercise(
 
     try:
         await db.commit()
-    except IntegrityError:
+    except IntegrityError as e:
+        logger.error(f"Integrity error updating exercise: {e}")
         await db.rollback()
         raise ExerciseNameConflict()
 

@@ -73,6 +73,24 @@ class ExerciseNotFound(HTTPError):
     detail = "Exercise not found"
 
 
+class WorkoutNotFound(HTTPError):
+    status_code = status.HTTP_404_NOT_FOUND
+    code = "workout_not_found"
+    detail = "Workout not found"
+
+
+class WorkoutExerciseNotFound(HTTPError):
+    status_code = status.HTTP_404_NOT_FOUND
+    code = "workout_exercise_not_found"
+    detail = "Workout exercise not found"
+
+
+class SetNotFound(HTTPError):
+    status_code = status.HTTP_404_NOT_FOUND
+    code = "set_not_found"
+    detail = "Set not found"
+
+
 class UsernameTaken(HTTPError):
     status_code = status.HTTP_409_CONFLICT
     code = "username_taken"
@@ -97,13 +115,13 @@ class ExerciseNameConflict(HTTPError):
     detail = "Exercise with this name already exists"
 
 
-class WorkoutNotFound(HTTPError):
-    status_code = status.HTTP_404_NOT_FOUND
-    code = "workout_not_found"
-    detail = "Workout not found"
+class WorkoutExercisePositionConflict(HTTPError):
+    status_code = status.HTTP_409_CONFLICT
+    code = "workout_exercise_position_conflict"
+    detail = "Workout exercise with this position already exists"
 
 
-class WorkoutExerciseNotFound(HTTPError):
-    status_code = status.HTTP_404_NOT_FOUND
-    code = "workout_exercise_not_found"
-    detail = "Workout exercise not found"
+class SetNumberConflict(HTTPError):
+    status_code = status.HTTP_409_CONFLICT
+    code = "set_number_conflict"
+    detail = "Set with this number already exists"
