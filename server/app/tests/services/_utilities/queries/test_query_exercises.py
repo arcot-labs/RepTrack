@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.database.exercise import Exercise
 from app.services.utilities.queries import query_exercises
 
-from ...exercise.utilities import create_exercise, get_muscle_group_id
+from ...exercise.utilities import create_exercise
+from ...muscle_group.utilities import get_muscle_group_id
 from ...utilities import create_user
 
 

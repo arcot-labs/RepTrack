@@ -12,8 +12,9 @@ from app.models.errors import (
 from app.models.schemas.exercise import UpdateExerciseRequest
 from app.services.exercise import get_exercise, update_exercise
 
+from ..muscle_group.utilities import get_muscle_group_id
 from ..utilities import create_user
-from .utilities import create_exercise, get_muscle_group_id
+from .utilities import create_exercise
 
 
 async def test_update_exercise(session: AsyncSession):

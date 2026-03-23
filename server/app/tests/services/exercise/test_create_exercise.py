@@ -10,8 +10,8 @@ from app.models.schemas.exercise import CreateExerciseRequest
 from app.services.exercise import create_exercise
 from app.services.utilities.queries import query_exercises
 
+from ..muscle_group.utilities import get_muscle_group_id
 from ..utilities import create_user
-from .utilities import get_muscle_group_id
 
 
 async def test_create_exercise(session: AsyncSession):
