@@ -1,26 +1,10 @@
-import { AuthService } from '@/api/generated'
 import { useSession } from '@/auth/session'
-import { FeedbackFormDialog } from '@/components/FeedbackFormDialog'
-import { ModeToggle } from '@/components/ModeToggle'
-import { Button } from '@/components/ui/overrides/button'
+import { HeaderActions } from '@/components/HeaderActions'
 import { NavItem } from '@/lib/nav'
-import { notify } from '@/lib/notify'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet } from 'react-router-dom'
 
 export function AppLayout() {
-    const { refresh, user } = useSession()
-    const navigate = useNavigate()
-
-    const handleLogout = async () => {
-        const { error } = await AuthService.logout()
-        if (error) {
-            notify.error('Failed to log out')
-            return
-        }
-        notify.success('Logged out')
-        await refresh()
-        void navigate('/login', { replace: true })
-    }
+    const { user } = useSession()
 
     return (
         <div className="flex min-h-screen flex-col bg-muted">
@@ -39,16 +23,7 @@ export function AppLayout() {
                             )}
                         </nav>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <ModeToggle />
-                        <FeedbackFormDialog />
-                        <Button
-                            variant="destructive"
-                            onClick={() => void handleLogout()}
-                        >
-                            Logout
-                        </Button>
-                    </div>
+                    <HeaderActions />
                 </div>
             </header>
             <main className="flex-1">
