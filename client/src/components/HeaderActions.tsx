@@ -34,7 +34,7 @@ export function HeaderActions() {
                     Logout
                 </Button>
             </div>
-            <div className="flex items-center justify-end gap-1 py-1 md:hidden">
+            <div className="flex items-center justify-end gap-2 py-1 md:hidden">
                 <ModeToggle />
                 <FeedbackFormDialog
                     trigger={
