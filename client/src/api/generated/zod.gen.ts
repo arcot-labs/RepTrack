@@ -21,16 +21,6 @@ export const zCreateExerciseRequest = z.object({
 });
 
 /**
- * CreateSetRequest
- */
-export const zCreateSetRequest = z.object({
-    reps: z.int().gte(0).nullish(),
-    weight: z.number().gte(0).nullish(),
-    unit: z.string().nullish(),
-    notes: z.string().nullish()
-});
-
-/**
  * CreateWorkoutExerciseRequest
  */
 export const zCreateWorkoutExerciseRequest = z.object({
@@ -186,6 +176,21 @@ export const zSetPublic = z.object({
 });
 
 /**
+ * SetUnit
+ */
+export const zSetUnit = z.enum(['kg', 'lb']);
+
+/**
+ * CreateSetRequest
+ */
+export const zCreateSetRequest = z.object({
+    reps: z.int().gte(0).nullish(),
+    weight: z.number().gte(0).nullish(),
+    unit: zSetUnit.nullish(),
+    notes: z.string().nullish()
+});
+
+/**
  * UpdateAccessRequestStatusRequest
  */
 export const zUpdateAccessRequestStatusRequest = z.object({
@@ -207,7 +212,7 @@ export const zUpdateExerciseRequest = z.object({
 export const zUpdateSetRequest = z.object({
     reps: z.int().gte(0).nullish(),
     weight: z.number().gte(0).nullish(),
-    unit: z.string().nullish(),
+    unit: zSetUnit.nullish(),
     notes: z.string().nullish()
 });
 

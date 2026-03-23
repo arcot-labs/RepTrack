@@ -9,13 +9,14 @@ from sqlalchemy import (
     Index,
     Integer,
     Numeric,
-    String,
     UniqueConstraint,
     func,
 )
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.models.enums import SetUnit
 
 if TYPE_CHECKING:
     from app.models.database.workout_exercise import WorkoutExercise
@@ -56,8 +57,11 @@ class Set(Base):
     weight: Mapped[float | None] = mapped_column(
         Numeric(6, 2),
     )
-    unit: Mapped[str | None] = mapped_column(
-        String(255),
+    unit: Mapped[SetUnit | None] = mapped_column(
+        SQLEnum(
+            SetUnit,
+            name="set_unit",
+        ),
     )
     notes: Mapped[str | None] = mapped_column(
         TEXT,

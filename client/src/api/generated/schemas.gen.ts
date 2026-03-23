@@ -184,13 +184,12 @@ export const CreateSetRequestSchema = {
         unit: {
             anyOf: [
                 {
-                    type: 'string'
+                    $ref: '#/components/schemas/SetUnit'
                 },
                 {
                     type: 'null'
                 }
-            ],
-            title: 'Unit'
+            ]
         },
         notes: {
             anyOf: [
@@ -703,6 +702,15 @@ export const SetPublicSchema = {
     title: 'SetPublic'
 } as const;
 
+export const SetUnitSchema = {
+    type: 'string',
+    enum: [
+        'kg',
+        'lb'
+    ],
+    title: 'SetUnit'
+} as const;
+
 export const UpdateAccessRequestStatusRequestSchema = {
     properties: {
         status: {
@@ -795,13 +803,12 @@ export const UpdateSetRequestSchema = {
         unit: {
             anyOf: [
                 {
-                    type: 'string'
+                    $ref: '#/components/schemas/SetUnit'
                 },
                 {
                     type: 'null'
                 }
-            ],
-            title: 'Unit'
+            ]
         },
         notes: {
             anyOf: [

@@ -2,7 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from app.models.schemas.types import SetReps, SetUnit, SetWeight
+from app.models.enums import SetUnit
+from app.models.schemas.types import SetReps, SetWeight
 
 
 class SetPublic(BaseModel):

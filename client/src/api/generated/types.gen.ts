@@ -98,10 +98,7 @@ export type CreateSetRequest = {
      * Weight
      */
     weight?: number | null;
-    /**
-     * Unit
-     */
-    unit?: string | null;
+    unit?: SetUnit | null;
     /**
      * Notes
      */
@@ -386,6 +383,11 @@ export type SetPublic = {
 };
 
 /**
+ * SetUnit
+ */
+export type SetUnit = 'kg' | 'lb';
+
+/**
  * UpdateAccessRequestStatusRequest
  */
 export type UpdateAccessRequestStatusRequest = {
@@ -425,10 +427,7 @@ export type UpdateSetRequest = {
      * Weight
      */
     weight?: number | null;
-    /**
-     * Unit
-     */
-    unit?: string | null;
+    unit?: SetUnit | null;
     /**
      * Notes
      */
