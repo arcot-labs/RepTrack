@@ -7,8 +7,12 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.core.database import is_unique_violation
 from app.models.database.exercise import Exercise
-from app.models.database.workout_exercise import WorkoutExercise
+from app.models.database.workout_exercise import (
+    WORKOUT_EXERCISE_UNIQUE_CONSTRAINT,
+    WorkoutExercise,
+)
 from app.models.errors import (
     ExerciseNotFound,
     WorkoutExerciseNotFound,
@@ -105,7 +109,9 @@ async def create_workout_exercise(
     except IntegrityError as e:
         logger.error(f"Integrity error creating workout exercise: {e}")
         await db.rollback()
-        raise WorkoutExercisePositionConflict()
+        if is_unique_violation(e, WORKOUT_EXERCISE_UNIQUE_CONSTRAINT):
+            raise WorkoutExercisePositionConflict()
+        raise
 
 
 async def delete_workout_exercise(

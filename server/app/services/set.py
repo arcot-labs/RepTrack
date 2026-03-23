@@ -6,7 +6,8 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.database.set import Set
+from app.core.database import is_unique_violation
+from app.models.database.set import SET_UNIQUE_CONSTRAINT, Set
 from app.models.database.workout_exercise import WorkoutExercise
 from app.models.errors import (
     SetNotFound,
@@ -95,7 +96,9 @@ async def create_set(
     except IntegrityError as e:
         logger.error(f"Integrity error creating set: {e}")
         await db.rollback()
-        raise SetNumberConflict()
+        if is_unique_violation(e, SET_UNIQUE_CONSTRAINT):
+            raise SetNumberConflict()
+        raise
 
 
 async def update_set(

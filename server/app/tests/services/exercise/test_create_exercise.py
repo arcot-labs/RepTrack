@@ -1,4 +1,7 @@
+from unittest.mock import patch
+
 import pytest
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.exercise import Exercise
@@ -66,3 +69,20 @@ async def test_create_exercise_name_conflict(session: AsyncSession):
             CreateExerciseRequest(name="Bench", muscle_group_ids=[]),
             session,
         )
+
+
+async def test_create_exercise_unhandled_integrity_error(session: AsyncSession):
+    user = await create_user(session)
+    await create_exercise(
+        user.id,
+        CreateExerciseRequest(name="Bench", muscle_group_ids=[]),
+        session,
+    )
+
+    with patch("app.services.exercise.is_unique_violation", return_value=False):
+        with pytest.raises(IntegrityError):
+            await create_exercise(
+                user.id,
+                CreateExerciseRequest(name="Bench", muscle_group_ids=[]),
+                session,
+            )

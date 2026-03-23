@@ -7,7 +7,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.database.exercise import Exercise
+from app.core.database import is_unique_violation
+from app.models.database.exercise import EXERCISE_UNIQUE_CONSTRAINT, Exercise
 from app.models.database.exercise_muscle_group import ExerciseMuscleGroup
 from app.models.errors import (
     ExerciseNameConflict,
@@ -102,7 +103,9 @@ async def create_exercise(
     except IntegrityError as e:
         logger.error(f"Integrity error creating exercise: {e}")
         await db.rollback()
-        raise ExerciseNameConflict()
+        if is_unique_violation(e, EXERCISE_UNIQUE_CONSTRAINT):
+            raise ExerciseNameConflict()
+        raise
 
     for mg in muscle_groups:
         db.add(
@@ -189,7 +192,9 @@ async def update_exercise(
     except IntegrityError as e:
         logger.error(f"Integrity error updating exercise: {e}")
         await db.rollback()
-        raise ExerciseNameConflict()
+        if is_unique_violation(e, EXERCISE_UNIQUE_CONSTRAINT):
+            raise ExerciseNameConflict()
+        raise
 
 
 async def delete_exercise(

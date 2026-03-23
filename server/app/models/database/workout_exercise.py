@@ -20,6 +20,8 @@ if TYPE_CHECKING:
     from app.models.database.set import Set
     from app.models.database.workout import Workout
 
+WORKOUT_EXERCISE_UNIQUE_CONSTRAINT = "uq_workout_exercises_workout_position"
+
 
 class WorkoutExercise(Base):
     __tablename__ = "workout_exercises"
@@ -35,7 +37,7 @@ class WorkoutExercise(Base):
         UniqueConstraint(
             "workout_id",
             "position",
-            name="uq_workout_exercises_workout_position",
+            name=WORKOUT_EXERCISE_UNIQUE_CONSTRAINT,
         ),
         CheckConstraint(
             "position > 0",

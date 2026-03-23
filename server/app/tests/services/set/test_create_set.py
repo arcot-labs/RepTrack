@@ -1,8 +1,10 @@
 from decimal import Decimal
+from unittest.mock import patch
 
 import pytest
 from pytest import MonkeyPatch
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.set import Set
@@ -162,3 +164,43 @@ async def test_create_set_set_number_conflict(
             req=CreateSetRequest(),
             db=session,
         )
+
+
+async def test_create_set_unhandled_integrity_error(
+    session: AsyncSession,
+    monkeypatch: MonkeyPatch,
+):
+    user = await create_user(session)
+    workout = await create_workout(session, user_id=user.id)
+    exercise = await create_exercise(session, name="Bench Press")
+    workout_exercise = await create_workout_exercise(
+        session,
+        workout_id=workout.id,
+        exercise_id=exercise.id,
+        position=1,
+    )
+
+    await create_set_util(
+        session,
+        workout_exercise_id=workout_exercise.id,
+        set_number=1,
+    )
+
+    async def mock_get_next_set_number(
+        workout_exercise_id: int, db: AsyncSession
+    ) -> int:
+        return 1
+
+    monkeypatch.setattr(
+        "app.services.set._get_next_set_number", mock_get_next_set_number
+    )
+
+    with patch("app.services.set.is_unique_violation", return_value=False):
+        with pytest.raises(IntegrityError):
+            await create_set(
+                workout_id=workout.id,
+                workout_exercise_id=workout_exercise.id,
+                user_id=user.id,
+                req=CreateSetRequest(),
+                db=session,
+            )

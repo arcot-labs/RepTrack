@@ -1,6 +1,9 @@
+from unittest.mock import patch
+
 import pytest
 from pytest import MonkeyPatch
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.workout_exercise import WorkoutExercise
@@ -132,3 +135,36 @@ async def test_create_workout_exercise_position_conflict(
             CreateWorkoutExerciseRequest(exercise_id=exercise.id),
             session,
         )
+
+
+async def test_create_workout_exercise_unhandled_integrity_error(
+    session: AsyncSession,
+    monkeypatch: MonkeyPatch,
+):
+    user = await create_user(session)
+    workout = await create_workout(session, user_id=user.id)
+    exercise = await create_exercise(session, name="Exercise 1")
+
+    await create_workout_exercise_util(
+        session,
+        workout_id=workout.id,
+        exercise_id=exercise.id,
+        position=1,
+    )
+
+    async def mock_get_next_position(workout_id: int, db: AsyncSession) -> int:
+        return 1
+
+    monkeypatch.setattr(
+        "app.services.workout_exercise._get_next_workout_exercise_position",
+        mock_get_next_position,
+    )
+
+    with patch("app.services.workout_exercise.is_unique_violation", return_value=False):
+        with pytest.raises(IntegrityError):
+            await create_workout_exercise(
+                workout.id,
+                user.id,
+                CreateWorkoutExerciseRequest(exercise_id=exercise.id),
+                session,
+            )
