@@ -1,9 +1,12 @@
+from decimal import Decimal
+
 import pytest
 from pytest import MonkeyPatch
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.set import Set
+from app.models.enums import SetUnit
 from app.models.errors import (
     SetNumberConflict,
     WorkoutExerciseNotFound,
@@ -36,8 +39,8 @@ async def test_create_set(session: AsyncSession):
         user_id=user.id,
         req=CreateSetRequest(
             reps=10,
-            weight=100.0,
-            unit="lb",
+            weight=Decimal(100),
+            unit=SetUnit.lb,
             notes="Test set",
         ),
         db=session,

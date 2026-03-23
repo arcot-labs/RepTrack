@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
@@ -54,7 +55,7 @@ class Set(Base):
     reps: Mapped[int | None] = mapped_column(
         Integer,
     )
-    weight: Mapped[float | None] = mapped_column(
+    weight: Mapped[Decimal | None] = mapped_column(
         Numeric(6, 2),
     )
     unit: Mapped[SetUnit | None] = mapped_column(

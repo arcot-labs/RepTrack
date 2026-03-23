@@ -1,7 +1,10 @@
+from decimal import Decimal
+
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.set import Set
+from app.models.enums import SetUnit
 from app.models.errors import (
     SetNotFound,
     WorkoutNotFound,
@@ -43,8 +46,8 @@ async def test_update_set(session: AsyncSession):
         user_id=user.id,
         req=UpdateSetRequest(
             reps=12,
-            weight=150,
-            unit="kg",
+            weight=Decimal(150),
+            unit=SetUnit.kg,
             notes="Updated set",
         ),
         db=session,
@@ -173,8 +176,8 @@ async def test_update_set_no_reps(session: AsyncSession):
         set_id=set_.id,
         user_id=user.id,
         req=UpdateSetRequest(
-            weight=150,
-            unit="kg",
+            weight=Decimal(150),
+            unit=SetUnit.kg,
             notes="Updated set",
         ),
         db=session,
@@ -216,7 +219,7 @@ async def test_update_set_no_weight(session: AsyncSession):
         user_id=user.id,
         req=UpdateSetRequest(
             reps=12,
-            unit="kg",
+            unit=SetUnit.kg,
             notes="Updated set",
         ),
         db=session,
@@ -258,7 +261,7 @@ async def test_update_set_no_unit(session: AsyncSession):
         user_id=user.id,
         req=UpdateSetRequest(
             reps=12,
-            weight=150,
+            weight=Decimal(150),
             notes="Updated set",
         ),
         db=session,
@@ -300,8 +303,8 @@ async def test_update_set_no_notes(session: AsyncSession):
         user_id=user.id,
         req=UpdateSetRequest(
             reps=12,
-            weight=150,
-            unit="kg",
+            weight=Decimal(150),
+            unit=SetUnit.kg,
         ),
         db=session,
     )
