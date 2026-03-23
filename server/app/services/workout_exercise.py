@@ -48,7 +48,8 @@ async def query_workout_exercises(
     query = (
         select(WorkoutExercise).where(*where_clauses).order_by(WorkoutExercise.position)
     )
-    query.options(
+    query = query.options(
+        selectinload(WorkoutExercise.exercise),
         selectinload(WorkoutExercise.sets),
     )
     result = await db.execute(query)
