@@ -1,4 +1,6 @@
 from datetime import datetime
+from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     TEXT,
@@ -8,13 +10,17 @@ from sqlalchemy import (
     Index,
     Integer,
     Numeric,
-    String,
     UniqueConstraint,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.models.enums import SetUnit
+
+if TYPE_CHECKING:
+    from app.models.database.workout_exercise import WorkoutExercise
 
 
 class Set(Base):
@@ -49,11 +55,14 @@ class Set(Base):
     reps: Mapped[int | None] = mapped_column(
         Integer,
     )
-    weight: Mapped[float | None] = mapped_column(
+    weight: Mapped[Decimal | None] = mapped_column(
         Numeric(6, 2),
     )
-    unit: Mapped[str | None] = mapped_column(
-        String(255),
+    unit: Mapped[SetUnit | None] = mapped_column(
+        SQLEnum(
+            SetUnit,
+            name="set_unit",
+        ),
     )
     notes: Mapped[str | None] = mapped_column(
         TEXT,
@@ -68,4 +77,9 @@ class Set(Base):
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
+    )
+
+    workout_exercise: Mapped[WorkoutExercise] = relationship(
+        "WorkoutExercise",
+        back_populates="sets",
     )

@@ -4,7 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.errors import ExerciseNotFound
 from app.services.exercise import get_exercise
 
-from .utilities import create_exercise, create_user
+from ..utilities import create_user
+from .utilities import create_exercise
 
 
 async def test_get_exercise(session: AsyncSession):
@@ -39,3 +40,16 @@ async def test_get_exercise_not_found(session: AsyncSession):
 
     with pytest.raises(ExerciseNotFound):
         await get_exercise(99999, user.id, session)
+
+
+async def test_get_exercise_not_allowed(session: AsyncSession):
+    owner = await create_user(session, username="owner")
+    other = await create_user(session, username="other")
+    exercise = await create_exercise(
+        session,
+        name="Other Exercise",
+        user_id=owner.id,
+    )
+
+    with pytest.raises(ExerciseNotFound):
+        await get_exercise(exercise.id, other.id, session)

@@ -21,7 +21,7 @@ from app.services.exercise import (
 
 api_router = APIRouter(
     prefix="/exercises",
-    tags=["Exercises"],
+    tags=["Exercise"],
     dependencies=[Depends(get_current_user)],
 )
 
@@ -29,7 +29,7 @@ api_router = APIRouter(
 @api_router.post(
     "",
     operation_id="createExercise",
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_204_NO_CONTENT,
     responses={
         status.HTTP_401_UNAUTHORIZED: ErrorResponseModel,
         status.HTTP_404_NOT_FOUND: ErrorResponseModel,
@@ -40,8 +40,8 @@ async def create_exercise_endpoint(
     req: CreateExerciseRequest,
     user: Annotated[UserPublic, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
-) -> ExercisePublic:
-    return await create_exercise(user.id, req, db)
+):
+    await create_exercise(user.id, req, db)
 
 
 @api_router.get(

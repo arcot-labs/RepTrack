@@ -10,3 +10,8 @@ class AccessRequestStatus(StrEnum):
 class FeedbackType(StrEnum):
     feedback = "feedback"
     feature = "feature"
+
+
+class SetUnit(StrEnum):
+    kg = "kg"
+    lb = "lb"

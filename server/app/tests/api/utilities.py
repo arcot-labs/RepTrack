@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
+from app.core.security import PASSWORD_HASH
 from app.models.database.user import User
 
 logger = logging.getLogger(__name__)
@@ -80,3 +81,21 @@ async def get_admin(session: AsyncSession, settings: Settings) -> User:
         select(User).where(User.username == settings.admin.username)
     )
     return result.scalar_one()
+
+
+async def create_user(
+    session: AsyncSession,
+    username: str = "user",
+    password: str = "password",
+) -> User:
+    user = User(
+        username=username,
+        email=f"{username}@example.com",
+        first_name=username.capitalize(),
+        last_name="Test",
+        password_hash=PASSWORD_HASH.hash(password),
+        is_admin=False,
+    )
+    session.add(user)
+    await session.commit()
+    return user

@@ -1,183 +1,71 @@
-# RepTrack – Copilot Instructions
+# RepTrack – Agent Instructions
 
-RepTrack is a full-stack strength-training tracker. The client is React + Vite (TypeScript), the server is FastAPI (Python 3.14+), and the database is PostgreSQL via SQLAlchemy 2.0 + AsyncPG.
+RepTrack is a full-stack strength-training tracker:
 
----
+- `client/`: React 19 + Vite + TypeScript
+- `server/`: FastAPI + SQLAlchemy 2.0 async stack
+- DB: PostgreSQL (AsyncPG)
 
-## Repository Layout
-
-```
-client/          React + Vite frontend
-server/          FastAPI backend
-config/env/      Environment files (.env.example → .env)
-config/infra/    Docker Compose for dev/prod
-scripts/         Dev bootstrap (dev.sh) and API generation
-```
-
----
-
-## Commands
-
-### Server (`cd server`)
-
-| Task                       | Command                                                         |
-| -------------------------- | --------------------------------------------------------------- |
-| Start dev server           | `make dev`                                                      |
-| Run all tests              | `make test`                                                     |
-| Run tests with coverage    | `make cov`                                                      |
-| Run a single test file     | `uv run pytest app/tests/api/auth/test_login.py -v`             |
-| Run a single test function | `uv run pytest app/tests/api/auth/test_login.py::test_login -v` |
-| Type check                 | `make check`                                                    |
-| Generate migration         | `make auto_migration msg="description"`                         |
-| Apply migrations           | `make migrate`                                                  |
-| Verify migrations          | `make check_migrations`                                         |
-
-### Client (`cd client`)
-
-| Task                  | Command                |
-| --------------------- | ---------------------- |
-| Start dev server      | `npm run dev`          |
-| Build                 | `npm run build`        |
-| Lint (auto-fix)       | `npm run lint`         |
-| Regenerate API client | `npm run generate-api` |
+## Build, Test, and Lint Commands
 
 ### Root (monorepo)
 
-| Task              | Command            |
-| ----------------- | ------------------ |
-| Format all        | `npm run format`   |
-| Lint all          | `npm run lint`     |
-| Type check server | `npm run check:py` |
+- Format all: `npm run format`
+- Lint/typecheck all configured checks: `npm run lint`
+- Server typecheck only: `npm run check:py`
 
----
+### Server (`cd server`)
 
-## Dev Environment
+- Dev server: `make dev`
+- Typecheck: `make check`
+- Test suite: `make test`
+- Tests with coverage: `make cov`
+- Single test file: `uv run pytest app/tests/api/auth/test_login.py -v`
+- Single test function: `uv run pytest app/tests/api/auth/test_login.py::test_login -v`
+- Alembic check: `make check_migrations`
+- Apply migrations: `make migrate`
 
-```bash
-cp config/env/.env.example config/env/.env    # fill in values
-./scripts/dev.sh                              # install deps + start Docker Compose
-./scripts/dev.sh -s                           # skip install, just start
-./scripts/dev.sh -o                           # omit client/server containers
-```
+### Client (`cd client`)
 
-Docker Compose runs postgres, adminer, migrations, server (uvicorn), and client (Vite) with hot reload.
+- Dev server: `npm run dev`
+- Build: `npm run build`
+- Lint (auto-fix): `npm run lint`
+- Regenerate OpenAPI client: `npm run generate-api`
 
----
+## High-Level Architecture
 
-## Architecture
+### Server request path
 
-### Server
+- `server/app/__init__.py` owns app assembly (`create_app`): logging setup, global exception handlers, `/api` router mounting, Swagger UI install in non-prod-like envs, CORS wrapping.
+- `server/app/main.py` just instantiates and exports `fastapi_app, app`.
+- `server/app/api/router.py` composes domain routers from `server/app/api/endpoints/*.py`.
+- Endpoints are intentionally thin and delegate business logic to `server/app/services/*.py`.
 
-- **Entry point:** `server/app/main.py` — creates the FastAPI app, registers routers, exception handlers, and lifespan
-- **Routing:** `server/app/api/router.py` composes all routers under `/api`. Each domain lives in `server/app/api/endpoints/{domain}.py`
-- **Services:** `server/app/services/{domain}.py` — business logic, called by endpoints. Keep endpoints thin.
-- **Database models:** `server/app/models/database/{entity}.py` — SQLAlchemy 2.0 declarative models
-- **Schemas:** `server/app/models/schemas/{domain}.py` — Pydantic request/response models
-- **Config:** `server/app/core/config.py` — `Settings` loaded via `pydantic-settings` with `__` as nested delimiter (e.g., `DB__HOST`)
-- **Auth:** HTTP-only JWT cookies (`ACCESS_JWT_KEY`, `REFRESH_JWT_KEY`). `get_current_user` and `get_current_admin` are FastAPI dependencies in `server/app/core/security.py`
-- **Errors:** Custom `HTTPError` subclasses in `server/app/models/errors.py`; raise them directly (e.g., `raise InvalidCredentials()`)
+### Auth/session architecture across backend + frontend
 
-### Client
+- Backend auth uses HTTP-only cookies (`access_token`, `refresh_token`) from `auth` endpoints.
+- JWT verification and current-user/admin dependencies are in `server/app/core/dependencies.py` and `server/app/core/security.py`.
+- Frontend API client (`client/src/api/axios.ts`) queues concurrent 401s and performs one refresh-token request, then retries queued calls.
+- `SessionProvider` loads `/api/users/current` to determine authenticated state; `RequireAuth` / `RequireGuest` gate routes in `client/src/AppRoutes.tsx`.
 
-- **API client:** Auto-generated from OpenAPI spec via `@hey-api/openapi-ts`. Run `npm run generate-api` after server changes. Do **not** hand-edit `src/api/`.
-- **Auth guards:** `RequireAuth` / `RequireGuest` components wrap routes in `src/router/`
-- **Axios interceptors:** Handle 401 auto-refresh with request queueing (`src/lib/axios.ts`)
+### OpenAPI client generation pipeline
 
----
+- Server OpenAPI spec is generated by `scripts/generate_api.sh`.
+- Client generation uses `client/openapi-ts.config.ts` with `@hey-api/openapi-ts`.
+- SDK generation strategy is `byTags` + `operationId` nesting, so endpoint `operation_id` values drive generated method names.
+- Generated files live in `client/src/api/generated/` and should not be hand-edited.
 
 ## Key Conventions
 
-### Endpoints
-
-```python
-api_router = APIRouter(prefix="/auth", tags=["Auth"])
-
-@api_router.post(
-    "/login",
-    operation_id="login", # required — used for OpenAPI client generation
-    status_code=status.HTTP_204_NO_CONTENT,
-    responses={status.HTTP_401_UNAUTHORIZED: ErrorResponseModel},
-)
-async def login_endpoint(
-    req: LoginRequest,
-    db: Annotated[AsyncSession, Depends(get_db)],
-    settings: Annotated[Settings, Depends(get_settings)],
-    res: Response,
-):
-    result = await login(...) # delegate to service
-    res.set_cookie(...)
-```
-
-Always set `operation_id` — it drives the generated TypeScript client method name.
-
-### Schemas
-
-- Response schemas: `{Entity}Public` (e.g., `UserPublic`)
-- Request schemas: `{Action}Request` (e.g., `LoginRequest`, `RegisterRequest`)
-- Convert ORM → schema with `Model.model_validate(orm_obj, from_attributes=True)`
-- Shared field type aliases (`Name`, `Username`, `Password`, `Email`) live in `server/app/models/schemas/types.py`
-
-### Database Models
-
-```python
-class User(Base):
-    __tablename__ = "users"
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-```
-
-- Use SQLAlchemy 2.0 `Mapped` annotations throughout
-- All models include `created_at` / `updated_at` with `server_default=func.now()`
-- Alembic bulk updates must explicitly set `updated_at` (no ORM trigger)
-- Table names: lowercase plural; index names: `ix_{table}_{column}`
-
-### Auth in Routes
-
-```python
-# Authenticated route
-async def endpoint(user: Annotated[UserPublic, Depends(get_current_user)], ...):
-
-# Admin-only route
-async def endpoint(user: Annotated[UserPublic, Depends(get_current_admin)], ...):
-```
-
-### Error Handling
-
-Define errors as `HTTPError` subclasses; raise without arguments:
-
-```python
-class InvalidCredentials(HTTPError):
-    status_code = status.HTTP_401_UNAUTHORIZED
-    code = "invalid_credentials"
-    detail = "Invalid credentials"
-
-raise InvalidCredentials()
-```
-
-### Tests
-
-- Fixtures are in `server/app/tests/fixtures/` and registered in `server/conftest.py`
-- Shared helpers go in `server/app/tests/{scope}/utilities.py`, not per-test-file
-- Module-private helpers and constants are prefixed with `_`
-- Tests use `AsyncClient` from `httpx` against a savepoint-wrapped test DB
-- Test settings use `console` email/GitHub backends; admin credentials: `admin` / `admin@example.com` / `password`
-- `RegisterRequest` rejects usernames that are email addresses (enforced by `@field_validator`)
-- `get_user_by_identifier` resolves login by email OR username
-
----
-
-## Configuration
-
-Settings use Pydantic nested models with `__` as the env delimiter:
-
-```
-DB__HOST, DB__PORT, DB__NAME, DB__USER, DB__PASSWORD
-JWT__SECRET_KEY, JWT__ALGORITHM, JWT__ACCESS_TOKEN_EXPIRE_MINUTES
-ADMIN__USERNAME, ADMIN__EMAIL, ADMIN__PASSWORD
-EMAIL__BACKEND=smtp|local|console|disabled
-GH__BACKEND=api|console
-```
-
-Production requires `EMAIL__BACKEND=smtp` and `GH__BACKEND=api` (validated at startup).
+- Always set explicit `operation_id` on FastAPI endpoints. Missing or unstable IDs cause churn/breakage in generated TS SDK method names.
+- Route handlers keep orchestration only; core business logic belongs in `server/app/services/`.
+- Error handling uses `HTTPError` subclasses in `server/app/models/errors.py`; raise typed errors directly (e.g., `raise InvalidCredentials()`), not ad-hoc `HTTPException` payloads.
+- Settings come from nested env vars with `__` delimiter (see `server/app/core/config.py`, e.g. `DB__HOST`, `JWT__SECRET_KEY`). In prod-like envs, config validators enforce `EMAIL__BACKEND=smtp` and `GH__BACKEND=api`.
+- SQLAlchemy models use `Mapped[...]` + `mapped_column(...)`; models include `created_at`/`updated_at` timestamps. Alembic/bulk updates must set `updated_at` explicitly.
+- Client lint rules enforce wrapper usage over direct imports:
+    - Prefer app override components like `@/components/ui/overrides/button` instead of base shadcn paths.
+    - Prefer `@/` alias imports over deep relative paths.
+    - Prefer `@/lib/notify` over direct `toast` import from `sonner`.
+- Test stack uses pytest + async fixtures with a Postgres Testcontainers instance (`postgres:18`) and savepoint-based rollback per test (`server/app/tests/fixtures/database.py`).
+- Shared test helpers belong in `utilities.py` under the relevant test scope; module-private test helpers/constants are prefixed with `_`.
+- Auth schema rule: usernames cannot be email-shaped strings (`RegisterRequest` validator in `server/app/models/schemas/auth.py`); login accepts username or email identifier.

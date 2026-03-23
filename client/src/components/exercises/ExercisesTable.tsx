@@ -1,5 +1,5 @@
 import {
-    ExercisesService,
+    ExerciseService,
     type ExercisePublic,
     type MuscleGroupPublic,
 } from '@/api/generated'
@@ -107,7 +107,7 @@ export function ExercisesTable({
         setIsDeleting(true)
         setExerciseRowLoading(exercise.id, true)
         try {
-            const { error } = await ExercisesService.deleteExercise({
+            const { error } = await ExerciseService.deleteExercise({
                 path: { exercise_id: exercise.id },
             })
             if (error) {
@@ -202,7 +202,7 @@ export function ExercisesTable({
                     )}
                     <DataTableTruncatedCell
                         value={row.original.name}
-                        className="max-w-48"
+                        className="max-w-40 min-w-25"
                     />
                 </div>
             ),
@@ -217,7 +217,7 @@ export function ExercisesTable({
                 row.original.description ? (
                     <DataTableTruncatedCell
                         value={row.original.description}
-                        className="max-w-64"
+                        className="max-w-60 min-w-25"
                     />
                 ) : (
                     '—'
@@ -241,7 +241,7 @@ export function ExercisesTable({
                 return names.length ? (
                     <DataTableTruncatedCell
                         value={names.join(', ')}
-                        className="max-w-48"
+                        className="max-w-100 min-w-25"
                     />
                 ) : (
                     '—'
@@ -267,20 +267,12 @@ export function ExercisesTable({
             accessorKey: 'updated_at',
             meta: { viewLabel: 'Updated At' },
             header: ({ column }) => (
-                <DataTableColumnHeader
-                    column={column}
-                    title="Updated At"
-                    className="justify-center"
-                />
+                <DataTableColumnHeader column={column} title="Updated At" />
             ),
             cell: ({ row }) =>
-                row.original.user_id !== null ? (
-                    <div className="text-center">
-                        {new Date(row.original.updated_at).toLocaleString()}
-                    </div>
-                ) : (
-                    <div className="text-center">—</div>
-                ),
+                row.original.user_id !== null
+                    ? new Date(row.original.updated_at).toLocaleString()
+                    : '—',
             enableHiding: true,
         },
     ]

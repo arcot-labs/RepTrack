@@ -2,11 +2,10 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security import PASSWORD_HASH
 from app.models.database.exercise import Exercise
 from app.models.database.muscle_group import MuscleGroup
-from app.models.database.user import User
 from app.models.schemas.exercise import ExercisePublic
+from app.services.exercise import query_exercises, to_exercise_public
 
 from ..utilities import HttpMethod, make_http_request
 
@@ -19,31 +18,14 @@ async def get_muscle_group_id(session: AsyncSession, name: str) -> int:
     return muscle_group.id
 
 
-async def create_user(
-    session: AsyncSession,
-    username: str,
-    password: str,
-) -> User:
-    user = User(
-        username=username,
-        email=f"{username}@example.com",
-        first_name=username.capitalize(),
-        last_name="Test",
-        password_hash=PASSWORD_HASH.hash(password),
-        is_admin=False,
-    )
-    session.add(user)
-    await session.commit()
-    return user
-
-
 async def create_exercise_via_api(
     client: AsyncClient,
+    session: AsyncSession,
     name: str,
     description: str | None = None,
     muscle_group_ids: list[int] | None = None,
 ) -> ExercisePublic:
-    resp = await make_http_request(
+    await make_http_request(
         client,
         method=HttpMethod.POST,
         endpoint="/api/exercises",
@@ -53,7 +35,12 @@ async def create_exercise_via_api(
             "muscle_group_ids": muscle_group_ids or [],
         },
     )
-    return ExercisePublic.model_validate(resp.json())
+    exercises = await query_exercises(
+        session,
+        False,
+        Exercise.name == name,
+    )
+    return to_exercise_public(exercises[0])
 
 
 async def create_system_exercise(

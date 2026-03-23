@@ -155,6 +155,129 @@ export const CreateFeedbackRequestSchema = {
     title: 'CreateFeedbackRequest'
 } as const;
 
+export const CreateSetRequestSchema = {
+    properties: {
+        reps: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reps'
+        },
+        weight: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*(?:\\d{0,4}|(?=[\\d.]{1,7}0*$)\\d{0,4}\\.\\d{0,2}0*$)'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Weight'
+        },
+        unit: {
+            anyOf: [
+                {
+                    $ref: '#/components/schemas/SetUnit'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    title: 'CreateSetRequest'
+} as const;
+
+export const CreateWorkoutExerciseRequestSchema = {
+    properties: {
+        exercise_id: {
+            type: 'integer',
+            title: 'Exercise Id'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    required: [
+        'exercise_id'
+    ],
+    title: 'CreateWorkoutExerciseRequest'
+} as const;
+
+export const CreateWorkoutRequestSchema = {
+    properties: {
+        started_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Started At'
+        },
+        ended_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Ended At'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    title: 'CreateWorkoutRequest'
+} as const;
+
 export const ErrorResponseSchema = {
     properties: {
         detail: {
@@ -172,6 +295,61 @@ export const ErrorResponseSchema = {
         'code'
     ],
     title: 'ErrorResponse'
+} as const;
+
+export const ExerciseBaseSchema = {
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id'
+        },
+        user_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'User Id'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'user_id',
+        'name',
+        'description',
+        'created_at',
+        'updated_at'
+    ],
+    title: 'ExerciseBase'
 } as const;
 
 export const ExercisePublicSchema = {
@@ -206,13 +384,6 @@ export const ExercisePublicSchema = {
             ],
             title: 'Description'
         },
-        muscle_groups: {
-            items: {
-                $ref: '#/components/schemas/MuscleGroupPublic'
-            },
-            type: 'array',
-            title: 'Muscle Groups'
-        },
         created_at: {
             type: 'string',
             format: 'date-time',
@@ -222,6 +393,13 @@ export const ExercisePublicSchema = {
             type: 'string',
             format: 'date-time',
             title: 'Updated At'
+        },
+        muscle_groups: {
+            items: {
+                $ref: '#/components/schemas/MuscleGroupPublic'
+            },
+            type: 'array',
+            title: 'Muscle Groups'
         }
     },
     type: 'object',
@@ -230,9 +408,9 @@ export const ExercisePublicSchema = {
         'user_id',
         'name',
         'description',
-        'muscle_groups',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'muscle_groups'
     ],
     title: 'ExercisePublic'
 } as const;
@@ -444,6 +622,99 @@ export const ReviewerPublicSchema = {
     title: 'ReviewerPublic'
 } as const;
 
+export const SetPublicSchema = {
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id'
+        },
+        workout_exercise_id: {
+            type: 'integer',
+            title: 'Workout Exercise Id'
+        },
+        set_number: {
+            type: 'integer',
+            title: 'Set Number'
+        },
+        reps: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reps'
+        },
+        weight: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Weight'
+        },
+        unit: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Unit'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'workout_exercise_id',
+        'set_number',
+        'reps',
+        'weight',
+        'unit',
+        'notes',
+        'created_at',
+        'updated_at'
+    ],
+    title: 'SetPublic'
+} as const;
+
+export const SetUnitSchema = {
+    type: 'string',
+    enum: [
+        'kg',
+        'lb'
+    ],
+    title: 'SetUnit'
+} as const;
+
 export const UpdateAccessRequestStatusRequestSchema = {
     properties: {
         status: {
@@ -505,6 +776,104 @@ export const UpdateExerciseRequestSchema = {
     },
     type: 'object',
     title: 'UpdateExerciseRequest'
+} as const;
+
+export const UpdateSetRequestSchema = {
+    properties: {
+        reps: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reps'
+        },
+        weight: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*(?:\\d{0,4}|(?=[\\d.]{1,7}0*$)\\d{0,4}\\.\\d{0,2}0*$)'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Weight'
+        },
+        unit: {
+            anyOf: [
+                {
+                    $ref: '#/components/schemas/SetUnit'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    title: 'UpdateSetRequest'
+} as const;
+
+export const UpdateWorkoutRequestSchema = {
+    properties: {
+        started_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Started At'
+        },
+        ended_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Ended At'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    title: 'UpdateWorkoutRequest'
 } as const;
 
 export const UserPublicSchema = {
@@ -590,4 +959,201 @@ export const ValidationErrorSchema = {
         'type'
     ],
     title: 'ValidationError'
+} as const;
+
+export const WorkoutBaseSchema = {
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id'
+        },
+        user_id: {
+            type: 'integer',
+            title: 'User Id'
+        },
+        started_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Started At'
+        },
+        ended_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Ended At'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'user_id',
+        'started_at',
+        'ended_at',
+        'notes',
+        'created_at',
+        'updated_at'
+    ],
+    title: 'WorkoutBase'
+} as const;
+
+export const WorkoutExercisePublicSchema = {
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id'
+        },
+        workout_id: {
+            type: 'integer',
+            title: 'Workout Id'
+        },
+        exercise_id: {
+            type: 'integer',
+            title: 'Exercise Id'
+        },
+        position: {
+            type: 'integer',
+            title: 'Position'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        exercise: {
+            $ref: '#/components/schemas/ExerciseBase'
+        },
+        sets: {
+            items: {
+                $ref: '#/components/schemas/SetPublic'
+            },
+            type: 'array',
+            title: 'Sets'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'workout_id',
+        'exercise_id',
+        'position',
+        'notes',
+        'created_at',
+        'updated_at',
+        'exercise',
+        'sets'
+    ],
+    title: 'WorkoutExercisePublic'
+} as const;
+
+export const WorkoutPublicSchema = {
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id'
+        },
+        user_id: {
+            type: 'integer',
+            title: 'User Id'
+        },
+        started_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Started At'
+        },
+        ended_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Ended At'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        exercises: {
+            items: {
+                $ref: '#/components/schemas/WorkoutExercisePublic'
+            },
+            type: 'array',
+            title: 'Exercises'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'user_id',
+        'started_at',
+        'ended_at',
+        'notes',
+        'created_at',
+        'updated_at',
+        'exercises'
+    ],
+    title: 'WorkoutPublic'
 } as const;

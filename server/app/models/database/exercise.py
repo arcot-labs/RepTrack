@@ -13,7 +13,10 @@ if TYPE_CHECKING:
 class Exercise(Base):
     __tablename__ = "exercises"
     __table_args__ = (
-        Index("ix_exercises_user_id", "user_id"),
+        Index(
+            "ix_exercises_user_id",
+            "user_id",
+        ),
         UniqueConstraint(
             "user_id",
             "name",
@@ -29,7 +32,6 @@ class Exercise(Base):
     # null for system exercise
     user_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=True,
     )
     name: Mapped[str] = mapped_column(
         String(255),

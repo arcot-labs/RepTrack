@@ -5,9 +5,7 @@ from app.models.database.exercise_muscle_group import ExerciseMuscleGroup
 from app.models.database.muscle_group import MuscleGroup
 from app.models.schemas.exercise import ExercisePublic
 from app.models.schemas.muscle_group import MuscleGroupPublic
-from app.services.exercise import (
-    _to_exercise_public,  # pyright: ignore[reportPrivateUsage]
-)
+from app.services.exercise import to_exercise_public
 
 
 def test_to_exercise_public_no_muscle_groups() -> None:
@@ -22,16 +20,16 @@ def test_to_exercise_public_no_muscle_groups() -> None:
         updated_at=updated_at,
     )
 
-    result = _to_exercise_public(exercise)
+    result = to_exercise_public(exercise)
 
     assert isinstance(result, ExercisePublic)
     assert result.id == 1
     assert result.user_id == 2
     assert result.name == "Bench Press"
     assert result.description == "Flat bench"
-    assert result.muscle_groups == []
     assert result.created_at == created_at
     assert result.updated_at == updated_at
+    assert result.muscle_groups == []
 
 
 def test_to_exercise_public_with_muscle_groups() -> None:
@@ -51,7 +49,7 @@ def test_to_exercise_public_with_muscle_groups() -> None:
         ExerciseMuscleGroup(exercise_id=11, muscle_group_id=2, muscle_group=triceps),
     ]
 
-    result = _to_exercise_public(exercise)
+    result = to_exercise_public(exercise)
 
     assert len(result.muscle_groups) == 2
 
@@ -83,7 +81,7 @@ def test_to_exercise_public_muscle_groups_ordering() -> None:
         ExerciseMuscleGroup(exercise_id=12, muscle_group_id=4, muscle_group=arms),
     ]
 
-    result = _to_exercise_public(exercise)
+    result = to_exercise_public(exercise)
 
     assert [muscle_group.name for muscle_group in result.muscle_groups] == [
         "arms",

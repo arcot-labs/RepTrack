@@ -1,6 +1,7 @@
 import { AuthService } from '@/api/generated'
 import { zLoginRequest } from '@/api/generated/zod.gen'
 import { useSession } from '@/auth/session'
+import { Field } from '@/components/forms/Field'
 import {
     Card,
     CardContent,
@@ -9,7 +10,6 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/overrides/button'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
@@ -92,10 +92,11 @@ export function Login() {
                             void handleSubmit(onSubmit)(e)
                         }}
                     >
-                        <div className="space-y-1">
-                            <Label htmlFor="identifier">
-                                Username or Email
-                            </Label>
+                        <Field
+                            label="Username or Email"
+                            htmlFor="identifier"
+                            error={errors.identifier?.message}
+                        >
                             <Input
                                 id="identifier"
                                 autoComplete="username"
@@ -107,14 +108,12 @@ export function Login() {
                                 }
                                 {...register('identifier')}
                             />
-                            {errors.identifier && (
-                                <p className="text-sm text-destructive">
-                                    {errors.identifier.message}
-                                </p>
-                            )}
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="password">Password</Label>
+                        </Field>
+                        <Field
+                            label="Password"
+                            htmlFor="password"
+                            error={errors.password?.message}
+                        >
                             <Input
                                 id="password"
                                 type="password"
@@ -125,12 +124,7 @@ export function Login() {
                                 }
                                 {...register('password')}
                             />
-                            {errors.password && (
-                                <p className="text-sm text-destructive">
-                                    {errors.password.message}
-                                </p>
-                            )}
-                        </div>
+                        </Field>
                     </form>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-3">

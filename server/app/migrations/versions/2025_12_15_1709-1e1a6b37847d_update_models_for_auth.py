@@ -18,7 +18,6 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    """Upgrade schema."""
     op.create_table(
         "access_requests",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),

@@ -1,27 +1,42 @@
-import logging
-
+import pytest
+from sqlalchemy.exc import MissingGreenlet
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.exercise import Exercise
 from app.services.exercise import (
-    _get_exercises_with_muscle_groups,  # pyright: ignore[reportPrivateUsage]
+    query_exercises,
 )
 
-from .utilities import (
-    clear_exercises,
-    create_exercise,
-    create_user,
-    get_muscle_group_id,
-)
-
-logger = logging.getLogger(__name__)
+from ..utilities import create_user
+from .utilities import create_exercise, get_muscle_group_id
 
 
-async def test_get_exercises_with_muscle_groups_no_where_clause(
+async def test_query_exercises_base(
     session: AsyncSession,
 ):
-    await clear_exercises(session)
+    exercise = await create_exercise(session, "Bench")
+    result = await query_exercises(session, True)
 
+    assert len(result) == 1
+    assert exercise in result
+    with pytest.raises(MissingGreenlet):
+        _ = result[0].muscle_groups
+
+
+async def test_query_exercises_public(
+    session: AsyncSession,
+):
+    exercise = await create_exercise(session, "Bench")
+    result = await query_exercises(session, False)
+
+    assert len(result) == 1
+    assert exercise in result
+    assert result[0].muscle_groups == exercise.muscle_groups
+
+
+async def test_query_exercises_no_where_clause(
+    session: AsyncSession,
+):
     user_1 = await create_user(session, username="user_1")
     user_2 = await create_user(session, username="user_2")
 
@@ -39,7 +54,7 @@ async def test_get_exercises_with_muscle_groups_no_where_clause(
         user_id=user_2.id,
     )
 
-    result = await _get_exercises_with_muscle_groups(session)
+    result = await query_exercises(session, False)
 
     names = [e.name for e in result]
     assert len(result) == 2
@@ -52,7 +67,7 @@ async def test_get_exercises_with_muscle_groups_no_where_clause(
     assert len(result[1].muscle_groups) == 0
 
 
-async def test_get_exercises_with_muscle_groups_with_where_clause(
+async def test_query_exercises_with_where_clause(
     session: AsyncSession,
 ):
     user = await create_user(session)
@@ -67,8 +82,9 @@ async def test_get_exercises_with_muscle_groups_with_where_clause(
         user_id=user.id,
     )
 
-    result = await _get_exercises_with_muscle_groups(
+    result = await query_exercises(
         session,
+        True,
         Exercise.id == exercise.id,
     )
 
@@ -76,7 +92,7 @@ async def test_get_exercises_with_muscle_groups_with_where_clause(
     assert result[0].id == exercise.id
 
 
-async def test_get_exercises_with_muscle_groups_ordering(session: AsyncSession):
+async def test_query_exercises_ordering(session: AsyncSession):
     user = await create_user(session)
 
     await create_exercise(
@@ -90,8 +106,10 @@ async def test_get_exercises_with_muscle_groups_ordering(session: AsyncSession):
         user_id=user.id,
     )
 
-    result = await _get_exercises_with_muscle_groups(
-        session, Exercise.user_id == user.id
+    result = await query_exercises(
+        session,
+        False,
+        Exercise.user_id == user.id,
     )
 
     names = [e.name for e in result]

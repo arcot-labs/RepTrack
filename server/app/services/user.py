@@ -5,6 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.user import User
 from app.models.schemas.types import is_email_identifier
+from app.models.schemas.user import UserPublic
+
+
+def to_user_public(user: User) -> UserPublic:
+    return UserPublic.model_validate(user, from_attributes=True)
 
 
 async def get_admin_users(db: AsyncSession) -> Sequence[User]:
