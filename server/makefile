@@ -1,4 +1,4 @@
-.PHONY: dev test cov open-cov check check_migrations manual_migration auto_migration migrate
+.PHONY: dev test cov open-cov check check_migrations manual_migration auto_migration migrate downgrade
 
 dev:
 	uv run uvicorn app.main:app \
