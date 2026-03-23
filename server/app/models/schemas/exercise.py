@@ -4,7 +4,7 @@ from typing import Self
 from pydantic import BaseModel, Field, model_validator
 
 from .muscle_group import MuscleGroupPublic
-from .types import ExerciseName
+from .types import ExerciseDescription, ExerciseName
 
 
 class ExerciseBase(BaseModel):
@@ -22,13 +22,13 @@ class ExercisePublic(ExerciseBase):
 
 class CreateExerciseRequest(BaseModel):
     name: ExerciseName
-    description: str | None = None
+    description: ExerciseDescription | None = None
     muscle_group_ids: list[int] = Field(default_factory=list[int])
 
 
 class UpdateExerciseRequest(BaseModel):
     name: ExerciseName | None = None
-    description: str | None = None
+    description: ExerciseDescription | None = None
     muscle_group_ids: list[int] | None = None
 
     @model_validator(mode="after")

@@ -90,7 +90,8 @@ export const CreateExerciseRequestSchema = {
         description: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 1000
                 },
                 {
                     type: 'null'
@@ -126,7 +127,7 @@ export const CreateFeedbackRequestSchema = {
         },
         title: {
             type: 'string',
-            maxLength: 100,
+            maxLength: 1000,
             minLength: 1,
             title: 'Title'
         },
@@ -198,7 +199,8 @@ export const CreateSetRequestSchema = {
         notes: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 1000
                 },
                 {
                     type: 'null'
@@ -220,7 +222,8 @@ export const CreateWorkoutExerciseRequestSchema = {
         notes: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 1000
                 },
                 {
                     type: 'null'
@@ -265,7 +268,8 @@ export const CreateWorkoutRequestSchema = {
         notes: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 1000
                 },
                 {
                     type: 'null'
@@ -460,7 +464,7 @@ export const LoginRequestSchema = {
             anyOf: [
                 {
                     type: 'string',
-                    maxLength: 50,
+                    maxLength: 255,
                     minLength: 3
                 },
                 {
@@ -530,7 +534,7 @@ export const RegisterRequestSchema = {
         },
         username: {
             type: 'string',
-            maxLength: 50,
+            maxLength: 255,
             minLength: 3,
             title: 'Username'
         },
@@ -560,13 +564,13 @@ export const RequestAccessRequestSchema = {
         },
         first_name: {
             type: 'string',
-            maxLength: 50,
+            maxLength: 255,
             minLength: 1,
             title: 'First Name'
         },
         last_name: {
             type: 'string',
-            maxLength: 50,
+            maxLength: 255,
             minLength: 1,
             title: 'Last Name'
         }
@@ -751,7 +755,8 @@ export const UpdateExerciseRequestSchema = {
         description: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 1000
                 },
                 {
                     type: 'null'
@@ -821,7 +826,8 @@ export const UpdateSetRequestSchema = {
         notes: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 1000
                 },
                 {
                     type: 'null'
@@ -863,7 +869,8 @@ export const UpdateWorkoutRequestSchema = {
         notes: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 1000
                 },
                 {
                     type: 'null'

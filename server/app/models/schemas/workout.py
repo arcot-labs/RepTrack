@@ -3,6 +3,7 @@ from typing import Self
 
 from pydantic import BaseModel, model_validator
 
+from .types import WorkoutNotes
 from .workout_exercise import WorkoutExercisePublic
 
 
@@ -23,13 +24,13 @@ class WorkoutPublic(WorkoutBase):
 class CreateWorkoutRequest(BaseModel):
     started_at: datetime | None = None
     ended_at: datetime | None = None
-    notes: str | None = None
+    notes: WorkoutNotes | None = None
 
 
 class UpdateWorkoutRequest(BaseModel):
     started_at: datetime | None = None
     ended_at: datetime | None = None
-    notes: str | None = None
+    notes: WorkoutNotes | None = None
 
     @model_validator(mode="after")
     def validate_non_nullable_fields(self) -> Self:

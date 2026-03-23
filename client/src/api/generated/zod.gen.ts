@@ -16,7 +16,7 @@ export const zAccessRequestStatus = z.enum([
  */
 export const zCreateExerciseRequest = z.object({
     name: z.string().min(1).max(255),
-    description: z.string().nullish(),
+    description: z.string().max(1000).nullish(),
     muscle_group_ids: z.array(z.int()).optional()
 });
 
@@ -25,7 +25,7 @@ export const zCreateExerciseRequest = z.object({
  */
 export const zCreateWorkoutExerciseRequest = z.object({
     exercise_id: z.int(),
-    notes: z.string().nullish()
+    notes: z.string().max(1000).nullish()
 });
 
 /**
@@ -34,7 +34,7 @@ export const zCreateWorkoutExerciseRequest = z.object({
 export const zCreateWorkoutRequest = z.object({
     started_at: z.iso.datetime().nullish(),
     ended_at: z.iso.datetime().nullish(),
-    notes: z.string().nullish()
+    notes: z.string().max(1000).nullish()
 });
 
 /**
@@ -68,7 +68,7 @@ export const zFeedbackType = z.enum(['feedback', 'feature']);
 export const zCreateFeedbackRequest = z.object({
     type: zFeedbackType,
     url: z.string().min(1).max(1000),
-    title: z.string().min(1).max(100),
+    title: z.string().min(1).max(1000),
     description: z.string().min(1).max(10000),
     files: z.array(z.string()).optional()
 });
@@ -84,7 +84,7 @@ export const zForgotPasswordRequest = z.object({
  * LoginRequest
  */
 export const zLoginRequest = z.object({
-    username: z.string().min(3).max(50).nullish(),
+    username: z.string().min(3).max(255).nullish(),
     email: z.email().max(255).nullish(),
     password: z.string().min(8).max(64)
 });
@@ -116,7 +116,7 @@ export const zExercisePublic = z.object({
  */
 export const zRegisterRequest = z.object({
     token: z.string().min(1).max(64),
-    username: z.string().min(3).max(50),
+    username: z.string().min(3).max(255),
     password: z.string().min(8).max(64)
 });
 
@@ -125,8 +125,8 @@ export const zRegisterRequest = z.object({
  */
 export const zRequestAccessRequest = z.object({
     email: z.email().max(255),
-    first_name: z.string().min(1).max(50),
-    last_name: z.string().min(1).max(50)
+    first_name: z.string().min(1).max(255),
+    last_name: z.string().min(1).max(255)
 });
 
 /**
@@ -190,7 +190,7 @@ export const zCreateSetRequest = z.object({
         z.string().regex(/^(?!^[-+.]*$)[+-]?0*(?:\d{0,4}|(?=[\d.]{1,7}0*$)\d{0,4}\.\d{0,2}0*$)/)
     ]).nullish(),
     unit: zSetUnit.nullish(),
-    notes: z.string().nullish()
+    notes: z.string().max(1000).nullish()
 });
 
 /**
@@ -205,7 +205,7 @@ export const zUpdateAccessRequestStatusRequest = z.object({
  */
 export const zUpdateExerciseRequest = z.object({
     name: z.string().min(1).max(255).nullish(),
-    description: z.string().nullish(),
+    description: z.string().max(1000).nullish(),
     muscle_group_ids: z.array(z.int()).nullish()
 });
 
@@ -219,7 +219,7 @@ export const zUpdateSetRequest = z.object({
         z.string().regex(/^(?!^[-+.]*$)[+-]?0*(?:\d{0,4}|(?=[\d.]{1,7}0*$)\d{0,4}\.\d{0,2}0*$)/)
     ]).nullish(),
     unit: zSetUnit.nullish(),
-    notes: z.string().nullish()
+    notes: z.string().max(1000).nullish()
 });
 
 /**
@@ -228,7 +228,7 @@ export const zUpdateSetRequest = z.object({
 export const zUpdateWorkoutRequest = z.object({
     started_at: z.iso.datetime().nullish(),
     ended_at: z.iso.datetime().nullish(),
-    notes: z.string().nullish()
+    notes: z.string().max(1000).nullish()
 });
 
 /**
