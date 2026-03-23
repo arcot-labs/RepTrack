@@ -329,7 +329,7 @@ export class SetService {
                     name: 'access_token',
                     type: 'apiKey'
                 }],
-            url: '/api/sets/{workout_id}/exercises/{workout_exercise_id}/sets',
+            url: '/api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets',
             ...options,
             headers: {
                 'Content-Type': 'application/json',
@@ -348,7 +348,7 @@ export class SetService {
                     name: 'access_token',
                     type: 'apiKey'
                 }],
-            url: '/api/sets/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}',
+            url: '/api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}',
             ...options
         });
     }
@@ -363,7 +363,7 @@ export class SetService {
                     name: 'access_token',
                     type: 'apiKey'
                 }],
-            url: '/api/sets/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}',
+            url: '/api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}',
             ...options,
             headers: {
                 'Content-Type': 'application/json',
@@ -402,7 +402,7 @@ export class WorkoutExerciseService {
                     name: 'access_token',
                     type: 'apiKey'
                 }],
-            url: '/api/workout-exercises/{workout_id}/exercises',
+            url: '/api/workouts/{workout_id}/exercises',
             ...options,
             headers: {
                 'Content-Type': 'application/json',
@@ -421,7 +421,7 @@ export class WorkoutExerciseService {
                     name: 'access_token',
                     type: 'apiKey'
                 }],
-            url: '/api/workout-exercises/{workout_id}/exercises/{workout_exercise_id}',
+            url: '/api/workouts/{workout_id}/exercises/{workout_exercise_id}',
             ...options
         });
     }

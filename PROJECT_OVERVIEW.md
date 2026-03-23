@@ -114,14 +114,14 @@ Basic relationships:
 
 **Workout Exercises**
 
-- `POST /api/workout-exercises/{workout_id}/exercises` — add an exercise to a workout
-- `DELETE /api/workout-exercises/{workout_id}/exercises/{workout_exercise_id}` — remove exercise from workout
+- `POST /api/workouts/{workout_id}/exercises` — add an exercise to a workout
+- `DELETE /api/workouts/{workout_id}/exercises/{workout_exercise_id}` — remove exercise from workout
 
 **Sets**
 
-- `POST /api/sets/{workout_id}/exercises/{workout_exercise_id}/sets` — log a set
-- `PATCH /api/sets/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}` — update a set
-- `DELETE /api/sets/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}` — delete a set
+- `POST /api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets` — log a set
+- `PATCH /api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}` — update a set
+- `DELETE /api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}` — delete a set
 
 ## Infrastructure & Deployment
 

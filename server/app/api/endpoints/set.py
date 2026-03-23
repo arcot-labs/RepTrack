@@ -10,14 +10,14 @@ from app.models.schemas.user import UserPublic
 from app.services.set import create_set, delete_set, update_set
 
 api_router = APIRouter(
-    prefix="/sets",
+    prefix="/workouts/{workout_id}/exercises/{workout_exercise_id}/sets",
     tags=["Set"],
     dependencies=[Depends(get_current_user)],
 )
 
 
 @api_router.post(
-    "/{workout_id}/exercises/{workout_exercise_id}/sets",
+    "",
     operation_id="createSet",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
@@ -37,7 +37,7 @@ async def create_set_endpoint(
 
 
 @api_router.patch(
-    "/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}",
+    "/{set_id}",
     operation_id="updateSet",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
@@ -57,7 +57,7 @@ async def update_set_endpoint(
 
 
 @api_router.delete(
-    "/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}",
+    "/{set_id}",
     operation_id="deleteSet",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={

@@ -15,14 +15,14 @@ from app.services.workout_exercise import (
 )
 
 api_router = APIRouter(
-    prefix="/workout-exercises",
+    prefix="/workouts/{workout_id}/exercises",
     tags=["Workout Exercise"],
     dependencies=[Depends(get_current_user)],
 )
 
 
 @api_router.post(
-    "/{workout_id}/exercises",
+    "",
     operation_id="createWorkoutExercise",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
@@ -41,7 +41,7 @@ async def create_workout_exercise_endpoint(
 
 
 @api_router.delete(
-    "/{workout_id}/exercises/{workout_exercise_id}",
+    "/{workout_exercise_id}",
     operation_id="deleteWorkoutExercise",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={

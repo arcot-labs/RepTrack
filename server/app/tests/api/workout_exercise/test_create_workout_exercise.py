@@ -31,7 +31,7 @@ async def _make_request(
     return await make_http_request(
         client,
         method=HttpMethod.POST,
-        endpoint=f"/api/workout-exercises/{workout_id}/exercises",
+        endpoint=f"/api/workouts/{workout_id}/exercises",
         json={
             "exercise_id": exercise_id,
             "notes": notes,

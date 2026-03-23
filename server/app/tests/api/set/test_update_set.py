@@ -30,7 +30,7 @@ async def _make_request(
     return await make_http_request(
         client,
         method=HttpMethod.PATCH,
-        endpoint=f"/api/sets/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}",
+        endpoint=f"/api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}",
         json={
             "reps": reps,
             "weight": weight,

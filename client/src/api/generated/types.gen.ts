@@ -1212,7 +1212,7 @@ export type CreateSetData = {
         workout_exercise_id: number;
     };
     query?: never;
-    url: '/api/sets/{workout_id}/exercises/{workout_exercise_id}/sets';
+    url: '/api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets';
 };
 
 export type CreateSetErrors = {
@@ -1262,7 +1262,7 @@ export type DeleteSetData = {
         set_id: number;
     };
     query?: never;
-    url: '/api/sets/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}';
+    url: '/api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}';
 };
 
 export type DeleteSetErrors = {
@@ -1308,7 +1308,7 @@ export type UpdateSetData = {
         set_id: number;
     };
     query?: never;
-    url: '/api/sets/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}';
+    url: '/api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}';
 };
 
 export type UpdateSetErrors = {
@@ -1371,7 +1371,7 @@ export type CreateWorkoutExerciseData = {
         workout_id: number;
     };
     query?: never;
-    url: '/api/workout-exercises/{workout_id}/exercises';
+    url: '/api/workouts/{workout_id}/exercises';
 };
 
 export type CreateWorkoutExerciseErrors = {
@@ -1417,7 +1417,7 @@ export type DeleteWorkoutExerciseData = {
         workout_exercise_id: number;
     };
     query?: never;
-    url: '/api/workout-exercises/{workout_id}/exercises/{workout_exercise_id}';
+    url: '/api/workouts/{workout_id}/exercises/{workout_exercise_id}';
 };
 
 export type DeleteWorkoutExerciseErrors = {

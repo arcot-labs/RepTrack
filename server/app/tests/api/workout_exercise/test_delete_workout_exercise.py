@@ -25,7 +25,7 @@ async def _make_request(
     return await make_http_request(
         client,
         method=HttpMethod.DELETE,
-        endpoint=f"/api/workout-exercises/{workout_id}/exercises/{workout_exercise_id}",
+        endpoint=f"/api/workouts/{workout_id}/exercises/{workout_exercise_id}",
     )
 
 
