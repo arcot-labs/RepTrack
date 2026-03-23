@@ -139,3 +139,41 @@ async def test_update_exercise_name_conflict(
     assert resp.status_code == ExerciseNameConflict.status_code
     body = resp.json()
     assert body["detail"] == ExerciseNameConflict.detail
+
+
+# 422
+async def test_update_exercise_name_null(
+    client: AsyncClient,
+    session: AsyncSession,
+    settings: Settings,
+):
+    await login_admin(client, settings)
+    created = await create_exercise_via_api(client, session, name="Old Name")
+
+    resp = await make_http_request(
+        client,
+        method=HttpMethod.PATCH,
+        endpoint=f"/api/exercises/{created.id}",
+        json={"name": None},
+    )
+
+    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+# 422
+async def test_update_exercise_muscle_group_ids_null(
+    client: AsyncClient,
+    session: AsyncSession,
+    settings: Settings,
+):
+    await login_admin(client, settings)
+    created = await create_exercise_via_api(client, session, name="Old Name")
+
+    resp = await make_http_request(
+        client,
+        method=HttpMethod.PATCH,
+        endpoint=f"/api/exercises/{created.id}",
+        json={"muscle_group_ids": None},
+    )
+
+    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT

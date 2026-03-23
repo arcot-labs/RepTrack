@@ -109,3 +109,23 @@ async def test_update_workout_not_allowed(
     assert resp.status_code == WorkoutNotFound.status_code
     body = resp.json()
     assert body["detail"] == WorkoutNotFound.detail
+
+
+# 422
+async def test_update_workout_started_at_null(
+    client: AsyncClient,
+    session: AsyncSession,
+    settings: Settings,
+):
+    await login_admin(client, settings)
+    admin = await get_admin(session, settings)
+    workout = await create_workout(session, user_id=admin.id)
+
+    resp = await make_http_request(
+        client,
+        method=HttpMethod.PATCH,
+        endpoint=f"/api/workouts/{workout.id}",
+        json={"started_at": None},
+    )
+
+    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT

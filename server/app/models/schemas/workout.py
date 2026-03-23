@@ -1,6 +1,7 @@
 from datetime import datetime
+from typing import Self
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 from .workout_exercise import WorkoutExercisePublic
 
@@ -29,3 +30,9 @@ class UpdateWorkoutRequest(BaseModel):
     started_at: datetime | None = None
     ended_at: datetime | None = None
     notes: str | None = None
+
+    @model_validator(mode="after")
+    def validate_non_nullable_fields(self) -> Self:
+        if "started_at" in self.model_fields_set and self.started_at is None:
+            raise ValueError("started_at cannot be null")
+        return self
