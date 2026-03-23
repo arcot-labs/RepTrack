@@ -1,20 +1,21 @@
 import pytest
+from pytest import MonkeyPatch
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.workout_exercise import WorkoutExercise
 from app.models.errors import (
     ExerciseNotFound,
+    WorkoutExercisePositionConflict,
     WorkoutNotFound,
 )
 from app.models.schemas.workout_exercise import CreateWorkoutExerciseRequest
-from app.services.workout_exercise import (
-    create_workout_exercise,
-)
+from app.services.workout_exercise import create_workout_exercise
 
 from ..exercise.utilities import create_exercise
 from ..utilities import create_user
 from ..workout.utilities import create_workout
+from .utilities import create_workout_exercise as create_workout_exercise_util
 
 
 async def test_create_workout_exercise(session: AsyncSession):
@@ -96,6 +97,38 @@ async def test_create_workout_exercise_exercise_not_allowed(session: AsyncSessio
         await create_workout_exercise(
             workout.id,
             user_1.id,
+            CreateWorkoutExerciseRequest(exercise_id=exercise.id),
+            session,
+        )
+
+
+async def test_create_workout_exercise_position_conflict(
+    session: AsyncSession,
+    monkeypatch: MonkeyPatch,
+):
+    user = await create_user(session)
+    workout = await create_workout(session, user_id=user.id)
+    exercise = await create_exercise(session, name="Exercise 1")
+
+    await create_workout_exercise_util(
+        session,
+        workout_id=workout.id,
+        exercise_id=exercise.id,
+        position=1,
+    )
+
+    async def mock_get_next_position(workout_id: int, db: AsyncSession) -> int:
+        return 1
+
+    monkeypatch.setattr(
+        "app.services.workout_exercise._get_next_workout_exercise_position",
+        mock_get_next_position,
+    )
+
+    with pytest.raises(WorkoutExercisePositionConflict):
+        await create_workout_exercise(
+            workout.id,
+            user.id,
             CreateWorkoutExerciseRequest(exercise_id=exercise.id),
             session,
         )

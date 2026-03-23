@@ -155,6 +155,62 @@ export const CreateFeedbackRequestSchema = {
     title: 'CreateFeedbackRequest'
 } as const;
 
+export const CreateSetRequestSchema = {
+    properties: {
+        reps: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reps'
+        },
+        weight: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*(?:\\d{0,4}|(?=[\\d.]{1,7}0*$)\\d{0,4}\\.\\d{0,2}0*$)'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Weight'
+        },
+        unit: {
+            anyOf: [
+                {
+                    $ref: '#/components/schemas/SetUnit'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    title: 'CreateSetRequest'
+} as const;
+
 export const CreateWorkoutExerciseRequestSchema = {
     properties: {
         exercise_id: {
@@ -650,6 +706,15 @@ export const SetPublicSchema = {
     title: 'SetPublic'
 } as const;
 
+export const SetUnitSchema = {
+    type: 'string',
+    enum: [
+        'kg',
+        'lb'
+    ],
+    title: 'SetUnit'
+} as const;
+
 export const UpdateAccessRequestStatusRequestSchema = {
     properties: {
         status: {
@@ -711,6 +776,62 @@ export const UpdateExerciseRequestSchema = {
     },
     type: 'object',
     title: 'UpdateExerciseRequest'
+} as const;
+
+export const UpdateSetRequestSchema = {
+    properties: {
+        reps: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reps'
+        },
+        weight: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*(?:\\d{0,4}|(?=[\\d.]{1,7}0*$)\\d{0,4}\\.\\d{0,2}0*$)'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Weight'
+        },
+        unit: {
+            anyOf: [
+                {
+                    $ref: '#/components/schemas/SetUnit'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    title: 'UpdateSetRequest'
 } as const;
 
 export const UpdateWorkoutRequestSchema = {

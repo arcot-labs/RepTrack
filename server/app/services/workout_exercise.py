@@ -1,13 +1,18 @@
 import logging
+from collections.abc import Sequence
+from typing import Any
 
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models.database.exercise import Exercise
 from app.models.database.workout_exercise import WorkoutExercise
 from app.models.errors import (
     ExerciseNotFound,
     WorkoutExerciseNotFound,
+    WorkoutExercisePositionConflict,
 )
 from app.models.schemas.workout_exercise import (
     CreateWorkoutExerciseRequest,
@@ -34,6 +39,21 @@ def to_workout_exercise_public(
         exercise=to_exercise_base(workout_exercise.exercise),
         sets=[to_set_public(s) for s in workout_exercise.sets],
     )
+
+
+async def query_workout_exercises(
+    db: AsyncSession,
+    *where_clauses: Any,
+) -> Sequence[WorkoutExercise]:
+    query = (
+        select(WorkoutExercise).where(*where_clauses).order_by(WorkoutExercise.position)
+    )
+    query = query.options(
+        selectinload(WorkoutExercise.exercise),
+        selectinload(WorkoutExercise.sets),
+    )
+    result = await db.execute(query)
+    return result.scalars().all()
 
 
 async def _get_next_workout_exercise_position(
@@ -79,7 +99,13 @@ async def create_workout_exercise(
         notes=req.notes,
     )
     db.add(workout_exercise)
-    await db.commit()
+
+    try:
+        await db.commit()
+    except IntegrityError as e:
+        logger.error(f"Integrity error creating workout exercise: {e}")
+        await db.rollback()
+        raise WorkoutExercisePositionConflict()
 
 
 async def delete_workout_exercise(
@@ -90,7 +116,6 @@ async def delete_workout_exercise(
 ) -> None:
     logger.info(f"Removing workout exercise {workout_exercise_id} from {workout_id}")
 
-    # validate workout existence & ownership
     await get_owned_workout(workout_id, user_id, db)
 
     result = await db.execute(

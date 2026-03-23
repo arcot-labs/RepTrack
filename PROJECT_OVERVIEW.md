@@ -7,7 +7,7 @@ RepTrack is a web app for tracking strength training progress. It is a full-stac
 ## High-Level Architecture
 
 - **Client (React + Vite)** talks to the **Server (FastAPI)** over HTTP.
-- **Server** handles auth, users/admin, exercises, muscle groups, feedback, and health endpoints.
+- **Server** handles auth, users/admin, workouts, workout exercises, sets, exercises, muscle groups, feedback, and health endpoints.
 - **Postgres** stores users, workouts, exercises, sets, and feedback.
 - **Background tasks** are used for email notifications and GitHub feedback issue creation.
 - **API client** for the frontend is generated from the server OpenAPI spec.
@@ -91,7 +91,8 @@ Basic relationships:
 ## Current Implementation Status
 
 - ✅ Exercise API + client CRUD flow is implemented (`/api/exercises`, `/api/muscle-groups`, `/exercises` page).
-- 🚧 Workout API + client workflow is the primary remaining feature area.
+- ✅ Workout API (workouts, workout-exercises, sets) is implemented on the server with tests.
+- 🚧 Workout client workflow is the primary remaining feature area.
 
 ## API Surface (Current)
 
@@ -103,8 +104,6 @@ Basic relationships:
 - `POST /api/feedback`: feedback submission
 - `GET /api/health`, `GET /api/health/db`: health checks
 
-## API Surface (Planned — Workouts)
-
 **Workouts**
 
 - `GET /api/workouts` — list current user's workouts
@@ -113,16 +112,16 @@ Basic relationships:
 - `PATCH /api/workouts/{id}` — update workout (started_at, ended_at, notes)
 - `DELETE /api/workouts/{id}` — delete workout
 
-**Workout Exercises (nested)**
+**Workout Exercises**
 
-- `POST /api/workouts/{id}/exercises` — add an exercise to a workout
-- `DELETE /api/workouts/{id}/exercises/{workout_exercise_id}` — remove exercise from workout
+- `POST /api/workout-exercises/{workout_id}/exercises` — add an exercise to a workout
+- `DELETE /api/workout-exercises/{workout_id}/exercises/{workout_exercise_id}` — remove exercise from workout
 
-**Sets (nested)**
+**Sets**
 
-- `POST /api/workouts/{id}/exercises/{workout_exercise_id}/sets` — log a set
-- `PATCH /api/workouts/{id}/exercises/{workout_exercise_id}/sets/{set_id}` — update a set
-- `DELETE /api/workouts/{id}/exercises/{workout_exercise_id}/sets/{set_id}` — delete a set
+- `POST /api/sets/{workout_id}/exercises/{workout_exercise_id}/sets` — log a set
+- `PATCH /api/sets/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}` — update a set
+- `DELETE /api/sets/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}` — delete a set
 
 ## Infrastructure & Deployment
 

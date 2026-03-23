@@ -32,7 +32,6 @@ class Exercise(Base):
     # null for system exercise
     user_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=True,
     )
     name: Mapped[str] = mapped_column(
         String(255),

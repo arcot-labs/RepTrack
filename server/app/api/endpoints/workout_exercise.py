@@ -28,6 +28,7 @@ api_router = APIRouter(
     responses={
         status.HTTP_401_UNAUTHORIZED: ErrorResponseModel,
         status.HTTP_404_NOT_FOUND: ErrorResponseModel,
+        status.HTTP_409_CONFLICT: ErrorResponseModel,
     },
 )
 async def create_workout_exercise_endpoint(
