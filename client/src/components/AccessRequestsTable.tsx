@@ -73,6 +73,7 @@ export function AccessRequestsTable({
     onReloadRequests,
 }: AccessRequestsTableProps) {
     const { user } = useSession()
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
     const [isLoadingRequestIds, setIsLoadingRequestIds] = useState<Set<number>>(
         new Set()
     )
