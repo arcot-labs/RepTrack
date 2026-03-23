@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Annotated
 
 from pydantic import EmailStr, Field, StringConstraints, TypeAdapter, ValidationError
@@ -22,4 +23,4 @@ Email = Annotated[EmailStr, Field(max_length=255)]
 ExerciseName = Annotated[str, StringConstraints(min_length=1, max_length=255)]
 
 SetReps = Annotated[int, Field(ge=0)]
-SetWeight = Annotated[float, Field(ge=0)]
+SetWeight = Annotated[Decimal, Field(max_digits=6, decimal_places=2, ge=0)]

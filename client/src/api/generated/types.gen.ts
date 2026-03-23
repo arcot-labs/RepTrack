@@ -97,7 +97,7 @@ export type CreateSetRequest = {
     /**
      * Weight
      */
-    weight?: number | null;
+    weight?: number | string | null;
     unit?: SetUnit | null;
     /**
      * Notes
@@ -426,7 +426,7 @@ export type UpdateSetRequest = {
     /**
      * Weight
      */
-    weight?: number | null;
+    weight?: number | string | null;
     unit?: SetUnit | null;
     /**
      * Notes

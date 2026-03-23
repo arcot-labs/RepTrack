@@ -176,6 +176,10 @@ export const CreateSetRequestSchema = {
                     minimum: 0
                 },
                 {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*(?:\\d{0,4}|(?=[\\d.]{1,7}0*$)\\d{0,4}\\.\\d{0,2}0*$)'
+                },
+                {
                     type: 'null'
                 }
             ],
@@ -793,6 +797,10 @@ export const UpdateSetRequestSchema = {
                 {
                     type: 'number',
                     minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*(?:\\d{0,4}|(?=[\\d.]{1,7}0*$)\\d{0,4}\\.\\d{0,2}0*$)'
                 },
                 {
                     type: 'null'

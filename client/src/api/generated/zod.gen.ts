@@ -185,7 +185,10 @@ export const zSetUnit = z.enum(['kg', 'lb']);
  */
 export const zCreateSetRequest = z.object({
     reps: z.int().gte(0).nullish(),
-    weight: z.number().gte(0).nullish(),
+    weight: z.union([
+        z.number().gte(0),
+        z.string().regex(/^(?!^[-+.]*$)[+-]?0*(?:\d{0,4}|(?=[\d.]{1,7}0*$)\d{0,4}\.\d{0,2}0*$)/)
+    ]).nullish(),
     unit: zSetUnit.nullish(),
     notes: z.string().nullish()
 });
@@ -211,7 +214,10 @@ export const zUpdateExerciseRequest = z.object({
  */
 export const zUpdateSetRequest = z.object({
     reps: z.int().gte(0).nullish(),
-    weight: z.number().gte(0).nullish(),
+    weight: z.union([
+        z.number().gte(0),
+        z.string().regex(/^(?!^[-+.]*$)[+-]?0*(?:\d{0,4}|(?=[\d.]{1,7}0*$)\d{0,4}\.\d{0,2}0*$)/)
+    ]).nullish(),
     unit: zSetUnit.nullish(),
     notes: z.string().nullish()
 });
