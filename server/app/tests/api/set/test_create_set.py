@@ -1,9 +1,15 @@
 from fastapi import status
 from httpx import AsyncClient
+from pytest import MonkeyPatch
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
-from app.models.errors import WorkoutExerciseNotFound, WorkoutNotFound
+from app.models.database.set import Set
+from app.models.errors import (
+    SetNumberConflict,
+    WorkoutExerciseNotFound,
+    WorkoutNotFound,
+)
 from app.tests.api.exercise.utilities import create_exercise
 from app.tests.api.workout.utilities import create_workout
 from app.tests.api.workout_exercise.utilities import create_workout_exercise
@@ -174,3 +180,52 @@ async def test_create_set_workout_exercise_not_allowed(
     assert resp.status_code == WorkoutExerciseNotFound.status_code
     body = resp.json()
     assert body["detail"] == WorkoutExerciseNotFound.detail
+
+
+# 409
+async def test_create_set_number_conflict(
+    client: AsyncClient,
+    session: AsyncSession,
+    settings: Settings,
+    monkeypatch: MonkeyPatch,
+):
+    await login_admin(client, settings)
+
+    admin = await get_admin(session, settings)
+    workout = await create_workout(session, user_id=admin.id)
+    exercise = await create_exercise(session, name="Bench Press")
+    workout_exercise = await create_workout_exercise(
+        session,
+        workout_id=workout.id,
+        exercise_id=exercise.id,
+        position=1,
+    )
+
+    existing = Set(
+        workout_exercise_id=workout_exercise.id,
+        set_number=1,
+    )
+    session.add(existing)
+    await session.commit()
+
+    async def mock_get_next_set_number(
+        workout_exercise_id: int, db: AsyncSession
+    ) -> int:
+        return 1
+
+    monkeypatch.setattr(
+        "app.services.set._get_next_set_number", mock_get_next_set_number
+    )
+
+    resp = await _make_request(
+        client,
+        workout_id=workout.id,
+        workout_exercise_id=workout_exercise.id,
+        reps=5,
+        weight=100,
+        unit="lb",
+    )
+
+    assert resp.status_code == SetNumberConflict.status_code
+    body = resp.json()
+    assert body["detail"] == SetNumberConflict.detail
