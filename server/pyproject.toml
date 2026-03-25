@@ -8,17 +8,21 @@ dependencies = [
     "asyncpg>=0.31.0",
     "fastapi-swagger-dark>=0.0.9",
     "fastapi[standard]>=0.124.4",
+    "httpx>=0.28.1",
     "meilisearch-python-sdk>=7.1.1",
     "pwdlib[argon2]>=0.3.0",
+    "pydantic>=2.12.5",
     "pydantic-settings>=2.12.0",
     "pyjwt>=2.10.1",
     "python-dotenv>=1.2.1",
     "python-json-logger>=4.0.0",
     "sqlalchemy>=2.0.45",
+    "starlette>=0.50.0",
 ]
 
 [dependency-groups]
 dev = [
+    "deptry>=0.25.1",
     "greenlet>=3.3.0",
     "pyright>=1.1.408",
     "pytest>=9.0.2",
@@ -46,3 +50,9 @@ show_missing = true
 
 [tool.coverage.html]
 directory = "htmlcov"
+
+[tool.deptry]
+exclude = ["app/tests/**", ".venv/"]
+
+[tool.deptry.per_rule_ignores]
+DEP002 = ["asyncpg"]

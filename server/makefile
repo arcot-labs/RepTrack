@@ -17,6 +17,9 @@ cov:
 open-cov:
 	open -a "Google Chrome" htmlcov/index.html
 
+deptry:
+	uv run deptry .
+
 check:
 	uv run pyright
 
