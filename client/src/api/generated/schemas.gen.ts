@@ -140,7 +140,7 @@ export const CreateFeedbackRequestSchema = {
         files: {
             items: {
                 type: 'string',
-                format: 'binary'
+                contentMediaType: 'application/octet-stream'
             },
             type: 'array',
             title: 'Files'
@@ -978,6 +978,13 @@ export const ValidationErrorSchema = {
         type: {
             type: 'string',
             title: 'Error Type'
+        },
+        input: {
+            title: 'Input'
+        },
+        ctx: {
+            type: 'object',
+            title: 'Context'
         }
     },
     type: 'object',

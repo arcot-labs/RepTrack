@@ -259,7 +259,9 @@ export const zUserPublic = z.object({
 export const zValidationError = z.object({
     loc: z.array(z.union([z.string(), z.int()])),
     msg: z.string(),
-    type: z.string()
+    type: z.string(),
+    input: z.unknown().optional(),
+    ctx: z.record(z.string(), z.unknown()).optional()
 });
 
 /**
