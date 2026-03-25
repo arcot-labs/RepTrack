@@ -5,6 +5,7 @@ from typing import Annotated
 
 from fastapi import Depends
 from fastapi.security import APIKeyCookie
+from meilisearch_python_sdk import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import Settings, get_settings
@@ -32,7 +33,10 @@ def get_sessionmaker(db_url: str, is_prod: bool):
 async def get_db(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> AsyncGenerator[AsyncSession]:
-    async with get_sessionmaker(settings.db.url, settings.is_prod_like)() as session:
+    async with get_sessionmaker(
+        settings.db.url,
+        settings.is_prod_like,
+    )() as session:
         yield session
 
 
@@ -43,6 +47,22 @@ access_token_cookie = APIKeyCookie(
 refresh_token_cookie = APIKeyCookie(
     name=REFRESH_JWT_KEY,
 )
+
+
+@cache
+def build_ms_client(host: str, port: int, master_key: str) -> AsyncClient:
+    url = f"http://{host}:{port}"
+    return AsyncClient(url, master_key)
+
+
+def get_ms_client(
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> AsyncClient:
+    return build_ms_client(
+        settings.ms.host,
+        settings.ms.port,
+        settings.ms.master_key,
+    )
 
 
 async def get_current_user(

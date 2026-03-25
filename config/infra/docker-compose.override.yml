@@ -13,6 +13,15 @@ services:
             - traefik.http.routers.${PROJECT?}-${ENV?}-adminer.rule=Host(`db.${DOMAIN?}`)
             - traefik.http.routers.${PROJECT?}-${ENV?}-adminer.entrypoints=web
 
+    meilisearch:
+        restart: no
+        ports:
+            - ${MS__PORT?}:7700
+
+        labels:
+            - traefik.http.routers.${PROJECT?}-${ENV?}-meilisearch.rule=Host(`search.${DOMAIN?}`)
+            - traefik.http.routers.${PROJECT?}-${ENV?}-meilisearch.entrypoints=web
+
     mailcatcher:
         image: dockage/mailcatcher:0.9.0
         container_name: ${PROJECT?}-${ENV?}-mailcatcher
