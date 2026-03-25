@@ -10,23 +10,23 @@ from ..utilities import create_user
 from ..workout.utilities import create_workout
 
 
-async def test_get_next_workout_exercise_position_empty(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
+async def test_get_next_workout_exercise_position_empty(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
 
-    position = await _get_next_workout_exercise_position(workout.id, session)
+    position = await _get_next_workout_exercise_position(workout.id, db_session)
     assert position == 1
 
 
-async def test_get_next_workout_exercise_position_max(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
-    other_workout = await create_workout(session, user_id=user.id)
-    exercise_1 = await create_exercise(session, name="Squat")
-    exercise_2 = await create_exercise(session, name="Bench")
-    exercise_3 = await create_exercise(session, name="Deadlift")
+async def test_get_next_workout_exercise_position_max(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    other_workout = await create_workout(db_session, user_id=user.id)
+    exercise_1 = await create_exercise(db_session, name="Squat")
+    exercise_2 = await create_exercise(db_session, name="Bench")
+    exercise_3 = await create_exercise(db_session, name="Deadlift")
 
-    session.add_all(
+    db_session.add_all(
         [
             WorkoutExercise(
                 workout_id=workout.id,
@@ -45,7 +45,7 @@ async def test_get_next_workout_exercise_position_max(session: AsyncSession):
             ),
         ]
     )
-    await session.commit()
+    await db_session.commit()
 
-    position = await _get_next_workout_exercise_position(workout.id, session)
+    position = await _get_next_workout_exercise_position(workout.id, db_session)
     assert position == 4

@@ -17,7 +17,7 @@ from ..utilities import get_admin_user_public
 
 
 async def test_update_access_request_status_approved(
-    session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+    db_session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     access_request = AccessRequest(
         email="pending@example.com",
@@ -25,23 +25,23 @@ async def test_update_access_request_status_approved(
         last_name="User",
         status=AccessRequestStatus.PENDING,
     )
-    session.add(access_request)
-    await session.commit()
+    db_session.add(access_request)
+    await db_session.commit()
 
-    admin_user = await get_admin_user_public(session, settings)
+    admin_user = await get_admin_user_public(db_session, settings)
     background_tasks = BackgroundTasks()
 
     await update_access_request_status(
         access_request_id=access_request.id,
         status=AccessRequestStatus.APPROVED,
-        db=session,
+        db=db_session,
         user=admin_user,
         background_tasks=background_tasks,
         email_svc=mock_email_svc,
         settings=settings,
     )
 
-    await session.refresh(access_request)
+    await db_session.refresh(access_request)
 
     assert access_request.status == AccessRequestStatus.APPROVED
     assert isinstance(access_request.reviewed_at, datetime)
@@ -49,7 +49,7 @@ async def test_update_access_request_status_approved(
 
     tokens = (
         (
-            await session.execute(
+            await db_session.execute(
                 select(RegistrationToken).where(
                     RegistrationToken.access_request_id == access_request.id
                 )
@@ -69,7 +69,7 @@ async def test_update_access_request_status_approved(
 
 
 async def test_update_access_request_status_rejected(
-    session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+    db_session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     access_request = AccessRequest(
         email="pending2@example.com",
@@ -77,28 +77,28 @@ async def test_update_access_request_status_rejected(
         last_name="User",
         status=AccessRequestStatus.PENDING,
     )
-    session.add(access_request)
-    await session.commit()
+    db_session.add(access_request)
+    await db_session.commit()
 
-    admin_user = await get_admin_user_public(session, settings)
+    admin_user = await get_admin_user_public(db_session, settings)
     background_tasks = BackgroundTasks()
 
     await update_access_request_status(
         access_request_id=access_request.id,
         status=AccessRequestStatus.REJECTED,
-        db=session,
+        db=db_session,
         user=admin_user,
         background_tasks=background_tasks,
         email_svc=mock_email_svc,
         settings=settings,
     )
 
-    await session.refresh(access_request)
+    await db_session.refresh(access_request)
     assert access_request.status == AccessRequestStatus.REJECTED
 
     tokens = (
         (
-            await session.execute(
+            await db_session.execute(
                 select(RegistrationToken).where(
                     RegistrationToken.access_request_id == access_request.id
                 )
@@ -117,14 +117,14 @@ async def test_update_access_request_status_rejected(
 
 
 async def test_update_access_request_status_not_found(
-    session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+    db_session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     with pytest.raises(AccessRequestNotFound):
         await update_access_request_status(
             access_request_id=9999,
             status=AccessRequestStatus.APPROVED,
-            db=session,
-            user=await get_admin_user_public(session, settings),
+            db=db_session,
+            user=await get_admin_user_public(db_session, settings),
             background_tasks=BackgroundTasks(),
             email_svc=mock_email_svc,
             settings=settings,
@@ -132,7 +132,7 @@ async def test_update_access_request_status_not_found(
 
 
 async def test_update_access_request_status_not_pending(
-    session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+    db_session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     access_request = AccessRequest(
         email="approved@example.com",
@@ -140,15 +140,15 @@ async def test_update_access_request_status_not_pending(
         last_name="User",
         status=AccessRequestStatus.APPROVED,
     )
-    session.add(access_request)
-    await session.commit()
+    db_session.add(access_request)
+    await db_session.commit()
 
     with pytest.raises(AccessRequestNotPending):
         await update_access_request_status(
             access_request_id=access_request.id,
             status=AccessRequestStatus.REJECTED,
-            db=session,
-            user=await get_admin_user_public(session, settings),
+            db=db_session,
+            user=await get_admin_user_public(db_session, settings),
             background_tasks=BackgroundTasks(),
             email_svc=mock_email_svc,
             settings=settings,

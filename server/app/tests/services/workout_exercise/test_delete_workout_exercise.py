@@ -16,21 +16,21 @@ from ..utilities import create_user
 from ..workout.utilities import create_workout
 
 
-async def test_delete_workout_exercise(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
-    exercise = await create_exercise(session, name="Squat")
+async def test_delete_workout_exercise(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Squat")
     workout_exercise = WorkoutExercise(
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
     )
-    session.add(workout_exercise)
-    await session.commit()
+    db_session.add(workout_exercise)
+    await db_session.commit()
 
-    await delete_workout_exercise(workout.id, workout_exercise.id, user.id, session)
+    await delete_workout_exercise(workout.id, workout_exercise.id, user.id, db_session)
 
-    result = await session.execute(
+    result = await db_session.execute(
         select(WorkoutExercise).where(
             WorkoutExercise.id == workout_exercise.id,
         )
@@ -38,33 +38,33 @@ async def test_delete_workout_exercise(session: AsyncSession):
     assert result.scalar_one_or_none() is None
 
 
-async def test_delete_workout_exercise_workout_not_found(session: AsyncSession):
+async def test_delete_workout_exercise_workout_not_found(db_session: AsyncSession):
     with pytest.raises(WorkoutNotFound):
         await delete_workout_exercise(
             workout_id=1,
             workout_exercise_id=2,
             user_id=3,
-            db=session,
+            db=db_session,
         )
 
 
-async def test_delete_workout_exercise_workout_not_allowed(session: AsyncSession):
-    user_1 = await create_user(session, username="user_1")
-    user_2 = await create_user(session, username="user_2")
-    workout = await create_workout(session, user_id=user_2.id)
+async def test_delete_workout_exercise_workout_not_allowed(db_session: AsyncSession):
+    user_1 = await create_user(db_session, username="user_1")
+    user_2 = await create_user(db_session, username="user_2")
+    workout = await create_workout(db_session, user_id=user_2.id)
 
     with pytest.raises(WorkoutNotFound):
         await delete_workout_exercise(
             workout_id=workout.id,
             workout_exercise_id=1,
             user_id=user_1.id,
-            db=session,
+            db=db_session,
         )
 
 
-async def test_delete_workout_exercise_not_found(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
+async def test_delete_workout_exercise_not_found(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
 
     with pytest.raises(WorkoutExerciseNotFound):
-        await delete_workout_exercise(workout.id, 99999, user.id, session)
+        await delete_workout_exercise(workout.id, 99999, user.id, db_session)

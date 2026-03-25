@@ -30,8 +30,8 @@ def fastapi_app(settings: Settings) -> FastAPI:
 async def client(
     fastapi_app: FastAPI,
     settings: Settings,
-    connection: AsyncConnection,
-    transaction: AsyncTransaction,
+    db_connection: AsyncConnection,
+    db_transaction: AsyncTransaction,
     mock_email_svc: EmailService,
     mock_github_svc: GitHubService,
 ) -> AsyncGenerator[AsyncClient]:
@@ -42,7 +42,7 @@ async def client(
 
     async def override_get_db() -> AsyncGenerator[AsyncSession]:
         async_session = AsyncSession(
-            bind=connection,
+            bind=db_connection,
             join_transaction_mode="create_savepoint",
             expire_on_commit=False,
         )
@@ -64,5 +64,5 @@ async def client(
         del fastapi_app.dependency_overrides[get_email_service]
         del fastapi_app.dependency_overrides[get_github_service]
 
-        if transaction.is_active:
-            await transaction.rollback()
+        if db_transaction.is_active:
+            await db_transaction.rollback()

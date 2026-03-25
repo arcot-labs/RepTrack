@@ -17,13 +17,13 @@ def _make_token(payload: dict[str, Any], secret: str, algorithm: str) -> str:
     return str(token)
 
 
-async def test_get_current_user(session: AsyncSession, settings: Settings):
+async def test_get_current_user(db_session: AsyncSession, settings: Settings):
     token = _make_token(
         {"sub": settings.admin.username},
         secret=settings.jwt.secret_key,
         algorithm=settings.jwt.algorithm,
     )
-    user = await get_current_user(token=token, db=session, settings=settings)
+    user = await get_current_user(token=token, db=db_session, settings=settings)
 
     assert user.username == settings.admin.username
     assert user.email == settings.admin.email
@@ -32,17 +32,19 @@ async def test_get_current_user(session: AsyncSession, settings: Settings):
     assert user.is_admin is True
 
 
-async def test_get_current_user_missing_sub(session: AsyncSession, settings: Settings):
+async def test_get_current_user_missing_sub(
+    db_session: AsyncSession, settings: Settings
+):
     token = _make_token(
         {}, secret=settings.jwt.secret_key, algorithm=settings.jwt.algorithm
     )
 
     with pytest.raises(InvalidCredentials):
-        await get_current_user(token=token, db=session, settings=settings)
+        await get_current_user(token=token, db=db_session, settings=settings)
 
 
 async def test_get_current_user_invalid_secret(
-    session: AsyncSession, settings: Settings
+    db_session: AsyncSession, settings: Settings
 ):
     token = _make_token(
         {"sub": settings.admin.username},
@@ -51,11 +53,11 @@ async def test_get_current_user_invalid_secret(
     )
 
     with pytest.raises(InvalidCredentials):
-        await get_current_user(token=token, db=session, settings=settings)
+        await get_current_user(token=token, db=db_session, settings=settings)
 
 
 async def test_get_current_user_expired_token(
-    session: AsyncSession, settings: Settings
+    db_session: AsyncSession, settings: Settings
 ):
     past_time = int(time.time()) - 3600
     token = _make_token(
@@ -65,18 +67,22 @@ async def test_get_current_user_expired_token(
     )
 
     with pytest.raises(InvalidCredentials):
-        await get_current_user(token=token, db=session, settings=settings)
+        await get_current_user(token=token, db=db_session, settings=settings)
 
 
-async def test_get_current_user_deleted_user(session: AsyncSession, settings: Settings):
+async def test_get_current_user_deleted_user(
+    db_session: AsyncSession, settings: Settings
+):
     token = _make_token(
         {"sub": settings.admin.username},
         secret=settings.jwt.secret_key,
         algorithm=settings.jwt.algorithm,
     )
 
-    await session.execute(delete(User).where(User.username == settings.admin.username))
-    await session.commit()
+    await db_session.execute(
+        delete(User).where(User.username == settings.admin.username)
+    )
+    await db_session.commit()
 
     with pytest.raises(InvalidCredentials):
-        await get_current_user(token=token, db=session, settings=settings)
+        await get_current_user(token=token, db=db_session, settings=settings)

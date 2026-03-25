@@ -12,7 +12,7 @@ from app.services.auth import request_password_reset
 
 
 async def test_request_password_reset(
-    session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+    db_session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     user = User(
         email="reset@example.com",
@@ -21,22 +21,22 @@ async def test_request_password_reset(
         last_name="User",
         password_hash=PASSWORD_HASH.hash("password"),
     )
-    session.add(user)
-    await session.commit()
+    db_session.add(user)
+    await db_session.commit()
 
     background_tasks = BackgroundTasks()
 
     await request_password_reset(
         email=user.email,
         background_tasks=background_tasks,
-        db=session,
+        db=db_session,
         email_svc=mock_email_svc,
         settings=settings,
     )
 
     tokens = (
         (
-            await session.execute(
+            await db_session.execute(
                 select(PasswordResetToken).where(PasswordResetToken.user_id == user.id)
             )
         )
@@ -54,36 +54,36 @@ async def test_request_password_reset(
 
 
 async def test_request_password_reset_unregistered_email(
-    session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+    db_session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     background_tasks = BackgroundTasks()
 
     await request_password_reset(
         email="missing@example.com",
         background_tasks=background_tasks,
-        db=session,
+        db=db_session,
         email_svc=mock_email_svc,
         settings=settings,
     )
 
-    tokens = (await session.execute(select(PasswordResetToken))).scalars().all()
+    tokens = (await db_session.execute(select(PasswordResetToken))).scalars().all()
     assert len(tokens) == 0
     assert len(background_tasks.tasks) == 0
 
 
 async def test_request_password_reset_admin_email(
-    session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+    db_session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     background_tasks = BackgroundTasks()
 
     await request_password_reset(
         email=settings.admin.email,
         background_tasks=background_tasks,
-        db=session,
+        db=db_session,
         email_svc=mock_email_svc,
         settings=settings,
     )
 
-    tokens = (await session.execute(select(PasswordResetToken))).scalars().all()
+    tokens = (await db_session.execute(select(PasswordResetToken))).scalars().all()
     assert len(tokens) == 0
     assert len(background_tasks.tasks) == 0

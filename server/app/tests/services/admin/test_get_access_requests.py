@@ -11,7 +11,7 @@ from app.services.admin import get_access_requests
 
 
 async def test_get_access_requests(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
     access_request = AccessRequest(
         email="shape@example.com",
@@ -19,10 +19,10 @@ async def test_get_access_requests(
         last_name="Test",
         status=AccessRequestStatus.PENDING,
     )
-    session.add(access_request)
-    await session.commit()
+    db_session.add(access_request)
+    await db_session.commit()
 
-    result = await get_access_requests(session)
+    result = await get_access_requests(db_session)
 
     assert isinstance(result[0], AccessRequestPublic)
     assert result[0].email == "shape@example.com"
@@ -33,9 +33,9 @@ async def test_get_access_requests(
     assert result[0].reviewed_at is None
 
 
-async def test_get_access_requests_reviewer(session: AsyncSession):
+async def test_get_access_requests_reviewer(db_session: AsyncSession):
     reviewer = (
-        await session.execute(select(User).where(User.username == "admin"))
+        await db_session.execute(select(User).where(User.username == "admin"))
     ).scalar_one()
 
     reviewed = AccessRequest(
@@ -46,10 +46,10 @@ async def test_get_access_requests_reviewer(session: AsyncSession):
         reviewed_by=reviewer.id,
         reviewed_at=datetime.now(UTC),
     )
-    session.add(reviewed)
-    await session.commit()
+    db_session.add(reviewed)
+    await db_session.commit()
 
-    result = await get_access_requests(session)
+    result = await get_access_requests(db_session)
 
     assert isinstance(result[0].reviewer, ReviewerPublic)
     assert result[0].reviewer.id == reviewer.id

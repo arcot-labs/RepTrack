@@ -6,23 +6,23 @@ from ..utilities import create_user
 from .utilities import create_exercise
 
 
-async def test_get_exercises(session: AsyncSession):
-    user = await create_user(session)
-    user_2 = await create_user(session, username="user_2")
+async def test_get_exercises(db_session: AsyncSession):
+    user = await create_user(db_session)
+    user_2 = await create_user(db_session, username="user_2")
 
-    await create_exercise(session, name="System Squat")
+    await create_exercise(db_session, name="System Squat")
     user_exercise = await create_exercise(
-        session,
+        db_session,
         name="User Curl",
         user_id=user.id,
     )
     await create_exercise(
-        session,
+        db_session,
         name="Other Curl",
         user_id=user_2.id,
     )
 
-    result = await get_exercises(user.id, session)
+    result = await get_exercises(user.id, db_session)
 
     ids = [exercise.id for exercise in result]
     assert len(ids) == 2
@@ -31,21 +31,21 @@ async def test_get_exercises(session: AsyncSession):
     assert all(exercise.name != "Other Curl" for exercise in result)
 
 
-async def test_get_exercises_ordering(session: AsyncSession):
-    user = await create_user(session)
+async def test_get_exercises_ordering(db_session: AsyncSession):
+    user = await create_user(db_session)
 
     await create_exercise(
-        session,
+        db_session,
         name="Z Press",
         user_id=user.id,
     )
     await create_exercise(
-        session,
+        db_session,
         name="A Press",
         user_id=user.id,
     )
 
-    result = await get_exercises(user.id, session)
+    result = await get_exercises(user.id, db_session)
 
     names = [exercise.name for exercise in result]
     assert names == sorted(names)

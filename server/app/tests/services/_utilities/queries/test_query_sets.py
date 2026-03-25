@@ -11,30 +11,30 @@ from ...workout_exercise.utilities import create_workout_exercise
 
 
 async def test_query_sets_no_where_clause(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    user = await create_user(session)
-    exercise = await create_exercise(session, "Bench")
-    workout = await create_workout(session, user_id=user.id, notes="Workout 1")
+    user = await create_user(db_session)
+    exercise = await create_exercise(db_session, "Bench")
+    workout = await create_workout(db_session, user_id=user.id, notes="Workout 1")
     workout_exercise = await create_workout_exercise(
-        session=session,
+        db_session=db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
     )
 
     set_1 = await create_set(
-        session=session,
+        db_session=db_session,
         workout_exercise_id=workout_exercise.id,
         set_number=1,
     )
     set_2 = await create_set(
-        session=session,
+        db_session=db_session,
         workout_exercise_id=workout_exercise.id,
         set_number=2,
     )
 
-    sets = await query_sets(session)
+    sets = await query_sets(db_session)
 
     assert len(sets) == 2
 
@@ -46,30 +46,30 @@ async def test_query_sets_no_where_clause(
 
 
 async def test_query_sets_with_where_clause(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    user = await create_user(session)
-    exercise = await create_exercise(session, "Bench")
-    workout = await create_workout(session, user_id=user.id, notes="Workout 1")
+    user = await create_user(db_session)
+    exercise = await create_exercise(db_session, "Bench")
+    workout = await create_workout(db_session, user_id=user.id, notes="Workout 1")
     workout_exercise = await create_workout_exercise(
-        session=session,
+        db_session=db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
     )
 
     set = await create_set(
-        session=session,
+        db_session=db_session,
         workout_exercise_id=workout_exercise.id,
         set_number=1,
     )
     await create_set(
-        session=session,
+        db_session=db_session,
         workout_exercise_id=workout_exercise.id,
         set_number=2,
     )
 
-    sets = await query_sets(session, Set.id == set.id)
+    sets = await query_sets(db_session, Set.id == set.id)
 
     assert len(sets) == 1
     assert sets[0] == set

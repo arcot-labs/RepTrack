@@ -36,7 +36,7 @@ async def _make_request(
 
 # 204
 async def test_update_access_request_status(
-    client: AsyncClient, session: AsyncSession, settings: Settings
+    client: AsyncClient, db_session: AsyncSession, settings: Settings
 ):
     access_request = AccessRequest(
         email="pending@example.com",
@@ -44,17 +44,17 @@ async def test_update_access_request_status(
         last_name="User",
         status=AccessRequestStatus.PENDING,
     )
-    session.add(access_request)
-    await session.commit()
+    db_session.add(access_request)
+    await db_session.commit()
 
-    admin = await get_admin(session, settings)
+    admin = await get_admin(db_session, settings)
 
     await login_admin(client, settings)
     resp = await _make_request(client, access_request.id, AccessRequestStatus.APPROVED)
 
     assert resp.status_code == status.HTTP_204_NO_CONTENT
 
-    await session.refresh(access_request)
+    await db_session.refresh(access_request)
     assert access_request.status == AccessRequestStatus.APPROVED
     assert access_request.reviewed_at is not None
     assert access_request.reviewed_by == admin.id
@@ -62,7 +62,7 @@ async def test_update_access_request_status(
 
 # 400
 async def test_update_access_request_status_not_pending(
-    client: AsyncClient, session: AsyncSession, settings: Settings
+    client: AsyncClient, db_session: AsyncSession, settings: Settings
 ):
     access_request = AccessRequest(
         email="approved@example.com",
@@ -70,8 +70,8 @@ async def test_update_access_request_status_not_pending(
         last_name="User",
         status=AccessRequestStatus.APPROVED,
     )
-    session.add(access_request)
-    await session.commit()
+    db_session.add(access_request)
+    await db_session.commit()
 
     await login_admin(client, settings)
     resp = await _make_request(client, access_request.id, AccessRequestStatus.REJECTED)
@@ -92,14 +92,14 @@ async def test_update_access_request_status_not_logged_in(client: AsyncClient):
 
 # 403
 async def test_update_access_request_status_non_admin_user(
-    client: AsyncClient, session: AsyncSession, settings: Settings
+    client: AsyncClient, db_session: AsyncSession, settings: Settings
 ):
-    await session.execute(
+    await db_session.execute(
         update(User)
         .where(User.username == settings.admin.username)
         .values(is_admin=False)
     )
-    await session.commit()
+    await db_session.commit()
 
     await login_admin(client, settings)
     resp = await _make_request(client, 1, AccessRequestStatus.APPROVED)

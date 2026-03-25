@@ -45,12 +45,12 @@ async def _make_request(
 # 204
 async def test_update_exercise(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    created = await create_exercise_via_api(client, session, name="Old Name")
-    muscle_group_id = await get_muscle_group_id(session, name="chest")
+    created = await create_exercise_via_api(client, db_session, name="Old Name")
+    muscle_group_id = await get_muscle_group_id(db_session, name="chest")
 
     resp = await _make_request(
         client,
@@ -66,9 +66,9 @@ async def test_update_exercise(
 # 401
 async def test_update_exercise_not_logged_in(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    system_ex = await create_system_exercise(session, name="Anonymous Row")
+    system_ex = await create_system_exercise(db_session, name="Anonymous Row")
 
     resp = await _make_request(client, system_ex.id, name="Renamed")
 
@@ -94,11 +94,11 @@ async def test_update_exercise_not_found(
 # 404
 async def test_update_exercise_muscle_group_not_found(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    created = await create_exercise_via_api(client, session, name="Flye")
+    created = await create_exercise_via_api(client, db_session, name="Flye")
 
     resp = await _make_request(client, created.id, muscle_group_ids=[99999])
 
@@ -110,11 +110,11 @@ async def test_update_exercise_muscle_group_not_found(
 # 404
 async def test_update_exercise_not_allowed(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    system_ex = await create_system_exercise(session, name="System Row")
+    system_ex = await create_system_exercise(db_session, name="System Row")
 
     resp = await _make_request(client, system_ex.id, name="Attempted Rename")
 
@@ -126,13 +126,13 @@ async def test_update_exercise_not_allowed(
 # 409
 async def test_update_exercise_name_conflict(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
 
-    await create_exercise_via_api(client, session, name="Taken Name")
-    other = await create_exercise_via_api(client, session, name="To Rename")
+    await create_exercise_via_api(client, db_session, name="Taken Name")
+    other = await create_exercise_via_api(client, db_session, name="To Rename")
 
     resp = await _make_request(client, other.id, name="Taken Name")
 
@@ -144,11 +144,11 @@ async def test_update_exercise_name_conflict(
 # 422
 async def test_update_exercise_name_null(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    created = await create_exercise_via_api(client, session, name="Old Name")
+    created = await create_exercise_via_api(client, db_session, name="Old Name")
 
     resp = await make_http_request(
         client,
@@ -163,11 +163,11 @@ async def test_update_exercise_name_null(
 # 422
 async def test_update_exercise_muscle_group_ids_null(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    created = await create_exercise_via_api(client, session, name="Old Name")
+    created = await create_exercise_via_api(client, db_session, name="Old Name")
 
     resp = await make_http_request(
         client,

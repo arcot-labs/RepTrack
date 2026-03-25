@@ -5,7 +5,7 @@ from app.models.database.exercise_muscle_group import ExerciseMuscleGroup
 
 
 async def create_exercise(
-    session: AsyncSession,
+    db_session: AsyncSession,
     name: str,
     user_id: int | None = None,
     description: str | None = None,
@@ -16,16 +16,16 @@ async def create_exercise(
         name=name,
         description=description,
     )
-    session.add(exercise)
-    await session.flush()
+    db_session.add(exercise)
+    await db_session.flush()
 
     for muscle_group_id in muscle_group_ids or []:
-        session.add(
+        db_session.add(
             ExerciseMuscleGroup(
                 exercise_id=exercise.id,
                 muscle_group_id=muscle_group_id,
             )
         )
 
-    await session.commit()
+    await db_session.commit()
     return exercise

@@ -11,10 +11,10 @@ from ...utilities import create_user
 
 
 async def test_query_exercises_base(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    exercise = await create_exercise(session, "Bench")
-    result = await query_exercises(session, True)
+    exercise = await create_exercise(db_session, "Bench")
+    result = await query_exercises(db_session, True)
 
     assert len(result) == 1
     assert exercise in result
@@ -23,10 +23,10 @@ async def test_query_exercises_base(
 
 
 async def test_query_exercises_public(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    exercise = await create_exercise(session, "Bench")
-    result = await query_exercises(session, False)
+    exercise = await create_exercise(db_session, "Bench")
+    result = await query_exercises(db_session, False)
 
     assert len(result) == 1
     assert exercise in result
@@ -34,26 +34,26 @@ async def test_query_exercises_public(
 
 
 async def test_query_exercises_no_where_clause(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    user_1 = await create_user(session, username="user_1")
-    user_2 = await create_user(session, username="user_2")
+    user_1 = await create_user(db_session, username="user_1")
+    user_2 = await create_user(db_session, username="user_2")
 
-    mg_id = await get_muscle_group_id(session, name="chest")
+    mg_id = await get_muscle_group_id(db_session, name="chest")
 
     await create_exercise(
-        session,
+        db_session,
         name="Bench",
         user_id=user_1.id,
         muscle_group_ids=[mg_id],
     )
     await create_exercise(
-        session,
+        db_session,
         name="Squat",
         user_id=user_2.id,
     )
 
-    result = await query_exercises(session, False)
+    result = await query_exercises(db_session, False)
 
     names = [e.name for e in result]
     assert len(result) == 2
@@ -67,22 +67,22 @@ async def test_query_exercises_no_where_clause(
 
 
 async def test_query_exercises_with_where_clause(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    user = await create_user(session)
+    user = await create_user(db_session)
     exercise = await create_exercise(
-        session,
+        db_session,
         name="Deadlift",
         user_id=user.id,
     )
     await create_exercise(
-        session,
+        db_session,
         name="Curl",
         user_id=user.id,
     )
 
     result = await query_exercises(
-        session,
+        db_session,
         True,
         Exercise.id == exercise.id,
     )
@@ -91,22 +91,22 @@ async def test_query_exercises_with_where_clause(
     assert result[0].id == exercise.id
 
 
-async def test_query_exercises_ordering(session: AsyncSession):
-    user = await create_user(session)
+async def test_query_exercises_ordering(db_session: AsyncSession):
+    user = await create_user(db_session)
 
     await create_exercise(
-        session,
+        db_session,
         name="Z Row",
         user_id=user.id,
     )
     await create_exercise(
-        session,
+        db_session,
         name="A Row",
         user_id=user.id,
     )
 
     result = await query_exercises(
-        session,
+        db_session,
         False,
         Exercise.user_id == user.id,
     )

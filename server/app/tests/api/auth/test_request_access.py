@@ -45,7 +45,7 @@ async def test_request_access(client: AsyncClient):
 
 # 200
 async def test_request_access_status_approved(
-    client: AsyncClient, session: AsyncSession
+    client: AsyncClient, db_session: AsyncSession
 ):
     approved_email = "approved@example.com"
     req = AccessRequest(
@@ -54,8 +54,8 @@ async def test_request_access_status_approved(
         last_name="User",
         status=AccessRequestStatus.APPROVED,
     )
-    session.add(req)
-    await session.commit()
+    db_session.add(req)
+    await db_session.commit()
 
     resp = await _make_request(
         client, email=approved_email, first_name="Test", last_name="User"
@@ -68,7 +68,7 @@ async def test_request_access_status_approved(
 
 # 403
 async def test_request_access_status_rejected(
-    client: AsyncClient, session: AsyncSession
+    client: AsyncClient, db_session: AsyncSession
 ):
     rejected_email = "rejected@example.com"
     req = AccessRequest(
@@ -77,8 +77,8 @@ async def test_request_access_status_rejected(
         last_name="User",
         status=AccessRequestStatus.REJECTED,
     )
-    session.add(req)
-    await session.commit()
+    db_session.add(req)
+    await db_session.commit()
 
     resp = await _make_request(
         client, email=rejected_email, first_name="Test", last_name="User"
@@ -91,7 +91,7 @@ async def test_request_access_status_rejected(
 
 # 409
 async def test_request_access_status_pending(
-    client: AsyncClient, session: AsyncSession
+    client: AsyncClient, db_session: AsyncSession
 ):
     pending_email = "pending@example.com"
     req = AccessRequest(
@@ -100,8 +100,8 @@ async def test_request_access_status_pending(
         last_name="User",
         status=AccessRequestStatus.PENDING,
     )
-    session.add(req)
-    await session.commit()
+    db_session.add(req)
+    await db_session.commit()
 
     resp = await _make_request(
         client, email=pending_email, first_name="Test", last_name="User"
@@ -113,7 +113,9 @@ async def test_request_access_status_pending(
 
 
 # 409
-async def test_request_access_existing_user(client: AsyncClient, session: AsyncSession):
+async def test_request_access_existing_user(
+    client: AsyncClient, db_session: AsyncSession
+):
     existing_email = "existing@example.com"
     user = User(
         email=existing_email,
@@ -123,8 +125,8 @@ async def test_request_access_existing_user(client: AsyncClient, session: AsyncS
         password_hash="hash",
         is_admin=False,
     )
-    session.add(user)
-    await session.commit()
+    db_session.add(user)
+    await db_session.commit()
 
     resp = await _make_request(
         client, email=existing_email, first_name="Test", last_name="User"
@@ -138,10 +140,10 @@ async def test_request_access_existing_user(client: AsyncClient, session: AsyncS
 # 409
 async def test_request_access_email_matches_username(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
     collision_identifier = "existing@example.com"
-    session.add(
+    db_session.add(
         User(
             email="different@example.com",
             username=collision_identifier,
@@ -151,7 +153,7 @@ async def test_request_access_email_matches_username(
             is_admin=False,
         )
     )
-    await session.commit()
+    await db_session.commit()
 
     resp = await _make_request(
         client,

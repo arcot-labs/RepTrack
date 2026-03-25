@@ -9,7 +9,7 @@ from app.models.errors import InvalidToken
 from app.services.auth import reset_password
 
 
-async def test_reset_password(session: AsyncSession):
+async def test_reset_password(db_session: AsyncSession):
     user = User(
         email="reset2@example.com",
         username="reset_user2",
@@ -17,12 +17,12 @@ async def test_reset_password(session: AsyncSession):
         last_name="User",
         password_hash=PASSWORD_HASH.hash("old_password"),
     )
-    session.add(user)
-    await session.flush()
+    db_session.add(user)
+    await db_session.flush()
 
     token_str, token = create_password_reset_token(user.id)
-    session.add(token)
-    await session.commit()
+    db_session.add(token)
+    await db_session.commit()
 
     assert not token.is_expired()
 
@@ -31,27 +31,27 @@ async def test_reset_password(session: AsyncSession):
     await reset_password(
         token_str=token_str,
         password="new_password",
-        db=session,
+        db=db_session,
     )
 
     assert user.password_hash != old_hash
     assert PASSWORD_HASH.verify("new_password", user.password_hash)
 
-    await session.refresh(token)
+    await db_session.refresh(token)
     assert token.is_used()
     assert token.is_expired()
 
 
-async def test_reset_password_invalid_token(session: AsyncSession):
+async def test_reset_password_invalid_token(db_session: AsyncSession):
     with pytest.raises(InvalidToken):
         await reset_password(
             token_str="invalid-token",
             password="new_password",
-            db=session,
+            db=db_session,
         )
 
 
-async def test_reset_password_used_token(session: AsyncSession):
+async def test_reset_password_used_token(db_session: AsyncSession):
     user = User(
         email="reset@example.com",
         username="reset_user",
@@ -59,23 +59,23 @@ async def test_reset_password_used_token(session: AsyncSession):
         last_name="User",
         password_hash=PASSWORD_HASH.hash("password"),
     )
-    session.add(user)
-    await session.flush()
+    db_session.add(user)
+    await db_session.flush()
 
     token_str, token = create_password_reset_token(user.id)
     token.used_at = datetime.now(UTC)
-    session.add(token)
-    await session.commit()
+    db_session.add(token)
+    await db_session.commit()
 
     with pytest.raises(InvalidToken):
         await reset_password(
             token_str=token_str,
             password="new_password",
-            db=session,
+            db=db_session,
         )
 
 
-async def test_reset_password_expired_token(session: AsyncSession):
+async def test_reset_password_expired_token(db_session: AsyncSession):
     user = User(
         email="expired@example.com",
         username="expired_user",
@@ -83,17 +83,17 @@ async def test_reset_password_expired_token(session: AsyncSession):
         last_name="User",
         password_hash=PASSWORD_HASH.hash("password"),
     )
-    session.add(user)
-    await session.flush()
+    db_session.add(user)
+    await db_session.flush()
 
     token_str, token = create_password_reset_token(user.id)
     token.expires_at = datetime.now(UTC)
-    session.add(token)
-    await session.commit()
+    db_session.add(token)
+    await db_session.commit()
 
     with pytest.raises(InvalidToken):
         await reset_password(
             token_str=token_str,
             password="new_password",
-            db=session,
+            db=db_session,
         )

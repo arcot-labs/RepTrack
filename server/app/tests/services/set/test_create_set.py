@@ -24,12 +24,12 @@ from ..workout_exercise.utilities import create_workout_exercise
 from .utilities import create_set as create_set_util
 
 
-async def test_create_set(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
-    exercise = await create_exercise(session, name="Bench Press")
+async def test_create_set(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Bench Press")
     workout_exercise = await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
@@ -45,10 +45,10 @@ async def test_create_set(session: AsyncSession):
             unit=SetUnit.lb,
             notes="Test set",
         ),
-        db=session,
+        db=db_session,
     )
 
-    result = await session.execute(
+    result = await db_session.execute(
         select(Set).where(
             Set.workout_exercise_id == workout_exercise.id,
         )
@@ -63,21 +63,21 @@ async def test_create_set(session: AsyncSession):
     assert set_.notes == "Test set"
 
 
-async def test_create_set_workout_not_found(session: AsyncSession):
+async def test_create_set_workout_not_found(db_session: AsyncSession):
     with pytest.raises(WorkoutNotFound):
         await create_set(
             workout_id=1,
             workout_exercise_id=2,
             user_id=3,
             req=CreateSetRequest(),
-            db=session,
+            db=db_session,
         )
 
 
-async def test_create_set_workout_not_allowed(session: AsyncSession):
-    user_1 = await create_user(session, username="user_1")
-    user_2 = await create_user(session, username="user_2")
-    workout = await create_workout(session, user_id=user_2.id)
+async def test_create_set_workout_not_allowed(db_session: AsyncSession):
+    user_1 = await create_user(db_session, username="user_1")
+    user_2 = await create_user(db_session, username="user_2")
+    workout = await create_workout(db_session, user_id=user_2.id)
 
     with pytest.raises(WorkoutNotFound):
         await create_set(
@@ -85,13 +85,13 @@ async def test_create_set_workout_not_allowed(session: AsyncSession):
             workout_exercise_id=2,
             user_id=user_1.id,
             req=CreateSetRequest(),
-            db=session,
+            db=db_session,
         )
 
 
-async def test_create_set_workout_exercise_not_found(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
+async def test_create_set_workout_exercise_not_found(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
 
     with pytest.raises(WorkoutExerciseNotFound):
         await create_set(
@@ -99,19 +99,19 @@ async def test_create_set_workout_exercise_not_found(session: AsyncSession):
             workout_exercise_id=2,
             user_id=user.id,
             req=CreateSetRequest(),
-            db=session,
+            db=db_session,
         )
 
 
-async def test_create_set_workout_exercise_not_allowed(session: AsyncSession):
-    exercise = await create_exercise(session, name="Squat")
+async def test_create_set_workout_exercise_not_allowed(db_session: AsyncSession):
+    exercise = await create_exercise(db_session, name="Squat")
 
-    user_1 = await create_user(session, username="user_1")
-    user_2 = await create_user(session, username="user_2")
-    workout_1 = await create_workout(session, user_id=user_1.id)
-    workout_2 = await create_workout(session, user_id=user_2.id)
+    user_1 = await create_user(db_session, username="user_1")
+    user_2 = await create_user(db_session, username="user_2")
+    workout_1 = await create_workout(db_session, user_id=user_1.id)
+    workout_2 = await create_workout(db_session, user_id=user_2.id)
     workout_exercise = await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout_2.id,
         exercise_id=exercise.id,
         position=1,
@@ -123,26 +123,26 @@ async def test_create_set_workout_exercise_not_allowed(session: AsyncSession):
             workout_exercise_id=workout_exercise.id,
             user_id=user_1.id,
             req=CreateSetRequest(),
-            db=session,
+            db=db_session,
         )
 
 
 async def test_create_set_set_number_conflict(
-    session: AsyncSession,
+    db_session: AsyncSession,
     monkeypatch: MonkeyPatch,
 ):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
-    exercise = await create_exercise(session, name="Bench Press")
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Bench Press")
     workout_exercise = await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
     )
 
     await create_set_util(
-        session,
+        db_session,
         workout_exercise_id=workout_exercise.id,
         set_number=1,
     )
@@ -162,26 +162,26 @@ async def test_create_set_set_number_conflict(
             workout_exercise_id=workout_exercise.id,
             user_id=user.id,
             req=CreateSetRequest(),
-            db=session,
+            db=db_session,
         )
 
 
 async def test_create_set_unhandled_integrity_error(
-    session: AsyncSession,
+    db_session: AsyncSession,
     monkeypatch: MonkeyPatch,
 ):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
-    exercise = await create_exercise(session, name="Bench Press")
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Bench Press")
     workout_exercise = await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
     )
 
     await create_set_util(
-        session,
+        db_session,
         workout_exercise_id=workout_exercise.id,
         set_number=1,
     )
@@ -202,5 +202,5 @@ async def test_create_set_unhandled_integrity_error(
                 workout_exercise_id=workout_exercise.id,
                 user_id=user.id,
                 req=CreateSetRequest(),
-                db=session,
+                db=db_session,
             )

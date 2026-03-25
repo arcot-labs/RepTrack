@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 @cache
-def get_sessionmaker(db_url: str, is_prod: bool):
+def get_db_sessionmaker(db_url: str, is_prod: bool):
     engine = create_async_engine(
         db_url,
         echo=not is_prod,
@@ -33,7 +33,7 @@ def get_sessionmaker(db_url: str, is_prod: bool):
 async def get_db(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> AsyncGenerator[AsyncSession]:
-    async with get_sessionmaker(
+    async with get_db_sessionmaker(
         settings.db.url,
         settings.is_prod_like,
     )() as session:

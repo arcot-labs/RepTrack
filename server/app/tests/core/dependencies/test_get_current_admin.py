@@ -10,8 +10,8 @@ from app.models.schemas.user import UserPublic
 from app.services.utilities.serializers import to_user_public
 
 
-async def _get_admin(session: AsyncSession, settings: Settings) -> UserPublic:
-    result = await session.execute(
+async def _get_admin(db_session: AsyncSession, settings: Settings) -> UserPublic:
+    result = await db_session.execute(
         select(User).where(User.username == settings.admin.username)
     )
     admin = result.scalar_one()
@@ -19,8 +19,8 @@ async def _get_admin(session: AsyncSession, settings: Settings) -> UserPublic:
     return adminPublic
 
 
-async def test_get_current_admin(session: AsyncSession, settings: Settings):
-    admin = await _get_admin(session, settings)
+async def test_get_current_admin(db_session: AsyncSession, settings: Settings):
+    admin = await _get_admin(db_session, settings)
     admin = await get_current_admin(user=admin)
 
     assert admin.username == settings.admin.username
@@ -28,9 +28,9 @@ async def test_get_current_admin(session: AsyncSession, settings: Settings):
 
 
 async def test_get_current_admin_insufficient_permissions(
-    session: AsyncSession, settings: Settings
+    db_session: AsyncSession, settings: Settings
 ):
-    admin = await _get_admin(session, settings)
+    admin = await _get_admin(db_session, settings)
     admin.is_admin = False
 
     with pytest.raises(InsufficientPermissions):

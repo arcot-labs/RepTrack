@@ -33,22 +33,22 @@ async def _make_request(
 # 204
 async def test_delete_set(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
 
-    admin = await get_admin(session, settings)
-    workout = await create_workout(session, user_id=admin.id)
-    exercise = await create_exercise(session, name="Bench Press")
+    admin = await get_admin(db_session, settings)
+    workout = await create_workout(db_session, user_id=admin.id)
+    exercise = await create_exercise(db_session, name="Bench Press")
     workout_exercise = await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
     )
     set_ = await create_set(
-        session,
+        db_session,
         workout_exercise_id=workout_exercise.id,
         set_number=1,
     )
@@ -99,16 +99,16 @@ async def test_delete_set_workout_not_found(
 # 404
 async def test_delete_set_not_found(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
 
-    admin = await get_admin(session, settings)
-    workout = await create_workout(session, user_id=admin.id)
-    exercise = await create_exercise(session, name="Bench Press")
+    admin = await get_admin(db_session, settings)
+    workout = await create_workout(db_session, user_id=admin.id)
+    exercise = await create_exercise(db_session, name="Bench Press")
     workout_exercise = await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,

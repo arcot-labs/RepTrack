@@ -4,7 +4,7 @@ from app.models.database.user import User
 from app.services.user import get_admin_users
 
 
-async def test_get_admin_users(session: AsyncSession):
+async def test_get_admin_users(db_session: AsyncSession):
     admin_user = User(
         email="svc-admin@example.com",
         username="svc_admin",
@@ -21,10 +21,10 @@ async def test_get_admin_users(session: AsyncSession):
         password_hash="hash",
         is_admin=False,
     )
-    session.add_all([admin_user, regular_user])
-    await session.commit()
+    db_session.add_all([admin_user, regular_user])
+    await db_session.commit()
 
-    result = await get_admin_users(session)
+    result = await get_admin_users(db_session)
 
     usernames = [user.username for user in result]
     assert "svc_admin" in usernames

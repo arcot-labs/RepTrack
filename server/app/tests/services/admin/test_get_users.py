@@ -5,7 +5,7 @@ from app.models.schemas.user import UserPublic
 from app.services.admin import get_users
 
 
-async def test_get_users(session: AsyncSession):
+async def test_get_users(db_session: AsyncSession):
     user = User(
         email="shape-user@example.com",
         username="shape_user",
@@ -13,10 +13,10 @@ async def test_get_users(session: AsyncSession):
         last_name="User",
         password_hash="hash",
     )
-    session.add(user)
-    await session.commit()
+    db_session.add(user)
+    await db_session.commit()
 
-    result = await get_users(session)
+    result = await get_users(db_session)
     item = next(entry for entry in result if entry.id == user.id)
 
     assert isinstance(item, UserPublic)

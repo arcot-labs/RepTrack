@@ -5,7 +5,7 @@ from app.services.user import get_user_by_identifier
 
 
 async def test_get_user_by_identifier_with_email(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
     collision_identifier = "collision@example.com"
     username_match = User(
@@ -22,17 +22,17 @@ async def test_get_user_by_identifier_with_email(
         last_name="Match",
         password_hash="hash",
     )
-    session.add_all([username_match, email_match])
-    await session.commit()
+    db_session.add_all([username_match, email_match])
+    await db_session.commit()
 
-    result = await get_user_by_identifier(collision_identifier, session)
+    result = await get_user_by_identifier(collision_identifier, db_session)
 
     assert result is not None
     assert result.id == email_match.id
 
 
 async def test_get_user_by_identifier_with_email_fallback(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
     identifier = "fallback@example.com"
     username_match = User(
@@ -42,25 +42,25 @@ async def test_get_user_by_identifier_with_email_fallback(
         last_name="Fallback",
         password_hash="hash",
     )
-    session.add(username_match)
-    await session.commit()
+    db_session.add(username_match)
+    await db_session.commit()
 
-    result = await get_user_by_identifier(identifier, session)
+    result = await get_user_by_identifier(identifier, db_session)
 
     assert result is not None
     assert result.id == username_match.id
 
 
 async def test_get_user_by_identifier_with_email_not_found(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    result = await get_user_by_identifier("not_found@example.com", session)
+    result = await get_user_by_identifier("not_found@example.com", db_session)
 
     assert result is None
 
 
 async def test_get_user_by_identifier_with_username(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
     collision_identifier = "collision_value"
     username_match = User(
@@ -77,17 +77,17 @@ async def test_get_user_by_identifier_with_username(
         last_name="Match",
         password_hash="hash",
     )
-    session.add_all([username_match, email_match])
-    await session.commit()
+    db_session.add_all([username_match, email_match])
+    await db_session.commit()
 
-    result = await get_user_by_identifier(collision_identifier, session)
+    result = await get_user_by_identifier(collision_identifier, db_session)
 
     assert result is not None
     assert result.id == username_match.id
 
 
 async def test_get_user_by_identifier_with_username_not_found(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
     collision_identifier = "collision_value"
     email_match = User(
@@ -97,9 +97,9 @@ async def test_get_user_by_identifier_with_username_not_found(
         last_name="Match",
         password_hash="hash",
     )
-    session.add(email_match)
-    await session.commit()
+    db_session.add(email_match)
+    await db_session.commit()
 
-    result = await get_user_by_identifier(collision_identifier, session)
+    result = await get_user_by_identifier(collision_identifier, db_session)
 
     assert result is None

@@ -45,14 +45,14 @@ async def test_get_users_not_logged_in(client: AsyncClient):
 
 # 403
 async def test_get_users_non_admin_user(
-    client: AsyncClient, session: AsyncSession, settings: Settings
+    client: AsyncClient, db_session: AsyncSession, settings: Settings
 ):
-    await session.execute(
+    await db_session.execute(
         update(User)
         .where(User.username == settings.admin.username)
         .values(is_admin=False)
     )
-    await session.commit()
+    await db_session.commit()
 
     await login_admin(client, settings)
     resp = await _make_request(client)

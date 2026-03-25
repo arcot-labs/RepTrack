@@ -20,17 +20,17 @@ from ..utilities import get_admin
 # wrappers are tested separately
 
 
-async def test_get_token_registration(session: AsyncSession):
-    access_request = await create_access_request(session, "token-user@example.com")
+async def test_get_token_registration(db_session: AsyncSession):
+    access_request = await create_access_request(db_session, "token-user@example.com")
     token_str, _token = create_registration_token(access_request.id)
-    session.add(_token)
-    await session.commit()
+    db_session.add(_token)
+    await db_session.commit()
 
     token = await _get_token(
         token_str,
         model=RegistrationToken,
         load_option=RegistrationToken.access_request,
-        db=session,
+        db=db_session,
     )
 
     assert token is not None
@@ -39,82 +39,82 @@ async def test_get_token_registration(session: AsyncSession):
 
 
 async def test_get_token_registration_invalid_token(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
     token = await _get_token(
         "invalid-token",
         model=RegistrationToken,
         load_option=RegistrationToken.access_request,
-        db=session,
+        db=db_session,
     )
     assert token is None
 
 
 async def test_get_token_registration_used_token(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    access_request = await create_access_request(session, "used@example.com")
+    access_request = await create_access_request(db_session, "used@example.com")
     token_str, _token = create_registration_token(access_request.id)
     _token.used_at = datetime.now(UTC)
-    session.add(_token)
-    await session.commit()
+    db_session.add(_token)
+    await db_session.commit()
 
     token = await _get_token(
         token_str,
         model=RegistrationToken,
         load_option=RegistrationToken.access_request,
-        db=session,
+        db=db_session,
     )
     assert token is None
 
 
 async def test_get_token_registration_expired_token(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    access_request = await create_access_request(session, "expired@example.com")
+    access_request = await create_access_request(db_session, "expired@example.com")
     token_str, _token = create_registration_token(access_request.id)
     _token.expires_at = datetime.now(UTC) - timedelta(minutes=1)
-    session.add(_token)
-    await session.commit()
+    db_session.add(_token)
+    await db_session.commit()
 
     token = await _get_token(
         token_str,
         model=RegistrationToken,
         load_option=RegistrationToken.access_request,
-        db=session,
+        db=db_session,
     )
     assert token is None
 
 
 async def test_get_token_registration_invalid_hash(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    access_request = await create_access_request(session, "invalid-hash@example.com")
+    access_request = await create_access_request(db_session, "invalid-hash@example.com")
     token_str, _token = create_registration_token(access_request.id)
     _token.token_hash = PASSWORD_HASH.hash(token_str + "tampered")
-    session.add(_token)
-    await session.commit()
+    db_session.add(_token)
+    await db_session.commit()
 
     token = await _get_token(
         token_str,
         model=RegistrationToken,
         load_option=RegistrationToken.access_request,
-        db=session,
+        db=db_session,
     )
     assert token is None
 
 
-async def test_get_registration_token(session: AsyncSession):
-    access_request = await create_access_request(session, "registered@example.com")
+async def test_get_registration_token(db_session: AsyncSession):
+    access_request = await create_access_request(db_session, "registered@example.com")
     token_str, _token = create_registration_token(access_request.id)
-    session.add(_token)
-    await session.commit()
+    db_session.add(_token)
+    await db_session.commit()
 
     token = await _get_token(
         token_str,
         model=RegistrationToken,
         load_option=RegistrationToken.access_request,
-        db=session,
+        db=db_session,
     )
 
     assert token is not None
@@ -122,17 +122,17 @@ async def test_get_registration_token(session: AsyncSession):
     assert token.access_request.id == access_request.id
 
 
-async def test_get_password_reset_token(session: AsyncSession, settings: Settings):
-    admin = await get_admin(session, settings)
+async def test_get_password_reset_token(db_session: AsyncSession, settings: Settings):
+    admin = await get_admin(db_session, settings)
     token_str, _token = create_password_reset_token(admin.id)
-    session.add(_token)
-    await session.commit()
+    db_session.add(_token)
+    await db_session.commit()
 
     token = await _get_token(
         token_str,
         model=type(_token),
         load_option=PasswordResetToken.user,
-        db=session,
+        db=db_session,
     )
 
     assert token is not None
