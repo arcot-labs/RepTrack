@@ -15,3 +15,8 @@ class FeedbackType(StrEnum):
 class SetUnit(StrEnum):
     kg = "kg"
     lb = "lb"
+
+
+class SearchIndex(StrEnum):
+    MUSCLE_GROUPS = "muscle_groups"
+    EXERCISES = "exercises"

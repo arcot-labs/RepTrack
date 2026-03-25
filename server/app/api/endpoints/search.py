@@ -1,0 +1,78 @@
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, status
+from meilisearch_python_sdk import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.dependencies import (
+    get_current_admin,
+    get_current_user,
+    get_db,
+    get_ms_client,
+)
+from app.models.schemas.errors import ErrorResponseModel
+from app.models.schemas.search import SearchRequest
+from app.models.schemas.user import UserPublic
+from app.services.search import reindex_data, search_exercises, search_muscle_groups
+
+api_router = APIRouter(
+    prefix="/search",
+    tags=["Search"],
+    dependencies=[Depends(get_current_user)],
+)
+
+
+@api_router.post(
+    "/reindex",
+    operation_id="reindex",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: ErrorResponseModel,
+        status.HTTP_403_FORBIDDEN: ErrorResponseModel,
+    },
+)
+async def reindex_endpoint(
+    _: Annotated[UserPublic, Depends(get_current_admin)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+    ms_client: Annotated[AsyncClient, Depends(get_ms_client)],
+):
+    await reindex_data(
+        db=db,
+        ms_client=ms_client,
+    )
+
+
+@api_router.post(
+    "/muscle-groups",
+    operation_id="searchMuscleGroups",
+    responses={
+        status.HTTP_401_UNAUTHORIZED: ErrorResponseModel,
+    },
+)
+async def search_muscle_groups_endpoint(
+    req: SearchRequest,
+    ms_client: Annotated[AsyncClient, Depends(get_ms_client)],
+):
+    return await search_muscle_groups(
+        req=req,
+        ms_client=ms_client,
+    )
+
+
+@api_router.post(
+    "/exercises",
+    operation_id="searchExercises",
+    responses={
+        status.HTTP_401_UNAUTHORIZED: ErrorResponseModel,
+    },
+)
+async def search_exercises_endpoint(
+    req: SearchRequest,
+    user: Annotated[UserPublic, Depends(get_current_user)],
+    ms_client: Annotated[AsyncClient, Depends(get_ms_client)],
+):
+    return await search_exercises(
+        req=req,
+        user_id=user.id,
+        ms_client=ms_client,
+    )

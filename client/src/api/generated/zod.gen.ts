@@ -161,6 +161,14 @@ export const zAccessRequestPublic = z.object({
 });
 
 /**
+ * SearchRequest
+ */
+export const zSearchRequest = z.object({
+    query: z.string().min(1).max(255),
+    limit: z.int()
+});
+
+/**
  * SetPublic
  */
 export const zSetPublic = z.object({
@@ -528,6 +536,29 @@ export const zGetMuscleGroupsData = z.object({
  * Successful Response
  */
 export const zGetMuscleGroupsResponse = z.array(zMuscleGroupPublic);
+
+export const zReindexData = z.object({
+    body: z.never().optional(),
+    path: z.never().optional(),
+    query: z.never().optional()
+});
+
+/**
+ * Successful Response
+ */
+export const zReindexResponse = z.void();
+
+export const zSearchMuscleGroupsData = z.object({
+    body: zSearchRequest,
+    path: z.never().optional(),
+    query: z.never().optional()
+});
+
+export const zSearchExercisesData = z.object({
+    body: zSearchRequest,
+    path: z.never().optional(),
+    query: z.never().optional()
+});
 
 export const zCreateSetData = z.object({
     body: zCreateSetRequest,

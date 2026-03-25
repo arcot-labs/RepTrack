@@ -626,6 +626,27 @@ export const ReviewerPublicSchema = {
     title: 'ReviewerPublic'
 } as const;
 
+export const SearchRequestSchema = {
+    properties: {
+        query: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Query'
+        },
+        limit: {
+            type: 'integer',
+            title: 'Limit'
+        }
+    },
+    type: 'object',
+    required: [
+        'query',
+        'limit'
+    ],
+    title: 'SearchRequest'
+} as const;
+
 export const SetPublicSchema = {
     properties: {
         id: {

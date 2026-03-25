@@ -341,6 +341,20 @@ export type ReviewerPublic = {
 };
 
 /**
+ * SearchRequest
+ */
+export type SearchRequest = {
+    /**
+     * Query
+     */
+    query: string;
+    /**
+     * Limit
+     */
+    limit: number;
+};
+
+/**
  * SetPublic
  */
 export type SetPublic = {
@@ -1198,6 +1212,89 @@ export type GetMuscleGroupsResponses = {
 };
 
 export type GetMuscleGroupsResponse = GetMuscleGroupsResponses[keyof GetMuscleGroupsResponses];
+
+export type ReindexData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/search/reindex';
+};
+
+export type ReindexErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+};
+
+export type ReindexError = ReindexErrors[keyof ReindexErrors];
+
+export type ReindexResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type ReindexResponse = ReindexResponses[keyof ReindexResponses];
+
+export type SearchMuscleGroupsData = {
+    body: SearchRequest;
+    path?: never;
+    query?: never;
+    url: '/api/search/muscle-groups';
+};
+
+export type SearchMuscleGroupsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SearchMuscleGroupsError = SearchMuscleGroupsErrors[keyof SearchMuscleGroupsErrors];
+
+export type SearchMuscleGroupsResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type SearchExercisesData = {
+    body: SearchRequest;
+    path?: never;
+    query?: never;
+    url: '/api/search/exercises';
+};
+
+export type SearchExercisesErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SearchExercisesError = SearchExercisesErrors[keyof SearchExercisesErrors];
+
+export type SearchExercisesResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type CreateSetData = {
     body: CreateSetRequest;

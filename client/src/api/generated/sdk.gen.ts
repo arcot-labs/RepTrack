@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { CreateExerciseData, CreateExerciseErrors, CreateExerciseResponses, CreateFeedbackData, CreateFeedbackErrors, CreateFeedbackResponses, CreateSetData, CreateSetErrors, CreateSetResponses, CreateWorkoutData, CreateWorkoutErrors, CreateWorkoutExerciseData, CreateWorkoutExerciseErrors, CreateWorkoutExerciseResponses, CreateWorkoutResponses, DeleteExerciseData, DeleteExerciseErrors, DeleteExerciseResponses, DeleteSetData, DeleteSetErrors, DeleteSetResponses, DeleteWorkoutData, DeleteWorkoutErrors, DeleteWorkoutExerciseData, DeleteWorkoutExerciseErrors, DeleteWorkoutExerciseResponses, DeleteWorkoutResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetAccessRequestsData, GetAccessRequestsErrors, GetAccessRequestsResponses, GetCurrentUserData, GetCurrentUserErrors, GetCurrentUserResponses, GetDbHealthData, GetDbHealthResponses, GetExerciseData, GetExerciseErrors, GetExerciseResponses, GetExercisesData, GetExercisesErrors, GetExercisesResponses, GetHealthData, GetHealthResponses, GetMuscleGroupsData, GetMuscleGroupsErrors, GetMuscleGroupsResponses, GetUsersData, GetUsersErrors, GetUsersResponses, GetWorkoutData, GetWorkoutErrors, GetWorkoutResponses, GetWorkoutsData, GetWorkoutsErrors, GetWorkoutsResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, RequestAccessData, RequestAccessErrors, RequestAccessResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, UpdateAccessRequestStatusData, UpdateAccessRequestStatusErrors, UpdateAccessRequestStatusResponses, UpdateExerciseData, UpdateExerciseErrors, UpdateExerciseResponses, UpdateSetData, UpdateSetErrors, UpdateSetResponses, UpdateWorkoutData, UpdateWorkoutErrors, UpdateWorkoutResponses } from './types.gen';
+import type { CreateExerciseData, CreateExerciseErrors, CreateExerciseResponses, CreateFeedbackData, CreateFeedbackErrors, CreateFeedbackResponses, CreateSetData, CreateSetErrors, CreateSetResponses, CreateWorkoutData, CreateWorkoutErrors, CreateWorkoutExerciseData, CreateWorkoutExerciseErrors, CreateWorkoutExerciseResponses, CreateWorkoutResponses, DeleteExerciseData, DeleteExerciseErrors, DeleteExerciseResponses, DeleteSetData, DeleteSetErrors, DeleteSetResponses, DeleteWorkoutData, DeleteWorkoutErrors, DeleteWorkoutExerciseData, DeleteWorkoutExerciseErrors, DeleteWorkoutExerciseResponses, DeleteWorkoutResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetAccessRequestsData, GetAccessRequestsErrors, GetAccessRequestsResponses, GetCurrentUserData, GetCurrentUserErrors, GetCurrentUserResponses, GetDbHealthData, GetDbHealthResponses, GetExerciseData, GetExerciseErrors, GetExerciseResponses, GetExercisesData, GetExercisesErrors, GetExercisesResponses, GetHealthData, GetHealthResponses, GetMuscleGroupsData, GetMuscleGroupsErrors, GetMuscleGroupsResponses, GetUsersData, GetUsersErrors, GetUsersResponses, GetWorkoutData, GetWorkoutErrors, GetWorkoutResponses, GetWorkoutsData, GetWorkoutsErrors, GetWorkoutsResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, ReindexData, ReindexErrors, ReindexResponses, RequestAccessData, RequestAccessErrors, RequestAccessResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, SearchExercisesData, SearchExercisesErrors, SearchExercisesResponses, SearchMuscleGroupsData, SearchMuscleGroupsErrors, SearchMuscleGroupsResponses, UpdateAccessRequestStatusData, UpdateAccessRequestStatusErrors, UpdateAccessRequestStatusResponses, UpdateExerciseData, UpdateExerciseErrors, UpdateExerciseResponses, UpdateSetData, UpdateSetErrors, UpdateSetResponses, UpdateWorkoutData, UpdateWorkoutErrors, UpdateWorkoutResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -314,6 +314,63 @@ export class MuscleGroupService {
                 }],
             url: '/api/muscle-groups',
             ...options
+        });
+    }
+}
+
+export class SearchService {
+    /**
+     * Reindex Endpoint
+     */
+    public static reindex<ThrowOnError extends boolean = false>(options?: Options<ReindexData, ThrowOnError>) {
+        return (options?.client ?? client).post<ReindexResponses, ReindexErrors, ThrowOnError>({
+            security: [{
+                    in: 'cookie',
+                    name: 'access_token',
+                    type: 'apiKey'
+                }],
+            url: '/api/search/reindex',
+            ...options
+        });
+    }
+    
+    /**
+     * Search Muscle Groups Endpoint
+     */
+    public static searchMuscleGroups<ThrowOnError extends boolean = false>(options: Options<SearchMuscleGroupsData, ThrowOnError>) {
+        return (options.client ?? client).post<SearchMuscleGroupsResponses, SearchMuscleGroupsErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{
+                    in: 'cookie',
+                    name: 'access_token',
+                    type: 'apiKey'
+                }],
+            url: '/api/search/muscle-groups',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Search Exercises Endpoint
+     */
+    public static searchExercises<ThrowOnError extends boolean = false>(options: Options<SearchExercisesData, ThrowOnError>) {
+        return (options.client ?? client).post<SearchExercisesResponses, SearchExercisesErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{
+                    in: 'cookie',
+                    name: 'access_token',
+                    type: 'apiKey'
+                }],
+            url: '/api/search/exercises',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
         });
     }
 }
