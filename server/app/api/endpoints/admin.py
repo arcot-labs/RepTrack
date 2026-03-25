@@ -4,7 +4,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings, get_settings
-from app.core.dependencies import get_current_admin, get_db
+from app.core.dependencies import get_current_admin, get_db_session
 from app.models.schemas.access_request import (
     AccessRequestPublic,
     UpdateAccessRequestStatusRequest,
@@ -34,9 +34,9 @@ api_router = APIRouter(
     },
 )
 async def get_access_requests_endpoint(
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> list[AccessRequestPublic]:
-    return await get_access_requests(db)
+    return await get_access_requests(db_session)
 
 
 @api_router.patch(
@@ -54,7 +54,7 @@ async def update_access_request_status_endpoint(
     access_request_id: int,
     req: UpdateAccessRequestStatusRequest,
     user: Annotated[UserPublic, Depends(get_current_admin)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
     background_tasks: BackgroundTasks,
     email_svc: Annotated[EmailService, Depends(get_email_service)],
     settings: Annotated[Settings, Depends(get_settings)],
@@ -63,7 +63,7 @@ async def update_access_request_status_endpoint(
         access_request_id=access_request_id,
         status=req.status,
         user=user,
-        db=db,
+        db_session=db_session,
         background_tasks=background_tasks,
         email_svc=email_svc,
         settings=settings,
@@ -79,6 +79,6 @@ async def update_access_request_status_endpoint(
     },
 )
 async def get_users_endpoint(
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> list[UserPublic]:
-    return await get_users(db)
+    return await get_users(db_session)

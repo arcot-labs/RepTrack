@@ -50,7 +50,7 @@ async def test_update_set(db_session: AsyncSession):
             unit=SetUnit.kg,
             notes="Updated set",
         ),
-        db=db_session,
+        db_session=db_session,
     )
 
     set_ = await db_session.get(Set, set_.id)
@@ -70,7 +70,7 @@ async def test_update_set_workout_not_found(db_session: AsyncSession):
             set_id=3,
             user_id=4,
             req=UpdateSetRequest(),
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -86,7 +86,7 @@ async def test_update_set_workout_not_allowed(db_session: AsyncSession):
             set_id=3,
             user_id=user_1.id,
             req=UpdateSetRequest(),
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -108,7 +108,7 @@ async def test_update_set_not_found(db_session: AsyncSession):
             set_id=3,
             user_id=user.id,
             req=UpdateSetRequest(),
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -138,7 +138,7 @@ async def test_update_set_no_changes(db_session: AsyncSession):
         set_id=set_.id,
         user_id=user.id,
         req=UpdateSetRequest(),
-        db=db_session,
+        db_session=db_session,
     )
 
     set_ = await db_session.get(Set, set_.id)
@@ -180,7 +180,7 @@ async def test_update_set_no_reps(db_session: AsyncSession):
             unit=SetUnit.kg,
             notes="Updated set",
         ),
-        db=db_session,
+        db_session=db_session,
     )
 
     set_ = await db_session.get(Set, set_.id)
@@ -222,7 +222,7 @@ async def test_update_set_no_weight(db_session: AsyncSession):
             unit=SetUnit.kg,
             notes="Updated set",
         ),
-        db=db_session,
+        db_session=db_session,
     )
 
     set_ = await db_session.get(Set, set_.id)
@@ -264,7 +264,7 @@ async def test_update_set_no_unit(db_session: AsyncSession):
             weight=Decimal(150),
             notes="Updated set",
         ),
-        db=db_session,
+        db_session=db_session,
     )
 
     set_ = await db_session.get(Set, set_.id)
@@ -306,7 +306,7 @@ async def test_update_set_no_notes(db_session: AsyncSession):
             weight=Decimal(150),
             unit=SetUnit.kg,
         ),
-        db=db_session,
+        db_session=db_session,
     )
 
     set_ = await db_session.get(Set, set_.id)
@@ -349,7 +349,7 @@ async def test_update_set_null_values(db_session: AsyncSession):
             unit=None,
             notes=None,
         ),
-        db=db_session,
+        db_session=db_session,
     )
 
     set_ = await db_session.get(Set, set_.id)

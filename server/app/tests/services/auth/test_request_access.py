@@ -25,7 +25,7 @@ async def test_request_access(
         first_name="New",
         last_name="User",
         background_tasks=background_tasks,
-        db=db_session,
+        db_session=db_session,
         email_svc=mock_email_svc,
         settings=settings,
     )
@@ -59,7 +59,7 @@ async def test_request_access_approved(
         first_name="Test",
         last_name="User",
         background_tasks=background_tasks,
-        db=db_session,
+        db_session=db_session,
         email_svc=mock_email_svc,
         settings=settings,
     )
@@ -94,7 +94,7 @@ async def test_request_access_existing_user(
             first_name="Test",
             last_name="User",
             background_tasks=background_tasks,
-            db=db_session,
+            db_session=db_session,
             email_svc=mock_email_svc,
             settings=settings,
         )
@@ -126,7 +126,7 @@ async def test_request_access_email_matches_username(
             first_name="Test",
             last_name="User",
             background_tasks=background_tasks,
-            db=db_session,
+            db_session=db_session,
             email_svc=mock_email_svc,
             settings=settings,
         )
@@ -153,7 +153,7 @@ async def test_request_access_pending(
             first_name="Test",
             last_name="User",
             background_tasks=background_tasks,
-            db=db_session,
+            db_session=db_session,
             email_svc=mock_email_svc,
             settings=settings,
         )
@@ -180,7 +180,7 @@ async def test_request_access_rejected(
             first_name="Test",
             last_name="User",
             background_tasks=background_tasks,
-            db=db_session,
+            db_session=db_session,
             email_svc=mock_email_svc,
             settings=settings,
         )

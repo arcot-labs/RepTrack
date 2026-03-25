@@ -24,9 +24,9 @@ logger = logging.getLogger(__name__)
 
 async def _get_next_set_number(
     workout_exercise_id: int,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> int:
-    result = await db.execute(
+    result = await db_session.execute(
         select(
             func.coalesce(func.max(Set.set_number), 0),
         ).where(
@@ -41,17 +41,17 @@ async def create_set(
     workout_exercise_id: int,
     user_id: int,
     req: CreateSetRequest,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> None:
     logger.info(
         f"Creating set for workout exercise {workout_exercise_id} in workout {workout_id}"
     )
 
     # validate workout existence & ownership
-    await get_owned_workout(workout_id, user_id, db)
+    await get_owned_workout(workout_id, user_id, db_session)
 
     result = await query_workout_exercises(
-        db,
+        db_session,
         WorkoutExercise.id == workout_exercise_id,
         WorkoutExercise.workout_id == workout_id,
     )
@@ -59,7 +59,7 @@ async def create_set(
     if not workout_exercise:
         raise WorkoutExerciseNotFound()
 
-    set_number = await _get_next_set_number(workout_exercise_id, db)
+    set_number = await _get_next_set_number(workout_exercise_id, db_session)
     set_ = Set(
         workout_exercise_id=workout_exercise_id,
         set_number=set_number,
@@ -68,13 +68,13 @@ async def create_set(
         unit=req.unit,
         notes=req.notes,
     )
-    db.add(set_)
+    db_session.add(set_)
 
     try:
-        await db.commit()
+        await db_session.commit()
     except IntegrityError as e:
         logger.error(f"Integrity error creating set: {e}")
-        await db.rollback()
+        await db_session.rollback()
         if is_unique_violation(e, SET_UNIQUE_CONSTRAINT):
             raise SetNumberConflict()
         raise
@@ -86,14 +86,14 @@ async def update_set(
     set_id: int,
     user_id: int,
     req: UpdateSetRequest,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> None:
     logger.info(f"Updating set {set_id} for workout exercise {workout_exercise_id}")
 
-    await get_owned_workout(workout_id, user_id, db)
+    await get_owned_workout(workout_id, user_id, db_session)
 
     result = await query_sets(
-        db,
+        db_session,
         Set.id == set_id,
         WorkoutExercise.id == workout_exercise_id,
         WorkoutExercise.workout_id == workout_id,
@@ -115,7 +115,7 @@ async def update_set(
     if "notes" in req.model_fields_set:
         set_.notes = req.notes
 
-    await db.commit()
+    await db_session.commit()
 
 
 async def delete_set(
@@ -123,14 +123,14 @@ async def delete_set(
     workout_exercise_id: int,
     set_id: int,
     user_id: int,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> None:
     logger.info(f"Deleting set {set_id} from workout {workout_id}")
 
-    await get_owned_workout(workout_id, user_id, db)
+    await get_owned_workout(workout_id, user_id, db_session)
 
     result = await query_sets(
-        db,
+        db_session,
         Set.id == set_id,
         WorkoutExercise.id == workout_exercise_id,
         WorkoutExercise.workout_id == workout_id,
@@ -139,5 +139,5 @@ async def delete_set(
     if not set_:
         raise SetNotFound()
 
-    await db.delete(set_)
-    await db.commit()
+    await db_session.delete(set_)
+    await db_session.commit()

@@ -16,9 +16,9 @@ from app.models.errors import WorkoutNotFound
 async def get_owned_workout(
     workout_id: int,
     user_id: int,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> Workout:
-    result = await db.execute(
+    result = await db_session.execute(
         select(Workout).where(
             Workout.id == workout_id,
         ),
@@ -30,7 +30,7 @@ async def get_owned_workout(
 
 
 async def query_exercises(
-    db: AsyncSession,
+    db_session: AsyncSession,
     base: bool,
     *where_clauses: Any,
 ) -> Sequence[Exercise]:
@@ -41,12 +41,12 @@ async def query_exercises(
                 ExerciseMuscleGroup.muscle_group
             )
         )
-    result = await db.execute(query)
+    result = await db_session.execute(query)
     return result.scalars().all()
 
 
 async def query_workout_exercises(
-    db: AsyncSession,
+    db_session: AsyncSession,
     *where_clauses: Any,
 ) -> Sequence[WorkoutExercise]:
     query = (
@@ -56,12 +56,12 @@ async def query_workout_exercises(
         selectinload(WorkoutExercise.exercise),
         selectinload(WorkoutExercise.sets),
     )
-    result = await db.execute(query)
+    result = await db_session.execute(query)
     return result.scalars().all()
 
 
 async def query_sets(
-    db: AsyncSession,
+    db_session: AsyncSession,
     *where_clauses: Any,
 ) -> Sequence[Set]:
     query = (
@@ -73,5 +73,5 @@ async def query_sets(
         .where(*where_clauses)
         .order_by(Set.set_number)
     )
-    result = await db.execute(query)
+    result = await db_session.execute(query)
     return result.scalars().all()

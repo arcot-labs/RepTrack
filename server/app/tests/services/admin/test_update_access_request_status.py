@@ -34,7 +34,7 @@ async def test_update_access_request_status_approved(
     await update_access_request_status(
         access_request_id=access_request.id,
         status=AccessRequestStatus.APPROVED,
-        db=db_session,
+        db_session=db_session,
         user=admin_user,
         background_tasks=background_tasks,
         email_svc=mock_email_svc,
@@ -86,7 +86,7 @@ async def test_update_access_request_status_rejected(
     await update_access_request_status(
         access_request_id=access_request.id,
         status=AccessRequestStatus.REJECTED,
-        db=db_session,
+        db_session=db_session,
         user=admin_user,
         background_tasks=background_tasks,
         email_svc=mock_email_svc,
@@ -123,7 +123,7 @@ async def test_update_access_request_status_not_found(
         await update_access_request_status(
             access_request_id=9999,
             status=AccessRequestStatus.APPROVED,
-            db=db_session,
+            db_session=db_session,
             user=await get_admin_user_public(db_session, settings),
             background_tasks=BackgroundTasks(),
             email_svc=mock_email_svc,
@@ -147,7 +147,7 @@ async def test_update_access_request_status_not_pending(
         await update_access_request_status(
             access_request_id=access_request.id,
             status=AccessRequestStatus.REJECTED,
-            db=db_session,
+            db_session=db_session,
             user=await get_admin_user_public(db_session, settings),
             background_tasks=BackgroundTasks(),
             email_svc=mock_email_svc,

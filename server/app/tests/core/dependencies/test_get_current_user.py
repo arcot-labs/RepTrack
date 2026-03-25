@@ -23,7 +23,7 @@ async def test_get_current_user(db_session: AsyncSession, settings: Settings):
         secret=settings.jwt.secret_key,
         algorithm=settings.jwt.algorithm,
     )
-    user = await get_current_user(token=token, db=db_session, settings=settings)
+    user = await get_current_user(token=token, db_session=db_session, settings=settings)
 
     assert user.username == settings.admin.username
     assert user.email == settings.admin.email
@@ -40,7 +40,7 @@ async def test_get_current_user_missing_sub(
     )
 
     with pytest.raises(InvalidCredentials):
-        await get_current_user(token=token, db=db_session, settings=settings)
+        await get_current_user(token=token, db_session=db_session, settings=settings)
 
 
 async def test_get_current_user_invalid_secret(
@@ -53,7 +53,7 @@ async def test_get_current_user_invalid_secret(
     )
 
     with pytest.raises(InvalidCredentials):
-        await get_current_user(token=token, db=db_session, settings=settings)
+        await get_current_user(token=token, db_session=db_session, settings=settings)
 
 
 async def test_get_current_user_expired_token(
@@ -67,7 +67,7 @@ async def test_get_current_user_expired_token(
     )
 
     with pytest.raises(InvalidCredentials):
-        await get_current_user(token=token, db=db_session, settings=settings)
+        await get_current_user(token=token, db_session=db_session, settings=settings)
 
 
 async def test_get_current_user_deleted_user(
@@ -85,4 +85,4 @@ async def test_get_current_user_deleted_user(
     await db_session.commit()
 
     with pytest.raises(InvalidCredentials):
-        await get_current_user(token=token, db=db_session, settings=settings)
+        await get_current_user(token=token, db_session=db_session, settings=settings)

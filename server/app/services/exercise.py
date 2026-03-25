@@ -27,9 +27,9 @@ logger = logging.getLogger(__name__)
 async def _get_owned_exercise(
     exercise_id: int,
     user_id: int,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> Exercise:
-    result = await db.execute(
+    result = await db_session.execute(
         select(Exercise).where(
             Exercise.id == exercise_id,
         )
@@ -43,11 +43,11 @@ async def _get_owned_exercise(
 async def create_exercise(
     user_id: int,
     req: CreateExerciseRequest,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> None:
     logger.info(f"Creating exercise '{req.name}' for user {user_id}")
 
-    muscle_groups = await get_muscle_groups_by_ids(req.muscle_group_ids, db)
+    muscle_groups = await get_muscle_groups_by_ids(req.muscle_group_ids, db_session)
     if len(muscle_groups) != len(req.muscle_group_ids):
         raise MuscleGroupNotFound()
 
@@ -56,36 +56,36 @@ async def create_exercise(
         name=req.name,
         description=req.description,
     )
-    db.add(exercise)
+    db_session.add(exercise)
 
     try:
-        await db.flush()
+        await db_session.flush()
     except IntegrityError as e:
         logger.error(f"Integrity error creating exercise: {e}")
-        await db.rollback()
+        await db_session.rollback()
         if is_unique_violation(e, EXERCISE_UNIQUE_CONSTRAINT):
             raise ExerciseNameConflict()
         raise
 
     for mg in muscle_groups:
-        db.add(
+        db_session.add(
             ExerciseMuscleGroup(
                 exercise_id=exercise.id,
                 muscle_group_id=mg.id,
             )
         )
 
-    await db.commit()
+    await db_session.commit()
 
 
 async def get_exercises(
     user_id: int,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> list[ExercisePublic]:
     logger.info(f"Getting exercises for user {user_id}")
 
     exercises = await query_exercises(
-        db,
+        db_session,
         False,
         (Exercise.user_id.is_(None)) | (Exercise.user_id == user_id),
     )
@@ -95,12 +95,12 @@ async def get_exercises(
 async def get_exercise(
     exercise_id: int,
     user_id: int,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> ExercisePublic:
     logger.info(f"Getting exercise {exercise_id} for user {user_id}")
 
     exercises = await query_exercises(
-        db,
+        db_session,
         False,
         Exercise.id == exercise_id,
         (Exercise.user_id.is_(None)) | (Exercise.user_id == user_id),
@@ -114,11 +114,11 @@ async def update_exercise(
     exercise_id: int,
     user_id: int,
     req: UpdateExerciseRequest,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> None:
     logger.info(f"Updating exercise {exercise_id} for user {user_id}")
 
-    exercise = await _get_owned_exercise(exercise_id, user_id, db)
+    exercise = await _get_owned_exercise(exercise_id, user_id, db_session)
 
     if not req.model_fields_set:
         logger.info("No changes provided, skipping update")
@@ -133,25 +133,25 @@ async def update_exercise(
 
     if "muscle_group_ids" in req.model_fields_set:
         assert req.muscle_group_ids is not None
-        muscle_groups = await get_muscle_groups_by_ids(req.muscle_group_ids, db)
+        muscle_groups = await get_muscle_groups_by_ids(req.muscle_group_ids, db_session)
         if len(muscle_groups) != len(req.muscle_group_ids):
             raise MuscleGroupNotFound()
 
-        await db.execute(
+        await db_session.execute(
             delete(ExerciseMuscleGroup).where(
                 ExerciseMuscleGroup.exercise_id == exercise_id
             ),
         )
         for mg in muscle_groups:
-            db.add(
+            db_session.add(
                 ExerciseMuscleGroup(exercise_id=exercise_id, muscle_group_id=mg.id),
             )
 
     try:
-        await db.commit()
+        await db_session.commit()
     except IntegrityError as e:
         logger.error(f"Integrity error updating exercise: {e}")
-        await db.rollback()
+        await db_session.rollback()
         if is_unique_violation(e, EXERCISE_UNIQUE_CONSTRAINT):
             raise ExerciseNameConflict()
         raise
@@ -160,10 +160,10 @@ async def update_exercise(
 async def delete_exercise(
     exercise_id: int,
     user_id: int,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> None:
     logger.info(f"Deleting exercise {exercise_id} for user {user_id}")
 
-    exercise = await _get_owned_exercise(exercise_id, user_id, db)
-    await db.delete(exercise)
-    await db.commit()
+    exercise = await _get_owned_exercise(exercise_id, user_id, db_session)
+    await db_session.delete(exercise)
+    await db_session.commit()

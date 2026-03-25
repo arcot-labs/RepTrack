@@ -31,7 +31,7 @@ async def test_reset_password(db_session: AsyncSession):
     await reset_password(
         token_str=token_str,
         password="new_password",
-        db=db_session,
+        db_session=db_session,
     )
 
     assert user.password_hash != old_hash
@@ -47,7 +47,7 @@ async def test_reset_password_invalid_token(db_session: AsyncSession):
         await reset_password(
             token_str="invalid-token",
             password="new_password",
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -71,7 +71,7 @@ async def test_reset_password_used_token(db_session: AsyncSession):
         await reset_password(
             token_str=token_str,
             password="new_password",
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -95,5 +95,5 @@ async def test_reset_password_expired_token(db_session: AsyncSession):
         await reset_password(
             token_str=token_str,
             password="new_password",
-            db=db_session,
+            db_session=db_session,
         )

@@ -11,7 +11,7 @@ async def test_login(db_session: AsyncSession, settings: Settings):
     result = await login(
         identifier=settings.admin.username,
         password=settings.admin.password,
-        db=db_session,
+        db_session=db_session,
         settings=settings,
     )
     payload = jwt.decode(
@@ -28,7 +28,7 @@ async def test_login_with_email(db_session: AsyncSession, settings: Settings):
     result = await login(
         identifier=settings.admin.email,
         password=settings.admin.password,
-        db=db_session,
+        db_session=db_session,
         settings=settings,
     )
     payload = jwt.decode(
@@ -46,7 +46,7 @@ async def test_login_user_not_found(db_session: AsyncSession, settings: Settings
         await login(
             identifier="non_existent_user",
             password="some_password",
-            db=db_session,
+            db_session=db_session,
             settings=settings,
         )
 
@@ -56,6 +56,6 @@ async def test_login_invalid_password(db_session: AsyncSession, settings: Settin
         await login(
             identifier=settings.admin.username,
             password="some_password",
-            db=db_session,
+            db_session=db_session,
             settings=settings,
         )

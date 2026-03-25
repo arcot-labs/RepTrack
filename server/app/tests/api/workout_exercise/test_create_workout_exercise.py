@@ -180,7 +180,7 @@ async def test_create_workout_exercise_position_conflict(
         position=1,
     )
 
-    async def mock_get_next_position(workout_id: int, db: AsyncSession) -> int:
+    async def mock_get_next_position(workout_id: int, db_session: AsyncSession) -> int:
         return 1
 
     monkeypatch.setattr(

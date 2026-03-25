@@ -38,7 +38,7 @@ async def test_delete_set(db_session: AsyncSession):
         workout_exercise_id=workout_exercise.id,
         set_id=set_.id,
         user_id=user.id,
-        db=db_session,
+        db_session=db_session,
     )
 
     result = await db_session.execute(
@@ -56,7 +56,7 @@ async def test_delete_set_workout_not_found(db_session: AsyncSession):
             workout_exercise_id=2,
             set_id=3,
             user_id=4,
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -71,7 +71,7 @@ async def test_delete_set_workout_not_allowed(db_session: AsyncSession):
             workout_exercise_id=2,
             set_id=3,
             user_id=user_1.id,
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -92,5 +92,5 @@ async def test_delete_set_not_found(db_session: AsyncSession):
             workout_exercise_id=workout_exercise.id,
             set_id=3,
             user_id=user.id,
-            db=db_session,
+            db_session=db_session,
         )

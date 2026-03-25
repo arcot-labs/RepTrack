@@ -33,7 +33,7 @@ async def test_get_tokens_by_prefix_password_reset(db_session: AsyncSession):
         type(token),
         load_option=type(token).user,
         prefix=token.token_prefix,
-        db=db_session,
+        db_session=db_session,
     )
 
     assert len(tokens) == 1
@@ -68,7 +68,7 @@ async def test_get_tokens_by_prefix_password_reset_condition(db_session: AsyncSe
         type(active_token),
         load_option=type(active_token).user,
         prefix=prefix,
-        db=db_session,
+        db_session=db_session,
     )
 
     assert [token.id for token in tokens] == [active_token.id]
@@ -94,7 +94,7 @@ async def test_get_tokens_by_prefix_password_reset_ordering(db_session: AsyncSes
         type(older_token),
         load_option=type(older_token).user,
         prefix=prefix,
-        db=db_session,
+        db_session=db_session,
     )
 
     assert [token.id for token in tokens] == [newer_token.id, older_token.id]

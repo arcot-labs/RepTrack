@@ -45,7 +45,7 @@ async def test_create_set(db_session: AsyncSession):
             unit=SetUnit.lb,
             notes="Test set",
         ),
-        db=db_session,
+        db_session=db_session,
     )
 
     result = await db_session.execute(
@@ -70,7 +70,7 @@ async def test_create_set_workout_not_found(db_session: AsyncSession):
             workout_exercise_id=2,
             user_id=3,
             req=CreateSetRequest(),
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -85,7 +85,7 @@ async def test_create_set_workout_not_allowed(db_session: AsyncSession):
             workout_exercise_id=2,
             user_id=user_1.id,
             req=CreateSetRequest(),
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -99,7 +99,7 @@ async def test_create_set_workout_exercise_not_found(db_session: AsyncSession):
             workout_exercise_id=2,
             user_id=user.id,
             req=CreateSetRequest(),
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -123,7 +123,7 @@ async def test_create_set_workout_exercise_not_allowed(db_session: AsyncSession)
             workout_exercise_id=workout_exercise.id,
             user_id=user_1.id,
             req=CreateSetRequest(),
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -148,7 +148,7 @@ async def test_create_set_set_number_conflict(
     )
 
     async def mock_get_next_set_number(
-        workout_exercise_id: int, db: AsyncSession
+        workout_exercise_id: int, db_session: AsyncSession
     ) -> int:
         return 1
 
@@ -162,7 +162,7 @@ async def test_create_set_set_number_conflict(
             workout_exercise_id=workout_exercise.id,
             user_id=user.id,
             req=CreateSetRequest(),
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -187,7 +187,7 @@ async def test_create_set_unhandled_integrity_error(
     )
 
     async def mock_get_next_set_number(
-        workout_exercise_id: int, db: AsyncSession
+        workout_exercise_id: int, db_session: AsyncSession
     ) -> int:
         return 1
 
@@ -202,5 +202,5 @@ async def test_create_set_unhandled_integrity_error(
                 workout_exercise_id=workout_exercise.id,
                 user_id=user.id,
                 req=CreateSetRequest(),
-                db=db_session,
+                db_session=db_session,
             )

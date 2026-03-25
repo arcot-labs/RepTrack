@@ -30,7 +30,7 @@ async def test_register(db_session: AsyncSession):
         token_str=token_str,
         username="new_user",
         password="new_password",
-        db=db_session,
+        db_session=db_session,
     )
 
     user = (
@@ -52,7 +52,7 @@ async def test_register_invalid_token(db_session: AsyncSession):
             token_str="invalid-token",
             username="new_user",
             password="new_password",
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -76,7 +76,7 @@ async def test_register_used_token(db_session: AsyncSession):
             token_str=token_str,
             username="new_user",
             password="new_password",
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -100,7 +100,7 @@ async def test_register_expired_token(db_session: AsyncSession):
             token_str=token_str,
             username="new_user",
             password="new_password",
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -123,7 +123,7 @@ async def test_register_access_request_not_approved(db_session: AsyncSession):
             token_str=token_str,
             username="pending_user",
             password="new_password",
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -156,7 +156,7 @@ async def test_register_username_taken(db_session: AsyncSession):
             token_str=token_str,
             username="taken",
             password="new_password",
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -190,5 +190,5 @@ async def test_register_username_matches_email(db_session: AsyncSession):
             token_str=token_str,
             username=collision_identifier,
             password="new_password",
-            db=db_session,
+            db_session=db_session,
         )

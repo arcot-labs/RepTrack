@@ -209,7 +209,7 @@ async def test_create_set_number_conflict(
     await db_session.commit()
 
     async def mock_get_next_set_number(
-        workout_exercise_id: int, db: AsyncSession
+        workout_exercise_id: int, db_session: AsyncSession
     ) -> int:
         return 1
 

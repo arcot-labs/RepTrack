@@ -29,21 +29,21 @@ async def get_task(
 
 
 async def reindex_data(
-    db: AsyncSession,
+    db_session: AsyncSession,
     ms_client: AsyncClient,
 ):
-    task = await _index_muscle_groups(db, ms_client)
+    task = await _index_muscle_groups(db_session, ms_client)
     logger.info(f"Reindexing muscle groups with task id: {task}")
 
-    task = await _index_exercises(db, ms_client)
+    task = await _index_exercises(db_session, ms_client)
     logger.info(f"Reindexing exercises with task id: {task}")
 
 
 async def _index_muscle_groups(
-    db: AsyncSession,
+    db_session: AsyncSession,
     ms_client: AsyncClient,
 ) -> int:
-    result = await db.execute(select(MuscleGroup))
+    result = await db_session.execute(select(MuscleGroup))
     muscle_groups = result.scalars().all()
     docs = [to_muscle_group_public(mg) for mg in muscle_groups]
 
@@ -64,10 +64,10 @@ async def _index_muscle_groups(
 
 
 async def _index_exercises(
-    db: AsyncSession,
+    db_session: AsyncSession,
     ms_client: AsyncClient,
 ) -> int:
-    exercises = await query_exercises(db, base=False)
+    exercises = await query_exercises(db_session, base=False)
     docs = [to_exercise_document(e) for e in exercises]
 
     await ms_client.delete_index_if_exists(SearchIndex.EXERCISES)

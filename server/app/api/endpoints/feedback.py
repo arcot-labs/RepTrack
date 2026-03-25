@@ -4,7 +4,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, Form, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings, get_settings
-from app.core.dependencies import get_current_user, get_db
+from app.core.dependencies import get_current_user, get_db_session
 from app.models.schemas.errors import ErrorResponseModel
 from app.models.schemas.feedback import CreateFeedbackRequest
 from app.models.schemas.user import UserPublic
@@ -29,7 +29,7 @@ api_router = APIRouter(
 def create_feedback_endpoint(
     user: Annotated[UserPublic, Depends(get_current_user)],
     background_tasks: BackgroundTasks,
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
     github_svc: Annotated[GitHubService, Depends(get_github_service)],
     settings: Annotated[Settings, Depends(get_settings)],
     req: CreateFeedbackRequest = Form(..., media_type="multipart/form-data"),
@@ -38,7 +38,7 @@ def create_feedback_endpoint(
         create_feedback,
         user=user,
         req=req,
-        db=db,
+        db_session=db_session,
         github_svc=github_svc,
         settings=settings,
     )

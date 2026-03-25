@@ -54,7 +54,7 @@ async def test_create_workout_exercise_workout_not_found(db_session: AsyncSessio
             workout_id=1,
             user_id=2,
             req=CreateWorkoutExerciseRequest(exercise_id=3),
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -69,7 +69,7 @@ async def test_create_workout_exercise_workout_not_allowed(db_session: AsyncSess
             workout_id=workout.id,
             user_id=user_1.id,
             req=CreateWorkoutExerciseRequest(exercise_id=exercise.id),
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -82,7 +82,7 @@ async def test_create_workout_exercise_exercise_not_found(db_session: AsyncSessi
             workout_id=workout.id,
             user_id=user.id,
             req=CreateWorkoutExerciseRequest(exercise_id=99999),
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -120,7 +120,7 @@ async def test_create_workout_exercise_position_conflict(
         position=1,
     )
 
-    async def mock_get_next_position(workout_id: int, db: AsyncSession) -> int:
+    async def mock_get_next_position(workout_id: int, db_session: AsyncSession) -> int:
         return 1
 
     monkeypatch.setattr(
@@ -152,7 +152,7 @@ async def test_create_workout_exercise_unhandled_integrity_error(
         position=1,
     )
 
-    async def mock_get_next_position(workout_id: int, db: AsyncSession) -> int:
+    async def mock_get_next_position(workout_id: int, db_session: AsyncSession) -> int:
         return 1
 
     monkeypatch.setattr(

@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.dependencies import (
     get_current_admin,
     get_current_user,
-    get_db,
+    get_db_session,
     get_ms_client,
 )
 from app.models.schemas.errors import ErrorResponseModel
@@ -54,11 +54,11 @@ async def get_task_endpoint(
 )
 async def reindex_endpoint(
     _: Annotated[UserPublic, Depends(get_current_admin)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
     ms_client: Annotated[AsyncClient, Depends(get_ms_client)],
 ):
     await reindex_data(
-        db=db,
+        db_session=db_session,
         ms_client=ms_client,
     )
 

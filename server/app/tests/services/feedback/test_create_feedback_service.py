@@ -43,7 +43,7 @@ async def test_create_feedback(
     await create_feedback(
         user=user,
         req=request,
-        db=db_session,
+        db_session=db_session,
         github_svc=mock_github_svc,
         settings=settings,
     )
@@ -90,7 +90,7 @@ async def test_create_feedback_no_files(
     await create_feedback(
         user=user,
         req=request,
-        db=db_session,
+        db_session=db_session,
         github_svc=mock_github_svc,
         settings=settings,
     )

@@ -15,9 +15,9 @@ STATUS_PRIORITY = case(
 
 
 async def get_latest_access_request_by_email(
-    email: str, db: AsyncSession
+    email: str, db_session: AsyncSession
 ) -> AccessRequest | None:
-    result = await db.execute(
+    result = await db_session.execute(
         select(AccessRequest)
         .where(AccessRequest.email == email)
         .order_by(AccessRequest.created_at.desc())
@@ -27,18 +27,18 @@ async def get_latest_access_request_by_email(
 
 
 async def get_access_request_by_id(
-    access_request_id: int, db: AsyncSession
+    access_request_id: int, db_session: AsyncSession
 ) -> AccessRequest | None:
-    result = await db.execute(
+    result = await db_session.execute(
         select(AccessRequest).where(AccessRequest.id == access_request_id)
     )
     return result.scalar_one_or_none()
 
 
 async def get_access_requests_with_reviewer(
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> Sequence[AccessRequest]:
-    result = await db.execute(
+    result = await db_session.execute(
         select(AccessRequest)
         .options(selectinload(AccessRequest.reviewer))
         .order_by(STATUS_PRIORITY)

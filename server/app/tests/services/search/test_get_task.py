@@ -2,8 +2,8 @@ from meilisearch_python_sdk import AsyncClient
 from meilisearch_python_sdk.models.task import TaskResult
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.search import (  # pyright: ignore[reportPrivateUsage]
-    _index_muscle_groups,
+from app.services.search import (
+    _index_muscle_groups,  # pyright: ignore[reportPrivateUsage]
     get_task,
 )
 

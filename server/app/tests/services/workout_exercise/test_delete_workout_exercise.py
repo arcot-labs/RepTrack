@@ -44,7 +44,7 @@ async def test_delete_workout_exercise_workout_not_found(db_session: AsyncSessio
             workout_id=1,
             workout_exercise_id=2,
             user_id=3,
-            db=db_session,
+            db_session=db_session,
         )
 
 
@@ -58,7 +58,7 @@ async def test_delete_workout_exercise_workout_not_allowed(db_session: AsyncSess
             workout_id=workout.id,
             workout_exercise_id=1,
             user_id=user_1.id,
-            db=db_session,
+            db_session=db_session,
         )
 
 

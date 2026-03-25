@@ -29,7 +29,7 @@ async def test_request_password_reset(
     await request_password_reset(
         email=user.email,
         background_tasks=background_tasks,
-        db=db_session,
+        db_session=db_session,
         email_svc=mock_email_svc,
         settings=settings,
     )
@@ -61,7 +61,7 @@ async def test_request_password_reset_unregistered_email(
     await request_password_reset(
         email="missing@example.com",
         background_tasks=background_tasks,
-        db=db_session,
+        db_session=db_session,
         email_svc=mock_email_svc,
         settings=settings,
     )
@@ -79,7 +79,7 @@ async def test_request_password_reset_admin_email(
     await request_password_reset(
         email=settings.admin.email,
         background_tasks=background_tasks,
-        db=db_session,
+        db_session=db_session,
         email_svc=mock_email_svc,
         settings=settings,
     )

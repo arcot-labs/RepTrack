@@ -12,10 +12,10 @@ async def test_reindex_data(
 ):
     calls: list[str] = []
 
-    async def fake_muscle_groups(db: AsyncSession, client: AsyncClient) -> None:
+    async def fake_muscle_groups(db_session: AsyncSession, client: AsyncClient) -> None:
         calls.append("muscle")
 
-    async def fake_exercises(db: AsyncSession, client: AsyncClient) -> None:
+    async def fake_exercises(db_session: AsyncSession, client: AsyncClient) -> None:
         calls.append("exercise")
 
     monkeypatch.setattr("app.services.search._index_muscle_groups", fake_muscle_groups)

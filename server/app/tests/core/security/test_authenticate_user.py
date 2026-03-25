@@ -8,7 +8,7 @@ async def test_authenticate_user(db_session: AsyncSession, settings: Settings):
     user = await authenticate_user(
         identifier=settings.admin.username,
         password=settings.admin.password,
-        db=db_session,
+        db_session=db_session,
     )
 
     assert user is not None
@@ -22,7 +22,7 @@ async def test_authenticate_user_with_email(
     user = await authenticate_user(
         identifier=settings.admin.email,
         password=settings.admin.password,
-        db=db_session,
+        db_session=db_session,
     )
 
     assert user is not None
@@ -33,7 +33,7 @@ async def test_authenticate_user_not_found(db_session: AsyncSession):
     user = await authenticate_user(
         identifier="non_existent_user",
         password="some_password",
-        db=db_session,
+        db_session=db_session,
     )
 
     assert user is None
@@ -45,7 +45,7 @@ async def test_authenticate_user_invalid_password(
     user = await authenticate_user(
         identifier=settings.admin.username,
         password="some_password",
-        db=db_session,
+        db_session=db_session,
     )
 
     assert user is None

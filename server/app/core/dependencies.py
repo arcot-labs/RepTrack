@@ -30,7 +30,7 @@ def get_db_sessionmaker(db_url: str, is_prod: bool):
     )
 
 
-async def get_db(
+async def get_db_session(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> AsyncGenerator[AsyncSession]:
     async with get_db_sessionmaker(
@@ -67,13 +67,13 @@ async def get_ms_client(
 
 async def get_current_user(
     token: Annotated[str, Depends(access_token_cookie)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> UserPublic:
     logger.info("Getting current user using jwt")
 
     username = verify_jwt(token, settings)
-    user = await get_user_by_username(username, db)
+    user = await get_user_by_username(username, db_session)
     if not user:
         raise InvalidCredentials()
 

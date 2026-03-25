@@ -22,17 +22,17 @@ from app.services.utilities.serializers import to_access_request_public, to_user
 logger = logging.getLogger(__name__)
 
 
-async def get_access_requests(db: AsyncSession) -> list[AccessRequestPublic]:
+async def get_access_requests(db_session: AsyncSession) -> list[AccessRequestPublic]:
     logger.info("Getting access requests")
 
-    requests = await get_access_requests_with_reviewer(db)
+    requests = await get_access_requests_with_reviewer(db_session)
     return [to_access_request_public(r) for r in requests]
 
 
 async def update_access_request_status(
     access_request_id: int,
     status: Literal[AccessRequestStatus.APPROVED, AccessRequestStatus.REJECTED],
-    db: AsyncSession,
+    db_session: AsyncSession,
     user: UserPublic,
     background_tasks: BackgroundTasks,
     email_svc: EmailService,
@@ -40,7 +40,7 @@ async def update_access_request_status(
 ) -> None:
     logger.info(f"Updating access request {access_request_id} to status {status}")
 
-    access_request = await get_access_request_by_id(access_request_id, db)
+    access_request = await get_access_request_by_id(access_request_id, db_session)
 
     if not access_request:
         logger.error(f"Access request {access_request_id} not found")
@@ -56,9 +56,9 @@ async def update_access_request_status(
     token_str: str | None = None
     if status == AccessRequestStatus.APPROVED:
         token_str, token = create_registration_token(access_request.id)
-        db.add(token)
+        db_session.add(token)
 
-    await db.commit()
+    await db_session.commit()
 
     if status == AccessRequestStatus.APPROVED:
         assert token_str is not None
@@ -74,8 +74,8 @@ async def update_access_request_status(
         )
 
 
-async def get_users(db: AsyncSession) -> list[UserPublic]:
+async def get_users(db_session: AsyncSession) -> list[UserPublic]:
     logger.info("Getting users")
 
-    users = await get_users_ordered_by_username(db)
+    users = await get_users_ordered_by_username(db_session)
     return [to_user_public(user) for user in users]

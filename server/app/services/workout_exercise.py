@@ -23,9 +23,9 @@ logger = logging.getLogger(__name__)
 
 async def _get_next_workout_exercise_position(
     workout_id: int,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> int:
-    result = await db.execute(
+    result = await db_session.execute(
         select(
             func.coalesce(func.max(WorkoutExercise.position), 0),
         ).where(
@@ -39,15 +39,15 @@ async def create_workout_exercise(
     workout_id: int,
     user_id: int,
     req: CreateWorkoutExerciseRequest,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> None:
     logger.info(f"Adding exercise {req.exercise_id} to workout {workout_id}")
 
     # validate workout existence & ownership
-    await get_owned_workout(workout_id, user_id, db)
+    await get_owned_workout(workout_id, user_id, db_session)
 
     exercises = await query_exercises(
-        db,
+        db_session,
         False,
         Exercise.id == req.exercise_id,
         (Exercise.user_id.is_(None)) | (Exercise.user_id == user_id),
@@ -56,20 +56,20 @@ async def create_workout_exercise(
     if not exercise:
         raise ExerciseNotFound()
 
-    position = await _get_next_workout_exercise_position(workout_id, db)
+    position = await _get_next_workout_exercise_position(workout_id, db_session)
     workout_exercise = WorkoutExercise(
         workout_id=workout_id,
         exercise_id=req.exercise_id,
         position=position,
         notes=req.notes,
     )
-    db.add(workout_exercise)
+    db_session.add(workout_exercise)
 
     try:
-        await db.commit()
+        await db_session.commit()
     except IntegrityError as e:
         logger.error(f"Integrity error creating workout exercise: {e}")
-        await db.rollback()
+        await db_session.rollback()
         if is_unique_violation(e, WORKOUT_EXERCISE_UNIQUE_CONSTRAINT):
             raise WorkoutExercisePositionConflict()
         raise
@@ -79,13 +79,13 @@ async def delete_workout_exercise(
     workout_id: int,
     workout_exercise_id: int,
     user_id: int,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> None:
     logger.info(f"Removing workout exercise {workout_exercise_id} from {workout_id}")
 
-    await get_owned_workout(workout_id, user_id, db)
+    await get_owned_workout(workout_id, user_id, db_session)
 
-    result = await db.execute(
+    result = await db_session.execute(
         select(WorkoutExercise).where(
             WorkoutExercise.id == workout_exercise_id,
             WorkoutExercise.workout_id == workout_id,
@@ -95,5 +95,5 @@ async def delete_workout_exercise(
     if not workout_exercise:
         raise WorkoutExerciseNotFound()
 
-    await db.delete(workout_exercise)
-    await db.commit()
+    await db_session.delete(workout_exercise)
+    await db_session.commit()

@@ -30,7 +30,7 @@ async def test_get_token_registration(db_session: AsyncSession):
         token_str,
         model=RegistrationToken,
         load_option=RegistrationToken.access_request,
-        db=db_session,
+        db_session=db_session,
     )
 
     assert token is not None
@@ -45,7 +45,7 @@ async def test_get_token_registration_invalid_token(
         "invalid-token",
         model=RegistrationToken,
         load_option=RegistrationToken.access_request,
-        db=db_session,
+        db_session=db_session,
     )
     assert token is None
 
@@ -63,7 +63,7 @@ async def test_get_token_registration_used_token(
         token_str,
         model=RegistrationToken,
         load_option=RegistrationToken.access_request,
-        db=db_session,
+        db_session=db_session,
     )
     assert token is None
 
@@ -81,7 +81,7 @@ async def test_get_token_registration_expired_token(
         token_str,
         model=RegistrationToken,
         load_option=RegistrationToken.access_request,
-        db=db_session,
+        db_session=db_session,
     )
     assert token is None
 
@@ -99,7 +99,7 @@ async def test_get_token_registration_invalid_hash(
         token_str,
         model=RegistrationToken,
         load_option=RegistrationToken.access_request,
-        db=db_session,
+        db_session=db_session,
     )
     assert token is None
 
@@ -114,7 +114,7 @@ async def test_get_registration_token(db_session: AsyncSession):
         token_str,
         model=RegistrationToken,
         load_option=RegistrationToken.access_request,
-        db=db_session,
+        db_session=db_session,
     )
 
     assert token is not None
@@ -132,7 +132,7 @@ async def test_get_password_reset_token(db_session: AsyncSession, settings: Sett
         token_str,
         model=type(_token),
         load_option=PasswordResetToken.user,
-        db=db_session,
+        db_session=db_session,
     )
 
     assert token is not None

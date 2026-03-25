@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import create_app
 from app.core.config import Settings, get_settings
-from app.core.dependencies import get_db, get_ms_client
+from app.core.dependencies import get_db_session, get_ms_client
 from app.services.email import EmailService, get_email_service
 from app.services.github import GitHubService, get_github_service
 
@@ -37,14 +37,14 @@ async def client(
     async def override_get_settings() -> Settings:
         return settings
 
-    async def override_get_db() -> AsyncGenerator[AsyncSession]:
+    async def override_get_db_session() -> AsyncGenerator[AsyncSession]:
         yield db_session
 
     async def override_get_ms_client() -> AsyncGenerator[MSAsyncClient]:
         yield ms_client
 
     fastapi_app.dependency_overrides[get_settings] = override_get_settings
-    fastapi_app.dependency_overrides[get_db] = override_get_db
+    fastapi_app.dependency_overrides[get_db_session] = override_get_db_session
     fastapi_app.dependency_overrides[get_ms_client] = override_get_ms_client
     fastapi_app.dependency_overrides[get_email_service] = lambda: mock_email_svc
     fastapi_app.dependency_overrides[get_github_service] = lambda: mock_github_svc
@@ -56,7 +56,7 @@ async def client(
         )
     finally:
         del fastapi_app.dependency_overrides[get_settings]
-        del fastapi_app.dependency_overrides[get_db]
+        del fastapi_app.dependency_overrides[get_db_session]
         del fastapi_app.dependency_overrides[get_ms_client]
         del fastapi_app.dependency_overrides[get_email_service]
         del fastapi_app.dependency_overrides[get_github_service]
