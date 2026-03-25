@@ -7,6 +7,7 @@ from app.core.config import (
     EmailConsoleSettings,
     GitHubConsoleSettings,
     JWTSettings,
+    MeilisearchSettings,
     Settings,
 )
 
@@ -30,6 +31,11 @@ TEST_DB_SETTINGS = DatabaseSettings(
     user="test",
     password="pw",
 )
+TEST_MS_SETTINGS = MeilisearchSettings(
+    host="localhost",
+    port=7700,
+    master_key="masterkey",
+)
 TEST_EMAIL_SETTINGS = EmailConsoleSettings(
     backend="console",
 )
@@ -43,6 +49,7 @@ TEST_SETTINGS = Settings(
     admin=TEST_ADMIN_SETTINGS,
     jwt=TEST_JWT_SETTINGS,
     db=TEST_DB_SETTINGS,
+    ms=TEST_MS_SETTINGS,
     email=TEST_EMAIL_SETTINGS,
     gh=TEST_GH_SETTINGS,
 )

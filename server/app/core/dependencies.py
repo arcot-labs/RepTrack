@@ -55,7 +55,7 @@ def build_ms_client(host: str, port: int, master_key: str) -> AsyncClient:
     return AsyncClient(url, master_key)
 
 
-def get_ms_client(
+async def get_ms_client(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> AsyncClient:
     return build_ms_client(

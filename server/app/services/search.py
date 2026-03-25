@@ -9,45 +9,66 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.muscle_group import MuscleGroup
 from app.models.enums import SearchIndex
-from app.models.schemas.exercise import ExercisePublic
+from app.models.schemas.exercise import ExerciseDocument
 from app.models.schemas.muscle_group import MuscleGroupPublic
 from app.models.schemas.search import SearchRequest
 from app.services.utilities.queries import query_exercises
 from app.services.utilities.serializers import (
-    to_exercise_public,
+    to_exercise_document,
     to_muscle_group_public,
 )
 
 logger = logging.getLogger(__name__)
 
 
+async def get_task(
+    ms_client: AsyncClient,
+    task_id: int,
+):
+    return await ms_client.get_task(task_id)
+
+
 async def reindex_data(
     db: AsyncSession,
     ms_client: AsyncClient,
 ):
-    await _index_muscle_groups(db, ms_client)
-    await _index_exercises(db, ms_client)
+    task = await _index_muscle_groups(db, ms_client)
+    logger.info(f"Reindexing muscle groups with task id: {task}")
+
+    task = await _index_exercises(db, ms_client)
+    logger.info(f"Reindexing exercises with task id: {task}")
 
 
 async def _index_muscle_groups(
     db: AsyncSession,
     ms_client: AsyncClient,
-):
+) -> int:
     result = await db.execute(select(MuscleGroup))
     muscle_groups = result.scalars().all()
-    public = [to_muscle_group_public(mg) for mg in muscle_groups]
+    docs = [to_muscle_group_public(mg) for mg in muscle_groups]
 
     await ms_client.delete_index_if_exists(SearchIndex.MUSCLE_GROUPS)
+
+    settings = MeilisearchSettings(
+        searchable_attributes=[
+            "name",
+            "description",
+        ],
+    )
+
     index = await ms_client.get_or_create_index(SearchIndex.MUSCLE_GROUPS)
-    await index.add_documents([mg.model_dump() for mg in public])
+    await index.update_settings(settings)
+
+    task = await index.add_documents([doc.model_dump() for doc in docs])
+    return task.task_uid
 
 
 async def _index_exercises(
     db: AsyncSession,
     ms_client: AsyncClient,
-):
+) -> int:
     exercises = await query_exercises(db, base=False)
-    public = [to_exercise_public(e) for e in exercises]
+    docs = [to_exercise_document(e) for e in exercises]
 
     await ms_client.delete_index_if_exists(SearchIndex.EXERCISES)
 
@@ -55,15 +76,7 @@ async def _index_exercises(
         searchable_attributes=[
             "name",
             "description",
-            "muscle_groups.name",
-        ],
-        displayed_attributes=[
-            "id",
-            "user_id",
-            "name",
-            "description",
-            "muscle_groups.id",
-            "muscle_groups.name",
+            "muscle_group_names",
         ],
         filterable_attributes=[
             "user_id",
@@ -72,15 +85,12 @@ async def _index_exercises(
 
     index = await ms_client.get_or_create_index(SearchIndex.EXERCISES)
     await index.update_settings(settings)
-    await index.add_documents(
-        [
-            e.model_dump(
-                exclude={"created_at", "updated_at"},
-            )
-            for e in public
-        ],
+
+    task = await index.add_documents(
+        [doc.model_dump() for doc in docs],
         primary_key="id",
     )
+    return task.task_uid
 
 
 async def search_muscle_groups(
@@ -99,16 +109,18 @@ async def search_muscle_groups(
 
 async def search_exercises(
     req: SearchRequest,
-    user_id: int,
+    user_id: int | None,
     ms_client: AsyncClient,
 ):
     logger.info(f"Searching exercises with query: '{req.query}' and user_id: {user_id}")
     return await _search(
-        model=ExercisePublic,
+        model=ExerciseDocument,
         ms_client=ms_client,
         index=SearchIndex.EXERCISES,
         query=req.query,
-        filter=f"user_id IS NULL OR user_id = {user_id}",
+        filter=f"user_id IS NULL OR user_id = {user_id}"
+        if user_id is not None
+        else None,
         limit=req.limit,
     )
 

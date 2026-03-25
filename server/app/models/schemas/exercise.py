@@ -20,6 +20,14 @@ class ExercisePublic(ExerciseBase):
     muscle_groups: list[MuscleGroupPublic]
 
 
+class ExerciseDocument(BaseModel):
+    id: int
+    user_id: int | None
+    name: str
+    description: str | None
+    muscle_group_names: list[str]
+
+
 class CreateExerciseRequest(BaseModel):
     name: ExerciseName
     description: ExerciseDescription | None = None

@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { CreateExerciseData, CreateExerciseErrors, CreateExerciseResponses, CreateFeedbackData, CreateFeedbackErrors, CreateFeedbackResponses, CreateSetData, CreateSetErrors, CreateSetResponses, CreateWorkoutData, CreateWorkoutErrors, CreateWorkoutExerciseData, CreateWorkoutExerciseErrors, CreateWorkoutExerciseResponses, CreateWorkoutResponses, DeleteExerciseData, DeleteExerciseErrors, DeleteExerciseResponses, DeleteSetData, DeleteSetErrors, DeleteSetResponses, DeleteWorkoutData, DeleteWorkoutErrors, DeleteWorkoutExerciseData, DeleteWorkoutExerciseErrors, DeleteWorkoutExerciseResponses, DeleteWorkoutResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetAccessRequestsData, GetAccessRequestsErrors, GetAccessRequestsResponses, GetCurrentUserData, GetCurrentUserErrors, GetCurrentUserResponses, GetDbHealthData, GetDbHealthResponses, GetExerciseData, GetExerciseErrors, GetExerciseResponses, GetExercisesData, GetExercisesErrors, GetExercisesResponses, GetHealthData, GetHealthResponses, GetMuscleGroupsData, GetMuscleGroupsErrors, GetMuscleGroupsResponses, GetUsersData, GetUsersErrors, GetUsersResponses, GetWorkoutData, GetWorkoutErrors, GetWorkoutResponses, GetWorkoutsData, GetWorkoutsErrors, GetWorkoutsResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, ReindexData, ReindexErrors, ReindexResponses, RequestAccessData, RequestAccessErrors, RequestAccessResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, SearchExercisesData, SearchExercisesErrors, SearchExercisesResponses, SearchMuscleGroupsData, SearchMuscleGroupsErrors, SearchMuscleGroupsResponses, UpdateAccessRequestStatusData, UpdateAccessRequestStatusErrors, UpdateAccessRequestStatusResponses, UpdateExerciseData, UpdateExerciseErrors, UpdateExerciseResponses, UpdateSetData, UpdateSetErrors, UpdateSetResponses, UpdateWorkoutData, UpdateWorkoutErrors, UpdateWorkoutResponses } from './types.gen';
+import type { CreateExerciseData, CreateExerciseErrors, CreateExerciseResponses, CreateFeedbackData, CreateFeedbackErrors, CreateFeedbackResponses, CreateSetData, CreateSetErrors, CreateSetResponses, CreateWorkoutData, CreateWorkoutErrors, CreateWorkoutExerciseData, CreateWorkoutExerciseErrors, CreateWorkoutExerciseResponses, CreateWorkoutResponses, DeleteExerciseData, DeleteExerciseErrors, DeleteExerciseResponses, DeleteSetData, DeleteSetErrors, DeleteSetResponses, DeleteWorkoutData, DeleteWorkoutErrors, DeleteWorkoutExerciseData, DeleteWorkoutExerciseErrors, DeleteWorkoutExerciseResponses, DeleteWorkoutResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetAccessRequestsData, GetAccessRequestsErrors, GetAccessRequestsResponses, GetCurrentUserData, GetCurrentUserErrors, GetCurrentUserResponses, GetDbHealthData, GetDbHealthResponses, GetExerciseData, GetExerciseErrors, GetExerciseResponses, GetExercisesData, GetExercisesErrors, GetExercisesResponses, GetHealthData, GetHealthResponses, GetMuscleGroupsData, GetMuscleGroupsErrors, GetMuscleGroupsResponses, GetTaskData, GetTaskErrors, GetTaskResponses, GetUsersData, GetUsersErrors, GetUsersResponses, GetWorkoutData, GetWorkoutErrors, GetWorkoutResponses, GetWorkoutsData, GetWorkoutsErrors, GetWorkoutsResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, ReindexData, ReindexErrors, ReindexResponses, RequestAccessData, RequestAccessErrors, RequestAccessResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, SearchExercisesData, SearchExercisesErrors, SearchExercisesResponses, SearchMuscleGroupsData, SearchMuscleGroupsErrors, SearchMuscleGroupsResponses, UpdateAccessRequestStatusData, UpdateAccessRequestStatusErrors, UpdateAccessRequestStatusResponses, UpdateExerciseData, UpdateExerciseErrors, UpdateExerciseResponses, UpdateSetData, UpdateSetErrors, UpdateSetResponses, UpdateWorkoutData, UpdateWorkoutErrors, UpdateWorkoutResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -319,6 +319,22 @@ export class MuscleGroupService {
 }
 
 export class SearchService {
+    /**
+     * Get Task Endpoint
+     */
+    public static getTask<ThrowOnError extends boolean = false>(options: Options<GetTaskData, ThrowOnError>) {
+        return (options.client ?? client).get<GetTaskResponses, GetTaskErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{
+                    in: 'cookie',
+                    name: 'access_token',
+                    type: 'apiKey'
+                }],
+            url: '/api/search/tasks/{task_id}',
+            ...options
+        });
+    }
+    
     /**
      * Reindex Endpoint
      */

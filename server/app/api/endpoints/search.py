@@ -13,13 +13,34 @@ from app.core.dependencies import (
 from app.models.schemas.errors import ErrorResponseModel
 from app.models.schemas.search import SearchRequest
 from app.models.schemas.user import UserPublic
-from app.services.search import reindex_data, search_exercises, search_muscle_groups
+from app.services.search import (
+    get_task,
+    reindex_data,
+    search_exercises,
+    search_muscle_groups,
+)
 
 api_router = APIRouter(
     prefix="/search",
     tags=["Search"],
     dependencies=[Depends(get_current_user)],
 )
+
+
+@api_router.get(
+    "/tasks/{task_id}",
+    operation_id="getTask",
+    responses={
+        status.HTTP_401_UNAUTHORIZED: ErrorResponseModel,
+        status.HTTP_403_FORBIDDEN: ErrorResponseModel,
+    },
+)
+async def get_task_endpoint(
+    task_id: int,
+    _: Annotated[UserPublic, Depends(get_current_admin)],
+    ms_client: Annotated[AsyncClient, Depends(get_ms_client)],
+):
+    return await get_task(ms_client, task_id)
 
 
 @api_router.post(

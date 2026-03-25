@@ -6,7 +6,7 @@ from app.models.database.user import User
 from app.models.database.workout import Workout
 from app.models.database.workout_exercise import WorkoutExercise
 from app.models.schemas.access_request import AccessRequestPublic, ReviewerPublic
-from app.models.schemas.exercise import ExerciseBase, ExercisePublic
+from app.models.schemas.exercise import ExerciseBase, ExerciseDocument, ExercisePublic
 from app.models.schemas.muscle_group import MuscleGroupPublic
 from app.models.schemas.set import SetPublic
 from app.models.schemas.user import UserPublic
@@ -63,6 +63,16 @@ def to_exercise_public(exercise: Exercise) -> ExercisePublic:
         muscle_groups=[
             to_muscle_group_public(emg.muscle_group) for emg in sorted_muscle_groups
         ],
+    )
+
+
+def to_exercise_document(exercise: Exercise) -> ExerciseDocument:
+    return ExerciseDocument(
+        id=exercise.id,
+        user_id=exercise.user_id,
+        name=exercise.name,
+        description=exercise.description,
+        muscle_group_names=[emg.muscle_group.name for emg in exercise.muscle_groups],
     )
 
 

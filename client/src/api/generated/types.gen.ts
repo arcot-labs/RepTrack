@@ -1213,6 +1213,42 @@ export type GetMuscleGroupsResponses = {
 
 export type GetMuscleGroupsResponse = GetMuscleGroupsResponses[keyof GetMuscleGroupsResponses];
 
+export type GetTaskData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: number;
+    };
+    query?: never;
+    url: '/api/search/tasks/{task_id}';
+};
+
+export type GetTaskErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetTaskError = GetTaskErrors[keyof GetTaskErrors];
+
+export type GetTaskResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
 export type ReindexData = {
     body?: never;
     path?: never;

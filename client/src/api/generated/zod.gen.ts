@@ -537,6 +537,14 @@ export const zGetMuscleGroupsData = z.object({
  */
 export const zGetMuscleGroupsResponse = z.array(zMuscleGroupPublic);
 
+export const zGetTaskData = z.object({
+    body: z.never().optional(),
+    path: z.object({
+        task_id: z.int()
+    }),
+    query: z.never().optional()
+});
+
 export const zReindexData = z.object({
     body: z.never().optional(),
     path: z.never().optional(),

@@ -1,6 +1,5 @@
 from meilisearch_python_sdk.models.search import SearchResults
 from pydantic import BaseModel
-from pydantic.generics import GenericModel
 
 from app.models.schemas.types import SearchQuery
 
@@ -10,6 +9,6 @@ class SearchRequest(BaseModel):
     limit: int
 
 
-class SearchResponse[T: BaseModel](GenericModel):
+class SearchResponse[T: BaseModel](BaseModel):
     query: str
     results: SearchResults[T]
