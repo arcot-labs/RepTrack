@@ -44,12 +44,12 @@ async def _make_request(
 # 204
 async def test_update_workout(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    admin = await get_admin(session, settings)
-    workout = await create_workout(session, user_id=admin.id)
+    admin = await get_admin(db_session, settings)
+    workout = await create_workout(db_session, user_id=admin.id)
 
     resp = await _make_request(
         client,
@@ -65,11 +65,11 @@ async def test_update_workout(
 # 401
 async def test_update_workout_not_logged_in(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
-    admin = await get_admin(session, settings)
-    workout = await create_workout(session, user_id=admin.id)
+    admin = await get_admin(db_session, settings)
+    workout = await create_workout(db_session, user_id=admin.id)
 
     resp = await _make_request(client, workout.id)
 
@@ -81,7 +81,7 @@ async def test_update_workout_not_logged_in(
 # 404
 async def test_update_workout_not_found(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
@@ -96,16 +96,36 @@ async def test_update_workout_not_found(
 # 404
 async def test_update_workout_not_allowed(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    user = await create_user(session)
+    user = await create_user(db_session)
 
-    workout = await create_workout(session, user_id=user.id)
+    workout = await create_workout(db_session, user_id=user.id)
 
     resp = await _make_request(client, workout.id)
 
     assert resp.status_code == WorkoutNotFound.status_code
     body = resp.json()
     assert body["detail"] == WorkoutNotFound.detail
+
+
+# 422
+async def test_update_workout_started_at_null(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    settings: Settings,
+):
+    await login_admin(client, settings)
+    admin = await get_admin(db_session, settings)
+    workout = await create_workout(db_session, user_id=admin.id)
+
+    resp = await make_http_request(
+        client,
+        method=HttpMethod.PATCH,
+        endpoint=f"/api/workouts/{workout.id}",
+        json={"started_at": None},
+    )
+
+    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT

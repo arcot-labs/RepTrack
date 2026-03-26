@@ -22,6 +22,8 @@ from app.models.enums import SetUnit
 if TYPE_CHECKING:
     from app.models.database.workout_exercise import WorkoutExercise
 
+SET_UNIQUE_CONSTRAINT = "uq_sets_workout_exercise_set_number"
+
 
 class Set(Base):
     __tablename__ = "sets"
@@ -30,7 +32,7 @@ class Set(Base):
         UniqueConstraint(
             "workout_exercise_id",
             "set_number",
-            name="uq_sets_workout_exercise_set_number",
+            name=SET_UNIQUE_CONSTRAINT,
         ),
         CheckConstraint("set_number > 0", name="ck_sets_set_number_positive"),
         CheckConstraint("reps IS NULL OR reps >= 0", name="ck_sets_reps_non_negative"),

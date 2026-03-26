@@ -7,15 +7,15 @@ from .utilities import create_workout
 
 
 async def test_get_workouts(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    user_1 = await create_user(session, username="user_1")
-    user_2 = await create_user(session, username="user_2")
+    user_1 = await create_user(db_session, username="user_1")
+    user_2 = await create_user(db_session, username="user_2")
 
-    workout_1 = await create_workout(session, user_1.id)
-    await create_workout(session, user_2.id)
+    workout_1 = await create_workout(db_session, user_1.id)
+    await create_workout(db_session, user_2.id)
 
-    result = await get_workouts(user_1.id, session)
+    result = await get_workouts(user_1.id, db_session)
 
     assert len(result) == 1
     assert result[0].id == workout_1.id

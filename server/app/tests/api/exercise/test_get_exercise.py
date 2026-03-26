@@ -21,11 +21,11 @@ async def _make_request(client: AsyncClient, exercise_id: int):
 # 200
 async def test_get_exercise(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    created = await create_exercise_via_api(client, session, name="Bench Press")
+    created = await create_exercise_via_api(client, db_session, name="Bench Press")
 
     resp = await _make_request(client, created.id)
 
@@ -38,10 +38,10 @@ async def test_get_exercise(
 # 200
 async def test_get_exercise_system_exercise(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
-    system_ex = await create_system_exercise(session, name="Deadlift")
+    system_ex = await create_system_exercise(db_session, name="Deadlift")
     await login_admin(client, settings)
 
     resp = await _make_request(client, system_ex.id)
@@ -56,9 +56,9 @@ async def test_get_exercise_system_exercise(
 # 401
 async def test_get_exercise_not_logged_in(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    system_ex = await create_system_exercise(session, name="Pull-up")
+    system_ex = await create_system_exercise(db_session, name="Pull-up")
 
     resp = await _make_request(client, system_ex.id)
 

@@ -49,7 +49,7 @@ def run_migrations(connection: Connection) -> None:
 
 
 @pytest.fixture(scope="session")
-async def engine(anyio_backend: str) -> AsyncGenerator[AsyncEngine]:
+async def db_engine(anyio_backend: str) -> AsyncGenerator[AsyncEngine]:
     _ = anyio_backend
     with PostgresContainer(image="postgres:18", driver="asyncpg") as postgres:
         url = postgres.get_connection_url()
@@ -63,29 +63,30 @@ async def engine(anyio_backend: str) -> AsyncGenerator[AsyncEngine]:
 
 
 @pytest.fixture(scope="session")
-async def connection(engine: AsyncEngine) -> AsyncGenerator[AsyncConnection]:
-    async with engine.connect() as connection:
+async def db_connection(db_engine: AsyncEngine) -> AsyncGenerator[AsyncConnection]:
+    async with db_engine.connect() as connection:
         yield connection
 
 
 @pytest.fixture()
-async def transaction(
-    connection: AsyncConnection,
+async def db_transaction(
+    db_connection: AsyncConnection,
 ) -> AsyncGenerator[AsyncTransaction]:
-    async with connection.begin() as transaction:
+    async with db_connection.begin() as transaction:
         yield transaction
 
 
 @pytest.fixture()
-async def session(
-    connection: AsyncConnection, transaction: AsyncTransaction
+async def db_session(
+    db_connection: AsyncConnection,
+    db_transaction: AsyncTransaction,
 ) -> AsyncGenerator[AsyncSession]:
     async_session = AsyncSession(
-        bind=connection,
+        bind=db_connection,
         join_transaction_mode="create_savepoint",
         expire_on_commit=False,
     )
     yield async_session
 
-    if transaction.is_active:
-        await transaction.rollback()
+    if db_transaction.is_active:
+        await db_transaction.rollback()

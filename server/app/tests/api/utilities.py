@@ -76,15 +76,15 @@ async def login_admin(client: AsyncClient, settings: Settings):
     )
 
 
-async def get_admin(session: AsyncSession, settings: Settings) -> User:
-    result = await session.execute(
+async def get_admin(db_session: AsyncSession, settings: Settings) -> User:
+    result = await db_session.execute(
         select(User).where(User.username == settings.admin.username)
     )
     return result.scalar_one()
 
 
 async def create_user(
-    session: AsyncSession,
+    db_session: AsyncSession,
     username: str = "user",
     password: str = "password",
 ) -> User:
@@ -96,6 +96,6 @@ async def create_user(
         password_hash=PASSWORD_HASH.hash(password),
         is_admin=False,
     )
-    session.add(user)
-    await session.commit()
+    db_session.add(user)
+    await db_session.commit()
     return user

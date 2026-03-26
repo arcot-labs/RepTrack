@@ -42,19 +42,19 @@ async def request_access(
     first_name: str,
     last_name: str,
     background_tasks: BackgroundTasks,
-    db: AsyncSession,
+    db_session: AsyncSession,
     email_svc: EmailService,
     settings: Settings,
 ) -> bool:
     """Returns True if access was already approved, False otherwise"""
     logger.info(f"Requesting access for email: {email}")
 
-    existing_user_by_email = await get_user_by_email(email, db)
-    existing_user_by_username = await get_user_by_username(email, db)
+    existing_user_by_email = await get_user_by_email(email, db_session)
+    existing_user_by_username = await get_user_by_username(email, db_session)
     if existing_user_by_email or existing_user_by_username:
         raise EmailInUse()
 
-    existing_request = await get_latest_access_request_by_email(email, db)
+    existing_request = await get_latest_access_request_by_email(email, db_session)
     if existing_request:
         logger.info(
             f"Found existing access request for email {email} with id {existing_request.id}"
@@ -65,11 +65,13 @@ async def request_access(
             case AccessRequestStatus.REJECTED:
                 raise AccessRequestRejected()
             case _:
-                await expire_existing_registration_tokens(existing_request.id, db)
+                await expire_existing_registration_tokens(
+                    existing_request.id, db_session
+                )
 
                 token_str, token = create_registration_token(existing_request.id)
-                db.add(token)
-                await db.commit()
+                db_session.add(token)
+                await db_session.commit()
 
                 background_tasks.add_task(
                     email_svc.send_access_request_approved_email,
@@ -85,10 +87,10 @@ async def request_access(
         first_name=first_name,
         last_name=last_name,
     )
-    db.add(access_request)
-    await db.commit()
+    db_session.add(access_request)
+    await db_session.commit()
 
-    admins = await get_admin_users(db)
+    admins = await get_admin_users(db_session)
     for admin in admins:
         background_tasks.add_task(
             email_svc.send_access_request_notification,
@@ -104,11 +106,11 @@ async def register(
     token_str: str,
     username: str,
     password: str,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> None:
     logger.info(f"Registering new user {username}")
 
-    token = await get_registration_token(token_str, db)
+    token = await get_registration_token(token_str, db_session)
     if not token or token.is_used() or token.is_expired():
         raise InvalidToken()
 
@@ -116,13 +118,13 @@ async def register(
     if access_request.status != AccessRequestStatus.APPROVED:
         raise InvalidToken()
 
-    existing_user_by_username = await get_user_by_username(username, db)
-    existing_user_by_email = await get_user_by_email(username, db)
+    existing_user_by_username = await get_user_by_username(username, db_session)
+    existing_user_by_email = await get_user_by_email(username, db_session)
     if existing_user_by_username or existing_user_by_email:
         raise UsernameTaken()
 
     token.used_at = datetime.now(UTC)
-    await expire_existing_registration_tokens(access_request.id, db)
+    await expire_existing_registration_tokens(access_request.id, db_session)
 
     user = User(
         username=username,
@@ -131,14 +133,14 @@ async def register(
         last_name=access_request.last_name,
         password_hash=hash_secret(password),
     )
-    db.add(user)
-    await db.commit()
+    db_session.add(user)
+    await db_session.commit()
 
 
 async def request_password_reset(
     email: str,
     background_tasks: BackgroundTasks,
-    db: AsyncSession,
+    db_session: AsyncSession,
     email_svc: EmailService,
     settings: Settings,
 ) -> None:
@@ -148,16 +150,16 @@ async def request_password_reset(
         logger.warning("Password reset requested for admin email, ignoring")
         return
 
-    user = await get_user_by_email(email, db)
+    user = await get_user_by_email(email, db_session)
     if not user:
         logger.info(f"Password reset requested for unregistered email: {email}")
         return
 
-    await expire_existing_password_reset_tokens(user.id, db)
+    await expire_existing_password_reset_tokens(user.id, db_session)
 
     token_str, token = create_password_reset_token(user.id)
-    db.add(token)
-    await db.commit()
+    db_session.add(token)
+    await db_session.commit()
 
     background_tasks.add_task(
         email_svc.send_password_reset_email,
@@ -170,31 +172,31 @@ async def request_password_reset(
 async def reset_password(
     token_str: str,
     password: str,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> None:
     logger.info("Resetting password")
 
-    token = await get_password_reset_token(token_str, db)
+    token = await get_password_reset_token(token_str, db_session)
     if not token or token.is_used() or token.is_expired():
         raise InvalidToken()
 
     user = token.user
     token.used_at = datetime.now(UTC)
-    await expire_existing_password_reset_tokens(user.id, db)
+    await expire_existing_password_reset_tokens(user.id, db_session)
 
     user.password_hash = hash_secret(password)
-    await db.commit()
+    await db_session.commit()
 
 
 async def login(
     identifier: str,
     password: str,
-    db: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ) -> LoginResult:
     logger.info(f"Logging in user with identifier {identifier}")
 
-    user = await authenticate_user(identifier, password, db)
+    user = await authenticate_user(identifier, password, db_session)
     if not user:
         raise InvalidCredentials()
 
@@ -207,11 +209,11 @@ async def login(
     )
 
 
-async def refresh(db: AsyncSession, token: str, settings: Settings) -> str:
+async def refresh(db_session: AsyncSession, token: str, settings: Settings) -> str:
     logger.info("Refreshing access token")
 
     username = verify_jwt(token, settings)
-    user = await get_user_by_username(username, db)
+    user = await get_user_by_username(username, db_session)
     if not user:
         raise InvalidCredentials()
 

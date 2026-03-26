@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_current_user, get_db
+from app.core.dependencies import get_current_user, get_db_session
 from app.models.schemas.errors import ErrorResponseModel
 from app.models.schemas.exercise import (
     CreateExerciseRequest,
@@ -39,9 +39,9 @@ api_router = APIRouter(
 async def create_exercise_endpoint(
     req: CreateExerciseRequest,
     user: Annotated[UserPublic, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    await create_exercise(user.id, req, db)
+    await create_exercise(user.id, req, db_session)
 
 
 @api_router.get(
@@ -51,9 +51,9 @@ async def create_exercise_endpoint(
 )
 async def get_exercises_endpoint(
     user: Annotated[UserPublic, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> list[ExercisePublic]:
-    return await get_exercises(user.id, db)
+    return await get_exercises(user.id, db_session)
 
 
 @api_router.get(
@@ -67,9 +67,9 @@ async def get_exercises_endpoint(
 async def get_exercise_endpoint(
     exercise_id: int,
     user: Annotated[UserPublic, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> ExercisePublic:
-    return await get_exercise(exercise_id, user.id, db)
+    return await get_exercise(exercise_id, user.id, db_session)
 
 
 @api_router.patch(
@@ -87,9 +87,9 @@ async def update_exercise_endpoint(
     exercise_id: int,
     req: UpdateExerciseRequest,
     user: Annotated[UserPublic, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    await update_exercise(exercise_id, user.id, req, db)
+    await update_exercise(exercise_id, user.id, req, db_session)
 
 
 @api_router.delete(
@@ -105,6 +105,6 @@ async def update_exercise_endpoint(
 async def delete_exercise_endpoint(
     exercise_id: int,
     user: Annotated[UserPublic, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    await delete_exercise(exercise_id, user.id, db)
+    await delete_exercise(exercise_id, user.id, db_session)

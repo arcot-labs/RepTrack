@@ -30,12 +30,12 @@ async def _make_request(
 # 204
 async def test_create_exercise(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
 
-    muscle_group_id = await get_muscle_group_id(session, name="chest")
+    muscle_group_id = await get_muscle_group_id(db_session, name="chest")
     resp = await _make_request(
         client,
         name="Overhead Press",

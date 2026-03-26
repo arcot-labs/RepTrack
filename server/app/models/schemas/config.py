@@ -35,6 +35,12 @@ class DatabaseSettings(BaseModel):
         )
 
 
+class MeilisearchSettings(BaseModel):
+    host: str
+    port: int
+    master_key: str
+
+
 class EmailSmtpSettings(BaseModel):
     backend: Literal["smtp"]
     # allow arbitrary string

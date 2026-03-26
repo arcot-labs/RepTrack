@@ -40,6 +40,32 @@ services:
             - traefik.http.routers.${PROJECT?}-${ENV?}-adminer.rule=Host(`db-${DOMAIN?}`)
             - traefik.http.routers.${PROJECT?}-${ENV?}-adminer.entrypoints=websecure
 
+    meilisearch:
+        image: getmeili/meilisearch:v1.40.0
+        container_name: ${PROJECT?}-${ENV?}-meilisearch
+        restart: unless-stopped
+        networks:
+            - traefik-public
+            - default
+
+        volumes:
+            - meili-data:/meili_data
+        environment:
+            - MEILI_MASTER_KEY=${MS__MASTER_KEY?}
+
+        healthcheck:
+            test: 'curl -f http://localhost:7700/health || exit 1'
+            start_period: 5s
+            timeout: 5s
+            retries: 3
+            interval: 1m
+
+        labels:
+            - traefik.enable=true
+            - traefik.prod=${PROD?}
+            - traefik.http.routers.${PROJECT?}-${ENV?}-meilisearch.rule=Host(`search-${DOMAIN?}`)
+            - traefik.http.routers.${PROJECT?}-${ENV?}-meilisearch.entrypoints=websecure
+
     migrations:
         image: ${DOCKER_REGISTRY?}/${PROJECT?}-${ENV?}-server:${TAG?}
         container_name: ${PROJECT?}-${ENV?}-migrations
@@ -74,6 +100,11 @@ services:
             - DB__NAME=${DB__NAME?}
             - DB__USER=${DB__USER?}
             - DB__PASSWORD=${DB__PASSWORD?}
+
+            # internal host & port
+            - MS__HOST=meilisearch
+            - MS__PORT=7700
+            - MS__MASTER_KEY=${MS__MASTER_KEY?}
 
             - EMAIL__BACKEND=${EMAIL__BACKEND?}
             - EMAIL__EMAIL_FROM=${EMAIL__EMAIL_FROM?}
@@ -135,6 +166,11 @@ services:
             - DB__USER=${DB__USER?}
             - DB__PASSWORD=${DB__PASSWORD?}
 
+            # internal host & port
+            - MS__HOST=meilisearch
+            - MS__PORT=7700
+            - MS__MASTER_KEY=${MS__MASTER_KEY?}
+
             - EMAIL__BACKEND=${EMAIL__BACKEND?}
             - EMAIL__EMAIL_FROM=${EMAIL__EMAIL_FROM?}
             # internal host
@@ -187,6 +223,7 @@ services:
 
 volumes:
     pg-data:
+    meili-data:
     server-data:
     server-logs:
 

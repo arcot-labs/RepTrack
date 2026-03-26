@@ -1,6 +1,9 @@
+from unittest.mock import patch
+
 import pytest
 from pytest import MonkeyPatch
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.workout_exercise import WorkoutExercise
@@ -18,10 +21,10 @@ from ..workout.utilities import create_workout
 from .utilities import create_workout_exercise as create_workout_exercise_util
 
 
-async def test_create_workout_exercise(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
-    exercise = await create_exercise(session, name="Deadlift")
+async def test_create_workout_exercise(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Deadlift")
 
     await create_workout_exercise(
         workout.id,
@@ -30,10 +33,10 @@ async def test_create_workout_exercise(session: AsyncSession):
             exercise_id=exercise.id,
             notes="Example exercise",
         ),
-        session,
+        db_session,
     )
 
-    result = await session.execute(
+    result = await db_session.execute(
         select(WorkoutExercise).where(
             WorkoutExercise.workout_id == workout.id,
             WorkoutExercise.exercise_id == exercise.id,
@@ -45,50 +48,50 @@ async def test_create_workout_exercise(session: AsyncSession):
     assert workout_exercise.notes == "Example exercise"
 
 
-async def test_create_workout_exercise_workout_not_found(session: AsyncSession):
+async def test_create_workout_exercise_workout_not_found(db_session: AsyncSession):
     with pytest.raises(WorkoutNotFound):
         await create_workout_exercise(
             workout_id=1,
             user_id=2,
             req=CreateWorkoutExerciseRequest(exercise_id=3),
-            db=session,
+            db_session=db_session,
         )
 
 
-async def test_create_workout_exercise_workout_not_allowed(session: AsyncSession):
-    user_1 = await create_user(session, username="user_1")
-    user_2 = await create_user(session, username="user_2")
-    workout = await create_workout(session, user_id=user_2.id)
-    exercise = await create_exercise(session, name="Squat")
+async def test_create_workout_exercise_workout_not_allowed(db_session: AsyncSession):
+    user_1 = await create_user(db_session, username="user_1")
+    user_2 = await create_user(db_session, username="user_2")
+    workout = await create_workout(db_session, user_id=user_2.id)
+    exercise = await create_exercise(db_session, name="Squat")
 
     with pytest.raises(WorkoutNotFound):
         await create_workout_exercise(
             workout_id=workout.id,
             user_id=user_1.id,
             req=CreateWorkoutExerciseRequest(exercise_id=exercise.id),
-            db=session,
+            db_session=db_session,
         )
 
 
-async def test_create_workout_exercise_exercise_not_found(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
+async def test_create_workout_exercise_exercise_not_found(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
 
     with pytest.raises(ExerciseNotFound):
         await create_workout_exercise(
             workout_id=workout.id,
             user_id=user.id,
             req=CreateWorkoutExerciseRequest(exercise_id=99999),
-            db=session,
+            db_session=db_session,
         )
 
 
-async def test_create_workout_exercise_exercise_not_allowed(session: AsyncSession):
-    user_1 = await create_user(session, username="user_1")
-    user_2 = await create_user(session, username="user_2")
-    workout = await create_workout(session, user_id=user_1.id)
+async def test_create_workout_exercise_exercise_not_allowed(db_session: AsyncSession):
+    user_1 = await create_user(db_session, username="user_1")
+    user_2 = await create_user(db_session, username="user_2")
+    workout = await create_workout(db_session, user_id=user_1.id)
     exercise = await create_exercise(
-        session,
+        db_session,
         name="Owned by other",
         user_id=user_2.id,
     )
@@ -98,26 +101,26 @@ async def test_create_workout_exercise_exercise_not_allowed(session: AsyncSessio
             workout.id,
             user_1.id,
             CreateWorkoutExerciseRequest(exercise_id=exercise.id),
-            session,
+            db_session,
         )
 
 
 async def test_create_workout_exercise_position_conflict(
-    session: AsyncSession,
+    db_session: AsyncSession,
     monkeypatch: MonkeyPatch,
 ):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
-    exercise = await create_exercise(session, name="Exercise 1")
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Exercise 1")
 
     await create_workout_exercise_util(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
     )
 
-    async def mock_get_next_position(workout_id: int, db: AsyncSession) -> int:
+    async def mock_get_next_position(workout_id: int, db_session: AsyncSession) -> int:
         return 1
 
     monkeypatch.setattr(
@@ -130,5 +133,38 @@ async def test_create_workout_exercise_position_conflict(
             workout.id,
             user.id,
             CreateWorkoutExerciseRequest(exercise_id=exercise.id),
-            session,
+            db_session,
         )
+
+
+async def test_create_workout_exercise_unhandled_integrity_error(
+    db_session: AsyncSession,
+    monkeypatch: MonkeyPatch,
+):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Exercise 1")
+
+    await create_workout_exercise_util(
+        db_session,
+        workout_id=workout.id,
+        exercise_id=exercise.id,
+        position=1,
+    )
+
+    async def mock_get_next_position(workout_id: int, db_session: AsyncSession) -> int:
+        return 1
+
+    monkeypatch.setattr(
+        "app.services.workout_exercise._get_next_workout_exercise_position",
+        mock_get_next_position,
+    )
+
+    with patch("app.services.workout_exercise.is_unique_violation", return_value=False):
+        with pytest.raises(IntegrityError):
+            await create_workout_exercise(
+                workout.id,
+                user.id,
+                CreateWorkoutExerciseRequest(exercise_id=exercise.id),
+                db_session,
+            )

@@ -17,6 +17,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import { zodResolver } from '@hookform/resolvers/zod'
+import type { ReactElement } from 'react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -27,7 +28,11 @@ const feedbackFormSchema = zCreateFeedbackRequest.omit({
 })
 type FeedbackForm = z.infer<typeof feedbackFormSchema>
 
-export function FeedbackFormDialog() {
+interface FeedbackFormDialogProps {
+    trigger: ReactElement
+}
+
+export function FeedbackFormDialog({ trigger }: FeedbackFormDialogProps) {
     const [open, setOpen] = useState(false)
     const [files, setFiles] = useState<File[]>([])
 
@@ -83,9 +88,7 @@ export function FeedbackFormDialog() {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button>Feedback</Button>
-            </DialogTrigger>
+            <DialogTrigger asChild>{trigger}</DialogTrigger>
             <DialogContent
                 onPointerDownOutside={(e) => {
                     onAttemptClose(e)

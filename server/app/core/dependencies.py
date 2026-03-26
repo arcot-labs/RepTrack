@@ -5,19 +5,21 @@ from typing import Annotated
 
 from fastapi import Depends
 from fastapi.security import APIKeyCookie
+from meilisearch_python_sdk import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import Settings, get_settings
 from app.core.security import ACCESS_JWT_KEY, REFRESH_JWT_KEY, verify_jwt
 from app.models.errors import InsufficientPermissions, InvalidCredentials
 from app.models.schemas.user import UserPublic
-from app.services.user import get_user_by_username, to_user_public
+from app.services.user import get_user_by_username
+from app.services.utilities.serializers import to_user_public
 
 logger = logging.getLogger(__name__)
 
 
 @cache
-def get_sessionmaker(db_url: str, is_prod: bool):
+def get_db_sessionmaker(db_url: str, is_prod: bool):
     engine = create_async_engine(
         db_url,
         echo=not is_prod,
@@ -28,10 +30,13 @@ def get_sessionmaker(db_url: str, is_prod: bool):
     )
 
 
-async def get_db(
+async def get_db_session(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> AsyncGenerator[AsyncSession]:
-    async with get_sessionmaker(settings.db.url, settings.is_prod_like)() as session:
+    async with get_db_sessionmaker(
+        settings.db.url,
+        settings.is_prod_like,
+    )() as session:
         yield session
 
 
@@ -44,15 +49,31 @@ refresh_token_cookie = APIKeyCookie(
 )
 
 
+@cache
+def build_ms_client(host: str, port: int, master_key: str) -> AsyncClient:
+    url = f"http://{host}:{port}"
+    return AsyncClient(url, master_key)
+
+
+async def get_ms_client(
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> AsyncClient:
+    return build_ms_client(
+        settings.ms.host,
+        settings.ms.port,
+        settings.ms.master_key,
+    )
+
+
 async def get_current_user(
     token: Annotated[str, Depends(access_token_cookie)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> UserPublic:
     logger.info("Getting current user using jwt")
 
     username = verify_jwt(token, settings)
-    user = await get_user_by_username(username, db)
+    user = await get_user_by_username(username, db_session)
     if not user:
         raise InvalidCredentials()
 

@@ -6,7 +6,7 @@ from app.models.database.workout import Workout
 
 
 async def create_workout(
-    session: AsyncSession,
+    db_session: AsyncSession,
     user_id: int,
     started_at: datetime = datetime.now(),
     ended_at: datetime | None = None,
@@ -18,7 +18,7 @@ async def create_workout(
         ended_at=ended_at,
         notes=notes,
     )
-    session.add(workout)
-    await session.commit()
-    await session.refresh(workout)
+    db_session.add(workout)
+    await db_session.commit()
+    await db_session.refresh(workout)
     return workout

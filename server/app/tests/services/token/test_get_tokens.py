@@ -10,7 +10,7 @@ from app.services.token import get_tokens_by_prefix
 # RegistrationToken behavior is identical
 
 
-async def _create_user(session: AsyncSession, suffix: str) -> User:
+async def _create_user(db_session: AsyncSession, suffix: str) -> User:
     user = User(
         email=f"get-token-{suffix}@example.com",
         username=f"get_token_{suffix}",
@@ -18,22 +18,22 @@ async def _create_user(session: AsyncSession, suffix: str) -> User:
         last_name="Tester",
         password_hash=PASSWORD_HASH.hash("password"),
     )
-    session.add(user)
-    await session.flush()
+    db_session.add(user)
+    await db_session.flush()
     return user
 
 
-async def test_get_tokens_by_prefix_password_reset(session: AsyncSession):
-    user = await _create_user(session, "basic")
+async def test_get_tokens_by_prefix_password_reset(db_session: AsyncSession):
+    user = await _create_user(db_session, "basic")
     _, token = create_password_reset_token(user.id)
-    session.add(token)
-    await session.commit()
+    db_session.add(token)
+    await db_session.commit()
 
     tokens = await get_tokens_by_prefix(
         type(token),
         load_option=type(token).user,
         prefix=token.token_prefix,
-        db=session,
+        db_session=db_session,
     )
 
     assert len(tokens) == 1
@@ -42,9 +42,9 @@ async def test_get_tokens_by_prefix_password_reset(session: AsyncSession):
     assert tokens[0].user.id == user.id
 
 
-async def test_get_tokens_by_prefix_password_reset_condition(session: AsyncSession):
-    target_user = await _create_user(session, "target")
-    other_user = await _create_user(session, "other")
+async def test_get_tokens_by_prefix_password_reset_condition(db_session: AsyncSession):
+    target_user = await _create_user(db_session, "target")
+    other_user = await _create_user(db_session, "other")
 
     _, active_token = create_password_reset_token(target_user.id)
     _, used_token = create_password_reset_token(target_user.id)
@@ -61,21 +61,21 @@ async def test_get_tokens_by_prefix_password_reset_condition(session: AsyncSessi
     expired_token.expires_at = now - timedelta(minutes=1)
     other_prefix_token.token_prefix = "prefix2"
 
-    session.add_all([active_token, used_token, expired_token, other_prefix_token])
-    await session.commit()
+    db_session.add_all([active_token, used_token, expired_token, other_prefix_token])
+    await db_session.commit()
 
     tokens = await get_tokens_by_prefix(
         type(active_token),
         load_option=type(active_token).user,
         prefix=prefix,
-        db=session,
+        db_session=db_session,
     )
 
     assert [token.id for token in tokens] == [active_token.id]
 
 
-async def test_get_tokens_by_prefix_password_reset_ordering(session: AsyncSession):
-    user = await _create_user(session, "ordering")
+async def test_get_tokens_by_prefix_password_reset_ordering(db_session: AsyncSession):
+    user = await _create_user(db_session, "ordering")
     _, older_token = create_password_reset_token(user.id)
     _, newer_token = create_password_reset_token(user.id)
 
@@ -87,14 +87,14 @@ async def test_get_tokens_by_prefix_password_reset_ordering(session: AsyncSessio
     older_token.created_at = now - timedelta(minutes=5)
     newer_token.created_at = now
 
-    session.add_all([older_token, newer_token])
-    await session.commit()
+    db_session.add_all([older_token, newer_token])
+    await db_session.commit()
 
     tokens = await get_tokens_by_prefix(
         type(older_token),
         load_option=type(older_token).user,
         prefix=prefix,
-        db=session,
+        db_session=db_session,
     )
 
     assert [token.id for token in tokens] == [newer_token.id, older_token.id]

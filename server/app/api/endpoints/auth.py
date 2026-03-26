@@ -4,7 +4,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings, get_settings
-from app.core.dependencies import get_db, refresh_token_cookie
+from app.core.dependencies import get_db_session, refresh_token_cookie
 from app.core.security import ACCESS_JWT_KEY, REFRESH_JWT_KEY
 from app.models.api import (
     REQUEST_ACCESS_APPROVED_MESSAGE,
@@ -45,7 +45,7 @@ api_router = APIRouter(
 async def request_access_endpoint(
     req: RequestAccessRequest,
     background_tasks: BackgroundTasks,
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
     email_svc: Annotated[EmailService, Depends(get_email_service)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> str:
@@ -54,7 +54,7 @@ async def request_access_endpoint(
         last_name=req.last_name,
         email_svc=email_svc,
         background_tasks=background_tasks,
-        db=db,
+        db_session=db_session,
         email=req.email,
         settings=settings,
     )
@@ -74,13 +74,13 @@ async def request_access_endpoint(
 )
 async def register_endpoint(
     req: RegisterRequest,
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
     await register(
         token_str=req.token,
         username=req.username,
         password=req.password,
-        db=db,
+        db_session=db_session,
     )
 
 
@@ -92,14 +92,14 @@ async def register_endpoint(
 async def forgot_password_endpoint(
     req: ForgotPasswordRequest,
     background_tasks: BackgroundTasks,
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
     email_svc: Annotated[EmailService, Depends(get_email_service)],
     settings: Annotated[Settings, Depends(get_settings)],
 ):
     await request_password_reset(
         email=req.email,
         background_tasks=background_tasks,
-        db=db,
+        db_session=db_session,
         email_svc=email_svc,
         settings=settings,
     )
@@ -115,12 +115,12 @@ async def forgot_password_endpoint(
 )
 async def reset_password_endpoint(
     req: ResetPasswordRequest,
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
     await reset_password(
         token_str=req.token,
         password=req.password,
-        db=db,
+        db_session=db_session,
     )
 
 
@@ -134,14 +134,14 @@ async def reset_password_endpoint(
 )
 async def login_endpoint(
     req: LoginRequest,
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
     settings: Annotated[Settings, Depends(get_settings)],
     res: Response,
 ):
     result = await login(
         identifier=req.identifier,
         password=req.password,
-        db=db,
+        db_session=db_session,
         settings=settings,
     )
     res.set_cookie(
@@ -171,12 +171,14 @@ async def login_endpoint(
     },
 )
 async def refresh_token_endpoint(
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
     refresh_token: Annotated[str, Depends(refresh_token_cookie)],
     settings: Annotated[Settings, Depends(get_settings)],
     res: Response,
 ):
-    access_token = await refresh(db=db, token=refresh_token, settings=settings)
+    access_token = await refresh(
+        db_session=db_session, token=refresh_token, settings=settings
+    )
     res.set_cookie(
         key=ACCESS_JWT_KEY,
         value=access_token,

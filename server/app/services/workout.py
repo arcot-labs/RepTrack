@@ -16,12 +16,14 @@ from app.models.schemas.workout import (
     WorkoutBase,
     WorkoutPublic,
 )
+from app.services.utilities.queries import get_owned_workout
+from app.services.utilities.serializers import to_workout_base, to_workout_public
 
 logger = logging.getLogger(__name__)
 
 
 async def _query_workouts(
-    db: AsyncSession,
+    db_session: AsyncSession,
     base: bool,
     *where_clauses: Any,
 ) -> Sequence[Workout]:
@@ -31,50 +33,14 @@ async def _query_workouts(
             selectinload(Workout.exercises).selectinload(WorkoutExercise.exercise),
             selectinload(Workout.exercises).selectinload(WorkoutExercise.sets),
         )
-    result = await db.execute(query)
+    result = await db_session.execute(query)
     return result.scalars().all()
-
-
-async def get_owned_workout(
-    workout_id: int,
-    user_id: int,
-    db: AsyncSession,
-) -> Workout:
-    result = await db.execute(
-        select(Workout).where(
-            Workout.id == workout_id,
-        ),
-    )
-    workout = result.scalar_one_or_none()
-    if not workout or workout.user_id != user_id:
-        raise WorkoutNotFound()
-    return workout
-
-
-def to_workout_base(workout: Workout) -> WorkoutBase:
-    return WorkoutBase.model_validate(workout, from_attributes=True)
-
-
-def to_workout_public(workout: Workout) -> WorkoutPublic:
-    # prevent circular import
-    from app.services.workout_exercise import to_workout_exercise_public
-
-    return WorkoutPublic(
-        id=workout.id,
-        user_id=workout.user_id,
-        started_at=workout.started_at,
-        ended_at=workout.ended_at,
-        notes=workout.notes,
-        created_at=workout.created_at,
-        updated_at=workout.updated_at,
-        exercises=[to_workout_exercise_public(we) for we in workout.exercises],
-    )
 
 
 async def create_workout(
     user_id: int,
     req: CreateWorkoutRequest,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> None:
     logger.info(f"Creating workout for user {user_id}")
 
@@ -84,18 +50,18 @@ async def create_workout(
         ended_at=req.ended_at,
         notes=req.notes,
     )
-    db.add(workout)
-    await db.commit()
+    db_session.add(workout)
+    await db_session.commit()
 
 
 async def get_workouts(
     user_id: int,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> list[WorkoutBase]:
     logger.info(f"Getting workouts for user {user_id}")
 
     workouts = await _query_workouts(
-        db,
+        db_session,
         True,
         Workout.user_id == user_id,
     )
@@ -105,12 +71,12 @@ async def get_workouts(
 async def get_workout(
     workout_id: int,
     user_id: int,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> WorkoutPublic:
     logger.info(f"Getting workout {workout_id} for user {user_id}")
 
     workouts = await _query_workouts(
-        db,
+        db_session,
         False,
         Workout.id == workout_id,
         Workout.user_id == user_id,
@@ -124,11 +90,11 @@ async def update_workout(
     workout_id: int,
     user_id: int,
     req: UpdateWorkoutRequest,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> None:
     logger.info(f"Updating workout {workout_id} for user {user_id}")
 
-    workout = await get_owned_workout(workout_id, user_id, db)
+    workout = await get_owned_workout(workout_id, user_id, db_session)
 
     if not req.model_fields_set:
         logger.info("No changes provided, skipping update")
@@ -144,16 +110,16 @@ async def update_workout(
     if "notes" in req.model_fields_set:
         workout.notes = req.notes
 
-    await db.commit()
+    await db_session.commit()
 
 
 async def delete_workout(
     workout_id: int,
     user_id: int,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> None:
     logger.info(f"Deleting workout {workout_id} for user {user_id}")
 
-    workout = await get_owned_workout(workout_id, user_id, db)
-    await db.delete(workout)
-    await db.commit()
+    workout = await get_owned_workout(workout_id, user_id, db_session)
+    await db_session.delete(workout)
+    await db_session.commit()

@@ -16,7 +16,7 @@ export const zAccessRequestStatus = z.enum([
  */
 export const zCreateExerciseRequest = z.object({
     name: z.string().min(1).max(255),
-    description: z.string().nullish(),
+    description: z.string().max(1000).nullish(),
     muscle_group_ids: z.array(z.int()).optional()
 });
 
@@ -25,7 +25,7 @@ export const zCreateExerciseRequest = z.object({
  */
 export const zCreateWorkoutExerciseRequest = z.object({
     exercise_id: z.int(),
-    notes: z.string().nullish()
+    notes: z.string().max(1000).nullish()
 });
 
 /**
@@ -34,7 +34,7 @@ export const zCreateWorkoutExerciseRequest = z.object({
 export const zCreateWorkoutRequest = z.object({
     started_at: z.iso.datetime().nullish(),
     ended_at: z.iso.datetime().nullish(),
-    notes: z.string().nullish()
+    notes: z.string().max(1000).nullish()
 });
 
 /**
@@ -58,6 +58,17 @@ export const zExerciseBase = z.object({
 });
 
 /**
+ * ExerciseDocument
+ */
+export const zExerciseDocument = z.object({
+    id: z.int(),
+    user_id: z.int().nullable(),
+    name: z.string(),
+    description: z.string().nullable(),
+    muscle_group_names: z.array(z.string())
+});
+
+/**
  * FeedbackType
  */
 export const zFeedbackType = z.enum(['feedback', 'feature']);
@@ -68,7 +79,7 @@ export const zFeedbackType = z.enum(['feedback', 'feature']);
 export const zCreateFeedbackRequest = z.object({
     type: zFeedbackType,
     url: z.string().min(1).max(1000),
-    title: z.string().min(1).max(100),
+    title: z.string().min(1).max(1000),
     description: z.string().min(1).max(10000),
     files: z.array(z.string()).optional()
 });
@@ -84,7 +95,7 @@ export const zForgotPasswordRequest = z.object({
  * LoginRequest
  */
 export const zLoginRequest = z.object({
-    username: z.string().min(3).max(50).nullish(),
+    username: z.string().min(3).max(255).nullish(),
     email: z.email().max(255).nullish(),
     password: z.string().min(8).max(64)
 });
@@ -116,7 +127,7 @@ export const zExercisePublic = z.object({
  */
 export const zRegisterRequest = z.object({
     token: z.string().min(1).max(64),
-    username: z.string().min(3).max(50),
+    username: z.string().min(3).max(255),
     password: z.string().min(8).max(64)
 });
 
@@ -125,8 +136,8 @@ export const zRegisterRequest = z.object({
  */
 export const zRequestAccessRequest = z.object({
     email: z.email().max(255),
-    first_name: z.string().min(1).max(50),
-    last_name: z.string().min(1).max(50)
+    first_name: z.string().min(1).max(255),
+    last_name: z.string().min(1).max(255)
 });
 
 /**
@@ -161,6 +172,54 @@ export const zAccessRequestPublic = z.object({
 });
 
 /**
+ * SearchRequest
+ */
+export const zSearchRequest = z.object({
+    query: z.string().min(1).max(255),
+    limit: z.int().optional().default(25)
+});
+
+/**
+ * SearchResults[ExerciseDocument]
+ */
+export const zSearchResultsExerciseDocument = z.object({
+    hits: z.array(zExerciseDocument),
+    offset: z.int().nullish(),
+    limit: z.int().nullish(),
+    estimatedTotalHits: z.int().nullish(),
+    processingTimeMs: z.int(),
+    query: z.string(),
+    facetDistribution: z.record(z.string(), z.unknown()).nullish(),
+    totalPages: z.int().nullish(),
+    totalHits: z.int().nullish(),
+    page: z.int().nullish(),
+    hitsPerPage: z.int().nullish(),
+    semanticHitCount: z.int().nullish(),
+    queryVector: z.array(z.number()).nullish(),
+    performanceDetails: z.record(z.string(), z.unknown()).nullish()
+});
+
+/**
+ * SearchResults[MuscleGroupPublic]
+ */
+export const zSearchResultsMuscleGroupPublic = z.object({
+    hits: z.array(zMuscleGroupPublic),
+    offset: z.int().nullish(),
+    limit: z.int().nullish(),
+    estimatedTotalHits: z.int().nullish(),
+    processingTimeMs: z.int(),
+    query: z.string(),
+    facetDistribution: z.record(z.string(), z.unknown()).nullish(),
+    totalPages: z.int().nullish(),
+    totalHits: z.int().nullish(),
+    page: z.int().nullish(),
+    hitsPerPage: z.int().nullish(),
+    semanticHitCount: z.int().nullish(),
+    queryVector: z.array(z.number()).nullish(),
+    performanceDetails: z.record(z.string(), z.unknown()).nullish()
+});
+
+/**
  * SetPublic
  */
 export const zSetPublic = z.object({
@@ -190,7 +249,29 @@ export const zCreateSetRequest = z.object({
         z.string().regex(/^(?!^[-+.]*$)[+-]?0*(?:\d{0,4}|(?=[\d.]{1,7}0*$)\d{0,4}\.\d{0,2}0*$)/)
     ]).nullish(),
     unit: zSetUnit.nullish(),
-    notes: z.string().nullish()
+    notes: z.string().max(1000).nullish()
+});
+
+/**
+ * TaskResult
+ */
+export const zTaskResult = z.object({
+    uid: z.int(),
+    indexUid: z.string().nullish(),
+    status: z.string(),
+    type: z.union([
+        z.string(),
+        z.record(z.string(), z.unknown())
+    ]),
+    details: z.record(z.string(), z.unknown()).nullish(),
+    error: z.record(z.string(), z.unknown()).nullish(),
+    canceledBy: z.int().nullish(),
+    duration: z.string().nullish(),
+    enqueuedAt: z.iso.datetime(),
+    startedAt: z.iso.datetime().nullish(),
+    finishedAt: z.iso.datetime().nullish(),
+    batchUid: z.int().nullish(),
+    customMetadata: z.string().nullish()
 });
 
 /**
@@ -205,7 +286,7 @@ export const zUpdateAccessRequestStatusRequest = z.object({
  */
 export const zUpdateExerciseRequest = z.object({
     name: z.string().min(1).max(255).nullish(),
-    description: z.string().nullish(),
+    description: z.string().max(1000).nullish(),
     muscle_group_ids: z.array(z.int()).nullish()
 });
 
@@ -219,7 +300,7 @@ export const zUpdateSetRequest = z.object({
         z.string().regex(/^(?!^[-+.]*$)[+-]?0*(?:\d{0,4}|(?=[\d.]{1,7}0*$)\d{0,4}\.\d{0,2}0*$)/)
     ]).nullish(),
     unit: zSetUnit.nullish(),
-    notes: z.string().nullish()
+    notes: z.string().max(1000).nullish()
 });
 
 /**
@@ -228,7 +309,7 @@ export const zUpdateSetRequest = z.object({
 export const zUpdateWorkoutRequest = z.object({
     started_at: z.iso.datetime().nullish(),
     ended_at: z.iso.datetime().nullish(),
-    notes: z.string().nullish()
+    notes: z.string().max(1000).nullish()
 });
 
 /**
@@ -251,7 +332,9 @@ export const zUserPublic = z.object({
 export const zValidationError = z.object({
     loc: z.array(z.union([z.string(), z.int()])),
     msg: z.string(),
-    type: z.string()
+    type: z.string(),
+    input: z.unknown().optional(),
+    ctx: z.record(z.string(), z.unknown()).optional()
 });
 
 /**
@@ -328,19 +411,6 @@ export const zUpdateAccessRequestStatusData = z.object({
  * Successful Response
  */
 export const zUpdateAccessRequestStatusResponse = z.void();
-
-export const zGetUsersData = z.object({
-    body: z.never().optional(),
-    path: z.never().optional(),
-    query: z.never().optional()
-});
-
-/**
- * Response Getusers
- *
- * Successful Response
- */
-export const zGetUsersResponse = z.array(zUserPublic);
 
 export const zRequestAccessData = z.object({
     body: zRequestAccessRequest,
@@ -529,6 +599,52 @@ export const zGetMuscleGroupsData = z.object({
  */
 export const zGetMuscleGroupsResponse = z.array(zMuscleGroupPublic);
 
+export const zGetTaskData = z.object({
+    body: z.never().optional(),
+    path: z.object({
+        task_id: z.int()
+    }),
+    query: z.never().optional()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetTaskResponse = zTaskResult;
+
+export const zReindexData = z.object({
+    body: z.never().optional(),
+    path: z.never().optional(),
+    query: z.never().optional()
+});
+
+/**
+ * Successful Response
+ */
+export const zReindexResponse = z.void();
+
+export const zSearchMuscleGroupsData = z.object({
+    body: zSearchRequest,
+    path: z.never().optional(),
+    query: z.never().optional()
+});
+
+/**
+ * Successful Response
+ */
+export const zSearchMuscleGroupsResponse = zSearchResultsMuscleGroupPublic;
+
+export const zSearchExercisesData = z.object({
+    body: zSearchRequest,
+    path: z.never().optional(),
+    query: z.never().optional()
+});
+
+/**
+ * Successful Response
+ */
+export const zSearchExercisesResponse = zSearchResultsExerciseDocument;
+
 export const zCreateSetData = z.object({
     body: zCreateSetRequest,
     path: z.object({
@@ -583,6 +699,19 @@ export const zGetCurrentUserData = z.object({
  * Successful Response
  */
 export const zGetCurrentUserResponse = zUserPublic;
+
+export const zGetUsersData = z.object({
+    body: z.never().optional(),
+    path: z.never().optional(),
+    query: z.never().optional()
+});
+
+/**
+ * Response Getusers
+ *
+ * Successful Response
+ */
+export const zGetUsersResponse = z.array(zUserPublic);
 
 export const zCreateWorkoutExerciseData = z.object({
     body: zCreateWorkoutExerciseRequest,

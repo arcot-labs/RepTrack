@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from app.models.schemas.exercise import ExerciseBase
 from app.models.schemas.set import SetPublic
+from app.models.schemas.types import WorkoutExerciseNotes
 
 
 class WorkoutExercisePublic(BaseModel):
@@ -21,4 +22,4 @@ class WorkoutExercisePublic(BaseModel):
 
 class CreateWorkoutExerciseRequest(BaseModel):
     exercise_id: int
-    notes: str | None = None
+    notes: WorkoutExerciseNotes | None = None

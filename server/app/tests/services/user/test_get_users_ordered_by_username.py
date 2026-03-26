@@ -5,7 +5,7 @@ from app.models.database.user import User
 from app.services.user import get_users_ordered_by_username
 
 
-async def test_get_users_ordered_by_username(session: AsyncSession):
+async def test_get_users_ordered_by_username(db_session: AsyncSession):
     user = User(
         email="shape-user@example.com",
         username="shape_user",
@@ -13,10 +13,10 @@ async def test_get_users_ordered_by_username(session: AsyncSession):
         last_name="User",
         password_hash="hash",
     )
-    session.add(user)
-    await session.commit()
+    db_session.add(user)
+    await db_session.commit()
 
-    result = await get_users_ordered_by_username(session)
+    result = await get_users_ordered_by_username(db_session)
     item = next(entry for entry in result if entry.id == user.id)
 
     assert isinstance(item, User)
@@ -27,8 +27,8 @@ async def test_get_users_ordered_by_username(session: AsyncSession):
     assert isinstance(item.is_admin, bool)
 
 
-async def test_get_users_ordered_by_username_ordering(session: AsyncSession):
-    session.add_all(
+async def test_get_users_ordered_by_username_ordering(db_session: AsyncSession):
+    db_session.add_all(
         [
             User(
                 email="zeta@example.com",
@@ -46,9 +46,9 @@ async def test_get_users_ordered_by_username_ordering(session: AsyncSession):
             ),
         ]
     )
-    await session.commit()
+    await db_session.commit()
 
-    result = await get_users_ordered_by_username(session)
+    result = await get_users_ordered_by_username(db_session)
 
     usernames = [user.username for user in result]
     assert usernames == sorted(usernames)
@@ -57,10 +57,10 @@ async def test_get_users_ordered_by_username_ordering(session: AsyncSession):
     assert alpha_index < zeta_index
 
 
-async def test_get_users_ordered_by_username_read_only(session: AsyncSession):
-    before_count = await session.scalar(select(func.count()).select_from(User))
+async def test_get_users_ordered_by_username_read_only(db_session: AsyncSession):
+    before_count = await db_session.scalar(select(func.count()).select_from(User))
 
-    _ = await get_users_ordered_by_username(session)
+    _ = await get_users_ordered_by_username(db_session)
 
-    after_count = await session.scalar(select(func.count()).select_from(User))
+    after_count = await db_session.scalar(select(func.count()).select_from(User))
     assert before_count == after_count

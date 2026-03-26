@@ -19,18 +19,18 @@ from ..workout_exercise.utilities import create_workout_exercise
 from .utilities import create_set
 
 
-async def test_update_set(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
-    exercise = await create_exercise(session, name="Bench Press")
+async def test_update_set(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Bench Press")
     workout_exercise = await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
     )
     set_ = await create_set(
-        session,
+        db_session,
         workout_exercise_id=workout_exercise.id,
         set_number=1,
         reps=10,
@@ -50,10 +50,10 @@ async def test_update_set(session: AsyncSession):
             unit=SetUnit.kg,
             notes="Updated set",
         ),
-        db=session,
+        db_session=db_session,
     )
 
-    set_ = await session.get(Set, set_.id)
+    set_ = await db_session.get(Set, set_.id)
 
     assert set_ is not None
     assert set_.reps == 12
@@ -62,7 +62,7 @@ async def test_update_set(session: AsyncSession):
     assert set_.notes == "Updated set"
 
 
-async def test_update_set_workout_not_found(session: AsyncSession):
+async def test_update_set_workout_not_found(db_session: AsyncSession):
     with pytest.raises(WorkoutNotFound):
         await update_set(
             workout_id=1,
@@ -70,14 +70,14 @@ async def test_update_set_workout_not_found(session: AsyncSession):
             set_id=3,
             user_id=4,
             req=UpdateSetRequest(),
-            db=session,
+            db_session=db_session,
         )
 
 
-async def test_update_set_workout_not_allowed(session: AsyncSession):
-    user_1 = await create_user(session, username="user_1")
-    user_2 = await create_user(session, username="user_2")
-    workout = await create_workout(session, user_id=user_2.id)
+async def test_update_set_workout_not_allowed(db_session: AsyncSession):
+    user_1 = await create_user(db_session, username="user_1")
+    user_2 = await create_user(db_session, username="user_2")
+    workout = await create_workout(db_session, user_id=user_2.id)
 
     with pytest.raises(WorkoutNotFound):
         await update_set(
@@ -86,16 +86,16 @@ async def test_update_set_workout_not_allowed(session: AsyncSession):
             set_id=3,
             user_id=user_1.id,
             req=UpdateSetRequest(),
-            db=session,
+            db_session=db_session,
         )
 
 
-async def test_update_set_not_found(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
-    exercise = await create_exercise(session, name="Bench Press")
+async def test_update_set_not_found(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Bench Press")
     workout_exercise = await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
@@ -108,22 +108,22 @@ async def test_update_set_not_found(session: AsyncSession):
             set_id=3,
             user_id=user.id,
             req=UpdateSetRequest(),
-            db=session,
+            db_session=db_session,
         )
 
 
-async def test_update_set_no_changes(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
-    exercise = await create_exercise(session, name="Bench Press")
+async def test_update_set_no_changes(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Bench Press")
     workout_exercise = await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
     )
     set_ = await create_set(
-        session,
+        db_session,
         workout_exercise_id=workout_exercise.id,
         set_number=1,
         reps=10,
@@ -138,10 +138,10 @@ async def test_update_set_no_changes(session: AsyncSession):
         set_id=set_.id,
         user_id=user.id,
         req=UpdateSetRequest(),
-        db=session,
+        db_session=db_session,
     )
 
-    set_ = await session.get(Set, set_.id)
+    set_ = await db_session.get(Set, set_.id)
 
     assert set_ is not None
     assert set_.reps == 10
@@ -150,18 +150,18 @@ async def test_update_set_no_changes(session: AsyncSession):
     assert set_.notes == "First set"
 
 
-async def test_update_set_no_reps(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
-    exercise = await create_exercise(session, name="Bench Press")
+async def test_update_set_no_reps(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Bench Press")
     workout_exercise = await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
     )
     set_ = await create_set(
-        session,
+        db_session,
         workout_exercise_id=workout_exercise.id,
         set_number=1,
         reps=10,
@@ -180,10 +180,10 @@ async def test_update_set_no_reps(session: AsyncSession):
             unit=SetUnit.kg,
             notes="Updated set",
         ),
-        db=session,
+        db_session=db_session,
     )
 
-    set_ = await session.get(Set, set_.id)
+    set_ = await db_session.get(Set, set_.id)
 
     assert set_ is not None
     assert set_.reps == 10
@@ -192,18 +192,18 @@ async def test_update_set_no_reps(session: AsyncSession):
     assert set_.notes == "Updated set"
 
 
-async def test_update_set_no_weight(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
-    exercise = await create_exercise(session, name="Bench Press")
+async def test_update_set_no_weight(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Bench Press")
     workout_exercise = await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
     )
     set_ = await create_set(
-        session,
+        db_session,
         workout_exercise_id=workout_exercise.id,
         set_number=1,
         reps=10,
@@ -222,10 +222,10 @@ async def test_update_set_no_weight(session: AsyncSession):
             unit=SetUnit.kg,
             notes="Updated set",
         ),
-        db=session,
+        db_session=db_session,
     )
 
-    set_ = await session.get(Set, set_.id)
+    set_ = await db_session.get(Set, set_.id)
 
     assert set_ is not None
     assert set_.reps == 12
@@ -234,18 +234,18 @@ async def test_update_set_no_weight(session: AsyncSession):
     assert set_.notes == "Updated set"
 
 
-async def test_update_set_no_unit(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
-    exercise = await create_exercise(session, name="Bench Press")
+async def test_update_set_no_unit(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Bench Press")
     workout_exercise = await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
     )
     set_ = await create_set(
-        session,
+        db_session,
         workout_exercise_id=workout_exercise.id,
         set_number=1,
         reps=10,
@@ -264,10 +264,10 @@ async def test_update_set_no_unit(session: AsyncSession):
             weight=Decimal(150),
             notes="Updated set",
         ),
-        db=session,
+        db_session=db_session,
     )
 
-    set_ = await session.get(Set, set_.id)
+    set_ = await db_session.get(Set, set_.id)
 
     assert set_ is not None
     assert set_.reps == 12
@@ -276,18 +276,18 @@ async def test_update_set_no_unit(session: AsyncSession):
     assert set_.notes == "Updated set"
 
 
-async def test_update_set_no_notes(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
-    exercise = await create_exercise(session, name="Bench Press")
+async def test_update_set_no_notes(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Bench Press")
     workout_exercise = await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
     )
     set_ = await create_set(
-        session,
+        db_session,
         workout_exercise_id=workout_exercise.id,
         set_number=1,
         reps=10,
@@ -306,10 +306,10 @@ async def test_update_set_no_notes(session: AsyncSession):
             weight=Decimal(150),
             unit=SetUnit.kg,
         ),
-        db=session,
+        db_session=db_session,
     )
 
-    set_ = await session.get(Set, set_.id)
+    set_ = await db_session.get(Set, set_.id)
 
     assert set_ is not None
     assert set_.reps == 12
@@ -318,18 +318,18 @@ async def test_update_set_no_notes(session: AsyncSession):
     assert set_.notes == "First set"
 
 
-async def test_update_set_null_values(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
-    exercise = await create_exercise(session, name="Bench Press")
+async def test_update_set_null_values(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Bench Press")
     workout_exercise = await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
     )
     set_ = await create_set(
-        session,
+        db_session,
         workout_exercise_id=workout_exercise.id,
         set_number=1,
         reps=10,
@@ -349,10 +349,10 @@ async def test_update_set_null_values(session: AsyncSession):
             unit=None,
             notes=None,
         ),
-        db=session,
+        db_session=db_session,
     )
 
-    set_ = await session.get(Set, set_.id)
+    set_ = await db_session.get(Set, set_.id)
 
     assert set_ is not None
     assert set_.reps is None

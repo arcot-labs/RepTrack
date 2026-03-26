@@ -15,7 +15,7 @@ from ..utilities import get_admin_user_public
 
 
 async def test_create_feedback(
-    session: AsyncSession,
+    db_session: AsyncSession,
     mock_github_svc: AsyncMock,
     settings: Settings,
     monkeypatch: pytest.MonkeyPatch,
@@ -30,7 +30,7 @@ async def test_create_feedback(
     store_files_mock = AsyncMock(return_value=stored_files)
     monkeypatch.setattr("app.services.feedback.store_files", store_files_mock)
 
-    user = await get_admin_user_public(session, settings)
+    user = await get_admin_user_public(db_session, settings)
     upload_file = UploadFile(filename="screen.png", file=AsyncMock())
     request = CreateFeedbackRequest(
         type=FeedbackType.feedback,
@@ -43,13 +43,15 @@ async def test_create_feedback(
     await create_feedback(
         user=user,
         req=request,
-        db=session,
+        db_session=db_session,
         github_svc=mock_github_svc,
         settings=settings,
     )
 
     feedback = (
-        await session.execute(select(Feedback).where(Feedback.title == request.title))
+        await db_session.execute(
+            select(Feedback).where(Feedback.title == request.title)
+        )
     ).scalar_one()
     assert feedback.user_id == user.id
     assert feedback.type == request.type
@@ -69,7 +71,7 @@ async def test_create_feedback(
 
 
 async def test_create_feedback_no_files(
-    session: AsyncSession,
+    db_session: AsyncSession,
     mock_github_svc: AsyncMock,
     settings: Settings,
     monkeypatch: pytest.MonkeyPatch,
@@ -77,7 +79,7 @@ async def test_create_feedback_no_files(
     store_files_mock = AsyncMock(return_value=[])
     monkeypatch.setattr("app.services.feedback.store_files", store_files_mock)
 
-    user = await get_admin_user_public(session, settings)
+    user = await get_admin_user_public(db_session, settings)
     request = CreateFeedbackRequest(
         type=FeedbackType.feature,
         url="https://example.com/feature",
@@ -88,13 +90,15 @@ async def test_create_feedback_no_files(
     await create_feedback(
         user=user,
         req=request,
-        db=session,
+        db_session=db_session,
         github_svc=mock_github_svc,
         settings=settings,
     )
 
     feedback = (
-        await session.execute(select(Feedback).where(Feedback.title == request.title))
+        await db_session.execute(
+            select(Feedback).where(Feedback.title == request.title)
+        )
     ).scalar_one()
     assert feedback.files == []
 

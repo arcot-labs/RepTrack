@@ -1,4 +1,4 @@
-import { AdminService } from '@/api/generated'
+import { AccessRequestService } from '@/api/generated'
 import { AccessRequestStatusSchema } from '@/api/generated/schemas.gen'
 import type {
     AccessRequestPublic,
@@ -73,6 +73,7 @@ export function AccessRequestsTable({
     onReloadRequests,
 }: AccessRequestsTableProps) {
     const { user } = useSession()
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
     const [isLoadingRequestIds, setIsLoadingRequestIds] = useState<Set<number>>(
         new Set()
     )
@@ -117,14 +118,15 @@ export function AccessRequestsTable({
     ) => {
         setIsLoadingRequestIds((prev) => new Set(prev).add(request.id))
         try {
-            const { error } = await AdminService.updateAccessRequestStatus({
-                path: {
-                    access_request_id: request.id,
-                },
-                body: {
-                    status: status,
-                },
-            })
+            const { error } =
+                await AccessRequestService.updateAccessRequestStatus({
+                    path: {
+                        access_request_id: request.id,
+                    },
+                    body: {
+                        status: status,
+                    },
+                })
             if (error) {
                 await handleApiError(error, {
                     httpErrorHandlers: {

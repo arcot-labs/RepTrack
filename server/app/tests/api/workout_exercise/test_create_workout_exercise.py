@@ -31,7 +31,7 @@ async def _make_request(
     return await make_http_request(
         client,
         method=HttpMethod.POST,
-        endpoint=f"/api/workout-exercises/{workout_id}/exercises",
+        endpoint=f"/api/workouts/{workout_id}/exercises",
         json={
             "exercise_id": exercise_id,
             "notes": notes,
@@ -42,14 +42,14 @@ async def _make_request(
 # 204
 async def test_create_workout_exercise(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
 
-    admin = await get_admin(session, settings)
-    workout = await create_workout(session, user_id=admin.id)
-    exercise = await create_exercise(session, name="Bench Press")
+    admin = await get_admin(db_session, settings)
+    workout = await create_workout(db_session, user_id=admin.id)
+    exercise = await create_exercise(db_session, name="Bench Press")
 
     resp = await _make_request(
         client,
@@ -94,13 +94,13 @@ async def test_create_workout_exercise_workout_not_found(
 # 404
 async def test_create_workout_exercise_exercise_not_found(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
 
-    admin = await get_admin(session, settings)
-    workout = await create_workout(session, user_id=admin.id)
+    admin = await get_admin(db_session, settings)
+    workout = await create_workout(db_session, user_id=admin.id)
 
     resp = await _make_request(
         client,
@@ -116,14 +116,14 @@ async def test_create_workout_exercise_exercise_not_found(
 # 404
 async def test_create_workout_exercise_workout_not_allowed(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    user = await create_user(session)
+    user = await create_user(db_session)
 
-    workout = await create_workout(session, user_id=user.id)
-    exercise = await create_exercise(session, name="Squat")
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Squat")
 
     resp = await _make_request(
         client,
@@ -139,15 +139,15 @@ async def test_create_workout_exercise_workout_not_allowed(
 # 404
 async def test_create_workout_exercise_exercise_not_allowed(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    admin = await get_admin(session, settings)
-    user = await create_user(session)
+    admin = await get_admin(db_session, settings)
+    user = await create_user(db_session)
 
-    workout = await create_workout(session, user_id=admin.id)
-    exercise = await create_exercise(session, name="Deadlift", user_id=user.id)
+    workout = await create_workout(db_session, user_id=admin.id)
+    exercise = await create_exercise(db_session, name="Deadlift", user_id=user.id)
 
     resp = await _make_request(
         client,
@@ -163,24 +163,24 @@ async def test_create_workout_exercise_exercise_not_allowed(
 # 409
 async def test_create_workout_exercise_position_conflict(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
     monkeypatch: MonkeyPatch,
 ):
     await login_admin(client, settings)
 
-    admin = await get_admin(session, settings)
-    workout = await create_workout(session, user_id=admin.id)
-    exercise = await create_exercise(session, name="Row")
+    admin = await get_admin(db_session, settings)
+    workout = await create_workout(db_session, user_id=admin.id)
+    exercise = await create_exercise(db_session, name="Row")
 
     await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
     )
 
-    async def mock_get_next_position(workout_id: int, db: AsyncSession) -> int:
+    async def mock_get_next_position(workout_id: int, db_session: AsyncSession) -> int:
         return 1
 
     monkeypatch.setattr(

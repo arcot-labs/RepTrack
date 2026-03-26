@@ -1,7 +1,8 @@
 import {
     type AccessRequestPublic,
-    AdminService,
+    AccessRequestService,
     type UserPublic,
+    UserService,
 } from '@/api/generated'
 import { AccessRequestsTable } from '@/components/AccessRequestsTable'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -19,7 +20,8 @@ export function Admin() {
     const loadAccessRequests = async () => {
         setIsLoadingRequests(true)
         try {
-            const { data, error } = await AdminService.getAccessRequests()
+            const { data, error } =
+                await AccessRequestService.getAccessRequests()
             if (error) {
                 await handleApiError(error, {
                     fallbackMessage: 'Failed to fetch access requests',
@@ -43,7 +45,7 @@ export function Admin() {
     const loadUsers = async () => {
         setIsLoadingUsers(true)
         try {
-            const { data, error } = await AdminService.getUsers()
+            const { data, error } = await UserService.getUsers()
             if (error) {
                 await handleApiError(error, {
                     fallbackMessage: 'Failed to fetch users',

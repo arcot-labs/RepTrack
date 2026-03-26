@@ -9,6 +9,7 @@ import { logger } from '@/lib/logger'
 import axios, { AxiosError } from 'axios'
 
 // created for type safety
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
 const refreshUrl = client.buildUrl<RefreshTokenData>({
     url: '/api/auth/refresh-token',
 })

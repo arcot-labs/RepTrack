@@ -42,10 +42,10 @@ async def _get_token[T: (RegistrationToken, PasswordResetToken)](
     token_str: str,
     model: type[T],
     load_option: InstrumentedAttribute[Any],
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> T | None:
     token_prefix = token_str[:TOKEN_PREFIX_LENGTH]
-    tokens = await get_tokens_by_prefix(model, load_option, token_prefix, db)
+    tokens = await get_tokens_by_prefix(model, load_option, token_prefix, db_session)
     for token in tokens:
         if verify_secret(token_str, token.token_hash):
             return token
@@ -53,31 +53,31 @@ async def _get_token[T: (RegistrationToken, PasswordResetToken)](
 
 async def get_registration_token(
     token_str: str,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> RegistrationToken | None:
     return await _get_token(
         token_str,
         model=RegistrationToken,
         load_option=RegistrationToken.access_request,
-        db=db,
+        db_session=db_session,
     )
 
 
 async def get_password_reset_token(
     token_str: str,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> PasswordResetToken | None:
     return await _get_token(
         token_str,
         model=PasswordResetToken,
         load_option=PasswordResetToken.user,
-        db=db,
+        db_session=db_session,
     )
 
 
 async def expire_existing_registration_tokens(
     access_request_id: int,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> None:
     logger.info(
         f"Expiring existing registration tokens for access request {access_request_id}"
@@ -85,19 +85,19 @@ async def expire_existing_registration_tokens(
     await expire_tokens(
         RegistrationToken,
         [RegistrationToken.access_request_id == access_request_id],
-        db,
+        db_session,
     )
 
 
 async def expire_existing_password_reset_tokens(
     user_id: int,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> None:
     logger.info(f"Expiring existing password reset tokens for user {user_id}")
     await expire_tokens(
         PasswordResetToken,
         [PasswordResetToken.user_id == user_id],
-        db,
+        db_session,
     )
 
 
@@ -138,9 +138,9 @@ def create_password_reset_token(
 async def authenticate_user(
     identifier: str,
     password: str,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> User | None:
-    user = await get_user_by_identifier(identifier, db)
+    user = await get_user_by_identifier(identifier, db_session)
     if not user or not verify_secret(password, user.password_hash):
         return None
     return user

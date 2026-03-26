@@ -25,23 +25,23 @@ async def _make_request(
     return await make_http_request(
         client,
         method=HttpMethod.DELETE,
-        endpoint=f"/api/workout-exercises/{workout_id}/exercises/{workout_exercise_id}",
+        endpoint=f"/api/workouts/{workout_id}/exercises/{workout_exercise_id}",
     )
 
 
 # 204
 async def test_delete_workout_exercise(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
 
-    admin = await get_admin(session, settings)
-    workout = await create_workout(session, user_id=admin.id)
-    exercise = await create_exercise(session, name="Pull-up")
+    admin = await get_admin(db_session, settings)
+    workout = await create_workout(db_session, user_id=admin.id)
+    exercise = await create_exercise(db_session, name="Pull-up")
     workout_exercise = await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
@@ -74,7 +74,7 @@ async def test_delete_workout_exercise_not_logged_in(
 # 404
 async def test_delete_workout_exercise_workout_not_found(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
@@ -93,13 +93,13 @@ async def test_delete_workout_exercise_workout_not_found(
 # 404
 async def test_delete_workout_exercise_not_found(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
 
-    admin = await get_admin(session, settings)
-    workout = await create_workout(session, user_id=admin.id)
+    admin = await get_admin(db_session, settings)
+    workout = await create_workout(db_session, user_id=admin.id)
 
     resp = await _make_request(
         client,
@@ -115,13 +115,13 @@ async def test_delete_workout_exercise_not_found(
 # 404
 async def test_delete_workout_exercise_workout_not_allowed(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    user = await create_user(session)
+    user = await create_user(db_session)
 
-    workout = await create_workout(session, user_id=user.id)
+    workout = await create_workout(db_session, user_id=user.id)
 
     resp = await _make_request(
         client,

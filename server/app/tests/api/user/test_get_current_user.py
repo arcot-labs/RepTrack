@@ -53,12 +53,14 @@ async def test_get_current_user_invalid_cookie(client: AsyncClient, settings: Se
 
 # 401
 async def test_get_current_user_deleted_user(
-    client: AsyncClient, session: AsyncSession, settings: Settings
+    client: AsyncClient, db_session: AsyncSession, settings: Settings
 ):
     await login_admin(client, settings)
 
-    await session.execute(delete(User).where(User.username == settings.admin.username))
-    await session.commit()
+    await db_session.execute(
+        delete(User).where(User.username == settings.admin.username)
+    )
+    await db_session.commit()
 
     resp = await _make_request(client)
 

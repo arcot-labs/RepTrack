@@ -6,8 +6,8 @@ from app.models.schemas.muscle_group import MuscleGroupPublic
 from app.services.muscle_group import get_muscle_groups_ordered_by_name
 
 
-async def test_get_muscle_groups_ordered_by_name(session: AsyncSession):
-    result = await get_muscle_groups_ordered_by_name(session)
+async def test_get_muscle_groups_ordered_by_name(db_session: AsyncSession):
+    result = await get_muscle_groups_ordered_by_name(db_session)
     item = next(r for r in result if r.name == "chest")
 
     assert item is not None
@@ -16,8 +16,8 @@ async def test_get_muscle_groups_ordered_by_name(session: AsyncSession):
     assert "pushing and pressing" in item.description
 
 
-async def test_get_muscle_groups_ordered_by_name_ordering(session: AsyncSession):
-    result = await get_muscle_groups_ordered_by_name(session)
+async def test_get_muscle_groups_ordered_by_name_ordering(db_session: AsyncSession):
+    result = await get_muscle_groups_ordered_by_name(db_session)
 
     names = [mg.name for mg in result]
     # case-insensitive sorting to match db
@@ -26,10 +26,12 @@ async def test_get_muscle_groups_ordered_by_name_ordering(session: AsyncSession)
     assert names[-1] == "upper traps"
 
 
-async def test_read_only(session: AsyncSession):
-    before_count = await session.scalar(select(func.count()).select_from(MuscleGroup))
+async def test_read_only(db_session: AsyncSession):
+    before_count = await db_session.scalar(
+        select(func.count()).select_from(MuscleGroup)
+    )
 
-    await get_muscle_groups_ordered_by_name(session)
+    await get_muscle_groups_ordered_by_name(db_session)
 
-    after_count = await session.scalar(select(func.count()).select_from(MuscleGroup))
+    after_count = await db_session.scalar(select(func.count()).select_from(MuscleGroup))
     assert before_count == after_count

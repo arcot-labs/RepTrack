@@ -26,11 +26,11 @@ async def _make_request(
 # 204
 async def test_delete_exercise(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    created = await create_exercise_via_api(client, session, name="Exercise")
+    created = await create_exercise_via_api(client, db_session, name="Exercise")
 
     resp = await _make_request(client, created.id)
 
@@ -40,9 +40,9 @@ async def test_delete_exercise(
 # 401
 async def test_delete_exercise_not_logged_in(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    system_ex = await create_system_exercise(session, name="System Exercise")
+    system_ex = await create_system_exercise(db_session, name="System Exercise")
 
     resp = await _make_request(client, system_ex.id)
 
@@ -66,11 +66,11 @@ async def test_delete_exercise_not_found(
 # 404
 async def test_delete_exercise_not_allowed(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    system_ex = await create_system_exercise(session, name="System Exercise")
+    system_ex = await create_system_exercise(db_session, name="System Exercise")
 
     resp = await _make_request(client, system_ex.id)
 

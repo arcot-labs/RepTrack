@@ -7,11 +7,11 @@ from app.models.errors import InvalidCredentials
 from app.services.auth import login
 
 
-async def test_login(session: AsyncSession, settings: Settings):
+async def test_login(db_session: AsyncSession, settings: Settings):
     result = await login(
         identifier=settings.admin.username,
         password=settings.admin.password,
-        db=session,
+        db_session=db_session,
         settings=settings,
     )
     payload = jwt.decode(
@@ -24,11 +24,11 @@ async def test_login(session: AsyncSession, settings: Settings):
     assert "exp" in payload
 
 
-async def test_login_with_email(session: AsyncSession, settings: Settings):
+async def test_login_with_email(db_session: AsyncSession, settings: Settings):
     result = await login(
         identifier=settings.admin.email,
         password=settings.admin.password,
-        db=session,
+        db_session=db_session,
         settings=settings,
     )
     payload = jwt.decode(
@@ -41,21 +41,21 @@ async def test_login_with_email(session: AsyncSession, settings: Settings):
     assert "exp" in payload
 
 
-async def test_login_user_not_found(session: AsyncSession, settings: Settings):
+async def test_login_user_not_found(db_session: AsyncSession, settings: Settings):
     with pytest.raises(InvalidCredentials):
         await login(
             identifier="non_existent_user",
             password="some_password",
-            db=session,
+            db_session=db_session,
             settings=settings,
         )
 
 
-async def test_login_invalid_password(session: AsyncSession, settings: Settings):
+async def test_login_invalid_password(db_session: AsyncSession, settings: Settings):
     with pytest.raises(InvalidCredentials):
         await login(
             identifier=settings.admin.username,
             password="some_password",
-            db=session,
+            db_session=db_session,
             settings=settings,
         )

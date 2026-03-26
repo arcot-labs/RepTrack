@@ -48,7 +48,7 @@ export function DataTable<TData, TValue>({
     lastColumnPaddingExcludeIds = ['actions'],
 }: DataTableProps<TData, TValue>) {
     const [rowSelection, setRowSelection] = useState({})
-    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+    const [columnVisibility, setColumnVisibility] = useState(
         initialColumnVisibility ?? {}
     )
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
