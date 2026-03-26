@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.user import User
 from app.models.schemas.user import UserPublic
-from app.services.admin import get_users
+from app.services.user import get_users
 
 
 async def test_get_users(db_session: AsyncSession):

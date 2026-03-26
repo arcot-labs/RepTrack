@@ -18,7 +18,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: Record<string, unknown>;
 };
 
-export class AdminService {
+export class AccessRequestService {
     /**
      * Get Access Requests Endpoint
      */
@@ -30,7 +30,7 @@ export class AdminService {
                     name: 'access_token',
                     type: 'apiKey'
                 }],
-            url: '/api/admin/access-requests',
+            url: '/api/access-requests',
             ...options
         });
     }
@@ -45,28 +45,12 @@ export class AdminService {
                     name: 'access_token',
                     type: 'apiKey'
                 }],
-            url: '/api/admin/access-requests/{access_request_id}',
+            url: '/api/access-requests/{access_request_id}',
             ...options,
             headers: {
                 'Content-Type': 'application/json',
                 ...options.headers
             }
-        });
-    }
-    
-    /**
-     * Get Users Endpoint
-     */
-    public static getUsers<ThrowOnError extends boolean = false>(options?: Options<GetUsersData, ThrowOnError>) {
-        return (options?.client ?? client).get<GetUsersResponses, GetUsersErrors, ThrowOnError>({
-            responseType: 'json',
-            security: [{
-                    in: 'cookie',
-                    name: 'access_token',
-                    type: 'apiKey'
-                }],
-            url: '/api/admin/users',
-            ...options
         });
     }
 }
@@ -459,6 +443,22 @@ export class UserService {
                     type: 'apiKey'
                 }],
             url: '/api/users/current',
+            ...options
+        });
+    }
+    
+    /**
+     * Get Users Endpoint
+     */
+    public static getUsers<ThrowOnError extends boolean = false>(options?: Options<GetUsersData, ThrowOnError>) {
+        return (options?.client ?? client).get<GetUsersResponses, GetUsersErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{
+                    in: 'cookie',
+                    name: 'access_token',
+                    type: 'apiKey'
+                }],
+            url: '/api/users',
             ...options
         });
     }

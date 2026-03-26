@@ -27,7 +27,7 @@ async def _make_request(
     return await make_http_request(
         client,
         method=HttpMethod.PATCH,
-        endpoint=f"/api/admin/access-requests/{access_request_id}",
+        endpoint=f"/api/access-requests/{access_request_id}",
         json={
             "status": status_value.value,
         },

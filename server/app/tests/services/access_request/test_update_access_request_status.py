@@ -11,7 +11,7 @@ from app.models.database.access_request import AccessRequest
 from app.models.database.registration_token import RegistrationToken
 from app.models.enums import AccessRequestStatus
 from app.models.errors import AccessRequestNotFound, AccessRequestNotPending
-from app.services.admin import update_access_request_status
+from app.services.access_request import update_access_request_status
 
 from ..utilities import get_admin_user_public
 

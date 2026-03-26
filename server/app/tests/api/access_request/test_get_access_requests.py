@@ -15,12 +15,12 @@ async def _make_request(client: AsyncClient):
     return await make_http_request(
         client,
         method=HttpMethod.GET,
-        endpoint="/api/admin/users",
+        endpoint="/api/access-requests",
     )
 
 
 # 200
-async def test_get_users(client: AsyncClient, settings: Settings):
+async def test_get_access_requests(client: AsyncClient, settings: Settings):
     await login_admin(client, settings)
     resp = await _make_request(client)
 
@@ -30,12 +30,9 @@ async def test_get_users(client: AsyncClient, settings: Settings):
     for item in body:  # type: ignore
         UserPublic.model_validate(item)
 
-    usernames = {item["username"] for item in body}  # type: ignore
-    assert settings.admin.username in usernames
-
 
 # 401
-async def test_get_users_not_logged_in(client: AsyncClient):
+async def test_get_access_requests_not_logged_in(client: AsyncClient):
     resp = await _make_request(client)
 
     assert resp.status_code == status.HTTP_401_UNAUTHORIZED
@@ -44,7 +41,7 @@ async def test_get_users_not_logged_in(client: AsyncClient):
 
 
 # 403
-async def test_get_users_non_admin_user(
+async def test_get_access_requests_non_admin_user(
     client: AsyncClient, db_session: AsyncSession, settings: Settings
 ):
     await db_session.execute(

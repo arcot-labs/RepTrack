@@ -11,22 +11,21 @@ from app.models.schemas.access_request import (
 )
 from app.models.schemas.errors import ErrorResponseModel
 from app.models.schemas.user import UserPublic
-from app.services.admin import (
+from app.services.access_request import (
     get_access_requests,
-    get_users,
     update_access_request_status,
 )
 from app.services.email import EmailService, get_email_service
 
 api_router = APIRouter(
-    prefix="/admin",
-    tags=["Admin"],
+    prefix="/access-requests",
+    tags=["Access Request"],
     dependencies=[Depends(get_current_admin)],
 )
 
 
 @api_router.get(
-    "/access-requests",
+    "",
     operation_id="getAccessRequests",
     responses={
         status.HTTP_401_UNAUTHORIZED: ErrorResponseModel,
@@ -40,7 +39,7 @@ async def get_access_requests_endpoint(
 
 
 @api_router.patch(
-    "/access-requests/{access_request_id}",
+    "/{access_request_id}",
     operation_id="updateAccessRequestStatus",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
@@ -68,17 +67,3 @@ async def update_access_request_status_endpoint(
         email_svc=email_svc,
         settings=settings,
     )
-
-
-@api_router.get(
-    "/users",
-    operation_id="getUsers",
-    responses={
-        status.HTTP_401_UNAUTHORIZED: ErrorResponseModel,
-        status.HTTP_403_FORBIDDEN: ErrorResponseModel,
-    },
-)
-async def get_users_endpoint(
-    db_session: Annotated[AsyncSession, Depends(get_db_session)],
-) -> list[UserPublic]:
-    return await get_users(db_session)

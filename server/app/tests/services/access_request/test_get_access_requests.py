@@ -7,7 +7,7 @@ from app.models.database.access_request import AccessRequest
 from app.models.database.user import User
 from app.models.enums import AccessRequestStatus
 from app.models.schemas.access_request import AccessRequestPublic, ReviewerPublic
-from app.services.admin import get_access_requests
+from app.services.access_request import get_access_requests
 
 
 async def test_get_access_requests(

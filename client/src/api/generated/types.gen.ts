@@ -647,7 +647,7 @@ export type GetAccessRequestsData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/admin/access-requests';
+    url: '/api/access-requests';
 };
 
 export type GetAccessRequestsErrors = {
@@ -683,7 +683,7 @@ export type UpdateAccessRequestStatusData = {
         access_request_id: number;
     };
     query?: never;
-    url: '/api/admin/access-requests/{access_request_id}';
+    url: '/api/access-requests/{access_request_id}';
 };
 
 export type UpdateAccessRequestStatusErrors = {
@@ -719,37 +719,6 @@ export type UpdateAccessRequestStatusResponses = {
 };
 
 export type UpdateAccessRequestStatusResponse = UpdateAccessRequestStatusResponses[keyof UpdateAccessRequestStatusResponses];
-
-export type GetUsersData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/admin/users';
-};
-
-export type GetUsersErrors = {
-    /**
-     * Unauthorized
-     */
-    401: ErrorResponse;
-    /**
-     * Forbidden
-     */
-    403: ErrorResponse;
-};
-
-export type GetUsersError = GetUsersErrors[keyof GetUsersErrors];
-
-export type GetUsersResponses = {
-    /**
-     * Response Getusers
-     *
-     * Successful Response
-     */
-    200: Array<UserPublic>;
-};
-
-export type GetUsersResponse = GetUsersResponses[keyof GetUsersResponses];
 
 export type RequestAccessData = {
     body: RequestAccessRequest;
@@ -1504,6 +1473,37 @@ export type GetCurrentUserResponses = {
 };
 
 export type GetCurrentUserResponse = GetCurrentUserResponses[keyof GetCurrentUserResponses];
+
+export type GetUsersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/users';
+};
+
+export type GetUsersErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+};
+
+export type GetUsersError = GetUsersErrors[keyof GetUsersErrors];
+
+export type GetUsersResponses = {
+    /**
+     * Response Getusers
+     *
+     * Successful Response
+     */
+    200: Array<UserPublic>;
+};
+
+export type GetUsersResponse = GetUsersResponses[keyof GetUsersResponses];
 
 export type CreateWorkoutExerciseData = {
     body: CreateWorkoutExerciseRequest;

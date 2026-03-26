@@ -339,19 +339,6 @@ export const zUpdateAccessRequestStatusData = z.object({
  */
 export const zUpdateAccessRequestStatusResponse = z.void();
 
-export const zGetUsersData = z.object({
-    body: z.never().optional(),
-    path: z.never().optional(),
-    query: z.never().optional()
-});
-
-/**
- * Response Getusers
- *
- * Successful Response
- */
-export const zGetUsersResponse = z.array(zUserPublic);
-
 export const zRequestAccessData = z.object({
     body: zRequestAccessRequest,
     path: z.never().optional(),
@@ -624,6 +611,19 @@ export const zGetCurrentUserData = z.object({
  * Successful Response
  */
 export const zGetCurrentUserResponse = zUserPublic;
+
+export const zGetUsersData = z.object({
+    body: z.never().optional(),
+    path: z.never().optional(),
+    query: z.never().optional()
+});
+
+/**
+ * Response Getusers
+ *
+ * Successful Response
+ */
+export const zGetUsersResponse = z.array(zUserPublic);
 
 export const zCreateWorkoutExerciseData = z.object({
     body: zCreateWorkoutExerciseRequest,
