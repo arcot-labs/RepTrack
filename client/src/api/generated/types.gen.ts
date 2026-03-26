@@ -182,6 +182,32 @@ export type ExerciseBase = {
 };
 
 /**
+ * ExerciseDocument
+ */
+export type ExerciseDocument = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * User Id
+     */
+    user_id: number | null;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description: string | null;
+    /**
+     * Muscle Group Names
+     */
+    muscle_group_names: Array<string>;
+};
+
+/**
  * ExercisePublic
  */
 export type ExercisePublic = {
@@ -355,6 +381,138 @@ export type SearchRequest = {
 };
 
 /**
+ * SearchResults[ExerciseDocument]
+ */
+export type SearchResultsExerciseDocument = {
+    /**
+     * Hits
+     */
+    hits: Array<ExerciseDocument>;
+    /**
+     * Offset
+     */
+    offset?: number | null;
+    /**
+     * Limit
+     */
+    limit?: number | null;
+    /**
+     * Estimatedtotalhits
+     */
+    estimatedTotalHits?: number | null;
+    /**
+     * Processingtimems
+     */
+    processingTimeMs: number;
+    /**
+     * Query
+     */
+    query: string;
+    /**
+     * Facetdistribution
+     */
+    facetDistribution?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Totalpages
+     */
+    totalPages?: number | null;
+    /**
+     * Totalhits
+     */
+    totalHits?: number | null;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Hitsperpage
+     */
+    hitsPerPage?: number | null;
+    /**
+     * Semantichitcount
+     */
+    semanticHitCount?: number | null;
+    /**
+     * Queryvector
+     */
+    queryVector?: Array<number> | null;
+    /**
+     * Performancedetails
+     */
+    performanceDetails?: {
+        [key: string]: unknown;
+    } | null;
+};
+
+/**
+ * SearchResults[MuscleGroupPublic]
+ */
+export type SearchResultsMuscleGroupPublic = {
+    /**
+     * Hits
+     */
+    hits: Array<MuscleGroupPublic>;
+    /**
+     * Offset
+     */
+    offset?: number | null;
+    /**
+     * Limit
+     */
+    limit?: number | null;
+    /**
+     * Estimatedtotalhits
+     */
+    estimatedTotalHits?: number | null;
+    /**
+     * Processingtimems
+     */
+    processingTimeMs: number;
+    /**
+     * Query
+     */
+    query: string;
+    /**
+     * Facetdistribution
+     */
+    facetDistribution?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Totalpages
+     */
+    totalPages?: number | null;
+    /**
+     * Totalhits
+     */
+    totalHits?: number | null;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Hitsperpage
+     */
+    hitsPerPage?: number | null;
+    /**
+     * Semantichitcount
+     */
+    semanticHitCount?: number | null;
+    /**
+     * Queryvector
+     */
+    queryVector?: Array<number> | null;
+    /**
+     * Performancedetails
+     */
+    performanceDetails?: {
+        [key: string]: unknown;
+    } | null;
+};
+
+/**
  * SetPublic
  */
 export type SetPublic = {
@@ -400,6 +558,70 @@ export type SetPublic = {
  * SetUnit
  */
 export type SetUnit = 'kg' | 'lb';
+
+/**
+ * TaskResult
+ */
+export type TaskResult = {
+    /**
+     * Uid
+     */
+    uid: number;
+    /**
+     * Indexuid
+     */
+    indexUid?: string | null;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Type
+     */
+    type: string | {
+        [key: string]: unknown;
+    };
+    /**
+     * Details
+     */
+    details?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Error
+     */
+    error?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Canceledby
+     */
+    canceledBy?: number | null;
+    /**
+     * Duration
+     */
+    duration?: string | null;
+    /**
+     * Enqueuedat
+     */
+    enqueuedAt: string;
+    /**
+     * Startedat
+     */
+    startedAt?: string | null;
+    /**
+     * Finishedat
+     */
+    finishedAt?: string | null;
+    /**
+     * Batchuid
+     */
+    batchUid?: number | null;
+    /**
+     * Custommetadata
+     */
+    customMetadata?: string | null;
+};
 
 /**
  * UpdateAccessRequestStatusRequest
@@ -1225,8 +1447,10 @@ export type GetTaskResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: TaskResult;
 };
+
+export type GetTaskResponse = GetTaskResponses[keyof GetTaskResponses];
 
 export type ReindexData = {
     body?: never;
@@ -1281,8 +1505,10 @@ export type SearchMuscleGroupsResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: SearchResultsMuscleGroupPublic;
 };
+
+export type SearchMuscleGroupsResponse = SearchMuscleGroupsResponses[keyof SearchMuscleGroupsResponses];
 
 export type SearchExercisesData = {
     body: SearchRequest;
@@ -1308,8 +1534,10 @@ export type SearchExercisesResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: SearchResultsExerciseDocument;
 };
+
+export type SearchExercisesResponse = SearchExercisesResponses[keyof SearchExercisesResponses];
 
 export type CreateSetData = {
     body: CreateSetRequest;

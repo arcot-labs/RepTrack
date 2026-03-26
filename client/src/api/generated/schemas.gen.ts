@@ -356,6 +356,57 @@ export const ExerciseBaseSchema = {
     title: 'ExerciseBase'
 } as const;
 
+export const ExerciseDocumentSchema = {
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id'
+        },
+        user_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'User Id'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        muscle_group_names: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Muscle Group Names'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'user_id',
+        'name',
+        'description',
+        'muscle_group_names'
+    ],
+    title: 'ExerciseDocument'
+} as const;
+
 export const ExercisePublicSchema = {
     properties: {
         id: {
@@ -647,6 +698,312 @@ export const SearchRequestSchema = {
     title: 'SearchRequest'
 } as const;
 
+export const SearchResults_ExerciseDocument_Schema = {
+    properties: {
+        hits: {
+            items: {
+                $ref: '#/components/schemas/ExerciseDocument'
+            },
+            type: 'array',
+            title: 'Hits'
+        },
+        offset: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Offset'
+        },
+        limit: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Limit'
+        },
+        estimatedTotalHits: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Estimatedtotalhits'
+        },
+        processingTimeMs: {
+            type: 'integer',
+            title: 'Processingtimems'
+        },
+        query: {
+            type: 'string',
+            title: 'Query'
+        },
+        facetDistribution: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Facetdistribution'
+        },
+        totalPages: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Totalpages'
+        },
+        totalHits: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Totalhits'
+        },
+        page: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Page'
+        },
+        hitsPerPage: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Hitsperpage'
+        },
+        semanticHitCount: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Semantichitcount'
+        },
+        queryVector: {
+            anyOf: [
+                {
+                    items: {
+                        type: 'number'
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Queryvector'
+        },
+        performanceDetails: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Performancedetails'
+        }
+    },
+    type: 'object',
+    required: [
+        'hits',
+        'processingTimeMs',
+        'query'
+    ],
+    title: 'SearchResults[ExerciseDocument]'
+} as const;
+
+export const SearchResults_MuscleGroupPublic_Schema = {
+    properties: {
+        hits: {
+            items: {
+                $ref: '#/components/schemas/MuscleGroupPublic'
+            },
+            type: 'array',
+            title: 'Hits'
+        },
+        offset: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Offset'
+        },
+        limit: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Limit'
+        },
+        estimatedTotalHits: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Estimatedtotalhits'
+        },
+        processingTimeMs: {
+            type: 'integer',
+            title: 'Processingtimems'
+        },
+        query: {
+            type: 'string',
+            title: 'Query'
+        },
+        facetDistribution: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Facetdistribution'
+        },
+        totalPages: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Totalpages'
+        },
+        totalHits: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Totalhits'
+        },
+        page: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Page'
+        },
+        hitsPerPage: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Hitsperpage'
+        },
+        semanticHitCount: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Semantichitcount'
+        },
+        queryVector: {
+            anyOf: [
+                {
+                    items: {
+                        type: 'number'
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Queryvector'
+        },
+        performanceDetails: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Performancedetails'
+        }
+    },
+    type: 'object',
+    required: [
+        'hits',
+        'processingTimeMs',
+        'query'
+    ],
+    title: 'SearchResults[MuscleGroupPublic]'
+} as const;
+
 export const SetPublicSchema = {
     properties: {
         id: {
@@ -738,6 +1095,147 @@ export const SetUnitSchema = {
         'lb'
     ],
     title: 'SetUnit'
+} as const;
+
+export const TaskResultSchema = {
+    properties: {
+        uid: {
+            type: 'integer',
+            title: 'Uid'
+        },
+        indexUid: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Indexuid'
+        },
+        status: {
+            type: 'string',
+            title: 'Status'
+        },
+        type: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                }
+            ],
+            title: 'Type'
+        },
+        details: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Details'
+        },
+        error: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Error'
+        },
+        canceledBy: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Canceledby'
+        },
+        duration: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Duration'
+        },
+        enqueuedAt: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Enqueuedat'
+        },
+        startedAt: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Startedat'
+        },
+        finishedAt: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Finishedat'
+        },
+        batchUid: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Batchuid'
+        },
+        customMetadata: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Custommetadata'
+        }
+    },
+    type: 'object',
+    required: [
+        'uid',
+        'status',
+        'type',
+        'enqueuedAt'
+    ],
+    title: 'TaskResult'
 } as const;
 
 export const UpdateAccessRequestStatusRequestSchema = {

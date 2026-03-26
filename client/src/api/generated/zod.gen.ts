@@ -58,6 +58,17 @@ export const zExerciseBase = z.object({
 });
 
 /**
+ * ExerciseDocument
+ */
+export const zExerciseDocument = z.object({
+    id: z.int(),
+    user_id: z.int().nullable(),
+    name: z.string(),
+    description: z.string().nullable(),
+    muscle_group_names: z.array(z.string())
+});
+
+/**
  * FeedbackType
  */
 export const zFeedbackType = z.enum(['feedback', 'feature']);
@@ -169,6 +180,46 @@ export const zSearchRequest = z.object({
 });
 
 /**
+ * SearchResults[ExerciseDocument]
+ */
+export const zSearchResultsExerciseDocument = z.object({
+    hits: z.array(zExerciseDocument),
+    offset: z.int().nullish(),
+    limit: z.int().nullish(),
+    estimatedTotalHits: z.int().nullish(),
+    processingTimeMs: z.int(),
+    query: z.string(),
+    facetDistribution: z.record(z.string(), z.unknown()).nullish(),
+    totalPages: z.int().nullish(),
+    totalHits: z.int().nullish(),
+    page: z.int().nullish(),
+    hitsPerPage: z.int().nullish(),
+    semanticHitCount: z.int().nullish(),
+    queryVector: z.array(z.number()).nullish(),
+    performanceDetails: z.record(z.string(), z.unknown()).nullish()
+});
+
+/**
+ * SearchResults[MuscleGroupPublic]
+ */
+export const zSearchResultsMuscleGroupPublic = z.object({
+    hits: z.array(zMuscleGroupPublic),
+    offset: z.int().nullish(),
+    limit: z.int().nullish(),
+    estimatedTotalHits: z.int().nullish(),
+    processingTimeMs: z.int(),
+    query: z.string(),
+    facetDistribution: z.record(z.string(), z.unknown()).nullish(),
+    totalPages: z.int().nullish(),
+    totalHits: z.int().nullish(),
+    page: z.int().nullish(),
+    hitsPerPage: z.int().nullish(),
+    semanticHitCount: z.int().nullish(),
+    queryVector: z.array(z.number()).nullish(),
+    performanceDetails: z.record(z.string(), z.unknown()).nullish()
+});
+
+/**
  * SetPublic
  */
 export const zSetPublic = z.object({
@@ -199,6 +250,28 @@ export const zCreateSetRequest = z.object({
     ]).nullish(),
     unit: zSetUnit.nullish(),
     notes: z.string().max(1000).nullish()
+});
+
+/**
+ * TaskResult
+ */
+export const zTaskResult = z.object({
+    uid: z.int(),
+    indexUid: z.string().nullish(),
+    status: z.string(),
+    type: z.union([
+        z.string(),
+        z.record(z.string(), z.unknown())
+    ]),
+    details: z.record(z.string(), z.unknown()).nullish(),
+    error: z.record(z.string(), z.unknown()).nullish(),
+    canceledBy: z.int().nullish(),
+    duration: z.string().nullish(),
+    enqueuedAt: z.iso.datetime(),
+    startedAt: z.iso.datetime().nullish(),
+    finishedAt: z.iso.datetime().nullish(),
+    batchUid: z.int().nullish(),
+    customMetadata: z.string().nullish()
 });
 
 /**
@@ -534,6 +607,11 @@ export const zGetTaskData = z.object({
     query: z.never().optional()
 });
 
+/**
+ * Successful Response
+ */
+export const zGetTaskResponse = zTaskResult;
+
 export const zReindexData = z.object({
     body: z.never().optional(),
     path: z.never().optional(),
@@ -551,11 +629,21 @@ export const zSearchMuscleGroupsData = z.object({
     query: z.never().optional()
 });
 
+/**
+ * Successful Response
+ */
+export const zSearchMuscleGroupsResponse = zSearchResultsMuscleGroupPublic;
+
 export const zSearchExercisesData = z.object({
     body: zSearchRequest,
     path: z.never().optional(),
     query: z.never().optional()
 });
+
+/**
+ * Successful Response
+ */
+export const zSearchExercisesResponse = zSearchResultsExerciseDocument;
 
 export const zCreateSetData = z.object({
     body: zCreateSetRequest,
