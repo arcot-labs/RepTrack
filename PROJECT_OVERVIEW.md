@@ -96,32 +96,61 @@ Basic relationships:
 
 ## API Surface (Current)
 
-- `POST /api/auth/*`: request-access, register, login, refresh-token, logout, forgot/reset-password
-- `GET /api/users/current`: current user
-- `GET/PATCH /api/admin/*`: access request management and user list
-- `GET/POST /api/exercises`, `GET/PATCH/DELETE /api/exercises/{id}`: exercise library CRUD
-- `GET /api/muscle-groups`: system muscle group reference data
-- `POST /api/feedback`: feedback submission
-- `GET /api/health`, `GET /api/health/db`: health checks
+**Auth & onboarding**
+
+- `POST /api/auth/request-access` — submit an access request (returns a friendly message if already approved).
+- `POST /api/auth/register` — consume a registration token and create credentials.
+- `POST /api/auth/login` — issue access + refresh tokens (HTTP-only cookies).
+- `POST /api/auth/refresh-token` — rotate the access token using the refresh cookie.
+- `POST /api/auth/logout` — clear auth cookies.
+- `POST /api/auth/forgot-password` + `POST /api/auth/reset-password` — request and fulfill password-reset tokens.
+
+**User / admin**
+
+- `GET /api/users/current` — returns the authenticated user.
+- `GET /api/users` — admin-only user list.
+- `GET /api/access-requests` — admin-only list of pending/approved access requests.
+- `PATCH /api/access-requests/{access_request_id}` — admin-only status update (generates registration token, emails user, etc.).
+
+**Exercise & catalog**
+
+- `GET /api/exercises` — list the current user's exercises.
+- `POST /api/exercises` — create a new exercise with optional muscle-group tags.
+- `GET /api/exercises/{exercise_id}` — fetch a specific exercise (403 if not owned).
+- `PATCH /api/exercises/{exercise_id}` — update exercise metadata.
+- `DELETE /api/exercises/{exercise_id}` — delete an exercise (owned-only).
+- `GET /api/muscle-groups` — reference data sorted by name.
+
+**Search / indexing**
+
+- `POST /api/search/exercises` — Meilisearch-powered search scoped to the current user.
+- `POST /api/search/muscle-groups` — search muscle groups.
+- `POST /api/search/reindex` — admin-only reindex of exercises + muscle groups.
+- `GET /api/search/tasks/{task_id}` — admin-only Meilisearch task status lookup.
+
+**Feedback & health**
+
+- `POST /api/feedback` — multipart/form-data feedback submission (creates GitHub issue via background task).
+- `GET /api/health` and `GET /api/health/db` — basic API and Postgres liveness checks.
 
 **Workouts**
 
-- `GET /api/workouts` — list current user's workouts
-- `POST /api/workouts` — create a workout
-- `GET /api/workouts/{id}` — get workout with exercises and sets
-- `PATCH /api/workouts/{id}` — update workout (started_at, ended_at, notes)
-- `DELETE /api/workouts/{id}` — delete workout
+- `GET /api/workouts` — list workouts for the current user.
+- `POST /api/workouts` — create a workout shell (started_at, ended_at, notes).
+- `GET /api/workouts/{workout_id}` — full workout with exercises and sets.
+- `PATCH /api/workouts/{workout_id}` — update metadata (started, ended, notes).
+- `DELETE /api/workouts/{workout_id}` — delete a workout (user-owned).
 
-**Workout Exercises**
+**Workout exercises**
 
-- `POST /api/workouts/{workout_id}/exercises` — add an exercise to a workout
-- `DELETE /api/workouts/{workout_id}/exercises/{workout_exercise_id}` — remove exercise from workout
+- `POST /api/workouts/{workout_id}/exercises` — attach an exercise to a workout.
+- `DELETE /api/workouts/{workout_id}/exercises/{workout_exercise_id}` — remove the workout-specific exercise.
 
 **Sets**
 
-- `POST /api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets` — log a set
-- `PATCH /api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}` — update a set
-- `DELETE /api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}` — delete a set
+- `POST /api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets` — log a set for the workout exercise.
+- `PATCH /api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}` — adjust reps/weight.
+- `DELETE /api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}` — delete a set from a workout exercise.
 
 ## Infrastructure & Deployment
 
