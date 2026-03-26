@@ -87,6 +87,10 @@ jobs:
 
                   echo "GH__BACKEND=console" >> .env
 
+                  echo "MS__HOST=" >> .env
+                  echo "MS__PORT=0" >> .env
+                  echo "MS__MASTER_KEY=" >> .env
+
             - name: generate api client
               working-directory: scripts
               run: ./generate_api.sh -f
