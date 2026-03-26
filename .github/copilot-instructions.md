@@ -57,14 +57,21 @@ RepTrack is a full-stack strength-training tracker:
 
 ## Browser Automation
 
-Use `agent-browser` for web automation. Run `agent-browser --help` for all commands.
+Use `agent-browser` for web automation.
+Run `agent-browser --help` for all commands.
+Run `agent-browser` commands from the project root to use the correct config and browser profile.
 
-Core workflow:
+Example workflow (assuming dev servers are running on default ports):
 
-1. `agent-browser open <url>` - Navigate to page
-2. `agent-browser snapshot -i` - Get interactive elements with refs (@e1, @e2)
-3. `agent-browser click @e1` / `fill @e2 "text"` - Interact using refs
-4. Re-snapshot after page changes
+```
+agent-browser open http://localhost:5173
+agent-browser snapshot -i
+agent-browser click @e1
+agent-browser snapshot -i
+agent-browser fill @e2 "hello world"
+agent-browser snapshot -i
+agent-browser close
+```
 
 ## Key Conventions
 
