@@ -687,13 +687,13 @@ export const SearchRequestSchema = {
         },
         limit: {
             type: 'integer',
-            title: 'Limit'
+            title: 'Limit',
+            default: 25
         }
     },
     type: 'object',
     required: [
-        'query',
-        'limit'
+        'query'
     ],
     title: 'SearchRequest'
 } as const;

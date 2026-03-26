@@ -176,7 +176,7 @@ export const zAccessRequestPublic = z.object({
  */
 export const zSearchRequest = z.object({
     query: z.string().min(1).max(255),
-    limit: z.int()
+    limit: z.int().optional().default(25)
 });
 
 /**

@@ -2,10 +2,10 @@ from meilisearch_python_sdk import AsyncClient
 from pytest import MonkeyPatch
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.search import reindex_data
+from app.services.search import reindex
 
 
-async def test_reindex_data(
+async def test_reindex(
     db_session: AsyncSession,
     ms_client: AsyncClient,
     monkeypatch: MonkeyPatch,
@@ -21,6 +21,6 @@ async def test_reindex_data(
     monkeypatch.setattr("app.services.search._index_muscle_groups", fake_muscle_groups)
     monkeypatch.setattr("app.services.search._index_exercises", fake_exercises)
 
-    await reindex_data(db_session, ms_client)
+    await reindex(db_session, ms_client)
 
     assert calls == ["muscle", "exercise"]

@@ -44,7 +44,7 @@ async def test_get_users_not_logged_in(client: AsyncClient):
 
 
 # 403
-async def test_get_users_non_admin_user(
+async def test_get_users_not_admin(
     client: AsyncClient, db_session: AsyncSession, settings: Settings
 ):
     await db_session.execute(

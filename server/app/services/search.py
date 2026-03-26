@@ -28,7 +28,7 @@ async def get_task(
     return await ms_client.get_task(task_id)
 
 
-async def reindex_data(
+async def reindex(
     db_session: AsyncSession,
     ms_client: AsyncClient,
 ):

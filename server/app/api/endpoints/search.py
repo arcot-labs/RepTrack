@@ -19,7 +19,7 @@ from app.models.schemas.search import SearchRequest
 from app.models.schemas.user import UserPublic
 from app.services.search import (
     get_task,
-    reindex_data,
+    reindex,
     search_exercises,
     search_muscle_groups,
 )
@@ -61,7 +61,7 @@ async def reindex_endpoint(
     db_session: Annotated[AsyncSession, Depends(get_db_session)],
     ms_client: Annotated[AsyncClient, Depends(get_ms_client)],
 ):
-    await reindex_data(
+    await reindex(
         db_session=db_session,
         ms_client=ms_client,
     )

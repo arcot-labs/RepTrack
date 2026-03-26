@@ -91,7 +91,7 @@ async def test_update_access_request_status_not_logged_in(client: AsyncClient):
 
 
 # 403
-async def test_update_access_request_status_non_admin_user(
+async def test_update_access_request_status_not_admin(
     client: AsyncClient, db_session: AsyncSession, settings: Settings
 ):
     await db_session.execute(

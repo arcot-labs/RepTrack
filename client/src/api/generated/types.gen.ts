@@ -377,7 +377,7 @@ export type SearchRequest = {
     /**
      * Limit
      */
-    limit: number;
+    limit?: number;
 };
 
 /**
