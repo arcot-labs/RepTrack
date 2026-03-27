@@ -23,8 +23,8 @@ export function AppLayout() {
 
     return (
         <div className="flex min-h-screen flex-col bg-muted">
-            <header className="border-b bg-background">
-                <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
+            <header className="bg-card">
+                <div className="mx-auto flex h-14 items-center justify-between px-2 md:px-4">
                     <div className="flex items-baseline gap-4">
                         <NavLink to="/" className="text-2xl font-bold">
                             RepTrack
@@ -77,10 +77,8 @@ export function AppLayout() {
                 </div>
             </header>
             <main className="flex-1">
-                <div className="mx-auto max-w-6xl px-4 py-6">
-                    <div className="rounded-lg bg-background p-6 shadow-md">
-                        <Outlet />
-                    </div>
+                <div className="mx-auto max-w-7xl p-0 md:p-4">
+                    <Outlet />
                 </div>
             </main>
         </div>
