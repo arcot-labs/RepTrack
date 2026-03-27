@@ -33,10 +33,11 @@ export function DataTableViewOptions<TData>({
                 <Button
                     variant="outline"
                     size="sm"
-                    className="ml-auto hidden h-8 lg:flex"
+                    className="h-8"
+                    aria-label="View options"
                 >
                     <Settings2 />
-                    View
+                    <span className="hidden sm:inline">View</span>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-37.5">

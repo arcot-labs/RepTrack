@@ -17,6 +17,7 @@ export function DataTableToolbar<TData>({
     config,
 }: DataTableToolbarProps<TData>) {
     const isFiltered = table.getState().columnFilters.length > 0
+    const hasSecondaryControls = (config.filters?.length ?? 0) > 0 || isFiltered
     const searchColumn = config.search
         ? table.getColumn(config.search.columnId)
         : undefined
@@ -24,48 +25,65 @@ export function DataTableToolbar<TData>({
         (searchColumn?.getFilterValue() as string | undefined) ?? ''
 
     return (
-        <div className="flex items-center justify-between">
-            <div className="flex flex-1 items-center gap-2">
-                {config.search && (
-                    <Input
-                        placeholder={config.search.placeholder}
-                        value={searchValue}
-                        onChange={(event) =>
-                            searchColumn?.setFilterValue(event.target.value)
-                        }
-                        className={
-                            config.search.className ?? 'h-8 w-37.5 lg:w-62.5'
-                        }
-                    />
-                )}
-                {config.filters?.map((filter) => {
-                    const column = table.getColumn(filter.columnId)
-                    return column ? (
-                        <DataTableFacetedFilter
-                            key={filter.columnId}
-                            column={column}
-                            title={filter.title}
-                            options={filter.options}
-                        />
-                    ) : null
-                })}
-                {isFiltered && (
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                            table.resetColumnFilters()
-                        }}
-                    >
-                        Reset
-                        <X />
-                    </Button>
-                )}
-            </div>
+        <div className="space-y-2">
             <div className="flex items-center gap-2">
+                <div className="min-w-0 flex-1">
+                    {config.search && (
+                        <Input
+                            placeholder={config.search.placeholder}
+                            value={searchValue}
+                            onChange={(event) =>
+                                searchColumn?.setFilterValue(event.target.value)
+                            }
+                            className={config.search.className ?? 'h-8 w-full'}
+                        />
+                    )}
+                </div>
                 {(config.showViewOptions ?? true) && (
                     <DataTableViewOptions table={table} />
                 )}
+                <div className="ml-auto hidden items-center gap-2 sm:flex">
+                    {config.actions?.map((action, index) => (
+                        <Button
+                            key={index}
+                            size="sm"
+                            variant={action.variant ?? 'default'}
+                            onClick={() => void action.onClick()}
+                        >
+                            {action.icon && <action.icon className="size-4" />}
+                            {action.label}
+                        </Button>
+                    ))}
+                </div>
+            </div>
+            {hasSecondaryControls && (
+                <div className="flex flex-wrap items-center gap-2">
+                    {config.filters?.map((filter) => {
+                        const column = table.getColumn(filter.columnId)
+                        return column ? (
+                            <DataTableFacetedFilter
+                                key={filter.columnId}
+                                column={column}
+                                title={filter.title}
+                                options={filter.options}
+                            />
+                        ) : null
+                    })}
+                    {isFiltered && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                                table.resetColumnFilters()
+                            }}
+                        >
+                            Reset
+                            <X />
+                        </Button>
+                    )}
+                </div>
+            )}
+            <div className="flex gap-2 sm:hidden">
                 {config.actions?.map((action, index) => (
                     <Button
                         key={index}
