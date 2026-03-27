@@ -57,6 +57,11 @@ export default defineConfig([
                                 'Use Tooltip from @/components/ui/overrides/tooltip',
                         },
                         {
+                            name: '@/components/ui/card',
+                            message:
+                                'Use Card from @/components/ui/overrides/card',
+                        },
+                        {
                             name: 'sonner',
                             importNames: ['toast'],
                             message:

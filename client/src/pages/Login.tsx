@@ -2,15 +2,15 @@ import { AuthService } from '@/api/generated'
 import { zLoginRequest } from '@/api/generated/zod.gen'
 import { useSession } from '@/auth/session'
 import { Field } from '@/components/forms/Field'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/overrides/button'
 import {
     Card,
     CardContent,
     CardFooter,
     CardHeader,
     CardTitle,
-} from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/overrides/button'
+} from '@/components/ui/overrides/card'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import type { LocationState } from '@/models/location'
@@ -78,11 +78,9 @@ export function Login() {
 
     return (
         <div className="flex h-dvh items-center justify-center bg-muted px-4">
-            <Card className="w-full max-w-sm shadow-md">
-                <CardHeader className="-mb-4">
-                    <CardTitle className="p-0 text-center text-2xl">
-                        Login
-                    </CardTitle>
+            <Card className="w-full max-w-sm rounded-lg! p-2 shadow-md">
+                <CardHeader className="mb-1">
+                    <CardTitle className="text-2xl">Login</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <form
@@ -127,7 +125,7 @@ export function Login() {
                         </Field>
                     </form>
                 </CardContent>
-                <CardFooter className="flex flex-col gap-3">
+                <CardFooter className="mt-2 mb-1 flex flex-col gap-3">
                     <Button
                         form="login-form"
                         className="w-full"

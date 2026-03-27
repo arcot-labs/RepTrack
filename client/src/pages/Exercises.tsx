@@ -5,7 +5,12 @@ import {
     MuscleGroupService,
 } from '@/api/generated'
 import { ExercisesTable } from '@/components/exercises/ExercisesTable'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/overrides/card'
 import { handleApiError } from '@/lib/http'
 import { logger } from '@/lib/logger'
 import { useEffect, useState } from 'react'
@@ -58,11 +63,9 @@ export function Exercises() {
     }, [])
 
     return (
-        <Card className="gap-2">
+        <Card>
             <CardHeader>
-                <CardTitle>
-                    <h1 className="text-xl font-bold">Exercises</h1>
-                </CardTitle>
+                <CardTitle>Exercises</CardTitle>
             </CardHeader>
             <CardContent>
                 <ExercisesTable

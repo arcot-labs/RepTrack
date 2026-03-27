@@ -1,15 +1,15 @@
 import { AuthService } from '@/api/generated'
 import { zRegisterRequest } from '@/api/generated/zod.gen'
 import { Field } from '@/components/forms/Field'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/overrides/button'
 import {
     Card,
     CardContent,
     CardFooter,
     CardHeader,
     CardTitle,
-} from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/overrides/button'
+} from '@/components/ui/overrides/card'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -77,11 +77,9 @@ export function Register() {
 
     return (
         <div className="flex h-dvh items-center justify-center bg-muted px-4">
-            <Card className="w-full max-w-sm shadow-md">
-                <CardHeader className="-mb-4">
-                    <CardTitle className="p-0 text-center text-2xl">
-                        Register
-                    </CardTitle>
+            <Card className="w-full max-w-sm rounded-lg! p-2 shadow-md">
+                <CardHeader className="mb-1">
+                    <CardTitle className="text-2xl">Register</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <form
@@ -157,7 +155,7 @@ export function Register() {
                         </Field>
                     </form>
                 </CardContent>
-                <CardFooter className="flex flex-col gap-3">
+                <CardFooter className="mt-2 mb-1 flex flex-col gap-3">
                     <Button
                         form="register-form"
                         className="w-full"
