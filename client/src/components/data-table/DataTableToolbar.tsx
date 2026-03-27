@@ -26,7 +26,7 @@ export function DataTableToolbar<TData>({
 
     return (
         <div className="space-y-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
                 <div className="min-w-0 flex-1">
                     {config.search && (
                         <Input
@@ -40,21 +40,27 @@ export function DataTableToolbar<TData>({
                     )}
                 </div>
                 {(config.showViewOptions ?? true) && (
-                    <DataTableViewOptions table={table} />
+                    <div className="ms-2">
+                        <DataTableViewOptions table={table} />
+                    </div>
                 )}
-                <div className="ml-auto hidden items-center gap-2 sm:flex">
-                    {config.actions?.map((action, index) => (
-                        <Button
-                            key={index}
-                            size="sm"
-                            variant={action.variant ?? 'default'}
-                            onClick={() => void action.onClick()}
-                        >
-                            {action.icon && <action.icon className="size-4" />}
-                            {action.label}
-                        </Button>
-                    ))}
-                </div>
+                {config.actions && (
+                    <div className="ms-2! ml-auto hidden items-center gap-2 sm:flex">
+                        {config.actions.map((action, index) => (
+                            <Button
+                                key={index}
+                                size="sm"
+                                variant={action.variant ?? 'default'}
+                                onClick={() => void action.onClick()}
+                            >
+                                {action.icon && (
+                                    <action.icon className="size-4" />
+                                )}
+                                {action.label}
+                            </Button>
+                        ))}
+                    </div>
+                )}
             </div>
             {hasSecondaryControls && (
                 <div className="flex flex-wrap items-center gap-2">
