@@ -202,7 +202,7 @@ export function ExercisesTable({
                         <Lock className={`size-3 shrink-0 ${blueText}`} />
                     )}
                     <DataTableTruncatedCell
-                        value={row.original.name}
+                        value={capitalizeWords(row.original.name)}
                         className="max-w-40 min-w-25"
                     />
                 </div>
