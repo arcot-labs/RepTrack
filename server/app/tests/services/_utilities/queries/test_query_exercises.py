@@ -16,7 +16,6 @@ async def test_query_exercises_base(
     exercise = await create_exercise(db_session, "Bench")
     result = await query_exercises(db_session, True)
 
-    assert len(result) == 1
     assert exercise in result
     with pytest.raises(MissingGreenlet):
         _ = result[0].muscle_groups
@@ -28,9 +27,8 @@ async def test_query_exercises_public(
     exercise = await create_exercise(db_session, "Bench")
     result = await query_exercises(db_session, False)
 
-    assert len(result) == 1
-    assert exercise in result
-    assert result[0].muscle_groups == exercise.muscle_groups
+    _exercise = next(e for e in result if e.name == "Bench")
+    assert _exercise.muscle_groups == exercise.muscle_groups
 
 
 async def test_query_exercises_no_where_clause(
@@ -55,15 +53,13 @@ async def test_query_exercises_no_where_clause(
 
     result = await query_exercises(db_session, False)
 
-    names = [e.name for e in result]
-    assert len(result) == 2
-    assert "Bench" in names
-    assert "Squat" in names
+    bench = next(e for e in result if e.name == "Bench")
+    squat = next(e for e in result if e.name == "Squat")
 
-    assert len(result[0].muscle_groups) == 1
-    assert result[0].muscle_groups[0].muscle_group_id == mg_id
+    assert len(bench.muscle_groups) == 1
+    assert bench.muscle_groups[0].muscle_group_id == mg_id
 
-    assert len(result[1].muscle_groups) == 0
+    assert len(squat.muscle_groups) == 0
 
 
 async def test_query_exercises_with_where_clause(

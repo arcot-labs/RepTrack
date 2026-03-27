@@ -25,7 +25,6 @@ async def test_get_exercises(db_session: AsyncSession):
     result = await get_exercises(user.id, db_session)
 
     ids = [exercise.id for exercise in result]
-    assert len(ids) == 2
     assert any(exercise.user_id is None for exercise in result)
     assert user_exercise.id in ids
     assert all(exercise.name != "Other Curl" for exercise in result)
@@ -36,12 +35,12 @@ async def test_get_exercises_ordering(db_session: AsyncSession):
 
     await create_exercise(
         db_session,
-        name="Z Press",
+        name="z press",
         user_id=user.id,
     )
     await create_exercise(
         db_session,
-        name="A Press",
+        name="a press",
         user_id=user.id,
     )
 

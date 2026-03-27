@@ -5,7 +5,12 @@ import {
     UserService,
 } from '@/api/generated'
 import { AccessRequestsTable } from '@/components/AccessRequestsTable'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/overrides/card'
 import { UsersTable } from '@/components/UsersTable'
 import { handleApiError } from '@/lib/http'
 import { logger } from '@/lib/logger'
@@ -67,11 +72,9 @@ export function Admin() {
 
     return (
         <div className="space-y-4">
-            <Card className="gap-2">
+            <Card>
                 <CardHeader>
-                    <CardTitle>
-                        <h1 className="text-xl font-bold">Access Requests</h1>
-                    </CardTitle>
+                    <CardTitle>Access Requests</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <AccessRequestsTable
@@ -82,11 +85,9 @@ export function Admin() {
                     />
                 </CardContent>
             </Card>
-            <Card className="gap-2">
+            <Card>
                 <CardHeader>
-                    <CardTitle>
-                        <h1 className="text-xl font-bold">Users</h1>
-                    </CardTitle>
+                    <CardTitle>Users</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <UsersTable users={users} isLoading={isLoadingUsers} />
