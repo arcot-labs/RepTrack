@@ -21,7 +21,10 @@ export function AppLayout() {
     const { user } = useSession()
 
     return (
-        <div className="flex min-h-screen flex-col bg-muted">
+        <div
+            className="flex min-h-screen flex-col bg-muted"
+            style={{ minHeight: 'min(100dvh, 100vh)' }}
+        >
             <header className="bg-card">
                 <div className="mx-auto flex h-14 items-center justify-between px-2 md:px-4">
                     <div className="flex items-baseline gap-4">
