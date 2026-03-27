@@ -43,9 +43,11 @@ trap cleanup EXIT
 cd "$INFRA_DIR"
 if [ "$INCLUDE_CLIENT_SERVER" = true ]; then
     echo "Starting Docker Compose with client and server"
+    docker compose --env-file "$ENV_DIR/.env" --profile include-client-server pull
     docker compose --env-file "$ENV_DIR/.env" --profile include-client-server up --watch &
 else
     echo "Starting Docker Compose without client and server"
+    docker compose --env-file "$ENV_DIR/.env" pull
     docker compose --env-file "$ENV_DIR/.env" up &
 fi
 
