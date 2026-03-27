@@ -19,11 +19,20 @@ interface DataTablePaginationProps<TData> {
     table: Table<TData>
 }
 
+const getDisplayedPagesText = <TData,>(table: Table<TData>) => {
+    const pageCount = table.getPageCount()
+    if (pageCount === 0) return `Page 1 of 1`
+
+    const pageIndex = table.getState().pagination.pageIndex
+    return `Page ${String(pageIndex + 1)} of ${String(pageCount)}`
+}
+
 const getDisplayedRowsText = <TData,>(table: Table<TData>) => {
+    const totalRows = table.getFilteredRowModel().rows.length
+    if (totalRows === 0) return `0 rows`
+
     const pageIndex = table.getState().pagination.pageIndex
     const pageSize = table.getState().pagination.pageSize
-    const totalRows = table.getFilteredRowModel().rows.length
-
     const startRow = pageIndex * pageSize + 1
     const endRow = Math.min((pageIndex + 1) * pageSize, totalRows)
 
@@ -37,8 +46,7 @@ export function DataTablePagination<TData>({
         <div className="flex items-center gap-2 text-xs md:px-4 md:text-sm">
             <div>
                 <div className="text-muted-foreground">
-                    Page {table.getState().pagination.pageIndex + 1} of{' '}
-                    {table.getPageCount()}
+                    {getDisplayedPagesText(table)}
                 </div>
                 <div className="hidden md:flex">
                     {table
