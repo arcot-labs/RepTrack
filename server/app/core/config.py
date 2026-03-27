@@ -16,6 +16,7 @@ from app.models.schemas.config import (
     GitHubApiSettings,
     GitHubConsoleSettings,
     JWTSettings,
+    MeilisearchSettings,
 )
 
 EmailSettings = (
@@ -36,6 +37,7 @@ class Settings(BaseSettings):
     admin: AdminSettings
     jwt: JWTSettings
     db: DatabaseSettings
+    ms: MeilisearchSettings
     # discriminator with any caps does not work
     email: Annotated[EmailSettings, Field(discriminator="backend")]
     gh: Annotated[GitHubSettings, Field(discriminator="backend")]

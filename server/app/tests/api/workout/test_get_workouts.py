@@ -26,15 +26,15 @@ async def _make_request(client: AsyncClient):
 # 200
 async def test_get_workouts(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    admin = await get_admin(session, settings)
-    user = await create_user(session)
+    admin = await get_admin(db_session, settings)
+    user = await create_user(db_session)
 
-    admin_workout = await create_workout(session, user_id=admin.id)
-    user_workout = await create_workout(session, user_id=user.id)
+    admin_workout = await create_workout(db_session, user_id=admin.id)
+    user_workout = await create_workout(db_session, user_id=user.id)
 
     resp = await _make_request(client)
 

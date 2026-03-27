@@ -36,6 +36,10 @@ jobs:
               working-directory: server
               run: uv sync
 
+            - name: run deptry
+              working-directory: server
+              run: make deptry
+
             - name: run type checks
               working-directory: server
               run: make check

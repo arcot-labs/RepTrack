@@ -16,7 +16,7 @@ from app.services.auth import request_access
 
 
 async def test_request_access(
-    session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+    db_session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     new_email = "newuser@example.com"
     background_tasks = BackgroundTasks()
@@ -25,7 +25,7 @@ async def test_request_access(
         first_name="New",
         last_name="User",
         background_tasks=background_tasks,
-        db=session,
+        db_session=db_session,
         email_svc=mock_email_svc,
         settings=settings,
     )
@@ -41,7 +41,7 @@ async def test_request_access(
 
 
 async def test_request_access_approved(
-    session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+    db_session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     approved_email = "approved@example.com"
     req = AccessRequest(
@@ -50,8 +50,8 @@ async def test_request_access_approved(
         last_name="User",
         status=AccessRequestStatus.APPROVED,
     )
-    session.add(req)
-    await session.commit()
+    db_session.add(req)
+    await db_session.commit()
 
     background_tasks = BackgroundTasks()
     already_approved = await request_access(
@@ -59,7 +59,7 @@ async def test_request_access_approved(
         first_name="Test",
         last_name="User",
         background_tasks=background_tasks,
-        db=session,
+        db_session=db_session,
         email_svc=mock_email_svc,
         settings=settings,
     )
@@ -75,7 +75,7 @@ async def test_request_access_approved(
 
 
 async def test_request_access_existing_user(
-    session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+    db_session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     user = User(
         email="existing@example.com",
@@ -84,8 +84,8 @@ async def test_request_access_existing_user(
         last_name="User",
         password_hash="fakehash",
     )
-    session.add(user)
-    await session.commit()
+    db_session.add(user)
+    await db_session.commit()
 
     background_tasks = BackgroundTasks()
     with pytest.raises(EmailInUse):
@@ -94,7 +94,7 @@ async def test_request_access_existing_user(
             first_name="Test",
             last_name="User",
             background_tasks=background_tasks,
-            db=session,
+            db_session=db_session,
             email_svc=mock_email_svc,
             settings=settings,
         )
@@ -103,12 +103,12 @@ async def test_request_access_existing_user(
 
 
 async def test_request_access_email_matches_username(
-    session: AsyncSession,
+    db_session: AsyncSession,
     mock_email_svc: AsyncMock,
     settings: Settings,
 ):
     collision_identifier = "existing@example.com"
-    session.add(
+    db_session.add(
         User(
             email="different@example.com",
             username=collision_identifier,
@@ -117,7 +117,7 @@ async def test_request_access_email_matches_username(
             password_hash="fakehash",
         )
     )
-    await session.commit()
+    await db_session.commit()
 
     background_tasks = BackgroundTasks()
     with pytest.raises(EmailInUse):
@@ -126,7 +126,7 @@ async def test_request_access_email_matches_username(
             first_name="Test",
             last_name="User",
             background_tasks=background_tasks,
-            db=session,
+            db_session=db_session,
             email_svc=mock_email_svc,
             settings=settings,
         )
@@ -135,7 +135,7 @@ async def test_request_access_email_matches_username(
 
 
 async def test_request_access_pending(
-    session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+    db_session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     req = AccessRequest(
         email="pending@example.com",
@@ -143,8 +143,8 @@ async def test_request_access_pending(
         last_name="User",
         status=AccessRequestStatus.PENDING,
     )
-    session.add(req)
-    await session.commit()
+    db_session.add(req)
+    await db_session.commit()
 
     background_tasks = BackgroundTasks()
     with pytest.raises(AccessRequestPending):
@@ -153,7 +153,7 @@ async def test_request_access_pending(
             first_name="Test",
             last_name="User",
             background_tasks=background_tasks,
-            db=session,
+            db_session=db_session,
             email_svc=mock_email_svc,
             settings=settings,
         )
@@ -162,7 +162,7 @@ async def test_request_access_pending(
 
 
 async def test_request_access_rejected(
-    session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+    db_session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
 ):
     req = AccessRequest(
         email="rejected@example.com",
@@ -170,8 +170,8 @@ async def test_request_access_rejected(
         last_name="User",
         status=AccessRequestStatus.REJECTED,
     )
-    session.add(req)
-    await session.commit()
+    db_session.add(req)
+    await db_session.commit()
 
     background_tasks = BackgroundTasks()
     with pytest.raises(AccessRequestRejected):
@@ -180,7 +180,7 @@ async def test_request_access_rejected(
             first_name="Test",
             last_name="User",
             background_tasks=background_tasks,
-            db=session,
+            db_session=db_session,
             email_svc=mock_email_svc,
             settings=settings,
         )

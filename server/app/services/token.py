@@ -13,9 +13,9 @@ async def get_tokens_by_prefix[T: (RegistrationToken, PasswordResetToken)](
     model: type[T],
     load_option: InstrumentedAttribute[Any],
     prefix: str,
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> Sequence[T]:
-    result = await db.execute(
+    result = await db_session.execute(
         select(model)
         .options(selectinload(load_option))
         .where(model.token_prefix == prefix)
@@ -29,9 +29,9 @@ async def get_tokens_by_prefix[T: (RegistrationToken, PasswordResetToken)](
 async def expire_tokens[T: (RegistrationToken, PasswordResetToken)](
     model: type[T],
     where_clauses: list[Any],
-    db: AsyncSession,
+    db_session: AsyncSession,
 ) -> None:
-    await db.execute(
+    await db_session.execute(
         update(model)
         .where(*where_clauses, model.expires_at > func.now())
         .values(expires_at=func.now())

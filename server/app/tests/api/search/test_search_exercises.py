@@ -1,0 +1,51 @@
+from fastapi import status
+from httpx import AsyncClient
+from meilisearch_python_sdk.models.search import SearchResults
+
+from app.core.config import Settings
+from app.tests.api.search.utilities import reindex_via_api
+
+from ..utilities import HttpMethod, login_admin, make_http_request
+
+
+async def _make_request(
+    client: AsyncClient,
+    query: str,
+    limit: int,
+):
+    return await make_http_request(
+        client,
+        method=HttpMethod.POST,
+        endpoint="/api/search/exercises",
+        json={
+            "query": query,
+            "limit": limit,
+        },
+    )
+
+
+# 200
+async def test_search_exercises(
+    client: AsyncClient,
+    settings: Settings,
+):
+    await login_admin(client, settings)
+
+    await reindex_via_api(client)
+    resp = await _make_request(client, query="test", limit=5)
+
+    assert resp.status_code == status.HTTP_200_OK
+    body = resp.json()
+    results = SearchResults.model_validate(body)  # pyright: ignore[reportUnknownVariableType]
+
+    assert results.query == "test"
+    assert results.limit == 5
+
+
+# 401
+async def test_search_exercises_not_logged_in(client: AsyncClient):
+    resp = await _make_request(client, "", 0)
+
+    assert resp.status_code == status.HTTP_401_UNAUTHORIZED
+    body = resp.json()
+    assert body["detail"] == "Not authenticated"

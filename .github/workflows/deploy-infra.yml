@@ -55,6 +55,9 @@ jobs:
                   echo "DB__USER=${{ secrets.DB__USER }}" >> .env
                   echo "DB__PASSWORD=${{ secrets.DB__PASSWORD }}" >> .env
 
+                  # exclude host & port
+                  echo "MS__MASTER_KEY=${{ secrets.MS__MASTER_KEY }}" >> .env
+
                   echo "EMAIL__BACKEND=smtp" >> .env
                   echo "EMAIL__EMAIL_FROM=${{ secrets.EMAIL__EMAIL_FROM }}" >> .env
                   # exclude host

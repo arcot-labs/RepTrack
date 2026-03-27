@@ -1,26 +1,25 @@
-import { AuthService } from '@/api/generated'
 import { useSession } from '@/auth/session'
-import { FeedbackFormDialog } from '@/components/FeedbackFormDialog'
-import { ModeToggle } from '@/components/ModeToggle'
+import { HeaderActions } from '@/components/HeaderActions'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/overrides/button'
 import { NavItem } from '@/lib/nav'
-import { notify } from '@/lib/notify'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { Menu } from 'lucide-react'
+import { NavLink, Outlet } from 'react-router-dom'
+
+const navLinks = [
+    { to: '/', label: 'Dashboard' },
+    { to: '/exercises', label: 'Exercises' },
+    { to: '/docs', label: 'Docs' },
+]
 
 export function AppLayout() {
-    const { refresh, user } = useSession()
-    const navigate = useNavigate()
-
-    const handleLogout = async () => {
-        const { error } = await AuthService.logout()
-        if (error) {
-            notify.error('Failed to log out')
-            return
-        }
-        notify.success('Logged out')
-        await refresh()
-        void navigate('/login', { replace: true })
-    }
+    const { user } = useSession()
 
     return (
         <div className="flex min-h-screen flex-col bg-muted">
@@ -30,24 +29,50 @@ export function AppLayout() {
                         <NavLink to="/" className="text-2xl font-bold">
                             RepTrack
                         </NavLink>
-                        <nav className="flex items-center gap-4">
-                            <NavItem to="/">Dashboard</NavItem>
-                            <NavItem to="/exercises">Exercises</NavItem>
-                            <NavItem to="/docs">Docs</NavItem>
+                        <nav className="hidden items-center gap-4 md:flex">
+                            {navLinks.map((link) => (
+                                <NavItem key={link.to} to={link.to}>
+                                    {link.label}
+                                </NavItem>
+                            ))}
                             {user?.is_admin && (
                                 <NavItem to="/admin">Admin</NavItem>
                             )}
                         </nav>
                     </div>
                     <div className="flex items-center gap-2">
-                        <ModeToggle />
-                        <FeedbackFormDialog />
-                        <Button
-                            variant="destructive"
-                            onClick={() => void handleLogout()}
-                        >
-                            Logout
-                        </Button>
+                        <div className="md:hidden">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="icon">
+                                        <Menu className="h-4 w-4" />
+                                        <span className="sr-only">
+                                            Open navigation
+                                        </span>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    {navLinks.map((link) => (
+                                        <DropdownMenuItem key={link.to} asChild>
+                                            <NavLink to={link.to}>
+                                                {link.label}
+                                            </NavLink>
+                                        </DropdownMenuItem>
+                                    ))}
+                                    {user?.is_admin && (
+                                        <>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem asChild>
+                                                <NavLink to="/admin">
+                                                    Admin
+                                                </NavLink>
+                                            </DropdownMenuItem>
+                                        </>
+                                    )}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                        <HeaderActions />
                     </div>
                 </div>
             </header>

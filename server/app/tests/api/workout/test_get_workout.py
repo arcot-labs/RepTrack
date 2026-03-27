@@ -27,13 +27,13 @@ async def _make_request(client: AsyncClient, workout_id: int):
 # 200
 async def test_get_workout(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    admin = await get_admin(session, settings)
+    admin = await get_admin(db_session, settings)
 
-    workout = await create_workout(session, user_id=admin.id)
+    workout = await create_workout(db_session, user_id=admin.id)
 
     resp = await _make_request(client, workout.id)
 
@@ -47,11 +47,11 @@ async def test_get_workout(
 # 401
 async def test_get_workout_not_logged_in(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
-    admin = await get_admin(session, settings)
-    workout = await create_workout(session, user_id=admin.id)
+    admin = await get_admin(db_session, settings)
+    workout = await create_workout(db_session, user_id=admin.id)
 
     resp = await _make_request(client, workout.id)
 
@@ -77,13 +77,13 @@ async def test_get_workout_not_found(
 # 404
 async def test_get_workout_not_allowed(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     settings: Settings,
 ):
     await login_admin(client, settings)
-    user = await create_user(session)
+    user = await create_user(db_session)
 
-    workout = await create_workout(session, user_id=user.id)
+    workout = await create_workout(db_session, user_id=user.id)
 
     resp = await _make_request(client, workout.id)
 

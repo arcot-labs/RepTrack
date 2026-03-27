@@ -16,19 +16,19 @@ from ..workout_exercise.utilities import create_workout_exercise
 from .utilities import create_set
 
 
-async def test_delete_set(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
-    exercise = await create_exercise(session, name="Bench Press")
+async def test_delete_set(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Bench Press")
     workout_exercise = await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
     )
 
     set_ = await create_set(
-        session,
+        db_session,
         workout_exercise_id=workout_exercise.id,
         set_number=1,
     )
@@ -38,10 +38,10 @@ async def test_delete_set(session: AsyncSession):
         workout_exercise_id=workout_exercise.id,
         set_id=set_.id,
         user_id=user.id,
-        db=session,
+        db_session=db_session,
     )
 
-    result = await session.execute(
+    result = await db_session.execute(
         select(Set).where(
             Set.id == set_.id,
         )
@@ -49,21 +49,21 @@ async def test_delete_set(session: AsyncSession):
     assert result.scalar_one_or_none() is None
 
 
-async def test_delete_set_workout_not_found(session: AsyncSession):
+async def test_delete_set_workout_not_found(db_session: AsyncSession):
     with pytest.raises(WorkoutNotFound):
         await delete_set(
             workout_id=1,
             workout_exercise_id=2,
             set_id=3,
             user_id=4,
-            db=session,
+            db_session=db_session,
         )
 
 
-async def test_delete_set_workout_not_allowed(session: AsyncSession):
-    user_1 = await create_user(session, username="user_1")
-    user_2 = await create_user(session, username="user_2")
-    workout = await create_workout(session, user_id=user_2.id)
+async def test_delete_set_workout_not_allowed(db_session: AsyncSession):
+    user_1 = await create_user(db_session, username="user_1")
+    user_2 = await create_user(db_session, username="user_2")
+    workout = await create_workout(db_session, user_id=user_2.id)
 
     with pytest.raises(WorkoutNotFound):
         await delete_set(
@@ -71,16 +71,16 @@ async def test_delete_set_workout_not_allowed(session: AsyncSession):
             workout_exercise_id=2,
             set_id=3,
             user_id=user_1.id,
-            db=session,
+            db_session=db_session,
         )
 
 
-async def test_delete_set_not_found(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
-    exercise = await create_exercise(session, name="Bench Press")
+async def test_delete_set_not_found(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
+    exercise = await create_exercise(db_session, name="Bench Press")
     workout_exercise = await create_workout_exercise(
-        session,
+        db_session,
         workout_id=workout.id,
         exercise_id=exercise.id,
         position=1,
@@ -92,5 +92,5 @@ async def test_delete_set_not_found(session: AsyncSession):
             workout_exercise_id=workout_exercise.id,
             set_id=3,
             user_id=user.id,
-            db=session,
+            db_session=db_session,
         )

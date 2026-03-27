@@ -4,15 +4,12 @@ from collections.abc import AsyncGenerator
 import pytest
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import (
-    AsyncConnection,
-    AsyncSession,
-    AsyncTransaction,
-)
+from meilisearch_python_sdk import AsyncClient as MSAsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import create_app
 from app.core.config import Settings, get_settings
-from app.core.dependencies import get_db
+from app.core.dependencies import get_db_session, get_ms_client
 from app.services.email import EmailService, get_email_service
 from app.services.github import GitHubService, get_github_service
 
@@ -30,8 +27,8 @@ def fastapi_app(settings: Settings) -> FastAPI:
 async def client(
     fastapi_app: FastAPI,
     settings: Settings,
-    connection: AsyncConnection,
-    transaction: AsyncTransaction,
+    db_session: AsyncSession,
+    ms_client: MSAsyncClient,
     mock_email_svc: EmailService,
     mock_github_svc: GitHubService,
 ) -> AsyncGenerator[AsyncClient]:
@@ -40,29 +37,26 @@ async def client(
     async def override_get_settings() -> Settings:
         return settings
 
-    async def override_get_db() -> AsyncGenerator[AsyncSession]:
-        async_session = AsyncSession(
-            bind=connection,
-            join_transaction_mode="create_savepoint",
-            expire_on_commit=False,
-        )
-        async with async_session:
-            yield async_session
+    async def override_get_db_session() -> AsyncGenerator[AsyncSession]:
+        yield db_session
+
+    async def override_get_ms_client() -> AsyncGenerator[MSAsyncClient]:
+        yield ms_client
 
     fastapi_app.dependency_overrides[get_settings] = override_get_settings
-    fastapi_app.dependency_overrides[get_db] = override_get_db
+    fastapi_app.dependency_overrides[get_db_session] = override_get_db_session
+    fastapi_app.dependency_overrides[get_ms_client] = override_get_ms_client
     fastapi_app.dependency_overrides[get_email_service] = lambda: mock_email_svc
     fastapi_app.dependency_overrides[get_github_service] = lambda: mock_github_svc
 
     try:
         yield AsyncClient(
-            transport=ASGITransport(app=fastapi_app), base_url="http://test"
+            transport=ASGITransport(app=fastapi_app),
+            base_url="http://test",
         )
     finally:
         del fastapi_app.dependency_overrides[get_settings]
-        del fastapi_app.dependency_overrides[get_db]
+        del fastapi_app.dependency_overrides[get_db_session]
+        del fastapi_app.dependency_overrides[get_ms_client]
         del fastapi_app.dependency_overrides[get_email_service]
         del fastapi_app.dependency_overrides[get_github_service]
-
-        if transaction.is_active:
-            await transaction.rollback()

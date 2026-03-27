@@ -9,6 +9,8 @@ from app.core.database import Base
 if TYPE_CHECKING:
     from app.models.database.exercise_muscle_group import ExerciseMuscleGroup
 
+EXERCISE_UNIQUE_CONSTRAINT = "uq_exercises_user_name"
+
 
 class Exercise(Base):
     __tablename__ = "exercises"
@@ -20,7 +22,7 @@ class Exercise(Base):
         UniqueConstraint(
             "user_id",
             "name",
-            name="uq_exercises_user_name",
+            name=EXERCISE_UNIQUE_CONSTRAINT,
             postgresql_nulls_not_distinct=True,
         ),
     )

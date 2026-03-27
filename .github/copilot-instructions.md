@@ -55,6 +55,24 @@ RepTrack is a full-stack strength-training tracker:
 - SDK generation strategy is `byTags` + `operationId` nesting, so endpoint `operation_id` values drive generated method names.
 - Generated files live in `client/src/api/generated/` and should not be hand-edited.
 
+## Browser Automation
+
+Use `agent-browser` for web automation.
+Run `agent-browser --help` for all commands.
+Run `agent-browser` commands from the project root to use the correct config and browser profile.
+
+Example workflow (assuming dev servers are running on default ports):
+
+```
+agent-browser open http://localhost:5173
+agent-browser snapshot -i
+agent-browser click @e1
+agent-browser snapshot -i
+agent-browser fill @e2 "hello world"
+agent-browser snapshot -i
+agent-browser close
+```
+
 ## Key Conventions
 
 - Always set explicit `operation_id` on FastAPI endpoints. Missing or unstable IDs cause churn/breakage in generated TS SDK method names.

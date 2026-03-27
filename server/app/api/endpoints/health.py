@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import text
 
-from app.core.dependencies import get_db
+from app.core.dependencies import get_db_session
 
 api_router = APIRouter(
     prefix="/health",
@@ -19,7 +19,7 @@ def get_health_endpoint() -> str:
 
 @api_router.get("/db", operation_id="getDbHealth")
 async def get_db_health_endpoint(
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> str:
-    await db.execute(text("SELECT 1"))
+    await db_session.execute(text("SELECT 1"))
     return "ok"

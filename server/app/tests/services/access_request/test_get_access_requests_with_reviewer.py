@@ -6,20 +6,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.database.access_request import AccessRequest
 from app.models.database.user import User
 from app.models.enums import AccessRequestStatus
-from app.services.access_request import get_access_requests_with_reviewer
+from app.services.access_request import (
+    _get_access_requests_with_reviewer,  # pyright: ignore[reportPrivateUsage]
+)
 
 
-async def test_get_access_requests_with_reviewer(session: AsyncSession):
+async def test_get_access_requests_with_reviewer(db_session: AsyncSession):
     access_request = AccessRequest(
         email="shape@example.com",
         first_name="Shape",
         last_name="Test",
         status=AccessRequestStatus.PENDING,
     )
-    session.add(access_request)
-    await session.commit()
+    db_session.add(access_request)
+    await db_session.commit()
 
-    result = await get_access_requests_with_reviewer(session)
+    result = await _get_access_requests_with_reviewer(db_session)
 
     assert isinstance(result[0], AccessRequest)
     assert result[0].email == "shape@example.com"
@@ -30,7 +32,9 @@ async def test_get_access_requests_with_reviewer(session: AsyncSession):
     assert result[0].reviewed_at is None
 
 
-async def test_get_access_requests_with_reviewer_status_ordering(session: AsyncSession):
+async def test_get_access_requests_with_reviewer_status_ordering(
+    db_session: AsyncSession,
+):
     pending = AccessRequest(
         email="pending@example.com",
         first_name="Pending",
@@ -50,10 +54,10 @@ async def test_get_access_requests_with_reviewer_status_ordering(session: AsyncS
         status=AccessRequestStatus.REJECTED,
     )
 
-    session.add_all([approved, rejected, pending])
-    await session.commit()
+    db_session.add_all([approved, rejected, pending])
+    await db_session.commit()
 
-    result = await get_access_requests_with_reviewer(session)
+    result = await _get_access_requests_with_reviewer(db_session)
 
     statuses = [item.status for item in result]
     assert statuses == [
@@ -64,7 +68,7 @@ async def test_get_access_requests_with_reviewer_status_ordering(session: AsyncS
 
 
 async def test_get_access_requests_with_reviewer_updated_at_ordering(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
     now = datetime.now(UTC)
     ar1 = AccessRequest(
@@ -82,17 +86,17 @@ async def test_get_access_requests_with_reviewer_updated_at_ordering(
         updated_at=now + timedelta(seconds=1),
     )
 
-    session.add_all([ar1, ar2])
-    await session.commit()
+    db_session.add_all([ar1, ar2])
+    await db_session.commit()
 
-    result = await get_access_requests_with_reviewer(session)
+    result = await _get_access_requests_with_reviewer(db_session)
 
     assert result[0].id == ar2.id
     assert result[1].id == ar1.id
     assert result[0].updated_at > result[1].updated_at
 
 
-async def test_get_access_requests_with_reviewer_id_ordering(session: AsyncSession):
+async def test_get_access_requests_with_reviewer_id_ordering(db_session: AsyncSession):
     now = datetime.now(UTC)
     ar1 = AccessRequest(
         email="user1@example.com",
@@ -109,18 +113,18 @@ async def test_get_access_requests_with_reviewer_id_ordering(session: AsyncSessi
         updated_at=now,
     )
 
-    session.add_all([ar1, ar2])
-    await session.commit()
+    db_session.add_all([ar1, ar2])
+    await db_session.commit()
 
-    result = await get_access_requests_with_reviewer(session)
+    result = await _get_access_requests_with_reviewer(db_session)
 
     assert result[0].id == ar2.id
     assert result[1].id == ar1.id
 
 
-async def test_get_access_requests_with_reviewer_reviewer(session: AsyncSession):
+async def test_get_access_requests_with_reviewer_reviewer(db_session: AsyncSession):
     reviewer = (
-        await session.execute(select(User).where(User.username == "admin"))
+        await db_session.execute(select(User).where(User.username == "admin"))
     ).scalar_one()
 
     reviewed = AccessRequest(
@@ -131,10 +135,10 @@ async def test_get_access_requests_with_reviewer_reviewer(session: AsyncSession)
         reviewed_by=reviewer.id,
         reviewed_at=datetime.now(UTC),
     )
-    session.add(reviewed)
-    await session.commit()
+    db_session.add(reviewed)
+    await db_session.commit()
 
-    result = await get_access_requests_with_reviewer(session)
+    result = await _get_access_requests_with_reviewer(db_session)
 
     assert isinstance(result[0].reviewer, User)
     assert result[0].reviewer.id == reviewer.id
@@ -142,10 +146,14 @@ async def test_get_access_requests_with_reviewer_reviewer(session: AsyncSession)
     assert result[0].reviewed_at is not None
 
 
-async def test_get_access_requests_with_reviewer_read_only(session: AsyncSession):
-    before_count = await session.scalar(select(func.count()).select_from(AccessRequest))
+async def test_get_access_requests_with_reviewer_read_only(db_session: AsyncSession):
+    before_count = await db_session.scalar(
+        select(func.count()).select_from(AccessRequest)
+    )
 
-    _ = await get_access_requests_with_reviewer(session)
+    _ = await _get_access_requests_with_reviewer(db_session)
 
-    after_count = await session.scalar(select(func.count()).select_from(AccessRequest))
+    after_count = await db_session.scalar(
+        select(func.count()).select_from(AccessRequest)
+    )
     assert before_count == after_count

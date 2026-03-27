@@ -182,6 +182,32 @@ export type ExerciseBase = {
 };
 
 /**
+ * ExerciseDocument
+ */
+export type ExerciseDocument = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * User Id
+     */
+    user_id: number | null;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description: string | null;
+    /**
+     * Muscle Group Names
+     */
+    muscle_group_names: Array<string>;
+};
+
+/**
  * ExercisePublic
  */
 export type ExercisePublic = {
@@ -341,6 +367,152 @@ export type ReviewerPublic = {
 };
 
 /**
+ * SearchRequest
+ */
+export type SearchRequest = {
+    /**
+     * Query
+     */
+    query: string;
+    /**
+     * Limit
+     */
+    limit?: number;
+};
+
+/**
+ * SearchResults[ExerciseDocument]
+ */
+export type SearchResultsExerciseDocument = {
+    /**
+     * Hits
+     */
+    hits: Array<ExerciseDocument>;
+    /**
+     * Offset
+     */
+    offset?: number | null;
+    /**
+     * Limit
+     */
+    limit?: number | null;
+    /**
+     * Estimatedtotalhits
+     */
+    estimatedTotalHits?: number | null;
+    /**
+     * Processingtimems
+     */
+    processingTimeMs: number;
+    /**
+     * Query
+     */
+    query: string;
+    /**
+     * Facetdistribution
+     */
+    facetDistribution?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Totalpages
+     */
+    totalPages?: number | null;
+    /**
+     * Totalhits
+     */
+    totalHits?: number | null;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Hitsperpage
+     */
+    hitsPerPage?: number | null;
+    /**
+     * Semantichitcount
+     */
+    semanticHitCount?: number | null;
+    /**
+     * Queryvector
+     */
+    queryVector?: Array<number> | null;
+    /**
+     * Performancedetails
+     */
+    performanceDetails?: {
+        [key: string]: unknown;
+    } | null;
+};
+
+/**
+ * SearchResults[MuscleGroupPublic]
+ */
+export type SearchResultsMuscleGroupPublic = {
+    /**
+     * Hits
+     */
+    hits: Array<MuscleGroupPublic>;
+    /**
+     * Offset
+     */
+    offset?: number | null;
+    /**
+     * Limit
+     */
+    limit?: number | null;
+    /**
+     * Estimatedtotalhits
+     */
+    estimatedTotalHits?: number | null;
+    /**
+     * Processingtimems
+     */
+    processingTimeMs: number;
+    /**
+     * Query
+     */
+    query: string;
+    /**
+     * Facetdistribution
+     */
+    facetDistribution?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Totalpages
+     */
+    totalPages?: number | null;
+    /**
+     * Totalhits
+     */
+    totalHits?: number | null;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Hitsperpage
+     */
+    hitsPerPage?: number | null;
+    /**
+     * Semantichitcount
+     */
+    semanticHitCount?: number | null;
+    /**
+     * Queryvector
+     */
+    queryVector?: Array<number> | null;
+    /**
+     * Performancedetails
+     */
+    performanceDetails?: {
+        [key: string]: unknown;
+    } | null;
+};
+
+/**
  * SetPublic
  */
 export type SetPublic = {
@@ -386,6 +558,70 @@ export type SetPublic = {
  * SetUnit
  */
 export type SetUnit = 'kg' | 'lb';
+
+/**
+ * TaskResult
+ */
+export type TaskResult = {
+    /**
+     * Uid
+     */
+    uid: number;
+    /**
+     * Indexuid
+     */
+    indexUid?: string | null;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Type
+     */
+    type: string | {
+        [key: string]: unknown;
+    };
+    /**
+     * Details
+     */
+    details?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Error
+     */
+    error?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Canceledby
+     */
+    canceledBy?: number | null;
+    /**
+     * Duration
+     */
+    duration?: string | null;
+    /**
+     * Enqueuedat
+     */
+    enqueuedAt: string;
+    /**
+     * Startedat
+     */
+    startedAt?: string | null;
+    /**
+     * Finishedat
+     */
+    finishedAt?: string | null;
+    /**
+     * Batchuid
+     */
+    batchUid?: number | null;
+    /**
+     * Custommetadata
+     */
+    customMetadata?: string | null;
+};
 
 /**
  * UpdateAccessRequestStatusRequest
@@ -506,6 +742,16 @@ export type ValidationError = {
      * Error Type
      */
     type: string;
+    /**
+     * Input
+     */
+    input?: unknown;
+    /**
+     * Context
+     */
+    ctx?: {
+        [key: string]: unknown;
+    };
 };
 
 /**
@@ -623,7 +869,7 @@ export type GetAccessRequestsData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/admin/access-requests';
+    url: '/api/access-requests';
 };
 
 export type GetAccessRequestsErrors = {
@@ -659,7 +905,7 @@ export type UpdateAccessRequestStatusData = {
         access_request_id: number;
     };
     query?: never;
-    url: '/api/admin/access-requests/{access_request_id}';
+    url: '/api/access-requests/{access_request_id}';
 };
 
 export type UpdateAccessRequestStatusErrors = {
@@ -695,37 +941,6 @@ export type UpdateAccessRequestStatusResponses = {
 };
 
 export type UpdateAccessRequestStatusResponse = UpdateAccessRequestStatusResponses[keyof UpdateAccessRequestStatusResponses];
-
-export type GetUsersData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/admin/users';
-};
-
-export type GetUsersErrors = {
-    /**
-     * Unauthorized
-     */
-    401: ErrorResponse;
-    /**
-     * Forbidden
-     */
-    403: ErrorResponse;
-};
-
-export type GetUsersError = GetUsersErrors[keyof GetUsersErrors];
-
-export type GetUsersResponses = {
-    /**
-     * Response Getusers
-     *
-     * Successful Response
-     */
-    200: Array<UserPublic>;
-};
-
-export type GetUsersResponse = GetUsersResponses[keyof GetUsersResponses];
 
 export type RequestAccessData = {
     body: RequestAccessRequest;
@@ -1199,6 +1414,131 @@ export type GetMuscleGroupsResponses = {
 
 export type GetMuscleGroupsResponse = GetMuscleGroupsResponses[keyof GetMuscleGroupsResponses];
 
+export type GetTaskData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: number;
+    };
+    query?: never;
+    url: '/api/search/tasks/{task_id}';
+};
+
+export type GetTaskErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetTaskError = GetTaskErrors[keyof GetTaskErrors];
+
+export type GetTaskResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskResult;
+};
+
+export type GetTaskResponse = GetTaskResponses[keyof GetTaskResponses];
+
+export type ReindexData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/search/reindex';
+};
+
+export type ReindexErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+};
+
+export type ReindexError = ReindexErrors[keyof ReindexErrors];
+
+export type ReindexResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type ReindexResponse = ReindexResponses[keyof ReindexResponses];
+
+export type SearchMuscleGroupsData = {
+    body: SearchRequest;
+    path?: never;
+    query?: never;
+    url: '/api/search/muscle-groups';
+};
+
+export type SearchMuscleGroupsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SearchMuscleGroupsError = SearchMuscleGroupsErrors[keyof SearchMuscleGroupsErrors];
+
+export type SearchMuscleGroupsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SearchResultsMuscleGroupPublic;
+};
+
+export type SearchMuscleGroupsResponse = SearchMuscleGroupsResponses[keyof SearchMuscleGroupsResponses];
+
+export type SearchExercisesData = {
+    body: SearchRequest;
+    path?: never;
+    query?: never;
+    url: '/api/search/exercises';
+};
+
+export type SearchExercisesErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SearchExercisesError = SearchExercisesErrors[keyof SearchExercisesErrors];
+
+export type SearchExercisesResponses = {
+    /**
+     * Successful Response
+     */
+    200: SearchResultsExerciseDocument;
+};
+
+export type SearchExercisesResponse = SearchExercisesResponses[keyof SearchExercisesResponses];
+
 export type CreateSetData = {
     body: CreateSetRequest;
     path: {
@@ -1212,7 +1552,7 @@ export type CreateSetData = {
         workout_exercise_id: number;
     };
     query?: never;
-    url: '/api/sets/{workout_id}/exercises/{workout_exercise_id}/sets';
+    url: '/api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets';
 };
 
 export type CreateSetErrors = {
@@ -1262,7 +1602,7 @@ export type DeleteSetData = {
         set_id: number;
     };
     query?: never;
-    url: '/api/sets/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}';
+    url: '/api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}';
 };
 
 export type DeleteSetErrors = {
@@ -1308,7 +1648,7 @@ export type UpdateSetData = {
         set_id: number;
     };
     query?: never;
-    url: '/api/sets/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}';
+    url: '/api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}';
 };
 
 export type UpdateSetErrors = {
@@ -1362,6 +1702,37 @@ export type GetCurrentUserResponses = {
 
 export type GetCurrentUserResponse = GetCurrentUserResponses[keyof GetCurrentUserResponses];
 
+export type GetUsersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/users';
+};
+
+export type GetUsersErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+};
+
+export type GetUsersError = GetUsersErrors[keyof GetUsersErrors];
+
+export type GetUsersResponses = {
+    /**
+     * Response Getusers
+     *
+     * Successful Response
+     */
+    200: Array<UserPublic>;
+};
+
+export type GetUsersResponse = GetUsersResponses[keyof GetUsersResponses];
+
 export type CreateWorkoutExerciseData = {
     body: CreateWorkoutExerciseRequest;
     path: {
@@ -1371,7 +1742,7 @@ export type CreateWorkoutExerciseData = {
         workout_id: number;
     };
     query?: never;
-    url: '/api/workout-exercises/{workout_id}/exercises';
+    url: '/api/workouts/{workout_id}/exercises';
 };
 
 export type CreateWorkoutExerciseErrors = {
@@ -1417,7 +1788,7 @@ export type DeleteWorkoutExerciseData = {
         workout_exercise_id: number;
     };
     query?: never;
-    url: '/api/workout-exercises/{workout_id}/exercises/{workout_exercise_id}';
+    url: '/api/workouts/{workout_id}/exercises/{workout_exercise_id}';
 };
 
 export type DeleteWorkoutExerciseErrors = {

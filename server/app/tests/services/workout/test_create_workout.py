@@ -12,8 +12,8 @@ from app.services.workout import (
 from ..utilities import create_user
 
 
-async def test_create_workout(session: AsyncSession):
-    user = await create_user(session)
+async def test_create_workout(db_session: AsyncSession):
+    user = await create_user(db_session)
     started_at = datetime(2024, 1, 1, tzinfo=UTC)
     ended_at = datetime(2024, 1, 1, 1, tzinfo=UTC)
     await create_workout(
@@ -23,10 +23,10 @@ async def test_create_workout(session: AsyncSession):
             ended_at=ended_at,
             notes="Test workout",
         ),
-        session,
+        db_session,
     )
 
-    workouts = await _query_workouts(session, False, Workout.user_id == user.id)
+    workouts = await _query_workouts(db_session, False, Workout.user_id == user.id)
     workout = workouts[0] if workouts else None
 
     assert workout is not None

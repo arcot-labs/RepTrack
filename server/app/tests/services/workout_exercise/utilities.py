@@ -4,7 +4,7 @@ from app.models.database.workout_exercise import WorkoutExercise
 
 
 async def create_workout_exercise(
-    session: AsyncSession,
+    db_session: AsyncSession,
     workout_id: int,
     exercise_id: int,
     position: int,
@@ -16,7 +16,7 @@ async def create_workout_exercise(
         position=position,
         notes=notes,
     )
-    session.add(workout_exercise)
-    await session.commit()
-    await session.refresh(workout_exercise)
+    db_session.add(workout_exercise)
+    await db_session.commit()
+    await db_session.refresh(workout_exercise)
     return workout_exercise

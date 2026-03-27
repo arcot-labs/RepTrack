@@ -98,7 +98,7 @@ export function ExerciseFormDialog({
             isSubmitting: isEditSubmitting,
         },
         reset: resetEdit,
-    } = useForm<UpdateExerciseForm>({
+    } = useForm({
         resolver: zodResolver(zUpdateExerciseRequest),
         defaultValues: defaultUpdateExerciseFormValues,
         mode: 'onSubmit',

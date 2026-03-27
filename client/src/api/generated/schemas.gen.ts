@@ -90,7 +90,8 @@ export const CreateExerciseRequestSchema = {
         description: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 1000
                 },
                 {
                     type: 'null'
@@ -126,7 +127,7 @@ export const CreateFeedbackRequestSchema = {
         },
         title: {
             type: 'string',
-            maxLength: 100,
+            maxLength: 1000,
             minLength: 1,
             title: 'Title'
         },
@@ -139,7 +140,7 @@ export const CreateFeedbackRequestSchema = {
         files: {
             items: {
                 type: 'string',
-                format: 'binary'
+                contentMediaType: 'application/octet-stream'
             },
             type: 'array',
             title: 'Files'
@@ -198,7 +199,8 @@ export const CreateSetRequestSchema = {
         notes: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 1000
                 },
                 {
                     type: 'null'
@@ -220,7 +222,8 @@ export const CreateWorkoutExerciseRequestSchema = {
         notes: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 1000
                 },
                 {
                     type: 'null'
@@ -265,7 +268,8 @@ export const CreateWorkoutRequestSchema = {
         notes: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 1000
                 },
                 {
                     type: 'null'
@@ -350,6 +354,57 @@ export const ExerciseBaseSchema = {
         'updated_at'
     ],
     title: 'ExerciseBase'
+} as const;
+
+export const ExerciseDocumentSchema = {
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id'
+        },
+        user_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'User Id'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        muscle_group_names: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Muscle Group Names'
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'user_id',
+        'name',
+        'description',
+        'muscle_group_names'
+    ],
+    title: 'ExerciseDocument'
 } as const;
 
 export const ExercisePublicSchema = {
@@ -460,7 +515,7 @@ export const LoginRequestSchema = {
             anyOf: [
                 {
                     type: 'string',
-                    maxLength: 50,
+                    maxLength: 255,
                     minLength: 3
                 },
                 {
@@ -530,7 +585,7 @@ export const RegisterRequestSchema = {
         },
         username: {
             type: 'string',
-            maxLength: 50,
+            maxLength: 255,
             minLength: 3,
             title: 'Username'
         },
@@ -560,13 +615,13 @@ export const RequestAccessRequestSchema = {
         },
         first_name: {
             type: 'string',
-            maxLength: 50,
+            maxLength: 255,
             minLength: 1,
             title: 'First Name'
         },
         last_name: {
             type: 'string',
-            maxLength: 50,
+            maxLength: 255,
             minLength: 1,
             title: 'Last Name'
         }
@@ -620,6 +675,333 @@ export const ReviewerPublicSchema = {
         'username'
     ],
     title: 'ReviewerPublic'
+} as const;
+
+export const SearchRequestSchema = {
+    properties: {
+        query: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Query'
+        },
+        limit: {
+            type: 'integer',
+            title: 'Limit',
+            default: 25
+        }
+    },
+    type: 'object',
+    required: [
+        'query'
+    ],
+    title: 'SearchRequest'
+} as const;
+
+export const SearchResults_ExerciseDocument_Schema = {
+    properties: {
+        hits: {
+            items: {
+                $ref: '#/components/schemas/ExerciseDocument'
+            },
+            type: 'array',
+            title: 'Hits'
+        },
+        offset: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Offset'
+        },
+        limit: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Limit'
+        },
+        estimatedTotalHits: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Estimatedtotalhits'
+        },
+        processingTimeMs: {
+            type: 'integer',
+            title: 'Processingtimems'
+        },
+        query: {
+            type: 'string',
+            title: 'Query'
+        },
+        facetDistribution: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Facetdistribution'
+        },
+        totalPages: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Totalpages'
+        },
+        totalHits: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Totalhits'
+        },
+        page: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Page'
+        },
+        hitsPerPage: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Hitsperpage'
+        },
+        semanticHitCount: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Semantichitcount'
+        },
+        queryVector: {
+            anyOf: [
+                {
+                    items: {
+                        type: 'number'
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Queryvector'
+        },
+        performanceDetails: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Performancedetails'
+        }
+    },
+    type: 'object',
+    required: [
+        'hits',
+        'processingTimeMs',
+        'query'
+    ],
+    title: 'SearchResults[ExerciseDocument]'
+} as const;
+
+export const SearchResults_MuscleGroupPublic_Schema = {
+    properties: {
+        hits: {
+            items: {
+                $ref: '#/components/schemas/MuscleGroupPublic'
+            },
+            type: 'array',
+            title: 'Hits'
+        },
+        offset: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Offset'
+        },
+        limit: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Limit'
+        },
+        estimatedTotalHits: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Estimatedtotalhits'
+        },
+        processingTimeMs: {
+            type: 'integer',
+            title: 'Processingtimems'
+        },
+        query: {
+            type: 'string',
+            title: 'Query'
+        },
+        facetDistribution: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Facetdistribution'
+        },
+        totalPages: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Totalpages'
+        },
+        totalHits: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Totalhits'
+        },
+        page: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Page'
+        },
+        hitsPerPage: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Hitsperpage'
+        },
+        semanticHitCount: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Semantichitcount'
+        },
+        queryVector: {
+            anyOf: [
+                {
+                    items: {
+                        type: 'number'
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Queryvector'
+        },
+        performanceDetails: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Performancedetails'
+        }
+    },
+    type: 'object',
+    required: [
+        'hits',
+        'processingTimeMs',
+        'query'
+    ],
+    title: 'SearchResults[MuscleGroupPublic]'
 } as const;
 
 export const SetPublicSchema = {
@@ -715,6 +1097,147 @@ export const SetUnitSchema = {
     title: 'SetUnit'
 } as const;
 
+export const TaskResultSchema = {
+    properties: {
+        uid: {
+            type: 'integer',
+            title: 'Uid'
+        },
+        indexUid: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Indexuid'
+        },
+        status: {
+            type: 'string',
+            title: 'Status'
+        },
+        type: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                }
+            ],
+            title: 'Type'
+        },
+        details: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Details'
+        },
+        error: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Error'
+        },
+        canceledBy: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Canceledby'
+        },
+        duration: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Duration'
+        },
+        enqueuedAt: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Enqueuedat'
+        },
+        startedAt: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Startedat'
+        },
+        finishedAt: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Finishedat'
+        },
+        batchUid: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Batchuid'
+        },
+        customMetadata: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Custommetadata'
+        }
+    },
+    type: 'object',
+    required: [
+        'uid',
+        'status',
+        'type',
+        'enqueuedAt'
+    ],
+    title: 'TaskResult'
+} as const;
+
 export const UpdateAccessRequestStatusRequestSchema = {
     properties: {
         status: {
@@ -751,7 +1274,8 @@ export const UpdateExerciseRequestSchema = {
         description: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 1000
                 },
                 {
                     type: 'null'
@@ -821,7 +1345,8 @@ export const UpdateSetRequestSchema = {
         notes: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 1000
                 },
                 {
                     type: 'null'
@@ -863,7 +1388,8 @@ export const UpdateWorkoutRequestSchema = {
         notes: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 1000
                 },
                 {
                     type: 'null'
@@ -950,6 +1476,13 @@ export const ValidationErrorSchema = {
         type: {
             type: 'string',
             title: 'Error Type'
+        },
+        input: {
+            title: 'Input'
+        },
+        ctx: {
+            type: 'object',
+            title: 'Context'
         }
     },
     type: 'object',

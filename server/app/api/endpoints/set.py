@@ -3,21 +3,21 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_current_user, get_db
+from app.core.dependencies import get_current_user, get_db_session
 from app.models.schemas.errors import ErrorResponseModel
 from app.models.schemas.set import CreateSetRequest, UpdateSetRequest
 from app.models.schemas.user import UserPublic
 from app.services.set import create_set, delete_set, update_set
 
 api_router = APIRouter(
-    prefix="/sets",
+    prefix="/workouts/{workout_id}/exercises/{workout_exercise_id}/sets",
     tags=["Set"],
     dependencies=[Depends(get_current_user)],
 )
 
 
 @api_router.post(
-    "/{workout_id}/exercises/{workout_exercise_id}/sets",
+    "",
     operation_id="createSet",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
@@ -31,13 +31,13 @@ async def create_set_endpoint(
     workout_exercise_id: int,
     req: CreateSetRequest,
     user: Annotated[UserPublic, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    await create_set(workout_id, workout_exercise_id, user.id, req, db)
+    await create_set(workout_id, workout_exercise_id, user.id, req, db_session)
 
 
 @api_router.patch(
-    "/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}",
+    "/{set_id}",
     operation_id="updateSet",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
@@ -51,13 +51,13 @@ async def update_set_endpoint(
     set_id: int,
     req: UpdateSetRequest,
     user: Annotated[UserPublic, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    await update_set(workout_id, workout_exercise_id, set_id, user.id, req, db)
+    await update_set(workout_id, workout_exercise_id, set_id, user.id, req, db_session)
 
 
 @api_router.delete(
-    "/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}",
+    "/{set_id}",
     operation_id="deleteSet",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
@@ -70,6 +70,6 @@ async def delete_set_endpoint(
     workout_exercise_id: int,
     set_id: int,
     user: Annotated[UserPublic, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    await delete_set(workout_id, workout_exercise_id, set_id, user.id, db)
+    await delete_set(workout_id, workout_exercise_id, set_id, user.id, db_session)

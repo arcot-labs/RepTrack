@@ -12,12 +12,12 @@ from .utilities import create_workout
 
 
 async def test_query_workouts_base(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    user = await create_user(session)
-    workout = await create_workout(session, user.id)
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user.id)
 
-    result = await _query_workouts(session, True)
+    result = await _query_workouts(db_session, True)
 
     assert len(result) == 1
     assert workout in result
@@ -26,12 +26,12 @@ async def test_query_workouts_base(
 
 
 async def test_query_workouts_public(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    user = await create_user(session)
-    workout = await create_workout(session, user.id)
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user.id)
 
-    result = await _query_workouts(session, False)
+    result = await _query_workouts(db_session, False)
 
     assert len(result) == 1
     assert workout in result
@@ -39,15 +39,15 @@ async def test_query_workouts_public(
 
 
 async def test_query_workouts_no_where_clause(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    user_1 = await create_user(session, "user_1")
-    user_2 = await create_user(session, "user_2")
+    user_1 = await create_user(db_session, "user_1")
+    user_2 = await create_user(db_session, "user_2")
 
-    workout_1 = await create_workout(session, user_1.id)
-    workout_2 = await create_workout(session, user_2.id)
+    workout_1 = await create_workout(db_session, user_1.id)
+    workout_2 = await create_workout(db_session, user_2.id)
 
-    result = await _query_workouts(session, True)
+    result = await _query_workouts(db_session, True)
 
     assert len(result) == 2
     assert workout_1 in result
@@ -55,15 +55,15 @@ async def test_query_workouts_no_where_clause(
 
 
 async def test_query_workouts_with_where_clause(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    user_1 = await create_user(session, "user_1")
-    user_2 = await create_user(session, "user_2")
+    user_1 = await create_user(db_session, "user_1")
+    user_2 = await create_user(db_session, "user_2")
 
-    workout_1 = await create_workout(session, user_1.id)
-    workout_2 = await create_workout(session, user_2.id)
+    workout_1 = await create_workout(db_session, user_1.id)
+    workout_2 = await create_workout(db_session, user_2.id)
 
-    result = await _query_workouts(session, True, Workout.user_id == user_1.id)
+    result = await _query_workouts(db_session, True, Workout.user_id == user_1.id)
 
     assert len(result) == 1
     assert workout_1 in result
@@ -71,22 +71,22 @@ async def test_query_workouts_with_where_clause(
 
 
 async def test_query_workouts_ordering(
-    session: AsyncSession,
+    db_session: AsyncSession,
 ):
-    user_1 = await create_user(session, "user_1")
-    user_2 = await create_user(session, "user_2")
+    user_1 = await create_user(db_session, "user_1")
+    user_2 = await create_user(db_session, "user_2")
 
     await create_workout(
-        session,
+        db_session,
         user_1.id,
         started_at=datetime.now(),
     )
     await create_workout(
-        session,
+        db_session,
         user_2.id,
         started_at=datetime.now() + timedelta(minutes=5),
     )
 
-    result = await _query_workouts(session, True)
+    result = await _query_workouts(db_session, True)
 
     assert result == sorted(result, key=lambda w: w.started_at, reverse=True)

@@ -11,9 +11,9 @@ from ..utilities import create_user
 from .utilities import create_workout
 
 
-async def test_update_workout(session: AsyncSession):
-    user = await create_user(session)
-    workout = await create_workout(session, user_id=user.id)
+async def test_update_workout(db_session: AsyncSession):
+    user = await create_user(db_session)
+    workout = await create_workout(db_session, user_id=user.id)
 
     started_at = datetime(2024, 1, 1, tzinfo=UTC)
     ended_at = datetime(2024, 1, 1, 1, tzinfo=UTC)
@@ -25,7 +25,7 @@ async def test_update_workout(session: AsyncSession):
             ended_at=ended_at,
             notes="Updated notes",
         ),
-        session,
+        db_session,
     )
 
     assert workout.started_at == started_at
@@ -33,38 +33,38 @@ async def test_update_workout(session: AsyncSession):
     assert workout.notes == "Updated notes"
 
 
-async def test_update_workout_not_found(session: AsyncSession):
-    user = await create_user(session)
+async def test_update_workout_not_found(db_session: AsyncSession):
+    user = await create_user(db_session)
 
     with pytest.raises(WorkoutNotFound):
         await update_workout(
             99999,
             user.id,
             UpdateWorkoutRequest(),
-            session,
+            db_session,
         )
 
 
-async def test_update_workout_not_allowed(session: AsyncSession):
-    user = await create_user(session)
-    user_2 = await create_user(session, username="user_2")
-    workout = await create_workout(session, user_id=user.id)
+async def test_update_workout_not_allowed(db_session: AsyncSession):
+    user = await create_user(db_session)
+    user_2 = await create_user(db_session, username="user_2")
+    workout = await create_workout(db_session, user_id=user.id)
 
     with pytest.raises(WorkoutNotFound):
         await update_workout(
             workout.id,
             user_2.id,
             UpdateWorkoutRequest(),
-            session,
+            db_session,
         )
 
 
-async def test_update_workout_no_changes(session: AsyncSession):
-    user = await create_user(session)
+async def test_update_workout_no_changes(db_session: AsyncSession):
+    user = await create_user(db_session)
     started_at = datetime(2024, 1, 1, tzinfo=UTC)
     ended_at = datetime(2024, 1, 1, 1, tzinfo=UTC)
     workout = await create_workout(
-        session,
+        db_session,
         user_id=user.id,
         started_at=started_at,
         ended_at=ended_at,
@@ -75,21 +75,21 @@ async def test_update_workout_no_changes(session: AsyncSession):
         workout.id,
         user.id,
         UpdateWorkoutRequest(),
-        session,
+        db_session,
     )
 
-    workout = await get_workout(workout.id, user.id, session)
+    workout = await get_workout(workout.id, user.id, db_session)
 
     assert workout.started_at == started_at
     assert workout.ended_at == ended_at
     assert workout.notes == "Test workout"
 
 
-async def test_update_workout_no_started_at(session: AsyncSession):
-    user = await create_user(session)
+async def test_update_workout_no_started_at(db_session: AsyncSession):
+    user = await create_user(db_session)
     started_at = datetime(2024, 1, 1, tzinfo=UTC)
     workout = await create_workout(
-        session,
+        db_session,
         user_id=user.id,
         started_at=started_at,
         notes="Test workout",
@@ -103,21 +103,21 @@ async def test_update_workout_no_started_at(session: AsyncSession):
             ended_at=new_ended_at,
             notes="Test workout updated",
         ),
-        session,
+        db_session,
     )
 
-    workout = await get_workout(workout.id, user.id, session)
+    workout = await get_workout(workout.id, user.id, db_session)
 
     assert workout.started_at == started_at
     assert workout.ended_at == new_ended_at
     assert workout.notes == "Test workout updated"
 
 
-async def test_update_workout_no_ended_at(session: AsyncSession):
-    user = await create_user(session)
+async def test_update_workout_no_ended_at(db_session: AsyncSession):
+    user = await create_user(db_session)
     ended_at = datetime(2024, 1, 1, tzinfo=UTC)
     workout = await create_workout(
-        session,
+        db_session,
         user_id=user.id,
         ended_at=ended_at,
         notes="Test workout",
@@ -131,20 +131,20 @@ async def test_update_workout_no_ended_at(session: AsyncSession):
             started_at=new_started_at,
             notes="Test workout updated",
         ),
-        session,
+        db_session,
     )
 
-    workout = await get_workout(workout.id, user.id, session)
+    workout = await get_workout(workout.id, user.id, db_session)
 
     assert workout.started_at == new_started_at
     assert workout.ended_at == ended_at
     assert workout.notes == "Test workout updated"
 
 
-async def test_update_workout_no_notes(session: AsyncSession):
-    user = await create_user(session)
+async def test_update_workout_no_notes(db_session: AsyncSession):
+    user = await create_user(db_session)
     workout = await create_workout(
-        session,
+        db_session,
         user_id=user.id,
         notes="Test workout",
     )
@@ -158,22 +158,22 @@ async def test_update_workout_no_notes(session: AsyncSession):
             started_at=new_started_at,
             ended_at=new_ended_at,
         ),
-        session,
+        db_session,
     )
 
-    workout = await get_workout(workout.id, user.id, session)
+    workout = await get_workout(workout.id, user.id, db_session)
 
     assert workout.started_at == new_started_at
     assert workout.ended_at == new_ended_at
     assert workout.notes == "Test workout"
 
 
-async def test_update_workout_null_values(session: AsyncSession):
-    user = await create_user(session)
+async def test_update_workout_null_values(db_session: AsyncSession):
+    user = await create_user(db_session)
     started_at = datetime(2024, 1, 1, tzinfo=UTC)
     ended_at = datetime(2024, 1, 1, 1, tzinfo=UTC)
     workout = await create_workout(
-        session,
+        db_session,
         user_id=user.id,
         started_at=started_at,
         ended_at=ended_at,
@@ -187,10 +187,10 @@ async def test_update_workout_null_values(session: AsyncSession):
             ended_at=None,
             notes=None,
         ),
-        session,
+        db_session,
     )
 
-    workout = await get_workout(workout.id, user.id, session)
+    workout = await get_workout(workout.id, user.id, db_session)
 
     assert workout.started_at == started_at
     assert workout.ended_at is None

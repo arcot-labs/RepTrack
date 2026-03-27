@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 async def create_feedback(
     user: UserPublic,
     req: CreateFeedbackRequest,
-    db: AsyncSession,
+    db_session: AsyncSession,
     github_svc: GitHubService,
     settings: Settings,
 ):
@@ -36,9 +36,9 @@ async def create_feedback(
         files=stored_files,
     )
 
-    db.add(feedback)
-    await db.commit()
-    await db.refresh(feedback)
+    db_session.add(feedback)
+    await db_session.commit()
+    await db_session.refresh(feedback)
 
     await github_svc.create_feedback_issue(feedback, settings)
 

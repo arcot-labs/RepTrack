@@ -7,7 +7,7 @@ from app.models.enums import AccessRequestStatus
 from app.services.access_request import get_latest_access_request_by_email
 
 
-async def test_get_latest_access_request_by_email(session: AsyncSession):
+async def test_get_latest_access_request_by_email(db_session: AsyncSession):
     now = datetime.now(UTC)
     older = AccessRequest(
         email="latest@example.com",
@@ -24,17 +24,17 @@ async def test_get_latest_access_request_by_email(session: AsyncSession):
         created_at=now + timedelta(seconds=1),
     )
 
-    session.add_all([older, newer])
-    await session.commit()
+    db_session.add_all([older, newer])
+    await db_session.commit()
 
-    result = await get_latest_access_request_by_email("latest@example.com", session)
+    result = await get_latest_access_request_by_email("latest@example.com", db_session)
 
     assert result is not None
     assert result.id == newer.id
     assert result.first_name == "Newer"
 
 
-async def test_get_latest_access_request_by_email_not_found(session: AsyncSession):
-    result = await get_latest_access_request_by_email("missing@example.com", session)
+async def test_get_latest_access_request_by_email_not_found(db_session: AsyncSession):
+    result = await get_latest_access_request_by_email("missing@example.com", db_session)
 
     assert result is None

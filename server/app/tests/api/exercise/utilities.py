@@ -5,13 +5,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.database.exercise import Exercise
 from app.models.database.muscle_group import MuscleGroup
 from app.models.schemas.exercise import ExercisePublic
-from app.services.exercise import query_exercises, to_exercise_public
+from app.services.utilities.queries import query_exercises
+from app.services.utilities.serializers import to_exercise_public
 
 from ..utilities import HttpMethod, make_http_request
 
 
-async def get_muscle_group_id(session: AsyncSession, name: str) -> int:
-    result = await session.execute(
+async def get_muscle_group_id(db_session: AsyncSession, name: str) -> int:
+    result = await db_session.execute(
         select(MuscleGroup).where(MuscleGroup.name == name),
     )
     muscle_group = result.scalar_one()
@@ -20,7 +21,7 @@ async def get_muscle_group_id(session: AsyncSession, name: str) -> int:
 
 async def create_exercise_via_api(
     client: AsyncClient,
-    session: AsyncSession,
+    db_session: AsyncSession,
     name: str,
     description: str | None = None,
     muscle_group_ids: list[int] | None = None,
@@ -36,7 +37,7 @@ async def create_exercise_via_api(
         },
     )
     exercises = await query_exercises(
-        session,
+        db_session,
         False,
         Exercise.name == name,
     )
@@ -44,24 +45,24 @@ async def create_exercise_via_api(
 
 
 async def create_system_exercise(
-    session: AsyncSession,
+    db_session: AsyncSession,
     name: str,
     description: str | None = None,
 ) -> Exercise:
     return await create_exercise(
-        session,
+        db_session,
         name=name,
         description=description,
     )
 
 
 async def create_exercise(
-    session: AsyncSession,
+    db_session: AsyncSession,
     name: str,
     description: str | None = None,
     user_id: int | None = None,
 ) -> Exercise:
     exercise = Exercise(user_id=user_id, name=name, description=description)
-    session.add(exercise)
-    await session.commit()
+    db_session.add(exercise)
+    await db_session.commit()
     return exercise

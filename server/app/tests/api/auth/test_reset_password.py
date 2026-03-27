@@ -23,13 +23,13 @@ async def _make_request(client: AsyncClient, *, token: str, password: str):
 
 # 204
 async def test_reset_password(
-    client: AsyncClient, session: AsyncSession, settings: Settings
+    client: AsyncClient, db_session: AsyncSession, settings: Settings
 ):
-    admin = await get_admin(session, settings)
+    admin = await get_admin(db_session, settings)
 
     token_str, token = create_password_reset_token(admin.id)
-    session.add(token)
-    await session.commit()
+    db_session.add(token)
+    await db_session.commit()
 
     resp = await _make_request(client, token=token_str, password="NewPassword123")
 

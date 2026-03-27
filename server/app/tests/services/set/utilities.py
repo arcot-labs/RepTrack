@@ -4,7 +4,7 @@ from app.models.database.set import Set
 
 
 async def create_set(
-    session: AsyncSession,
+    db_session: AsyncSession,
     workout_exercise_id: int,
     set_number: int,
     reps: int | None = None,
@@ -20,7 +20,7 @@ async def create_set(
         unit=unit,
         notes=notes,
     )
-    session.add(set_)
-    await session.commit()
-    await session.refresh(set_)
+    db_session.add(set_)
+    await db_session.commit()
+    await db_session.refresh(set_)
     return set_
