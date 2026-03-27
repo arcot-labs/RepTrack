@@ -32,6 +32,11 @@ async def reindex(
     db_session: AsyncSession,
     ms_client: AsyncClient,
 ):
+    indexes = await ms_client.get_indexes() or []
+    for idx in indexes:
+        logger.info(f"Deleting index: {idx.uid}")
+        await ms_client.delete_index_if_exists(idx.uid)
+
     task = await _index_muscle_groups(db_session, ms_client)
     logger.info(f"Reindexing muscle groups with task id: {task}")
 
@@ -46,8 +51,6 @@ async def _index_muscle_groups(
     result = await db_session.execute(select(MuscleGroup))
     muscle_groups = result.scalars().all()
     docs = [to_muscle_group_public(mg) for mg in muscle_groups]
-
-    await ms_client.delete_index_if_exists(SearchIndex.MUSCLE_GROUPS)
 
     settings = MeilisearchSettings(
         searchable_attributes=[
@@ -69,8 +72,6 @@ async def _index_exercises(
 ) -> int:
     exercises = await query_exercises(db_session, base=False)
     docs = [to_exercise_document(e) for e in exercises]
-
-    await ms_client.delete_index_if_exists(SearchIndex.EXERCISES)
 
     settings = MeilisearchSettings(
         searchable_attributes=[
