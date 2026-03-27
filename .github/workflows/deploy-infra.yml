@@ -72,4 +72,6 @@ jobs:
 
             - name: start containers
               working-directory: config/infra
-              run: docker compose --env-file ../env/.env -f docker-compose.yml up -d
+              run: |
+                  docker compose --env-file ../env/.env -f docker-compose.yml pull
+                  docker compose --env-file ../env/.env -f docker-compose.yml up -d
