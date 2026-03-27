@@ -15,7 +15,6 @@ import { NavLink, Outlet } from 'react-router-dom'
 const navLinks = [
     { to: '/', label: 'Dashboard' },
     { to: '/exercises', label: 'Exercises' },
-    { to: '/docs', label: 'Docs' },
 ]
 
 export function AppLayout() {
