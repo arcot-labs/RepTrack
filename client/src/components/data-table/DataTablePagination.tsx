@@ -19,6 +19,17 @@ interface DataTablePaginationProps<TData> {
     table: Table<TData>
 }
 
+const getDisplayedRowsText = <TData,>(table: Table<TData>) => {
+    const pageIndex = table.getState().pagination.pageIndex
+    const pageSize = table.getState().pagination.pageSize
+    const totalRows = table.getFilteredRowModel().rows.length
+
+    const startRow = pageIndex * pageSize + 1
+    const endRow = Math.min((pageIndex + 1) * pageSize, totalRows)
+
+    return `${String(startRow)}-${String(endRow)} of ${String(totalRows)} row(s)`
+}
+
 export function DataTablePagination<TData>({
     table,
 }: DataTablePaginationProps<TData>) {
@@ -30,7 +41,9 @@ export function DataTablePagination<TData>({
                     {table.getFilteredRowModel().rows.length} row(s) selected
                 </div>
             ) : (
-                <div></div>
+                <div className="text-sm text-muted-foreground">
+                    {getDisplayedRowsText(table)}
+                </div>
             )}
             <div className="flex items-center space-x-6 lg:space-x-8">
                 <div className="flex items-center space-x-2">
