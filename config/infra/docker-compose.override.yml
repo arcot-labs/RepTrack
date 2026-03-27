@@ -37,7 +37,13 @@ services:
             - traefik.http.routers.${PROJECT?}-${ENV?}-mailcatcher.entrypoints=web
             - traefik.http.services.${PROJECT?}-${ENV?}-mailcatcher.loadbalancer.server.port=1080
 
-    migrations:
+    migrate-database:
+        pull_policy: build
+        build:
+            context: ../../server
+            target: dev
+
+    reindex-meilisearch:
         pull_policy: build
         build:
             context: ../../server
