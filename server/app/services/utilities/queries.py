@@ -34,7 +34,9 @@ async def query_exercises(
     base: bool,
     *where_clauses: Any,
 ) -> Sequence[Exercise]:
-    query = select(Exercise).where(*where_clauses).order_by(Exercise.name)
+    query = select(Exercise).where(*where_clauses)
+    # display custom exercises first
+    query = query.order_by(Exercise.user_id, Exercise.name)
     if not base:
         query = query.options(
             selectinload(Exercise.muscle_groups).selectinload(

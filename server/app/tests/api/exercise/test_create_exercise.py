@@ -77,7 +77,8 @@ async def test_create_exercise_name_conflict(
     await login_admin(client, settings)
 
     await _make_request(client, name="Lunge")
-    resp = await _make_request(client, name="Lunge")
+    # case insensitive match should also be a conflict
+    resp = await _make_request(client, name="lunge")
 
     assert resp.status_code == ExerciseNameConflict.status_code
     body = resp.json()

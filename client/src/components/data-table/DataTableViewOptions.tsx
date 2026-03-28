@@ -12,9 +12,11 @@ import {
 import { Button } from '@/components/ui/overrides/button'
 import { formatIdentifier } from '@/lib/text'
 
-interface DataTableColumnMeta {
+export interface DataTableColumnMeta {
     viewLabel?: string
     filterOnly?: boolean
+    headerClassName?: string
+    cellClassName?: string
 }
 
 function getColumnViewLabel(columnId: string, meta?: unknown): string {

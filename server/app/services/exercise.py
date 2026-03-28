@@ -1,4 +1,5 @@
 import logging
+from datetime import UTC, datetime
 
 from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
@@ -146,6 +147,8 @@ async def update_exercise(
             db_session.add(
                 ExerciseMuscleGroup(exercise_id=exercise_id, muscle_group_id=mg.id),
             )
+        # manually update in case of only muscle group changes
+        exercise.updated_at = datetime.now(UTC)
 
     try:
         await db_session.commit()

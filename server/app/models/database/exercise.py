@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import TEXT, DateTime, ForeignKey, Index, String, UniqueConstraint, func
+from sqlalchemy import TEXT, DateTime, ForeignKey, Index, UniqueConstraint, func
+from sqlalchemy.dialects.postgresql import CITEXT
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -36,7 +37,7 @@ class Exercise(Base):
         ForeignKey("users.id", ondelete="CASCADE"),
     )
     name: Mapped[str] = mapped_column(
-        String(255),
+        CITEXT(255),
         nullable=False,
     )
     description: Mapped[str | None] = mapped_column(

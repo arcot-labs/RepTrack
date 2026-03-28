@@ -134,7 +134,7 @@ async def test_update_exercise_name_conflict(
     await create_exercise_via_api(client, db_session, name="Taken Name")
     other = await create_exercise_via_api(client, db_session, name="To Rename")
 
-    resp = await _make_request(client, other.id, name="Taken Name")
+    resp = await _make_request(client, other.id, name="taken name")
 
     assert resp.status_code == ExerciseNameConflict.status_code
     body = resp.json()

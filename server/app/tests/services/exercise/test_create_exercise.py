@@ -64,7 +64,7 @@ async def test_create_exercise_name_conflict(db_session: AsyncSession):
     with pytest.raises(ExerciseNameConflict):
         await create_exercise(
             user.id,
-            CreateExerciseRequest(name="Bench", muscle_group_ids=[]),
+            CreateExerciseRequest(name="bench", muscle_group_ids=[]),
             db_session,
         )
 

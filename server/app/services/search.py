@@ -60,7 +60,8 @@ async def _index_muscle_groups(
     )
 
     index = await ms_client.get_or_create_index(SearchIndex.MUSCLE_GROUPS)
-    await index.update_settings(settings)
+    settings_task = await index.update_settings(settings)
+    await ms_client.wait_for_task(settings_task.task_uid)
 
     task = await index.add_documents([doc.model_dump() for doc in docs])
     return task.task_uid
@@ -85,7 +86,8 @@ async def _index_exercises(
     )
 
     index = await ms_client.get_or_create_index(SearchIndex.EXERCISES)
-    await index.update_settings(settings)
+    settings_task = await index.update_settings(settings)
+    await ms_client.wait_for_task(settings_task.task_uid)
 
     task = await index.add_documents(
         [doc.model_dump() for doc in docs],

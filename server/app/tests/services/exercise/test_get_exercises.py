@@ -35,6 +35,10 @@ async def test_get_exercises_ordering(db_session: AsyncSession):
 
     await create_exercise(
         db_session,
+        name="z squat",
+    )
+    await create_exercise(
+        db_session,
         name="z press",
         user_id=user.id,
     )
@@ -44,7 +48,10 @@ async def test_get_exercises_ordering(db_session: AsyncSession):
         user_id=user.id,
     )
 
-    result = await get_exercises(user.id, db_session)
+    exercises = await get_exercises(user.id, db_session)
 
-    names = [exercise.name for exercise in result]
-    assert names == sorted(names)
+    user_exercises = sorted([e.name for e in exercises if e.user_id == user.id])
+    system_exercises = sorted([e.name for e in exercises if e.user_id is None])
+
+    names = [e.name for e in exercises]
+    assert names == user_exercises + system_exercises

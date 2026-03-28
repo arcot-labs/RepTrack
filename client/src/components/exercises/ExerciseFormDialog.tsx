@@ -45,7 +45,7 @@ const defaultUpdateExerciseFormValues: UpdateExerciseForm = {
 
 interface ExerciseFormDialogProps {
     open: boolean
-    mode: 'create' | 'edit'
+    mode: 'create' | 'edit' | 'view'
     exercise: ExercisePublic | null
     muscleGroups: MuscleGroupPublic[]
     isRowLoading: boolean
@@ -106,6 +106,7 @@ export function ExerciseFormDialog({
     })
 
     const isCreateMode = mode === 'create'
+    const isViewMode = mode === 'view'
     const isSubmitting =
         (isCreateMode ? isCreateSubmitting : isEditSubmitting) || isRowLoading
     const isDirty = isCreateMode ? isCreateDirty : isEditDirty
@@ -140,7 +141,7 @@ export function ExerciseFormDialog({
 
     const closeDialog = () => {
         if (isCreateMode) resetCreate(defaultCreateExerciseFormValues)
-        else resetEdit(defaultUpdateExerciseFormValues)
+        else if (!isViewMode) resetEdit(defaultUpdateExerciseFormValues)
         onOpenChange(false)
     }
 
@@ -257,7 +258,11 @@ export function ExerciseFormDialog({
         }
     }
 
-    const formDialogTitle = isCreateMode ? 'Create Exercise' : 'Edit Exercise'
+    const formDialogTitle = isCreateMode
+        ? 'Create Exercise'
+        : isViewMode
+          ? 'View Exercise'
+          : 'Edit Exercise'
     const formSubmitButtonText = isCreateMode ? 'Create' : 'Save'
     const formSubmittingButtonText = isCreateMode ? 'Creating...' : 'Saving...'
     const cancelButtonDisabled = isSubmitting || !isDirty
@@ -279,9 +284,11 @@ export function ExerciseFormDialog({
             >
                 <DialogHeader>
                     <DialogTitle>{formDialogTitle}</DialogTitle>
-                    <DialogDescription>
-                        Set exercise details and assign target muscle groups
-                    </DialogDescription>
+                    {!isViewMode && (
+                        <DialogDescription>
+                            Set exercise details and assign target muscle groups
+                        </DialogDescription>
+                    )}
                 </DialogHeader>
                 <form
                     id="exercise-form"
@@ -297,67 +304,119 @@ export function ExerciseFormDialog({
                         htmlFor="exercise-name"
                         error={errors.name?.message}
                     >
-                        <Input
-                            id="exercise-name"
-                            placeholder="e.g., Barbell Squat"
-                            aria-invalid={!!errors.name}
-                            {...(isCreateMode
-                                ? registerCreate('name')
-                                : registerEdit('name'))}
-                        />
+                        {isViewMode ? (
+                            <div className="text-sm text-muted-foreground">
+                                {capitalizeWords(exercise?.name ?? '—')}
+                            </div>
+                        ) : (
+                            <Input
+                                id="exercise-name"
+                                placeholder="e.g., Barbell Squat"
+                                aria-invalid={!!errors.name}
+                                {...(isCreateMode
+                                    ? registerCreate('name')
+                                    : registerEdit('name'))}
+                            />
+                        )}
                     </Field>
                     <Field
                         label="Description"
                         htmlFor="exercise-description"
                         error={errors.description?.message}
                     >
-                        <Input
-                            id="exercise-description"
-                            placeholder="e.g., Lower-body compound movement"
-                            aria-invalid={!!errors.description}
-                            {...(isCreateMode
-                                ? registerCreate('description')
-                                : registerEdit('description'))}
-                        />
+                        {isViewMode ? (
+                            <div className="text-sm text-muted-foreground">
+                                {exercise?.description ?? '—'}
+                            </div>
+                        ) : (
+                            <Input
+                                id="exercise-description"
+                                placeholder="e.g., Lower-body compound movement"
+                                aria-invalid={!!errors.description}
+                                {...(isCreateMode
+                                    ? registerCreate('description')
+                                    : registerEdit('description'))}
+                            />
+                        )}
                     </Field>
                     <Field
                         label="Muscle Groups"
                         error={errors.muscle_group_ids?.message}
                     >
-                        <div className="max-h-50 space-y-2 overflow-y-auto rounded-md border p-3">
-                            {muscleGroups.map((group) => {
-                                const checked = selectedMuscleGroupIds.includes(
-                                    group.id
-                                )
-                                return (
-                                    <label
-                                        key={group.id}
-                                        className="flex cursor-pointer gap-2"
-                                    >
-                                        <Checkbox
-                                            checked={checked}
-                                            onCheckedChange={(value) => {
-                                                toggleMuscleGroup(
-                                                    group.id,
-                                                    value === true
-                                                )
-                                            }}
-                                            disabled={isSubmitting}
-                                        />
-                                        <span className="text-sm">
-                                            <span className="font-medium">
-                                                {capitalizeWords(group.name)}
+                        {isViewMode ? (
+                            selectedMuscleGroupIds.length ? (
+                                <div className="flex flex-wrap gap-1">
+                                    {muscleGroups.map(
+                                        (group) =>
+                                            selectedMuscleGroupIds.includes(
+                                                group.id
+                                            ) && (
+                                                <span
+                                                    key={group.id}
+                                                    className="rounded-md bg-muted px-2 py-1 text-sm text-muted-foreground"
+                                                >
+                                                    {capitalizeWords(
+                                                        group.name
+                                                    )}
+                                                </span>
+                                            )
+                                    )}
+                                </div>
+                            ) : (
+                                <span className="text-sm text-muted-foreground">
+                                    —
+                                </span>
+                            )
+                        ) : (
+                            <div className="max-h-50 space-y-2 overflow-y-auto rounded-md border p-3">
+                                {muscleGroups.map((group) => {
+                                    const checked =
+                                        selectedMuscleGroupIds.includes(
+                                            group.id
+                                        )
+                                    return (
+                                        <label
+                                            key={group.id}
+                                            className="flex cursor-pointer gap-2"
+                                        >
+                                            <Checkbox
+                                                checked={checked}
+                                                onCheckedChange={(value) => {
+                                                    toggleMuscleGroup(
+                                                        group.id,
+                                                        value === true
+                                                    )
+                                                }}
+                                                disabled={isSubmitting}
+                                            />
+                                            <span className="text-sm">
+                                                <span className="font-medium">
+                                                    {capitalizeWords(
+                                                        group.name
+                                                    )}
+                                                </span>
+                                                <span className="text-muted-foreground">
+                                                    {' '}
+                                                    &mdash; {group.description}
+                                                </span>
                                             </span>
-                                            <span className="text-muted-foreground">
-                                                {' '}
-                                                &mdash; {group.description}
-                                            </span>
-                                        </span>
-                                    </label>
-                                )
-                            })}
-                        </div>
+                                        </label>
+                                    )
+                                })}
+                            </div>
+                        )}
                     </Field>
+                    {exercise?.user_id !== null && !isCreateMode && (
+                        <Field label="Last Updated">
+                            <div className="text-sm text-muted-foreground">
+                                {exercise?.updated_at
+                                    ? new Date(
+                                          exercise.updated_at
+                                      ).toLocaleString()
+                                    : '—'}
+                            </div>
+                        </Field>
+                    )}
                 </form>
                 <DialogFooter>
                     <DialogClose asChild>
@@ -368,19 +427,21 @@ export function ExerciseFormDialog({
                                 handleAttemptCloseDialog(e as unknown as Event)
                             }}
                         >
-                            Cancel
+                            {isViewMode ? 'Close' : 'Cancel'}
                         </Button>
                     </DialogClose>
-                    <Button
-                        form="exercise-form"
-                        type="submit"
-                        variant="success"
-                        disabled={cancelButtonDisabled}
-                    >
-                        {isSubmitting
-                            ? formSubmittingButtonText
-                            : formSubmitButtonText}
-                    </Button>
+                    {!isViewMode && (
+                        <Button
+                            form="exercise-form"
+                            type="submit"
+                            variant="success"
+                            disabled={cancelButtonDisabled}
+                        >
+                            {isSubmitting
+                                ? formSubmittingButtonText
+                                : formSubmitButtonText}
+                        </Button>
+                    )}
                 </DialogFooter>
             </DialogContent>
         </Dialog>

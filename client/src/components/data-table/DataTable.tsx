@@ -1,6 +1,7 @@
 import { DataTablePagination } from '@/components/data-table/DataTablePagination'
 import { DataTableSkeleton } from '@/components/data-table/DataTableSkeleton'
 import { DataTableToolbar } from '@/components/data-table/DataTableToolbar'
+import { type DataTableColumnMeta } from '@/components/data-table/DataTableViewOptions'
 import {
     Table,
     TableBody,
@@ -11,6 +12,7 @@ import {
 } from '@/components/ui/table'
 import type { DataTableToolbarConfig } from '@/models/data-table'
 import {
+    type Cell,
     type ColumnDef,
     type ColumnFiltersState,
     flexRender,
@@ -20,6 +22,7 @@ import {
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
+    type Header,
     type SortingState,
     useReactTable,
     type VisibilityState,
@@ -35,6 +38,24 @@ interface DataTableProps<TData, TValue> {
     initialColumnVisibility?: VisibilityState
     firstColumnPaddingExcludeIds?: string[]
     lastColumnPaddingExcludeIds?: string[]
+}
+
+function getHeaderClassName<TData, TValue>(
+    header: Header<TData, TValue>
+): string | undefined {
+    const headerMeta = header.column.columnDef.meta as
+        | DataTableColumnMeta
+        | undefined
+    return headerMeta?.headerClassName
+}
+
+function getCellClassName<TData, TValue>(
+    cell: Cell<TData, TValue>
+): string | undefined {
+    const cellMeta = cell.column.columnDef.meta as
+        | DataTableColumnMeta
+        | undefined
+    return 'h-10 ' + (cellMeta?.cellClassName ?? '')
 }
 
 export function DataTable<TData, TValue>({
@@ -134,7 +155,10 @@ export function DataTable<TData, TValue>({
                                                         headerIdx,
                                                         headerGroup.headers
                                                             .length - 1,
-                                                        header.column.id
+                                                        header.column.id,
+                                                        getHeaderClassName(
+                                                            header
+                                                        )
                                                     )}
                                                 >
                                                     {header.isPlaceholder
@@ -163,23 +187,27 @@ export function DataTable<TData, TValue>({
                                     >
                                         {row
                                             .getVisibleCells()
-                                            .map((cell, cellIdx, cells) => (
-                                                <TableCell
-                                                    key={cell.id}
-                                                    className={getEdgePaddingClassName(
-                                                        cellIdx,
-                                                        cells.length - 1,
-                                                        cell.column.id,
-                                                        'h-10'
-                                                    )}
-                                                >
-                                                    {flexRender(
-                                                        cell.column.columnDef
-                                                            .cell,
-                                                        cell.getContext()
-                                                    )}
-                                                </TableCell>
-                                            ))}
+                                            .map((cell, cellIdx, cells) => {
+                                                return (
+                                                    <TableCell
+                                                        key={cell.id}
+                                                        className={getEdgePaddingClassName(
+                                                            cellIdx,
+                                                            cells.length - 1,
+                                                            cell.column.id,
+                                                            getCellClassName(
+                                                                cell
+                                                            )
+                                                        )}
+                                                    >
+                                                        {flexRender(
+                                                            cell.column
+                                                                .columnDef.cell,
+                                                            cell.getContext()
+                                                        )}
+                                                    </TableCell>
+                                                )
+                                            })}
                                     </TableRow>
                                 ))
                             ) : (
