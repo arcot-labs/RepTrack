@@ -200,7 +200,7 @@ async def test_update_exercise_name_conflict(db_session: AsyncSession):
         await update_exercise(
             exercise.id,
             user.id,
-            UpdateExerciseRequest(name="Bench"),
+            UpdateExerciseRequest(name="bench"),
             db_session,
         )
 
