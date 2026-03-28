@@ -92,20 +92,27 @@ async def test_query_exercises_ordering(db_session: AsyncSession):
 
     await create_exercise(
         db_session,
-        name="Z Row",
+        name="z row",
+    )
+    await create_exercise(
+        db_session,
+        name="z row",
         user_id=user.id,
     )
     await create_exercise(
         db_session,
-        name="A Row",
+        name="a row",
         user_id=user.id,
     )
 
-    result = await query_exercises(
+    exercises = await query_exercises(
         db_session,
         False,
-        Exercise.user_id == user.id,
+        (Exercise.user_id.is_(None)) | (Exercise.user_id == user.id),
     )
 
-    names = [e.name for e in result]
-    assert names == sorted(names)
+    user_exercises = sorted([e.name for e in exercises if e.user_id == user.id])
+    system_exercises = sorted([e.name for e in exercises if e.user_id is None])
+
+    names = [e.name for e in exercises]
+    assert names == user_exercises + system_exercises
