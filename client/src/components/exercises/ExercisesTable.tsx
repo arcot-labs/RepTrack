@@ -19,7 +19,7 @@ import {
 import { Button } from '@/components/ui/overrides/button'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
-import { blueText, redText } from '@/lib/styles'
+import { redText } from '@/lib/styles'
 import { capitalizeWords } from '@/lib/text'
 import type {
     DataTableRowActionsConfig,
@@ -27,7 +27,7 @@ import type {
     FilterOption,
 } from '@/models/data-table'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Lock, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Eye, Pencil, Plus, Trash } from 'lucide-react'
 import { useState } from 'react'
 
 function getTypeFilterOptions(): FilterOption[] {
@@ -60,7 +60,7 @@ export function ExercisesTable({
 
     const [formDialog, setFormDialog] = useState<{
         isOpen: boolean
-        mode: 'create' | 'edit'
+        mode: 'create' | 'edit' | 'view'
         exercise: ExercisePublic | null
     }>({
         isOpen: false,
@@ -82,6 +82,10 @@ export function ExercisesTable({
 
     const openEditDialog = (exercise: ExercisePublic) => {
         setFormDialog({ isOpen: true, mode: 'edit', exercise })
+    }
+
+    const openViewDialog = (exercise: ExercisePublic) => {
+        setFormDialog({ isOpen: true, mode: 'view', exercise })
     }
 
     const openDeleteDialog = (exercise: ExercisePublic) => {
@@ -144,7 +148,16 @@ export function ExercisesTable({
     const rowActionsConfig: DataTableRowActionsConfig<ExercisePublic> = {
         schema: zExercisePublic,
         menuItems: (row) => {
-            if (row.user_id === null) return []
+            if (row.user_id === null)
+                return [
+                    {
+                        type: 'action',
+                        icon: Eye,
+                        onSelect: () => {
+                            openViewDialog(row)
+                        },
+                    },
+                ]
 
             const isRowLoading = isLoadingExerciseIds.has(row.id)
             return [
@@ -159,7 +172,7 @@ export function ExercisesTable({
                 {
                     type: 'action',
                     className: redText,
-                    icon: Trash2,
+                    icon: Trash,
                     onSelect: () => {
                         openDeleteDialog(row)
                     },
@@ -197,20 +210,26 @@ export function ExercisesTable({
                 <DataTableColumnHeader column={column} title="Name" />
             ),
             cell: ({ row }) => (
-                <div className="flex items-center gap-1.5">
-                    {row.original.user_id === null && (
-                        <Lock className={`size-3 shrink-0 ${blueText}`} />
-                    )}
-                    <DataTableTruncatedCell
-                        value={capitalizeWords(row.original.name)}
-                        className="max-w-40 min-w-25"
-                    />
-                </div>
+                <>
+                    <span className="inline md:hidden">
+                        {capitalizeWords(row.original.name)}
+                    </span>
+                    <span className="hidden md:inline">
+                        <DataTableTruncatedCell
+                            value={capitalizeWords(row.original.name)}
+                            className="max-w-50 min-w-25"
+                        />
+                    </span>
+                </>
             ),
             enableHiding: false,
         },
         {
             accessorKey: 'description',
+            meta: {
+                headerClassName: 'hidden md:table-cell',
+                cellClassName: 'hidden md:table-cell',
+            },
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Description" />
             ),
@@ -218,7 +237,7 @@ export function ExercisesTable({
                 row.original.description ? (
                     <DataTableTruncatedCell
                         value={row.original.description}
-                        className="max-w-60 min-w-25"
+                        className="max-w-100 min-w-25 lg:max-w-150"
                     />
                 ) : (
                     '—'
@@ -240,10 +259,17 @@ export function ExercisesTable({
                     capitalizeWords(group.name)
                 )
                 return names.length ? (
-                    <DataTableTruncatedCell
-                        value={names.join(', ')}
-                        className="max-w-100 min-w-25"
-                    />
+                    <>
+                        <span className="inline md:hidden">
+                            {names.join(', ')}
+                        </span>
+                        <span className="hidden md:inline">
+                            <DataTableTruncatedCell
+                                value={names.join(', ')}
+                                className="max-w-100 min-w-25"
+                            />
+                        </span>
+                    </>
                 ) : (
                     '—'
                 )
@@ -263,18 +289,6 @@ export function ExercisesTable({
             accessorFn: (row) => (row.user_id === null ? 'system' : 'custom'),
             filterFn: (row, id, filterValues: string[]) =>
                 filterValues.includes(row.getValue(id)),
-        },
-        {
-            accessorKey: 'updated_at',
-            meta: { viewLabel: 'Updated At' },
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Updated At" />
-            ),
-            cell: ({ row }) =>
-                row.original.user_id !== null
-                    ? new Date(row.original.updated_at).toLocaleString()
-                    : '—',
-            enableHiding: true,
         },
     ]
 

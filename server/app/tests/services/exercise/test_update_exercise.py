@@ -143,6 +143,33 @@ async def test_update_exercise_no_description(db_session: AsyncSession):
     assert len(exercise.muscle_groups) == 0
 
 
+async def test_update_exercise_only_muscle_groups(db_session: AsyncSession):
+    user = await create_user(db_session)
+    exercise = await create_exercise(
+        db_session,
+        name="Bench",
+        user_id=user.id,
+    )
+    original_updated_at = exercise.updated_at
+    muscle_group_id = await get_muscle_group_id(db_session, name="chest")
+
+    await update_exercise(
+        exercise.id,
+        user.id,
+        UpdateExerciseRequest(muscle_group_ids=[muscle_group_id]),
+        db_session,
+    )
+
+    exercise = await get_exercise(exercise.id, user.id, db_session)
+
+    assert exercise.name == "Bench"
+    assert exercise.description is None
+    assert [muscle_group.id for muscle_group in exercise.muscle_groups] == [
+        muscle_group_id
+    ]
+    assert exercise.updated_at > original_updated_at
+
+
 async def test_update_exercise_null_values(db_session: AsyncSession):
     user = await create_user(db_session)
     exercise = await create_exercise(
@@ -200,7 +227,7 @@ async def test_update_exercise_name_conflict(db_session: AsyncSession):
         await update_exercise(
             exercise.id,
             user.id,
-            UpdateExerciseRequest(name="Bench"),
+            UpdateExerciseRequest(name="bench"),
             db_session,
         )
 

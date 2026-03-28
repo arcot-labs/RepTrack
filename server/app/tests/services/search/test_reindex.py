@@ -21,11 +21,19 @@ async def test_reindex(
     async def fake_delete_index_if_exists(uid: str) -> None:
         deleted_indexes.append(uid)
 
-    async def fake_muscle_groups(db_session: AsyncSession, client: AsyncClient) -> None:
+    async def fake_muscle_groups(
+        db_session: AsyncSession,
+        client: AsyncClient,
+    ) -> int:
         calls.append("muscle")
+        return 1
 
-    async def fake_exercises(db_session: AsyncSession, client: AsyncClient) -> None:
+    async def fake_exercises(
+        db_session: AsyncSession,
+        client: AsyncClient,
+    ) -> int:
         calls.append("exercise")
+        return 2
 
     monkeypatch.setattr(ms_client, "get_indexes", fake_get_indexes)
     monkeypatch.setattr(
