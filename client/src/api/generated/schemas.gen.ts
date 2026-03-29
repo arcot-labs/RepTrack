@@ -678,6 +678,8 @@ export const SearchRequestSchema = {
         },
         limit: {
             type: 'integer',
+            maximum: 1000,
+            minimum: 0,
             title: 'Limit'
         }
     },

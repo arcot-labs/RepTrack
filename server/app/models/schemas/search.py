@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from app.models.schemas.types import SearchQuery
+from app.models.schemas.types import SearchLimit, SearchQuery
 
 
 class ReindexRequest(BaseModel):
@@ -9,4 +9,4 @@ class ReindexRequest(BaseModel):
 
 class SearchRequest(BaseModel):
     query: SearchQuery
-    limit: int
+    limit: SearchLimit

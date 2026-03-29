@@ -36,3 +36,4 @@ WorkoutExerciseNotes = Annotated[str, Field(max_length=1000)]
 WorkoutNotes = Annotated[str, Field(max_length=1000)]
 
 SearchQuery = Annotated[str, Field(min_length=1, max_length=255)]
+SearchLimit = Annotated[int, Field(ge=0, le=1000)]
