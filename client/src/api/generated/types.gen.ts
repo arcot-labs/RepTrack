@@ -182,32 +182,6 @@ export type ExerciseBase = {
 };
 
 /**
- * ExerciseDocument
- */
-export type ExerciseDocument = {
-    /**
-     * Id
-     */
-    id: number;
-    /**
-     * User Id
-     */
-    user_id: number | null;
-    /**
-     * Name
-     */
-    name: string;
-    /**
-     * Description
-     */
-    description: string | null;
-    /**
-     * Muscle Group Names
-     */
-    muscle_group_names: Array<string>;
-};
-
-/**
  * ExercisePublic
  */
 export type ExercisePublic = {
@@ -239,6 +213,16 @@ export type ExercisePublic = {
      * Muscle Groups
      */
     muscle_groups: Array<MuscleGroupPublic>;
+};
+
+/**
+ * ExerciseSearchResult
+ */
+export type ExerciseSearchResult = {
+    /**
+     * Id
+     */
+    id: number;
 };
 
 /**
@@ -303,6 +287,16 @@ export type MuscleGroupPublic = {
 };
 
 /**
+ * MuscleGroupSearchResult
+ */
+export type MuscleGroupSearchResult = {
+    /**
+     * Id
+     */
+    id: number;
+};
+
+/**
  * RegisterRequest
  */
 export type RegisterRequest = {
@@ -318,6 +312,16 @@ export type RegisterRequest = {
      * Password
      */
     password: string;
+};
+
+/**
+ * ReindexRequest
+ */
+export type ReindexRequest = {
+    /**
+     * Wait For Tasks
+     */
+    wait_for_tasks: boolean;
 };
 
 /**
@@ -377,139 +381,7 @@ export type SearchRequest = {
     /**
      * Limit
      */
-    limit?: number;
-};
-
-/**
- * SearchResults[ExerciseDocument]
- */
-export type SearchResultsExerciseDocument = {
-    /**
-     * Hits
-     */
-    hits: Array<ExerciseDocument>;
-    /**
-     * Offset
-     */
-    offset?: number | null;
-    /**
-     * Limit
-     */
-    limit?: number | null;
-    /**
-     * Estimatedtotalhits
-     */
-    estimatedTotalHits?: number | null;
-    /**
-     * Processingtimems
-     */
-    processingTimeMs: number;
-    /**
-     * Query
-     */
-    query: string;
-    /**
-     * Facetdistribution
-     */
-    facetDistribution?: {
-        [key: string]: unknown;
-    } | null;
-    /**
-     * Totalpages
-     */
-    totalPages?: number | null;
-    /**
-     * Totalhits
-     */
-    totalHits?: number | null;
-    /**
-     * Page
-     */
-    page?: number | null;
-    /**
-     * Hitsperpage
-     */
-    hitsPerPage?: number | null;
-    /**
-     * Semantichitcount
-     */
-    semanticHitCount?: number | null;
-    /**
-     * Queryvector
-     */
-    queryVector?: Array<number> | null;
-    /**
-     * Performancedetails
-     */
-    performanceDetails?: {
-        [key: string]: unknown;
-    } | null;
-};
-
-/**
- * SearchResults[MuscleGroupPublic]
- */
-export type SearchResultsMuscleGroupPublic = {
-    /**
-     * Hits
-     */
-    hits: Array<MuscleGroupPublic>;
-    /**
-     * Offset
-     */
-    offset?: number | null;
-    /**
-     * Limit
-     */
-    limit?: number | null;
-    /**
-     * Estimatedtotalhits
-     */
-    estimatedTotalHits?: number | null;
-    /**
-     * Processingtimems
-     */
-    processingTimeMs: number;
-    /**
-     * Query
-     */
-    query: string;
-    /**
-     * Facetdistribution
-     */
-    facetDistribution?: {
-        [key: string]: unknown;
-    } | null;
-    /**
-     * Totalpages
-     */
-    totalPages?: number | null;
-    /**
-     * Totalhits
-     */
-    totalHits?: number | null;
-    /**
-     * Page
-     */
-    page?: number | null;
-    /**
-     * Hitsperpage
-     */
-    hitsPerPage?: number | null;
-    /**
-     * Semantichitcount
-     */
-    semanticHitCount?: number | null;
-    /**
-     * Queryvector
-     */
-    queryVector?: Array<number> | null;
-    /**
-     * Performancedetails
-     */
-    performanceDetails?: {
-        [key: string]: unknown;
-    } | null;
+    limit: number;
 };
 
 /**
@@ -1453,7 +1325,7 @@ export type GetTaskResponses = {
 export type GetTaskResponse = GetTaskResponses[keyof GetTaskResponses];
 
 export type ReindexData = {
-    body?: never;
+    body: ReindexRequest;
     path?: never;
     query?: never;
     url: '/api/search/reindex';
@@ -1468,6 +1340,10 @@ export type ReindexErrors = {
      * Forbidden
      */
     403: ErrorResponse;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
 };
 
 export type ReindexError = ReindexErrors[keyof ReindexErrors];
@@ -1503,9 +1379,11 @@ export type SearchMuscleGroupsError = SearchMuscleGroupsErrors[keyof SearchMuscl
 
 export type SearchMuscleGroupsResponses = {
     /**
+     * Response Searchmusclegroups
+     *
      * Successful Response
      */
-    200: SearchResultsMuscleGroupPublic;
+    200: Array<MuscleGroupSearchResult>;
 };
 
 export type SearchMuscleGroupsResponse = SearchMuscleGroupsResponses[keyof SearchMuscleGroupsResponses];
@@ -1532,9 +1410,11 @@ export type SearchExercisesError = SearchExercisesErrors[keyof SearchExercisesEr
 
 export type SearchExercisesResponses = {
     /**
+     * Response Searchexercises
+     *
      * Successful Response
      */
-    200: SearchResultsExerciseDocument;
+    200: Array<ExerciseSearchResult>;
 };
 
 export type SearchExercisesResponse = SearchExercisesResponses[keyof SearchExercisesResponses];

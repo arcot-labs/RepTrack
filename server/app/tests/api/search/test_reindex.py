@@ -17,6 +17,7 @@ async def _make_request(
         client,
         method=HttpMethod.POST,
         endpoint="/api/search/reindex",
+        json={"wait_for_tasks": False},
     )
 
 

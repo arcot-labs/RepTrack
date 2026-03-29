@@ -29,7 +29,9 @@ async def test_get_search_task(
 ):
     await login_admin(client, settings)
 
-    await reindex_via_api(client)
+    resp = await reindex_via_api(client)
+    assert resp.status_code == status.HTTP_204_NO_CONTENT
+
     resp = await _make_request(client, task_id=0)
 
     assert resp.status_code == status.HTTP_200_OK

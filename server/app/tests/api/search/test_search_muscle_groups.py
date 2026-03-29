@@ -1,8 +1,8 @@
 from fastapi import status
 from httpx import AsyncClient
-from meilisearch_python_sdk.models.search import SearchResults
 
 from app.core.config import Settings
+from app.models.schemas.muscle_group import MuscleGroupSearchResult
 from app.tests.api.search.utilities import reindex_via_api
 
 from ..utilities import HttpMethod, login_admin, make_http_request
@@ -31,15 +31,18 @@ async def test_search_muscle_groups(
 ):
     await login_admin(client, settings)
 
-    await reindex_via_api(client)
-    resp = await _make_request(client, query="chest", limit=5)
+    resp = await reindex_via_api(client)
+    assert resp.status_code == status.HTTP_204_NO_CONTENT
+
+    resp = await _make_request(client, query=" ", limit=5)
 
     assert resp.status_code == status.HTTP_200_OK
     body = resp.json()
-    results = SearchResults.model_validate(body)  # pyright: ignore[reportUnknownVariableType]
+    assert isinstance(body, list)
 
-    assert results.query == "chest"
-    assert results.limit == 5
+    assert len(body) == 5  # pyright: ignore[reportUnknownArgumentType]
+    for result in body:  # pyright: ignore[reportUnknownVariableType]
+        MuscleGroupSearchResult.model_validate(result)
 
 
 # 401

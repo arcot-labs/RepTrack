@@ -1,7 +1,9 @@
 import {
     ExerciseService,
+    SearchService,
     type ExercisePublic,
     type MuscleGroupPublic,
+    type MuscleGroupSearchResult,
 } from '@/api/generated'
 import {
     zCreateExerciseRequest,
@@ -20,11 +22,12 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/overrides/button'
+import { Spinner } from '@/components/ui/spinner'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import { capitalizeWords } from '@/lib/text'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -68,6 +71,14 @@ export function ExerciseFormDialog({
     onReloadMuscleGroups,
     onRowLoadingChange,
 }: ExerciseFormDialogProps) {
+    const [searchQuery, setSearchQuery] = useState('')
+    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
+    const [isSearching, setIsSearching] = useState(false)
+    const [searchResults, setSearchResults] = useState<
+        MuscleGroupSearchResult[] | null
+    >(null)
+    const searchRequestIdRef = useRef(0)
+
     const {
         register: registerCreate,
         handleSubmit: handleSubmitCreate,
@@ -119,6 +130,23 @@ export function ExerciseFormDialog({
     useEffect(() => {
         if (!open) return
         if (isCreateMode) {
+            if (exercise) {
+                // copying existing exercise
+                resetCreate(
+                    {
+                        name: `${exercise.name} - copy`,
+                        description: exercise.description,
+                        muscle_group_ids: exercise.muscle_groups.map(
+                            (mg) => mg.id
+                        ),
+                    },
+                    {
+                        // use default values as initial for dirty check
+                        keepDefaultValues: true,
+                    }
+                )
+                return
+            }
             resetCreate(defaultCreateExerciseFormValues)
             return
         }
@@ -132,6 +160,62 @@ export function ExerciseFormDialog({
         }
         resetEdit(defaultUpdateExerciseFormValues)
     }, [open, isCreateMode, exercise, resetCreate, resetEdit])
+
+    useEffect(() => {
+        if (!open || isViewMode) {
+            setSearchQuery('')
+            setDebouncedSearchQuery('')
+            setSearchResults(null)
+            setIsSearching(false)
+            return
+        }
+        const timeout = setTimeout(() => {
+            setDebouncedSearchQuery(searchQuery.trim())
+        }, 300)
+        return () => {
+            clearTimeout(timeout)
+        }
+    }, [searchQuery, open, isViewMode])
+
+    useEffect(() => {
+        if (!open || isViewMode || !debouncedSearchQuery) {
+            setSearchResults(null)
+            setIsSearching(false)
+            return
+        }
+        const requestId = searchRequestIdRef.current + 1
+        searchRequestIdRef.current = requestId
+        setIsSearching(true)
+        void (async () => {
+            const { data, error } = await SearchService.searchMuscleGroups({
+                body: {
+                    query: debouncedSearchQuery,
+                    limit: muscleGroups.length,
+                },
+            })
+            if (requestId !== searchRequestIdRef.current) return
+            if (error) {
+                await handleApiError(error, {
+                    fallbackMessage: 'Failed to search muscle groups',
+                })
+                setSearchResults(null)
+                return
+            }
+            setSearchResults(data)
+        })().finally(() => {
+            if (requestId === searchRequestIdRef.current) setIsSearching(false)
+        })
+    }, [debouncedSearchQuery, muscleGroups.length, open, isViewMode])
+
+    const displayedMuscleGroups = useMemo(() => {
+        if (!searchResults) {
+            return muscleGroups
+        }
+        const byId = new Map(muscleGroups.map((group) => [group.id, group]))
+        return searchResults
+            .map((hit) => byId.get(hit.id))
+            .filter((group): group is MuscleGroupPublic => !!group)
+    }, [muscleGroups, searchResults])
 
     const handleAttemptCloseDialog = (e: Event) => {
         if (isDirty && !confirm('Discard changes?')) {
@@ -368,41 +452,65 @@ export function ExerciseFormDialog({
                                 </span>
                             )
                         ) : (
-                            <div className="max-h-50 space-y-2 overflow-y-auto rounded-md border p-3">
-                                {muscleGroups.map((group) => {
-                                    const checked =
-                                        selectedMuscleGroupIds.includes(
-                                            group.id
-                                        )
-                                    return (
-                                        <label
-                                            key={group.id}
-                                            className="flex cursor-pointer gap-2"
-                                        >
-                                            <Checkbox
-                                                checked={checked}
-                                                onCheckedChange={(value) => {
-                                                    toggleMuscleGroup(
-                                                        group.id,
-                                                        value === true
-                                                    )
-                                                }}
-                                                disabled={isSubmitting}
-                                            />
-                                            <span className="text-sm">
-                                                <span className="font-medium">
-                                                    {capitalizeWords(
-                                                        group.name
-                                                    )}
-                                                </span>
-                                                <span className="text-muted-foreground">
-                                                    {' '}
-                                                    &mdash; {group.description}
-                                                </span>
-                                            </span>
-                                        </label>
-                                    )
-                                })}
+                            <div className="space-y-2">
+                                <div className="relative">
+                                    <Input
+                                        placeholder="Search muscle groups..."
+                                        value={searchQuery}
+                                        onChange={(event) => {
+                                            setSearchQuery(event.target.value)
+                                        }}
+                                        className={isSearching ? 'pr-8' : ''}
+                                    />
+                                    {isSearching && (
+                                        <Spinner className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground" />
+                                    )}
+                                </div>
+                                <div className="max-h-50 space-y-2 overflow-y-auto rounded-md border p-3">
+                                    {displayedMuscleGroups.length ? (
+                                        displayedMuscleGroups.map((group) => {
+                                            const checked =
+                                                selectedMuscleGroupIds.includes(
+                                                    group.id
+                                                )
+                                            return (
+                                                <label
+                                                    key={group.id}
+                                                    className="flex cursor-pointer gap-2"
+                                                >
+                                                    <Checkbox
+                                                        checked={checked}
+                                                        onCheckedChange={(
+                                                            value
+                                                        ) => {
+                                                            toggleMuscleGroup(
+                                                                group.id,
+                                                                value === true
+                                                            )
+                                                        }}
+                                                        disabled={isSubmitting}
+                                                    />
+                                                    <span className="text-sm">
+                                                        <span className="font-medium">
+                                                            {capitalizeWords(
+                                                                group.name
+                                                            )}
+                                                        </span>
+                                                        <span className="text-muted-foreground">
+                                                            {' '}
+                                                            &mdash;{' '}
+                                                            {group.description}
+                                                        </span>
+                                                    </span>
+                                                </label>
+                                            )
+                                        })
+                                    ) : (
+                                        <div className="text-sm text-muted-foreground">
+                                            No muscle groups found.
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </Field>

@@ -6,8 +6,13 @@ from app.models.database.user import User
 from app.models.database.workout import Workout
 from app.models.database.workout_exercise import WorkoutExercise
 from app.models.schemas.access_request import AccessRequestPublic, ReviewerPublic
-from app.models.schemas.exercise import ExerciseBase, ExerciseDocument, ExercisePublic
-from app.models.schemas.muscle_group import MuscleGroupPublic
+from app.models.schemas.exercise import (
+    ExerciseBase,
+    ExerciseDocument,
+    ExercisePublic,
+    ExerciseSearchResult,
+)
+from app.models.schemas.muscle_group import MuscleGroupPublic, MuscleGroupSearchResult
 from app.models.schemas.set import SetPublic
 from app.models.schemas.user import UserPublic
 from app.models.schemas.workout import WorkoutBase, WorkoutPublic
@@ -44,12 +49,20 @@ def to_muscle_group_public(muscle_group: MuscleGroup) -> MuscleGroupPublic:
     return MuscleGroupPublic.model_validate(muscle_group, from_attributes=True)
 
 
+def to_muscle_group_search_result(
+    muscle_group: MuscleGroupPublic,
+) -> MuscleGroupSearchResult:
+    return MuscleGroupSearchResult(
+        id=muscle_group.id,
+    )
+
+
 def to_exercise_base(exercise: Exercise) -> ExerciseBase:
     return ExerciseBase.model_validate(exercise, from_attributes=True)
 
 
 def to_exercise_public(exercise: Exercise) -> ExercisePublic:
-    sorted_muscle_groups = sorted(
+    mgs = sorted(
         exercise.muscle_groups,
         key=lambda emg: emg.muscle_group.name,
     )
@@ -60,19 +73,27 @@ def to_exercise_public(exercise: Exercise) -> ExercisePublic:
         description=exercise.description,
         created_at=exercise.created_at,
         updated_at=exercise.updated_at,
-        muscle_groups=[
-            to_muscle_group_public(emg.muscle_group) for emg in sorted_muscle_groups
-        ],
+        muscle_groups=[to_muscle_group_public(emg.muscle_group) for emg in mgs],
     )
 
 
 def to_exercise_document(exercise: Exercise) -> ExerciseDocument:
+    mgs = sorted(
+        exercise.muscle_groups,
+        key=lambda emg: emg.muscle_group.name,
+    )
     return ExerciseDocument(
         id=exercise.id,
         user_id=exercise.user_id,
         name=exercise.name,
         description=exercise.description,
-        muscle_group_names=[emg.muscle_group.name for emg in exercise.muscle_groups],
+        muscle_group_names=[mg.muscle_group.name for mg in mgs],
+    )
+
+
+def to_exercise_search_result(exercise: ExerciseDocument) -> ExerciseSearchResult:
+    return ExerciseSearchResult(
+        id=exercise.id,
     )
 
 

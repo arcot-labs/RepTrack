@@ -28,6 +28,10 @@ class ExerciseDocument(BaseModel):
     muscle_group_names: list[str]
 
 
+class ExerciseSearchResult(BaseModel):
+    id: int
+
+
 class CreateExerciseRequest(BaseModel):
     name: ExerciseName
     description: ExerciseDescription | None = None

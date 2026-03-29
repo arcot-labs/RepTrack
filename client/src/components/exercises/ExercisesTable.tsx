@@ -1,6 +1,8 @@
 import {
     ExerciseService,
+    SearchService,
     type ExercisePublic,
+    type ExerciseSearchResult,
     type MuscleGroupPublic,
 } from '@/api/generated'
 import { zExercisePublic } from '@/api/generated/zod.gen'
@@ -19,7 +21,7 @@ import {
 import { Button } from '@/components/ui/overrides/button'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
-import { redText } from '@/lib/styles'
+import { blueText, redText } from '@/lib/styles'
 import { capitalizeWords } from '@/lib/text'
 import type {
     DataTableRowActionsConfig,
@@ -27,8 +29,8 @@ import type {
     FilterOption,
 } from '@/models/data-table'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Eye, Pencil, Plus, Trash } from 'lucide-react'
-import { useState } from 'react'
+import { Copy, Eye, Pencil, Plus, Trash } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 function getTypeFilterOptions(): FilterOption[] {
     return [
@@ -52,6 +54,15 @@ export function ExercisesTable({
     onReloadExercises,
     onReloadMuscleGroups,
 }: ExercisesTableProps) {
+    const [searchQuery, setSearchQuery] = useState('')
+    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
+    const [isSearching, setIsSearching] = useState(false)
+    const [searchResults, setSearchResults] = useState<
+        ExerciseSearchResult[] | null
+    >(null)
+    const [searchRefreshTick, setSearchRefreshTick] = useState(0)
+    const searchRequestIdRef = useRef(0)
+
     const [isLoadingExerciseIds, setIsLoadingExerciseIds] = useState<
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
         Set<number>
@@ -76,8 +87,67 @@ export function ExercisesTable({
         exercise: null,
     })
 
-    const openCreateDialog = () => {
-        setFormDialog({ isOpen: true, mode: 'create', exercise: null })
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setDebouncedSearchQuery(searchQuery.trim())
+        }, 300)
+        return () => {
+            clearTimeout(timeout)
+        }
+    }, [searchQuery])
+
+    useEffect(() => {
+        if (!debouncedSearchQuery) {
+            setSearchResults(null)
+            setIsSearching(false)
+            return
+        }
+        const requestId = searchRequestIdRef.current + 1
+        searchRequestIdRef.current = requestId
+        setIsSearching(true)
+        void (async () => {
+            const { data, error } = await SearchService.searchExercises({
+                body: {
+                    query: debouncedSearchQuery,
+                    limit: exercises.length,
+                },
+            })
+            // only update results for latest request
+            if (requestId !== searchRequestIdRef.current) return
+            if (error) {
+                await handleApiError(error, {
+                    fallbackMessage: 'Failed to search exercises',
+                })
+                setSearchResults(null)
+                return
+            }
+            setSearchResults(data)
+        })().finally(() => {
+            if (requestId === searchRequestIdRef.current) setIsSearching(false)
+        })
+    }, [debouncedSearchQuery, exercises.length, searchRefreshTick])
+
+    const refreshSearchResults = () => {
+        if (!debouncedSearchQuery) return
+        setSearchRefreshTick((prev) => prev + 1)
+    }
+
+    const displayedExercises = useMemo(() => {
+        if (!searchResults) return exercises
+        const byId = new Map(
+            exercises.map((exercise) => [exercise.id, exercise])
+        )
+        return searchResults
+            .map((hit) => byId.get(hit.id))
+            .filter((exercise): exercise is ExercisePublic => !!exercise)
+    }, [exercises, searchResults])
+
+    const openCreateDialog = (exercise?: ExercisePublic) => {
+        setFormDialog({
+            isOpen: true,
+            mode: 'create',
+            exercise: exercise ?? null,
+        })
     }
 
     const openEditDialog = (exercise: ExercisePublic) => {
@@ -138,6 +208,7 @@ export function ExercisesTable({
             }
             notify.success('Exercise deleted')
             await onReloadExercises()
+            refreshSearchResults()
             closeDeleteDialog()
         } finally {
             setExerciseRowLoading(exercise.id, false)
@@ -157,6 +228,14 @@ export function ExercisesTable({
                             openViewDialog(row)
                         },
                     },
+                    {
+                        type: 'action',
+                        className: blueText,
+                        icon: Copy,
+                        onSelect: () => {
+                            openCreateDialog(row)
+                        },
+                    },
                 ]
 
             const isRowLoading = isLoadingExerciseIds.has(row.id)
@@ -168,6 +247,14 @@ export function ExercisesTable({
                         openEditDialog(row)
                     },
                     disabled: isRowLoading,
+                },
+                {
+                    type: 'action',
+                    className: blueText,
+                    icon: Copy,
+                    onSelect: () => {
+                        openCreateDialog(row)
+                    },
                 },
                 {
                     type: 'action',
@@ -295,7 +382,10 @@ export function ExercisesTable({
     const toolbarConfig: DataTableToolbarConfig = {
         search: {
             columnId: 'name',
-            placeholder: 'Filter by name...',
+            placeholder: 'Search exercises...',
+            value: searchQuery,
+            onChange: setSearchQuery,
+            isLoading: isSearching,
         },
         filters: [
             {
@@ -327,7 +417,7 @@ export function ExercisesTable({
     return (
         <>
             <DataTable
-                data={exercises}
+                data={displayedExercises}
                 columns={columns}
                 pageSize={10}
                 isLoading={isLoading}
@@ -345,7 +435,10 @@ export function ExercisesTable({
                 onOpenChange={(isOpen) => {
                     setFormDialog((prev) => ({ ...prev, isOpen }))
                 }}
-                onSuccess={onReloadExercises}
+                onSuccess={async () => {
+                    await onReloadExercises()
+                    refreshSearchResults()
+                }}
                 onReloadExercises={onReloadExercises}
                 onReloadMuscleGroups={onReloadMuscleGroups}
                 onRowLoadingChange={setExerciseRowLoading}

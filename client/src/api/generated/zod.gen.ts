@@ -58,14 +58,10 @@ export const zExerciseBase = z.object({
 });
 
 /**
- * ExerciseDocument
+ * ExerciseSearchResult
  */
-export const zExerciseDocument = z.object({
-    id: z.int(),
-    user_id: z.int().nullable(),
-    name: z.string(),
-    description: z.string().nullable(),
-    muscle_group_names: z.array(z.string())
+export const zExerciseSearchResult = z.object({
+    id: z.int()
 });
 
 /**
@@ -123,12 +119,26 @@ export const zExercisePublic = z.object({
 });
 
 /**
+ * MuscleGroupSearchResult
+ */
+export const zMuscleGroupSearchResult = z.object({
+    id: z.int()
+});
+
+/**
  * RegisterRequest
  */
 export const zRegisterRequest = z.object({
     token: z.string().min(1).max(64),
     username: z.string().min(3).max(255),
     password: z.string().min(8).max(64)
+});
+
+/**
+ * ReindexRequest
+ */
+export const zReindexRequest = z.object({
+    wait_for_tasks: z.boolean()
 });
 
 /**
@@ -176,47 +186,7 @@ export const zAccessRequestPublic = z.object({
  */
 export const zSearchRequest = z.object({
     query: z.string().min(1).max(255),
-    limit: z.int().optional().default(25)
-});
-
-/**
- * SearchResults[ExerciseDocument]
- */
-export const zSearchResultsExerciseDocument = z.object({
-    hits: z.array(zExerciseDocument),
-    offset: z.int().nullish(),
-    limit: z.int().nullish(),
-    estimatedTotalHits: z.int().nullish(),
-    processingTimeMs: z.int(),
-    query: z.string(),
-    facetDistribution: z.record(z.string(), z.unknown()).nullish(),
-    totalPages: z.int().nullish(),
-    totalHits: z.int().nullish(),
-    page: z.int().nullish(),
-    hitsPerPage: z.int().nullish(),
-    semanticHitCount: z.int().nullish(),
-    queryVector: z.array(z.number()).nullish(),
-    performanceDetails: z.record(z.string(), z.unknown()).nullish()
-});
-
-/**
- * SearchResults[MuscleGroupPublic]
- */
-export const zSearchResultsMuscleGroupPublic = z.object({
-    hits: z.array(zMuscleGroupPublic),
-    offset: z.int().nullish(),
-    limit: z.int().nullish(),
-    estimatedTotalHits: z.int().nullish(),
-    processingTimeMs: z.int(),
-    query: z.string(),
-    facetDistribution: z.record(z.string(), z.unknown()).nullish(),
-    totalPages: z.int().nullish(),
-    totalHits: z.int().nullish(),
-    page: z.int().nullish(),
-    hitsPerPage: z.int().nullish(),
-    semanticHitCount: z.int().nullish(),
-    queryVector: z.array(z.number()).nullish(),
-    performanceDetails: z.record(z.string(), z.unknown()).nullish()
+    limit: z.int().gte(0).lte(1000)
 });
 
 /**
@@ -613,7 +583,7 @@ export const zGetTaskData = z.object({
 export const zGetTaskResponse = zTaskResult;
 
 export const zReindexData = z.object({
-    body: z.never().optional(),
+    body: zReindexRequest,
     path: z.never().optional(),
     query: z.never().optional()
 });
@@ -630,9 +600,11 @@ export const zSearchMuscleGroupsData = z.object({
 });
 
 /**
+ * Response Searchmusclegroups
+ *
  * Successful Response
  */
-export const zSearchMuscleGroupsResponse = zSearchResultsMuscleGroupPublic;
+export const zSearchMuscleGroupsResponse = z.array(zMuscleGroupSearchResult);
 
 export const zSearchExercisesData = z.object({
     body: zSearchRequest,
@@ -641,9 +613,11 @@ export const zSearchExercisesData = z.object({
 });
 
 /**
+ * Response Searchexercises
+ *
  * Successful Response
  */
-export const zSearchExercisesResponse = zSearchResultsExerciseDocument;
+export const zSearchExercisesResponse = z.array(zExerciseSearchResult);
 
 export const zCreateSetData = z.object({
     body: zCreateSetRequest,
