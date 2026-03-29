@@ -322,15 +322,19 @@ export class SearchService {
     /**
      * Reindex Endpoint
      */
-    public static reindex<ThrowOnError extends boolean = false>(options?: Options<ReindexData, ThrowOnError>) {
-        return (options?.client ?? client).post<ReindexResponses, ReindexErrors, ThrowOnError>({
+    public static reindex<ThrowOnError extends boolean = false>(options: Options<ReindexData, ThrowOnError>) {
+        return (options.client ?? client).post<ReindexResponses, ReindexErrors, ThrowOnError>({
             security: [{
                     in: 'cookie',
                     name: 'access_token',
                     type: 'apiKey'
                 }],
             url: '/api/search/reindex',
-            ...options
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
         });
     }
     

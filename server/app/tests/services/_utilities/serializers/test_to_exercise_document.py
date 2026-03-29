@@ -26,8 +26,8 @@ def test_to_exercise_document() -> None:
 
 
 def test_to_exercise_document_with_muscle_groups() -> None:
-    chest = MuscleGroup(id=1, name="chest", description="Chest muscles")
-    triceps = MuscleGroup(id=2, name="triceps", description="Triceps muscles")
+    chest = MuscleGroup(id=2, name="chest", description="Chest muscles")
+    triceps = MuscleGroup(id=1, name="triceps", description="Triceps muscles")
 
     exercise = Exercise(
         id=11,
@@ -38,10 +38,11 @@ def test_to_exercise_document_with_muscle_groups() -> None:
         updated_at=datetime(2026, 1, 4, tzinfo=UTC),
     )
     exercise.muscle_groups = [
-        ExerciseMuscleGroup(exercise_id=11, muscle_group_id=1, muscle_group=chest),
-        ExerciseMuscleGroup(exercise_id=11, muscle_group_id=2, muscle_group=triceps),
+        ExerciseMuscleGroup(exercise_id=11, muscle_group_id=2, muscle_group=chest),
+        ExerciseMuscleGroup(exercise_id=11, muscle_group_id=1, muscle_group=triceps),
     ]
 
     result = to_exercise_document(exercise)
 
+    # sorted by name
     assert result.muscle_group_names == ["chest", "triceps"]

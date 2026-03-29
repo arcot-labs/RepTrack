@@ -15,7 +15,9 @@ from app.models.schemas.search import SearchRequest
 from app.services.utilities.queries import query_exercises
 from app.services.utilities.serializers import (
     to_exercise_document,
+    to_exercise_search_result,
     to_muscle_group_public,
+    to_muscle_group_search_result,
 )
 
 logger = logging.getLogger(__name__)
@@ -31,17 +33,24 @@ async def get_task(
 async def reindex(
     db_session: AsyncSession,
     ms_client: AsyncClient,
+    wait_for_tasks: bool = False,
 ):
+    logger.info("Starting reindexing")
+
     indexes = await ms_client.get_indexes() or []
     for idx in indexes:
         logger.info(f"Deleting index: {idx.uid}")
         await ms_client.delete_index_if_exists(idx.uid)
 
-    task = await _index_muscle_groups(db_session, ms_client)
-    logger.info(f"Reindexing muscle groups with task id: {task}")
+    task_id = await _index_muscle_groups(db_session, ms_client)
+    logger.info(f"Reindexing muscle groups with task id: {task_id}")
+    if wait_for_tasks:
+        await ms_client.wait_for_task(task_id)
 
-    task = await _index_exercises(db_session, ms_client)
-    logger.info(f"Reindexing exercises with task id: {task}")
+    task_id = await _index_exercises(db_session, ms_client)
+    logger.info(f"Reindexing exercises with task id: {task_id}")
+    if wait_for_tasks:
+        await ms_client.wait_for_task(task_id)
 
 
 async def _index_muscle_groups(
@@ -101,13 +110,14 @@ async def search_muscle_groups(
     ms_client: AsyncClient,
 ):
     logger.info(f"Searching muscle groups with query: '{req.query}'")
-    return await _search(
+    results = await _search(
         model=MuscleGroupPublic,
         ms_client=ms_client,
         index=SearchIndex.MUSCLE_GROUPS,
         query=req.query,
         limit=req.limit,
     )
+    return [to_muscle_group_search_result(hit) for hit in results.hits]
 
 
 async def search_exercises(
@@ -116,7 +126,7 @@ async def search_exercises(
     ms_client: AsyncClient,
 ):
     logger.info(f"Searching exercises with query: '{req.query}' and user_id: {user_id}")
-    return await _search(
+    results = await _search(
         model=ExerciseDocument,
         ms_client=ms_client,
         index=SearchIndex.EXERCISES,
@@ -126,6 +136,7 @@ async def search_exercises(
         else None,
         limit=req.limit,
     )
+    return [to_exercise_search_result(hit) for hit in results.hits]
 
 
 async def _search[T](
@@ -136,6 +147,9 @@ async def _search[T](
     filter: str | None = None,
     limit: int = 20,
 ) -> SearchResults[T]:
+    logger.info(
+        f"Performing search on index '{index}' with query: '{query}', filter: '{filter}', limit: {limit}"
+    )
     _index = await ms_client.get_or_create_index(
         index,
         hits_type=model,

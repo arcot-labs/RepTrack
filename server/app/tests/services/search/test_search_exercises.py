@@ -1,10 +1,9 @@
 import logging
 
 from meilisearch_python_sdk import AsyncClient
-from meilisearch_python_sdk.models.search import SearchResults
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.schemas.exercise import ExerciseDocument
+from app.models.schemas.exercise import ExerciseSearchResult
 from app.models.schemas.search import SearchRequest
 from app.services.search import (
     _index_exercises,  # pyright: ignore[reportPrivateUsage]
@@ -44,17 +43,12 @@ async def test_search_exercises(
         ms_client=ms_client,
     )
 
-    assert isinstance(results, SearchResults)
-    assert isinstance(results.hits, list)
-    assert len(results.hits) == 1
+    assert isinstance(results, list)
+    assert len(results) == 1
 
-    hit = results.hits[0]
-    ExerciseDocument.model_validate(hit)
+    hit = results[0]
+    ExerciseSearchResult.model_validate(hit)
     assert hit.id == exercise.id
-    assert hit.user_id == exercise.user_id
-    assert hit.name == exercise.name
-    assert hit.description == exercise.description
-    assert hit.muscle_group_names == [mg.name]
 
 
 async def test_search_exercises_user_filter(
@@ -86,12 +80,11 @@ async def test_search_exercises_user_filter(
         ms_client=ms_client,
     )
 
-    assert isinstance(results, SearchResults)
-    assert isinstance(results.hits, list)
-    assert len(results.hits) == 1
+    assert isinstance(results, list)
+    assert len(results) == 1
 
-    hit = results.hits[0]
-    ExerciseDocument.model_validate(hit)
+    hit = results[0]
+    ExerciseSearchResult.model_validate(hit)
     assert hit.id == exercise_1.id
 
 
@@ -115,6 +108,5 @@ async def test_search_exercises_limit(
         ms_client=ms_client,
     )
 
-    assert isinstance(results, SearchResults)
-    assert isinstance(results.hits, list)
-    assert len(results.hits) == 3
+    assert isinstance(results, list)
+    assert len(results) == 3
