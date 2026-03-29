@@ -119,6 +119,23 @@ export function ExerciseFormDialog({
     useEffect(() => {
         if (!open) return
         if (isCreateMode) {
+            if (exercise) {
+                // copying existing exercise
+                resetCreate(
+                    {
+                        name: `${exercise.name} - copy`,
+                        description: exercise.description,
+                        muscle_group_ids: exercise.muscle_groups.map(
+                            (mg) => mg.id
+                        ),
+                    },
+                    {
+                        // use default values as initial for dirty check
+                        keepDefaultValues: true,
+                    }
+                )
+                return
+            }
             resetCreate(defaultCreateExerciseFormValues)
             return
         }

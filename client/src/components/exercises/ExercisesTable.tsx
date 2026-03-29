@@ -19,7 +19,7 @@ import {
 import { Button } from '@/components/ui/overrides/button'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
-import { redText } from '@/lib/styles'
+import { blueText, redText } from '@/lib/styles'
 import { capitalizeWords } from '@/lib/text'
 import type {
     DataTableRowActionsConfig,
@@ -27,7 +27,7 @@ import type {
     FilterOption,
 } from '@/models/data-table'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Eye, Pencil, Plus, Trash } from 'lucide-react'
+import { Copy, Eye, Pencil, Plus, Trash } from 'lucide-react'
 import { useState } from 'react'
 
 function getTypeFilterOptions(): FilterOption[] {
@@ -76,8 +76,12 @@ export function ExercisesTable({
         exercise: null,
     })
 
-    const openCreateDialog = () => {
-        setFormDialog({ isOpen: true, mode: 'create', exercise: null })
+    const openCreateDialog = (exercise?: ExercisePublic) => {
+        setFormDialog({
+            isOpen: true,
+            mode: 'create',
+            exercise: exercise ?? null,
+        })
     }
 
     const openEditDialog = (exercise: ExercisePublic) => {
@@ -157,6 +161,14 @@ export function ExercisesTable({
                             openViewDialog(row)
                         },
                     },
+                    {
+                        type: 'action',
+                        className: blueText,
+                        icon: Copy,
+                        onSelect: () => {
+                            openCreateDialog(row)
+                        },
+                    },
                 ]
 
             const isRowLoading = isLoadingExerciseIds.has(row.id)
@@ -168,6 +180,14 @@ export function ExercisesTable({
                         openEditDialog(row)
                     },
                     disabled: isRowLoading,
+                },
+                {
+                    type: 'action',
+                    className: blueText,
+                    icon: Copy,
+                    onSelect: () => {
+                        openCreateDialog(row)
+                    },
                 },
                 {
                     type: 'action',
