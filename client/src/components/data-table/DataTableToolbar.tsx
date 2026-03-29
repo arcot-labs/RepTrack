@@ -5,6 +5,7 @@ import { DataTableFacetedFilter } from '@/components/data-table/DataTableFaceted
 import { DataTableViewOptions } from '@/components/data-table/DataTableViewOptions'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/overrides/button'
+import { Spinner } from '@/components/ui/spinner'
 import type { DataTableToolbarConfig } from '@/models/data-table'
 
 interface DataTableToolbarProps<TData> {
@@ -21,22 +22,37 @@ export function DataTableToolbar<TData>({
     const searchColumn = config.search
         ? table.getColumn(config.search.columnId)
         : undefined
-    const searchValue =
-        (searchColumn?.getFilterValue() as string | undefined) ?? ''
+    const isExternalSearch = typeof config.search?.onChange === 'function'
+    const searchValue = isExternalSearch
+        ? (config.search?.value ?? '')
+        : ((searchColumn?.getFilterValue() as string | undefined) ?? '')
 
     return (
         <div className="space-y-2">
             <div className="flex items-center">
                 <div className="min-w-0 flex-1">
                     {config.search && (
-                        <Input
-                            placeholder={config.search.placeholder}
-                            value={searchValue}
-                            onChange={(event) =>
-                                searchColumn?.setFilterValue(event.target.value)
-                            }
-                            className={config.search.className ?? 'h-8 w-full'}
-                        />
+                        <div className="relative">
+                            <Input
+                                placeholder={config.search.placeholder}
+                                value={searchValue}
+                                onChange={(event) => {
+                                    if (isExternalSearch) {
+                                        config.search?.onChange?.(
+                                            event.target.value
+                                        )
+                                        return
+                                    }
+                                    searchColumn?.setFilterValue(
+                                        event.target.value
+                                    )
+                                }}
+                                className={`${config.search.className ?? 'h-8 w-full'} ${config.search.isLoading ? 'pr-8' : ''}`}
+                            />
+                            {config.search.isLoading && (
+                                <Spinner className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground" />
+                            )}
+                        </div>
                     )}
                 </div>
                 {(config.showViewOptions ?? true) && (

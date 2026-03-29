@@ -1,10 +1,9 @@
 import logging
 
 from meilisearch_python_sdk import AsyncClient
-from meilisearch_python_sdk.models.search import SearchResults
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.schemas.muscle_group import MuscleGroupPublic
+from app.models.schemas.muscle_group import MuscleGroupSearchResult
 from app.models.schemas.search import SearchRequest
 from app.services.search import (
     _index_muscle_groups,  # pyright: ignore[reportPrivateUsage]
@@ -35,11 +34,9 @@ async def test_search_muscle_groups(
         ms_client,
     )
 
-    assert isinstance(results, SearchResults)
-    assert isinstance(results.hits, list)
-    assert len(results.hits) == 1
+    assert isinstance(results, list)
+    assert len(results) == 1
 
-    hit = results.hits[0]
-    MuscleGroupPublic.model_validate(hit)
-    assert hit.name == mg.name
-    assert hit.description == mg.description
+    hit = results[0]
+    MuscleGroupSearchResult.model_validate(hit)
+    assert hit.id == mg.id

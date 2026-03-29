@@ -5,6 +5,10 @@ interface DataTableSearchConfig {
     columnId: string
     placeholder: string
     className?: string
+    // for external search
+    value?: string
+    onChange?: (value: string) => void
+    isLoading?: boolean
 }
 
 export interface FilterOption {

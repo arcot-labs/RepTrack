@@ -2,7 +2,6 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 from meilisearch_python_sdk import AsyncClient
-from meilisearch_python_sdk.models.search import SearchResults
 from meilisearch_python_sdk.models.task import TaskResult
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,9 +12,9 @@ from app.core.dependencies import (
     get_ms_client,
 )
 from app.models.schemas.errors import ErrorResponseModel
-from app.models.schemas.exercise import ExerciseDocument
-from app.models.schemas.muscle_group import MuscleGroupPublic
-from app.models.schemas.search import SearchRequest
+from app.models.schemas.exercise import ExerciseSearchResult
+from app.models.schemas.muscle_group import MuscleGroupSearchResult
+from app.models.schemas.search import ReindexRequest, SearchRequest
 from app.models.schemas.user import UserPublic
 from app.services.search import (
     get_task,
@@ -57,6 +56,7 @@ async def get_task_endpoint(
     },
 )
 async def reindex_endpoint(
+    req: ReindexRequest,
     _: Annotated[UserPublic, Depends(get_current_admin)],
     db_session: Annotated[AsyncSession, Depends(get_db_session)],
     ms_client: Annotated[AsyncClient, Depends(get_ms_client)],
@@ -64,6 +64,7 @@ async def reindex_endpoint(
     await reindex(
         db_session=db_session,
         ms_client=ms_client,
+        wait_for_tasks=req.wait_for_tasks,
     )
 
 
@@ -77,7 +78,7 @@ async def reindex_endpoint(
 async def search_muscle_groups_endpoint(
     req: SearchRequest,
     ms_client: Annotated[AsyncClient, Depends(get_ms_client)],
-) -> SearchResults[MuscleGroupPublic]:
+) -> list[MuscleGroupSearchResult]:
     return await search_muscle_groups(
         req=req,
         ms_client=ms_client,
@@ -95,7 +96,7 @@ async def search_exercises_endpoint(
     req: SearchRequest,
     user: Annotated[UserPublic, Depends(get_current_user)],
     ms_client: Annotated[AsyncClient, Depends(get_ms_client)],
-) -> SearchResults[ExerciseDocument]:
+) -> list[ExerciseSearchResult]:
     return await search_exercises(
         req=req,
         user_id=user.id,
