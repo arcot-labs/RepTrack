@@ -123,9 +123,7 @@ export function ExercisesTable({
             }
             setSearchResults(data)
         })().finally(() => {
-            if (requestId === searchRequestIdRef.current) {
-                setIsSearching(false)
-            }
+            if (requestId === searchRequestIdRef.current) setIsSearching(false)
         })
     }, [debouncedSearchQuery, exercises.length, searchRefreshTick])
 
@@ -136,7 +134,6 @@ export function ExercisesTable({
 
     const displayedExercises = useMemo(() => {
         if (!searchResults) return exercises
-
         const byId = new Map(
             exercises.map((exercise) => [exercise.id, exercise])
         )
