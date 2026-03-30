@@ -110,7 +110,7 @@ export function ExercisesTable({
             const { data, error } = await SearchService.searchExercises({
                 body: {
                     query: debouncedSearchQuery,
-                    limit: Math.max(exercises.length, 1000),
+                    limit: Math.min(exercises.length, 1000),
                 },
             })
             // only update results for latest request

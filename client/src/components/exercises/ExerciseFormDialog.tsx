@@ -191,7 +191,7 @@ export function ExerciseFormDialog({
             const { data, error } = await SearchService.searchMuscleGroups({
                 body: {
                     query: debouncedSearchQuery,
-                    limit: Math.max(muscleGroups.length, 1000),
+                    limit: Math.min(muscleGroups.length, 1000),
                 },
             })
             if (requestId !== searchRequestIdRef.current) return
