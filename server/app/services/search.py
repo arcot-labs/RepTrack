@@ -7,6 +7,7 @@ from meilisearch_python_sdk.models.settings import MeilisearchSettings
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.database.exercise import Exercise
 from app.models.database.muscle_group import MuscleGroup
 from app.models.enums import SearchIndex
 from app.models.schemas.exercise import ExerciseDocument
@@ -102,6 +103,35 @@ async def _index_exercises(
         [doc.model_dump() for doc in docs],
         primary_key="id",
     )
+    return task.task_uid
+
+
+async def index_exercise(
+    exercise: Exercise,
+    ms_client: AsyncClient,
+) -> int:
+    logger.info("Indexing exercise %s", exercise.id)
+
+    index = await ms_client.get_or_create_index(SearchIndex.EXERCISES)
+    task = await index.add_documents(
+        [to_exercise_document(exercise).model_dump()],
+        primary_key="id",
+    )
+
+    logger.info("Exercise index task %s created", task.task_uid)
+    return task.task_uid
+
+
+async def delete_indexed_exercise(
+    exercise: Exercise,
+    ms_client: AsyncClient,
+) -> int:
+    logger.info("Removing exercise %s from index", exercise.id)
+
+    index = await ms_client.get_or_create_index(SearchIndex.EXERCISES)
+    task = await index.delete_document(str(exercise.id))
+
+    logger.info("Exercise delete task %s created", task.task_uid)
     return task.task_uid
 
 

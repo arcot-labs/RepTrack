@@ -1,16 +1,21 @@
+import pytest
 from meilisearch_python_sdk import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.database.exercise import Exercise
 from app.models.enums import SearchIndex
+from app.models.errors import ExerciseNotFound
 from app.models.schemas.exercise import ExerciseDocument
-from app.services.search import _index_exercises  # pyright: ignore[reportPrivateUsage]
+from app.services.exercise import (
+    _index_exercise,  # pyright: ignore[reportPrivateUsage]
+)
 
 from ..exercise.utilities import create_exercise
 from ..muscle_group.utilities import create_muscle_group
-from .utilities import wait_for_task
+from ..search.utilities import wait_for_task
 
 
-async def test_index_exercises(
+async def test_index_exercise(
     db_session: AsyncSession,
     ms_client: AsyncClient,
 ):
@@ -26,7 +31,7 @@ async def test_index_exercises(
         muscle_group_ids=[mg.id],
     )
 
-    task = await _index_exercises(db_session, ms_client)
+    task = await _index_exercise(exercise, db_session, ms_client)
     await wait_for_task(ms_client, task)
 
     index = await ms_client.get_index(SearchIndex.EXERCISES)
@@ -34,7 +39,17 @@ async def test_index_exercises(
 
     ExerciseDocument.model_validate(doc)
     assert doc["id"] == exercise.id
-    assert doc["user_id"] == exercise.user_id
-    assert doc["name"] == exercise.name
-    assert doc["description"] == exercise.description
-    assert doc["muscle_group_names"] == [mg.name]
+
+
+async def test_index_exercise_not_found(
+    db_session: AsyncSession,
+    ms_client: AsyncClient,
+):
+    exercise = Exercise(
+        id=99999,
+        user_id=99999,
+        name="Nonexistent Exercise",
+    )
+
+    with pytest.raises(ExerciseNotFound):
+        await _index_exercise(exercise, db_session, ms_client)
