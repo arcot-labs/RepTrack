@@ -179,6 +179,7 @@ export function ExerciseFormDialog({
 
     useEffect(() => {
         if (!open || isViewMode || !debouncedSearchQuery) {
+            searchRequestIdRef.current += 1
             setSearchResults(null)
             setIsSearching(false)
             return
@@ -190,7 +191,7 @@ export function ExerciseFormDialog({
             const { data, error } = await SearchService.searchMuscleGroups({
                 body: {
                     query: debouncedSearchQuery,
-                    limit: muscleGroups.length,
+                    limit: Math.min(muscleGroups.length, 1000),
                 },
             })
             if (requestId !== searchRequestIdRef.current) return

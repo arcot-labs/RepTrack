@@ -1,9 +1,10 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
+from meilisearch_python_sdk import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_current_user, get_db_session
+from app.core.dependencies import get_current_user, get_db_session, get_ms_client
 from app.models.schemas.errors import ErrorResponseModel
 from app.models.schemas.exercise import (
     CreateExerciseRequest,
@@ -40,8 +41,9 @@ async def create_exercise_endpoint(
     req: CreateExerciseRequest,
     user: Annotated[UserPublic, Depends(get_current_user)],
     db_session: Annotated[AsyncSession, Depends(get_db_session)],
+    ms_client: Annotated[AsyncClient, Depends(get_ms_client)],
 ):
-    await create_exercise(user.id, req, db_session)
+    await create_exercise(user.id, req, db_session, ms_client)
 
 
 @api_router.get(
@@ -88,8 +90,9 @@ async def update_exercise_endpoint(
     req: UpdateExerciseRequest,
     user: Annotated[UserPublic, Depends(get_current_user)],
     db_session: Annotated[AsyncSession, Depends(get_db_session)],
+    ms_client: Annotated[AsyncClient, Depends(get_ms_client)],
 ):
-    await update_exercise(exercise_id, user.id, req, db_session)
+    await update_exercise(exercise_id, user.id, req, db_session, ms_client)
 
 
 @api_router.delete(
@@ -106,5 +109,6 @@ async def delete_exercise_endpoint(
     exercise_id: int,
     user: Annotated[UserPublic, Depends(get_current_user)],
     db_session: Annotated[AsyncSession, Depends(get_db_session)],
+    ms_client: Annotated[AsyncClient, Depends(get_ms_client)],
 ):
-    await delete_exercise(exercise_id, user.id, db_session)
+    await delete_exercise(exercise_id, user.id, db_session, ms_client)

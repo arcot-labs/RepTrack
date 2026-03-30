@@ -24,7 +24,7 @@ async def test_index_muscle_groups(
     task = await _index_muscle_groups(db_session, ms_client)
     await wait_for_task(ms_client, task)
 
-    index = await ms_client.get_or_create_index(SearchIndex.MUSCLE_GROUPS)
+    index = await ms_client.get_index(SearchIndex.MUSCLE_GROUPS)
     doc = await index.get_document(str(mg.id))
 
     MuscleGroupPublic.model_validate(doc)

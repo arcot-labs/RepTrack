@@ -98,6 +98,7 @@ export function ExercisesTable({
 
     useEffect(() => {
         if (!debouncedSearchQuery) {
+            searchRequestIdRef.current += 1
             setSearchResults(null)
             setIsSearching(false)
             return
@@ -109,7 +110,7 @@ export function ExercisesTable({
             const { data, error } = await SearchService.searchExercises({
                 body: {
                     query: debouncedSearchQuery,
-                    limit: exercises.length,
+                    limit: Math.min(exercises.length, 1000),
                 },
             })
             // only update results for latest request

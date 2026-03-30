@@ -1,5 +1,6 @@
 from typing import Any
 
+import pytest
 from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,6 +18,7 @@ from app.tests.api.exercise.utilities import (
 )
 
 from ..utilities import HttpMethod, login_admin, make_http_request
+from .utilities import patch_index_exercise
 
 
 async def _make_request(
@@ -47,7 +49,10 @@ async def test_update_exercise(
     client: AsyncClient,
     db_session: AsyncSession,
     settings: Settings,
+    monkeypatch: pytest.MonkeyPatch,
 ):
+    patch_index_exercise(monkeypatch)
+
     await login_admin(client, settings)
     created = await create_exercise_via_api(client, db_session, name="Old Name")
     muscle_group_id = await get_muscle_group_id(db_session, name="chest")
@@ -96,7 +101,10 @@ async def test_update_exercise_muscle_group_not_found(
     client: AsyncClient,
     db_session: AsyncSession,
     settings: Settings,
+    monkeypatch: pytest.MonkeyPatch,
 ):
+    patch_index_exercise(monkeypatch)
+
     await login_admin(client, settings)
     created = await create_exercise_via_api(client, db_session, name="Flye")
 
@@ -128,7 +136,10 @@ async def test_update_exercise_name_conflict(
     client: AsyncClient,
     db_session: AsyncSession,
     settings: Settings,
+    monkeypatch: pytest.MonkeyPatch,
 ):
+    patch_index_exercise(monkeypatch)
+
     await login_admin(client, settings)
 
     await create_exercise_via_api(client, db_session, name="Taken Name")
@@ -146,7 +157,10 @@ async def test_update_exercise_name_null(
     client: AsyncClient,
     db_session: AsyncSession,
     settings: Settings,
+    monkeypatch: pytest.MonkeyPatch,
 ):
+    patch_index_exercise(monkeypatch)
+
     await login_admin(client, settings)
     created = await create_exercise_via_api(client, db_session, name="Old Name")
 
@@ -165,7 +179,10 @@ async def test_update_exercise_muscle_group_ids_null(
     client: AsyncClient,
     db_session: AsyncSession,
     settings: Settings,
+    monkeypatch: pytest.MonkeyPatch,
 ):
+    patch_index_exercise(monkeypatch)
+
     await login_admin(client, settings)
     created = await create_exercise_via_api(client, db_session, name="Old Name")
 

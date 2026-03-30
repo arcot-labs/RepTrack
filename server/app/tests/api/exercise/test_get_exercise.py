@@ -1,3 +1,4 @@
+import pytest
 from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,7 +8,11 @@ from app.models.errors import ExerciseNotFound
 from app.models.schemas.exercise import ExercisePublic
 
 from ..utilities import HttpMethod, login_admin, make_http_request
-from .utilities import create_exercise_via_api, create_system_exercise
+from .utilities import (
+    create_exercise_via_api,
+    create_system_exercise,
+    patch_index_exercise,
+)
 
 
 async def _make_request(client: AsyncClient, exercise_id: int):
@@ -23,7 +28,10 @@ async def test_get_exercise(
     client: AsyncClient,
     db_session: AsyncSession,
     settings: Settings,
+    monkeypatch: pytest.MonkeyPatch,
 ):
+    patch_index_exercise(monkeypatch)
+
     await login_admin(client, settings)
     created = await create_exercise_via_api(client, db_session, name="Bench Press")
 

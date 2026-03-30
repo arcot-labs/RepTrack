@@ -1,3 +1,6 @@
+from unittest.mock import AsyncMock
+
+import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -66,3 +69,22 @@ async def create_exercise(
     db_session.add(exercise)
     await db_session.commit()
     return exercise
+
+
+def patch_index_exercise(
+    monkeypatch: pytest.MonkeyPatch,
+    return_value: int = 1,
+):
+    mocked_index_exercise = AsyncMock(return_value=return_value)
+    monkeypatch.setattr("app.services.exercise._index_exercise", mocked_index_exercise)
+    return mocked_index_exercise
+
+
+def patch_delete_indexed_exercise(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    mocked_delete_indexed_exercise = AsyncMock()
+    monkeypatch.setattr(
+        "app.services.exercise.delete_indexed_exercise", mocked_delete_indexed_exercise
+    )
+    return mocked_delete_indexed_exercise
