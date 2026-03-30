@@ -1,3 +1,4 @@
+import pytest
 from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,6 +12,7 @@ from app.tests.api.exercise.utilities import (
 )
 
 from ..utilities import HttpMethod, create_user, login_admin, make_http_request
+from .utilities import patch_index_exercise
 
 
 async def _make_request(client: AsyncClient):
@@ -26,7 +28,10 @@ async def test_get_exercises(
     client: AsyncClient,
     db_session: AsyncSession,
     settings: Settings,
+    monkeypatch: pytest.MonkeyPatch,
 ):
+    patch_index_exercise(monkeypatch)
+
     await login_admin(client, settings)
     user = await create_user(db_session)
 

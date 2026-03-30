@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 from meilisearch_python_sdk import AsyncClient
@@ -13,6 +13,7 @@ from app.services.utilities.queries import query_exercises
 
 from ..muscle_group.utilities import get_muscle_group_id
 from ..utilities import create_user
+from .utilities import patch_index_exercise
 
 
 async def test_create_exercise(
@@ -20,8 +21,7 @@ async def test_create_exercise(
     ms_client: AsyncClient,
     monkeypatch: pytest.MonkeyPatch,
 ):
-    mocked_index_exercise = AsyncMock(return_value=1)
-    monkeypatch.setattr("app.services.exercise._index_exercise", mocked_index_exercise)
+    mocked_index_exercise = patch_index_exercise(monkeypatch)
 
     user = await create_user(db_session)
     muscle_group_id = await get_muscle_group_id(db_session, name="chest")
@@ -71,7 +71,10 @@ async def test_create_exercise_muscle_group_not_found(
 async def test_create_exercise_name_conflict(
     db_session: AsyncSession,
     ms_client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
 ):
+    patch_index_exercise(monkeypatch)
+
     user = await create_user(db_session)
     await create_exercise(
         user.id,
@@ -92,7 +95,10 @@ async def test_create_exercise_name_conflict(
 async def test_create_exercise_unhandled_integrity_error(
     db_session: AsyncSession,
     ms_client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
 ):
+    patch_index_exercise(monkeypatch)
+
     user = await create_user(db_session)
     await create_exercise(
         user.id,

@@ -9,6 +9,7 @@ from app.models.schemas.exercise import ExerciseDocument
 from app.services.exercise import (
     _index_exercise,  # pyright: ignore[reportPrivateUsage]
 )
+from app.services.search import reindex
 
 from ..exercise.utilities import create_exercise
 from ..muscle_group.utilities import create_muscle_group
@@ -19,6 +20,8 @@ async def test_index_exercise(
     db_session: AsyncSession,
     ms_client: AsyncClient,
 ):
+    await reindex(db_session, ms_client)
+
     mg = await create_muscle_group(
         db_session,
         name="muscle group 1",

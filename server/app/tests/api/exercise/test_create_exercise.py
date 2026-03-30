@@ -1,3 +1,4 @@
+import pytest
 from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,6 +8,7 @@ from app.models.errors import ExerciseNameConflict, MuscleGroupNotFound
 from app.tests.api.exercise.utilities import get_muscle_group_id
 
 from ..utilities import HttpMethod, login_admin, make_http_request
+from .utilities import patch_index_exercise
 
 
 async def _make_request(
@@ -32,7 +34,10 @@ async def test_create_exercise(
     client: AsyncClient,
     db_session: AsyncSession,
     settings: Settings,
+    monkeypatch: pytest.MonkeyPatch,
 ):
+    patch_index_exercise(monkeypatch)
+
     await login_admin(client, settings)
 
     muscle_group_id = await get_muscle_group_id(db_session, name="chest")
@@ -73,7 +78,10 @@ async def test_create_exercise_muscle_group_not_found(
 async def test_create_exercise_name_conflict(
     client: AsyncClient,
     settings: Settings,
+    monkeypatch: pytest.MonkeyPatch,
 ):
+    patch_index_exercise(monkeypatch)
+
     await login_admin(client, settings)
 
     await _make_request(client, name="Lunge")

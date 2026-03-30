@@ -69,7 +69,7 @@ async def _index_muscle_groups(
         ],
     )
 
-    index = await ms_client.get_or_create_index(SearchIndex.MUSCLE_GROUPS)
+    index = await ms_client.create_index(SearchIndex.MUSCLE_GROUPS)
     settings_task = await index.update_settings(settings)
     await ms_client.wait_for_task(settings_task.task_uid)
 
@@ -95,7 +95,7 @@ async def _index_exercises(
         ],
     )
 
-    index = await ms_client.get_or_create_index(SearchIndex.EXERCISES)
+    index = await ms_client.create_index(SearchIndex.EXERCISES)
     settings_task = await index.update_settings(settings)
     await ms_client.wait_for_task(settings_task.task_uid)
 
@@ -112,7 +112,7 @@ async def index_exercise(
 ) -> int:
     logger.info(f"Indexing exercise {exercise.id}")
 
-    index = await ms_client.get_or_create_index(SearchIndex.EXERCISES)
+    index = await ms_client.get_index(SearchIndex.EXERCISES)
     task = await index.add_documents(
         [to_exercise_document(exercise).model_dump()],
         primary_key="id",
@@ -128,7 +128,7 @@ async def delete_indexed_exercise(
 ) -> int:
     logger.info(f"Removing exercise {exercise.id} from index")
 
-    index = await ms_client.get_or_create_index(SearchIndex.EXERCISES)
+    index = await ms_client.get_index(SearchIndex.EXERCISES)
     task = await index.delete_document(str(exercise.id))
 
     logger.info(f"Exercise delete task {task.task_uid} created")
@@ -180,10 +180,7 @@ async def _search[T](
     logger.info(
         f"Performing search on index '{index}' with query: '{query}', filter: '{filter}', limit: {limit}"
     )
-    _index = await ms_client.get_or_create_index(
-        index,
-        hits_type=model,
-    )
+    _index = await ms_client.get_index(index)
     raw = await _index.search(  # type: ignore
         query=query,
         filter=filter,

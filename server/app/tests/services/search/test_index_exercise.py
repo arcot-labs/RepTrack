@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.database.exercise import Exercise
 from app.models.enums import SearchIndex
 from app.models.schemas.exercise import ExerciseDocument
-from app.services.search import index_exercise
+from app.services.search import index_exercise, reindex
 from app.services.utilities.queries import query_exercises
 
 from ..exercise.utilities import create_exercise
@@ -16,6 +16,8 @@ async def test_index_exercise(
     db_session: AsyncSession,
     ms_client: AsyncClient,
 ):
+    await reindex(db_session, ms_client)
+
     mg = await create_muscle_group(
         db_session,
         name="muscle group 1",
