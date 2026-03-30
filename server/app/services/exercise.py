@@ -1,6 +1,7 @@
 import logging
 from datetime import UTC, datetime
 
+from meilisearch_python_sdk import AsyncClient
 from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,6 +20,10 @@ from app.models.schemas.exercise import (
     UpdateExerciseRequest,
 )
 from app.services.muscle_group import get_muscle_groups_by_ids
+from app.services.search import (
+    delete_indexed_exercise,
+    index_exercise,
+)
 from app.services.utilities.queries import query_exercises
 from app.services.utilities.serializers import to_exercise_public
 
@@ -41,10 +46,33 @@ async def _get_owned_exercise(
     return exercise
 
 
+async def _index_exercise(
+    exercise: Exercise,
+    db_session: AsyncSession,
+    ms_client: AsyncClient,
+) -> int:
+    logger.info(f"Indexing exercise {exercise.id}")
+
+    exercises = await query_exercises(
+        db_session,
+        False,
+        Exercise.id == exercise.id,
+    )
+    if not exercises:
+        raise ExerciseNotFound()
+
+    try:
+        return await index_exercise(exercises[0], ms_client)
+    except Exception as e:
+        logger.error(f"Failed to index exercise {exercise.id}: {e}")
+        return -1
+
+
 async def create_exercise(
     user_id: int,
     req: CreateExerciseRequest,
     db_session: AsyncSession,
+    ms_client: AsyncClient,
 ) -> None:
     logger.info(f"Creating exercise '{req.name}' for user {user_id}")
 
@@ -77,6 +105,8 @@ async def create_exercise(
         )
 
     await db_session.commit()
+    await db_session.refresh(exercise)
+    await _index_exercise(exercise, db_session, ms_client)
 
 
 async def get_exercises(
@@ -116,6 +146,7 @@ async def update_exercise(
     user_id: int,
     req: UpdateExerciseRequest,
     db_session: AsyncSession,
+    ms_client: AsyncClient,
 ) -> None:
     logger.info(f"Updating exercise {exercise_id} for user {user_id}")
 
@@ -152,21 +183,30 @@ async def update_exercise(
 
     try:
         await db_session.commit()
+        await db_session.refresh(exercise)
     except IntegrityError as e:
         logger.error(f"Integrity error updating exercise: {e}")
         await db_session.rollback()
         if is_unique_violation(e, EXERCISE_UNIQUE_CONSTRAINT):
             raise ExerciseNameConflict()
         raise
+    else:
+        await _index_exercise(exercise, db_session, ms_client)
 
 
 async def delete_exercise(
     exercise_id: int,
     user_id: int,
     db_session: AsyncSession,
+    ms_client: AsyncClient,
 ) -> None:
     logger.info(f"Deleting exercise {exercise_id} for user {user_id}")
 
     exercise = await _get_owned_exercise(exercise_id, user_id, db_session)
     await db_session.delete(exercise)
     await db_session.commit()
+
+    try:
+        await delete_indexed_exercise(exercise, ms_client)
+    except Exception as e:
+        logger.error(f"Failed to delete indexed exercise {exercise.id}: {e}")

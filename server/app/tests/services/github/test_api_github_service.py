@@ -107,7 +107,7 @@ async def test_api_github_service_http_error(
     await service.create_feedback_issue(feedback_obj, settings)
 
     assert any(
-        "Failed to create GitHub issue for feedback id 77" in record.message
+        "Failed to create GitHub issue for feedback id: 77" in record.message
         for record in caplog.records
     )
 
@@ -135,7 +135,7 @@ async def test_api_github_service_unexpected_error(
     await service.create_feedback_issue(feedback_obj, settings)
 
     assert any(
-        "Unexpected error while creating GitHub issue for feedback id 77"
+        "Unexpected error while creating GitHub issue for feedback id: 77"
         in record.message
         for record in caplog.records
     )

@@ -1,3 +1,4 @@
+import pytest
 from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,6 +11,7 @@ from app.tests.api.exercise.utilities import (
 )
 
 from ..utilities import HttpMethod, login_admin, make_http_request
+from .utilities import patch_delete_indexed_exercise, patch_index_exercise
 
 
 async def _make_request(
@@ -28,7 +30,11 @@ async def test_delete_exercise(
     client: AsyncClient,
     db_session: AsyncSession,
     settings: Settings,
+    monkeypatch: pytest.MonkeyPatch,
 ):
+    patch_index_exercise(monkeypatch)
+    patch_delete_indexed_exercise(monkeypatch)
+
     await login_admin(client, settings)
     created = await create_exercise_via_api(client, db_session, name="Exercise")
 

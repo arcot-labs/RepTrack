@@ -1,0 +1,81 @@
+from unittest.mock import AsyncMock
+
+import pytest
+from meilisearch_python_sdk import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models.database.exercise import Exercise
+from app.models.enums import SearchIndex
+from app.models.errors import ExerciseNotFound
+from app.models.schemas.exercise import ExerciseDocument
+from app.services.exercise import (
+    _index_exercise,  # pyright: ignore[reportPrivateUsage]
+)
+from app.services.search import reindex
+
+from ..exercise.utilities import create_exercise
+from ..muscle_group.utilities import create_muscle_group
+from ..search.utilities import wait_for_task
+
+
+async def test_index_exercise(
+    db_session: AsyncSession,
+    ms_client: AsyncClient,
+):
+    await reindex(db_session, ms_client)
+
+    mg = await create_muscle_group(
+        db_session,
+        name="muscle group 1",
+        description="Muscle group 1",
+    )
+    exercise = await create_exercise(
+        db_session,
+        name="exercise 1",
+        description="Exercise 1",
+        muscle_group_ids=[mg.id],
+    )
+
+    task = await _index_exercise(exercise, db_session, ms_client)
+    await wait_for_task(ms_client, task)
+
+    index = await ms_client.get_index(SearchIndex.EXERCISES)
+    doc = await index.get_document(str(exercise.id))
+
+    ExerciseDocument.model_validate(doc)
+    assert doc["id"] == exercise.id
+
+
+async def test_index_exercise_not_found(
+    db_session: AsyncSession,
+    ms_client: AsyncClient,
+):
+    exercise = Exercise(
+        id=99999,
+        user_id=99999,
+        name="Nonexistent Exercise",
+    )
+
+    with pytest.raises(ExerciseNotFound):
+        await _index_exercise(exercise, db_session, ms_client)
+
+
+async def test_index_exercise_error(
+    db_session: AsyncSession,
+    ms_client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    await reindex(db_session, ms_client)
+
+    exercise = await create_exercise(
+        db_session,
+        name="exercise 1",
+        description="Exercise 1",
+        muscle_group_ids=[],
+    )
+
+    mocked_index_exercise = AsyncMock(side_effect=Exception("Indexing error"))
+    monkeypatch.setattr("app.services.exercise.index_exercise", mocked_index_exercise)
+
+    result = await _index_exercise(exercise, db_session, ms_client)
+    assert result == -1
