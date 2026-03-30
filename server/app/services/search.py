@@ -110,7 +110,7 @@ async def index_exercise(
     exercise: Exercise,
     ms_client: AsyncClient,
 ) -> int:
-    logger.info("Indexing exercise %s", exercise.id)
+    logger.info(f"Indexing exercise {exercise.id}")
 
     index = await ms_client.get_or_create_index(SearchIndex.EXERCISES)
     task = await index.add_documents(
@@ -118,7 +118,7 @@ async def index_exercise(
         primary_key="id",
     )
 
-    logger.info("Exercise index task %s created", task.task_uid)
+    logger.info(f"Exercise index task {task.task_uid} created")
     return task.task_uid
 
 
@@ -126,12 +126,12 @@ async def delete_indexed_exercise(
     exercise: Exercise,
     ms_client: AsyncClient,
 ) -> int:
-    logger.info("Removing exercise %s from index", exercise.id)
+    logger.info(f"Removing exercise {exercise.id} from index")
 
     index = await ms_client.get_or_create_index(SearchIndex.EXERCISES)
     task = await index.delete_document(str(exercise.id))
 
-    logger.info("Exercise delete task %s created", task.task_uid)
+    logger.info(f"Exercise delete task {task.task_uid} created")
     return task.task_uid
 
 

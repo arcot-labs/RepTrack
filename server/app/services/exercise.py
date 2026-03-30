@@ -51,7 +51,7 @@ async def _index_exercise(
     db_session: AsyncSession,
     ms_client: AsyncClient,
 ) -> int:
-    logger.info("Indexing exercise %s", exercise.id)
+    logger.info(f"Indexing exercise {exercise.id}")
 
     exercises = await query_exercises(
         db_session,

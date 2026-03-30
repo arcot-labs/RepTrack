@@ -80,16 +80,13 @@ class ApiGitHubService(GitHubService):
                 resp.raise_for_status()
                 logger.info(f"Created GitHub issue for feedback id: {feedback.id}")
             except httpx.HTTPStatusError as e:
+                err = e.response.text if e.response else "<no response>"
                 logger.error(
-                    "Failed to create GitHub issue for feedback id %s - %s",
-                    feedback.id,
-                    e.response.text if e.response else "<no response>",
+                    f"Failed to create GitHub issue for feedback id: {feedback.id} - {err}"
                 )
             except Exception as e:
                 logger.error(
-                    "Unexpected error while creating GitHub issue for feedback id %s - %s",
-                    feedback.id,
-                    e,
+                    f"Unexpected error while creating GitHub issue for feedback id: {feedback.id} - {e}"
                 )
 
 
