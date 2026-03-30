@@ -98,6 +98,7 @@ export function ExercisesTable({
 
     useEffect(() => {
         if (!debouncedSearchQuery) {
+            searchRequestIdRef.current += 1
             setSearchResults(null)
             setIsSearching(false)
             return

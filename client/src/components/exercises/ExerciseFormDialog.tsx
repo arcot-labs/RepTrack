@@ -179,6 +179,7 @@ export function ExerciseFormDialog({
 
     useEffect(() => {
         if (!open || isViewMode || !debouncedSearchQuery) {
+            searchRequestIdRef.current += 1
             setSearchResults(null)
             setIsSearching(false)
             return
