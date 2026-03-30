@@ -91,3 +91,34 @@ async def test_delete_exercise_not_allowed(
             db_session,
             ms_client,
         )
+
+
+async def test_delete_exercise_error(
+    db_session: AsyncSession,
+    ms_client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+):
+    user = await create_user(db_session)
+    exercise = await create_exercise(
+        db_session,
+        name="Bench",
+        user_id=user.id,
+    )
+
+    mocked_delete_indexed_exercise = AsyncMock(side_effect=Exception("Deletion error"))
+    monkeypatch.setattr(
+        "app.services.exercise.delete_indexed_exercise", mocked_delete_indexed_exercise
+    )
+
+    await delete_exercise(
+        exercise.id,
+        user.id,
+        db_session,
+        ms_client,
+    )
+
+    assert any(
+        "Failed to delete indexed exercise" in record.message
+        for record in caplog.records
+    )

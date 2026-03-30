@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock
+
 import pytest
 from meilisearch_python_sdk import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -56,3 +58,24 @@ async def test_index_exercise_not_found(
 
     with pytest.raises(ExerciseNotFound):
         await _index_exercise(exercise, db_session, ms_client)
+
+
+async def test_index_exercise_error(
+    db_session: AsyncSession,
+    ms_client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    await reindex(db_session, ms_client)
+
+    exercise = await create_exercise(
+        db_session,
+        name="exercise 1",
+        description="Exercise 1",
+        muscle_group_ids=[],
+    )
+
+    mocked_index_exercise = AsyncMock(side_effect=Exception("Indexing error"))
+    monkeypatch.setattr("app.services.exercise.index_exercise", mocked_index_exercise)
+
+    result = await _index_exercise(exercise, db_session, ms_client)
+    assert result == -1

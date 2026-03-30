@@ -61,7 +61,11 @@ async def _index_exercise(
     if not exercises:
         raise ExerciseNotFound()
 
-    return await index_exercise(exercises[0], ms_client)
+    try:
+        return await index_exercise(exercises[0], ms_client)
+    except Exception as e:
+        logger.error(f"Failed to index exercise {exercise.id}: {e}")
+        return -1
 
 
 async def create_exercise(
@@ -201,4 +205,8 @@ async def delete_exercise(
     exercise = await _get_owned_exercise(exercise_id, user_id, db_session)
     await db_session.delete(exercise)
     await db_session.commit()
-    await delete_indexed_exercise(exercise, ms_client)
+
+    try:
+        await delete_indexed_exercise(exercise, ms_client)
+    except Exception as e:
+        logger.error(f"Failed to delete indexed exercise {exercise.id}: {e}")
