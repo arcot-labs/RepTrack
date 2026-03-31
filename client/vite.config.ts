@@ -1,3 +1,5 @@
+/// <reference types="vitest/config" />
+
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
@@ -13,6 +15,16 @@ export default defineConfig({
         forwardConsole: {
             unhandledErrors: true,
             logLevels: ['debug', 'log', 'info', 'warn', 'error'],
+        },
+    },
+    test: {
+        environment: 'jsdom',
+        globals: true,
+        setupFiles: './src/tests/setup.ts',
+        include: ['src/tests/**/*.{test,spec}.{ts,tsx}'],
+        coverage: {
+            include: ['src/**/*.{ts,tsx}'],
+            exclude: ['src/api/generated/**', 'src/components/ui/**'],
         },
     },
 })
