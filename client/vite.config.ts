@@ -23,6 +23,7 @@ export default defineConfig({
         setupFiles: './src/tests/setup.ts',
         include: ['src/tests/**/*.{test,spec}.{ts,tsx}'],
         coverage: {
+            provider: 'v8',
             include: ['src/**/*.{ts,tsx}'],
             exclude: ['src/api/generated/**', 'src/components/ui/**'],
         },

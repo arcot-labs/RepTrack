@@ -1,23 +1,25 @@
+type DocRegistry = Record<string, string>
+
 const docs = import.meta.glob('../docs/*.md', {
     eager: true,
     query: '?raw',
     import: 'default',
-})
+}) as DocRegistry
 
-export function getDoc(slug: string) {
-    return docs[`../docs/${slug}.md`] as string | undefined
+export function getDoc(slug: string, registry: DocRegistry = docs) {
+    return registry[`../docs/${slug}.md`]
 }
 
 const h1Regex = /^#\s+(.+)$/m
 
-export function getAllDocs() {
-    return Object.entries(docs)
+export function getAllDocs(registry: DocRegistry = docs) {
+    return Object.entries(registry)
         .map(([path, content]) => {
-            const slug = path.split('/').pop()?.replace('.md', '') ?? ''
+            const match = h1Regex.exec(content)
+            const slug = path.split('/').pop()?.replace('.md', '')
+            if (!slug) throw Error(`Skipping doc with invalid path: ${path}`)
 
-            const match = h1Regex.exec(content as string)
             const title = match?.[1] ?? slug.replace(/-/g, ' ')
-
             return { slug, title }
         })
         .sort((a, b) =>
