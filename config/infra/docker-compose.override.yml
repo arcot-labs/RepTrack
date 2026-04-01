@@ -122,9 +122,9 @@ services:
                   target: /src/index.html
                 - path: ../../client/Dockerfile
                   action: rebuild
-                - path: ../../client/package-lock.json
-                  action: rebuild
                 - path: ../../client/package.json
+                  action: rebuild
+                - path: ../../client/pnpm-lock.yaml
                   action: rebuild
                 - path: ../../client/tsconfig.app.json
                   action: rebuild

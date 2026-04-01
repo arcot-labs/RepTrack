@@ -49,4 +49,4 @@ mv "$NEW_SPEC_FILE" "$OLD_SPEC_FILE"
 
 cd "$CLIENT_DIR"
 echo "Generating API client"
-npm run generate-api > /dev/null
+pnpm run generate-api > /dev/null

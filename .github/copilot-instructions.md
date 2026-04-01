@@ -10,9 +10,9 @@ RepTrack is a full-stack strength-training tracker:
 
 ### Root (monorepo)
 
-- Format all: `npm run format`
-- Lint/typecheck all configured checks: `npm run lint`
-- Server typecheck only: `npm run check:py`
+- Format all: `pnpm run format`
+- Lint/typecheck all configured checks: `pnpm run lint`
+- Server typecheck only: `pnpm run check:py`
 
 ### Server (`cd server`)
 
@@ -27,10 +27,10 @@ RepTrack is a full-stack strength-training tracker:
 
 ### Client (`cd client`)
 
-- Dev server: `npm run dev`
-- Build: `npm run build`
-- Lint (auto-fix): `npm run lint`
-- Regenerate OpenAPI client: `npm run generate-api`
+- Dev server: `pnpm run dev`
+- Build: `pnpm run build`
+- Lint (auto-fix): `pnpm run lint`
+- Regenerate OpenAPI client: `pnpm run generate-api`
 
 ## High-Level Architecture
 

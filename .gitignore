@@ -1,8 +1,5 @@
 node_modules/
 
-# cache folder in CI
-.npm/
-
 .env*
 !.env.example
 

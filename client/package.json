@@ -6,12 +6,13 @@
     "scripts": {
         "build": "tsc -b && vite build",
         "dev": "vite",
+        "generate-api": "openapi-ts",
+        "preinstall": "npx only-allow pnpm",
+        "lint": "eslint --fix --max-warnings=0",
+        "preview": "vite preview",
         "test": "vitest run",
         "test:coverage": "vitest run --coverage",
         "test:watch": "vitest --coverage --ui",
-        "generate-api": "openapi-ts",
-        "lint": "eslint --fix --max-warnings=0",
-        "preview": "vite preview",
         "update-components": "for file in src/components/ui/*.tsx; do npx shadcn@latest add -o $(basename \"$file\" .tsx); done && cd .. && npx prettier --write client/src/components/ui"
     },
     "lint-staged": {
