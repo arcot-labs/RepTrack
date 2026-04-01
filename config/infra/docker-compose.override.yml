@@ -99,15 +99,14 @@ services:
         build:
             context: ../../client
             target: dev
+            args:
+                - VITE_ENV=dev
+                - VITE_IMAGE_TAG=local
+                - VITE_API_URL=http://localhost:8000
 
         restart: no
         ports:
             - 5173:5173
-
-        environment:
-            - VITE_ENV=dev
-            - VITE_IMAGE_TAG=local
-            - VITE_API_URL=http://localhost:8000
 
         develop:
             watch:
