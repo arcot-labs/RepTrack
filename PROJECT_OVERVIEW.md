@@ -172,7 +172,7 @@ Basic relationships:
 ## Testing
 
 - **Server tests** live under `server/app/tests/`, run via pytest/pytest-asyncio with Testcontainers-backed Postgres; coverage configured in `server/pyproject.toml`.
-- **Client tests** use Vitest (`npm run test`), with suites under `client/src/tests/{lib,auth,config,api}` covering helpers (`cn`, `notify`, docs/nav loaders), auth guards/hooks (`RequireAuth`, `RequireGuest`, `useSession`, `SessionProvider`), env parsing, and the axios client refresh flow; run `npm run test -- src/tests/<subset>` for targeted checks or `npm run test:coverage` for coverage reports.
+- **Client tests** use Vitest (`pnpm run test`), with suites under `client/src/tests/{lib,auth,config,api}` covering helpers (`cn`, `notify`, docs/nav loaders), auth guards/hooks (`RequireAuth`, `RequireGuest`, `useSession`, `SessionProvider`), env parsing, and the axios client refresh flow; run `pnpm run test -- src/tests/<subset>` for targeted checks or `pnpm run test:coverage` for coverage reports.
 
 ## Notes for Future Agents
 
