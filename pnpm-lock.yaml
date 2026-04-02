@@ -18,8 +18,8 @@ importers:
                 specifier: ^16.4.0
                 version: 16.4.0
             npm-check-updates:
-                specifier: ^19.6.6
-                version: 19.6.6
+                specifier: ^20.0.0
+                version: 20.0.0
             prettier:
                 specifier: ^3.8.1
                 version: 3.8.1
@@ -46,10 +46,10 @@ packages:
                 integrity: sha512-+xIqpQXJco3T+VGaTTwmhxLa51qpkQxCjRwezjFZgr+l21ExlywJFcDfTrNmL6lG6tqb0h8GyJKO3UPGPtSCWg==,
             }
 
-    ansi-escapes@7.2.0:
+    ansi-escapes@7.3.0:
         resolution:
             {
-                integrity: sha512-g6LhBsl+GBPRWGWsBtutpzBYuIIdBkLEvad5C/va/74Db018+5TZiyA26cZJAr3Rft5lprVqOIPxf5Vid6tqAw==,
+                integrity: sha512-BvU8nYgGQBxcmMuEeUEmNTvrMVjJNSH7RgW24vXexN4Ven6qCvy4TntnvlnwnMLTVlcRQQdbRY8NKnaIoeWDNg==,
             }
         engines: { node: '>=18' }
 
@@ -74,10 +74,10 @@ packages:
             }
         engines: { node: '>=18' }
 
-    cli-truncate@5.1.1:
+    cli-truncate@5.2.0:
         resolution:
             {
-                integrity: sha512-SroPvNHxUnk+vIW/dOSfNqdy1sPEFkrTk6TUtqLCnBlo3N7TNYYkzzN7uSD6+jVjrdO4+p8nH7JzH6cIvUem6A==,
+                integrity: sha512-xRwvIOMGrfOAnM1JYtqQImuaNtDEv9v6oIYAs4LIHwTiKee8uwvIi363igssOC0O5U04i4AlENs79LQLu9tEMw==,
             }
         engines: { node: '>=20' }
 
@@ -121,10 +121,10 @@ packages:
             }
         engines: { node: '>=18' }
 
-    eventemitter3@5.0.1:
+    eventemitter3@5.0.4:
         resolution:
             {
-                integrity: sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==,
+                integrity: sha512-mlsTRyGaPBjPedk6Bvw+aqbsXDtoAyAzm5MO7JgU+yVRyMQ5O8bD4Kcci7BS85f93veegeCPkL8R4GLClnjLFw==,
             }
 
     fdir@6.5.0:
@@ -139,17 +139,17 @@ packages:
             picomatch:
                 optional: true
 
-    get-east-asian-width@1.4.0:
+    get-east-asian-width@1.5.0:
         resolution:
             {
-                integrity: sha512-QZjmEOC+IT1uk6Rx0sX22V6uHWVwbdbxf1faPqJ1QhLdGgsRGCZoyaQBm/piRdJy/D2um6hM1UP7ZEeQ4EkP+Q==,
+                integrity: sha512-CQ+bEO+Tva/qlmw24dCejulK5pMzVnUOFOijVogd3KQs07HnRIgp8TGipvCCRT06xeYEbpbgwaCxglFyiuIcmA==,
             }
         engines: { node: '>=18' }
 
-    git-hooks-list@4.1.1:
+    git-hooks-list@4.2.1:
         resolution:
             {
-                integrity: sha512-cmP497iLq54AZnv4YRAEMnEyQ1eIn4tGKbmswqwmFV4GBnAqE8NLtWxxdXa++AalfgL5EBH4IxTPyquEuGY/jA==,
+                integrity: sha512-WNvqJjOxxs/8ZP9+DWdwWJ7cDsd60NHf39XnD82pDVrKO5q7xfPqpkK6hwEAmBa/ZSEE4IOoR75EzbbIuwGlMw==,
             }
 
     husky@9.1.7:
@@ -203,10 +203,10 @@ packages:
             }
         engines: { node: '>=18' }
 
-    npm-check-updates@19.6.6:
+    npm-check-updates@20.0.0:
         resolution:
             {
-                integrity: sha512-AvlRcnlUEyBEJfblUSjYMJwYKvCIWDRuCDa6x3hyUMTMkI3kslmFm0LDqwgzQfshfNh0Z3ouKiA4fLjRN7HejQ==,
+                integrity: sha512-qCs02x51irGf0okCttwv8lHEO2NxT903IJ2bKpG82kIzkm6pfT3CoWB5YIvqY/wi/DdnYRfI7eVfCYYymQgvCg==,
             }
         engines: { node: '>=20.0.0', npm: '>=8.12.1' }
         hasBin: true
@@ -326,10 +326,10 @@ packages:
                 integrity: sha512-q1b3N5QkRUWUl7iyylaaj3kOpIT0N2i9MqIEQXP73GVsN9cw3fdx8X63cEmWhJGi2PPCF23Ijp7ktmd39rawIA==,
             }
 
-    semver@7.7.3:
+    semver@7.7.4:
         resolution:
             {
-                integrity: sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q==,
+                integrity: sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==,
             }
         engines: { node: '>=10' }
         hasBin: true
@@ -348,10 +348,17 @@ packages:
             }
         engines: { node: '>=18' }
 
-    sort-object-keys@2.0.1:
+    slice-ansi@8.0.0:
         resolution:
             {
-                integrity: sha512-R89fO+z3x7hiKPXX5P0qim+ge6Y60AjtlW+QQpRozrrNcR1lw9Pkpm5MLB56HoNvdcLHL4wbpq16OcvGpEDJIg==,
+                integrity: sha512-stxByr12oeeOyY2BlviTNQlYV5xOj47GirPr4yA1hE9JCtxfQN0+tVbkxwCtYDQWhEKWFHsEK48ORg5jrouCAg==,
+            }
+        engines: { node: '>=20' }
+
+    sort-object-keys@2.1.0:
+        resolution:
+            {
+                integrity: sha512-SOiEnthkJKPv2L6ec6HMwhUcN0/lppkeYuN1x63PbyPRrgSPIuBJCiYxYyvWRTtjMlOi14vQUCGUJqS6PLVm8g==,
             }
 
     sort-package-json@3.6.1:
@@ -376,17 +383,17 @@ packages:
             }
         engines: { node: '>=18' }
 
-    string-width@8.1.0:
+    string-width@8.2.0:
         resolution:
             {
-                integrity: sha512-Kxl3KJGb/gxkaUMOjRsQ8IrXiGW75O4E3RPjFIINOVH8AMl2SQ/yWdTzWwF3FevIX9LcMAjJW+GRwAlAbTSXdg==,
+                integrity: sha512-6hJPQ8N0V0P3SNmP6h2J99RLuzrWz2gvT7VnK5tKvrNqJoyS9W4/Fb8mo31UiPvy00z7DQXkP2hnKBVav76thw==,
             }
         engines: { node: '>=20' }
 
-    strip-ansi@7.1.2:
+    strip-ansi@7.2.0:
         resolution:
             {
-                integrity: sha512-gmBGslpoQJtgnMAvOVqGZpEz9dyoKTCzy2nfz/n8aIFhN/jCE/rCmcxabB6jOOHV+0WNnylOxaxBQPSvcWklhA==,
+                integrity: sha512-yDPMNjp4WyfYBkHnjIRLfca1i6KMyGCtsVgoKe/z1+6vukgaENdgGBZt+ZmKPc4gavvEZ5OgHfHdrazhgNyG7w==,
             }
         engines: { node: '>=12' }
 
@@ -434,7 +441,7 @@ snapshots:
         dependencies:
             '@taplo/core': 0.2.0
 
-    ansi-escapes@7.2.0:
+    ansi-escapes@7.3.0:
         dependencies:
             environment: 1.1.0
 
@@ -446,10 +453,10 @@ snapshots:
         dependencies:
             restore-cursor: 5.1.0
 
-    cli-truncate@5.1.1:
+    cli-truncate@5.2.0:
         dependencies:
-            slice-ansi: 7.1.2
-            string-width: 8.1.0
+            slice-ansi: 8.0.0
+            string-width: 8.2.0
 
     colorette@2.0.20: {}
 
@@ -463,21 +470,21 @@ snapshots:
 
     environment@1.1.0: {}
 
-    eventemitter3@5.0.1: {}
+    eventemitter3@5.0.4: {}
 
     fdir@6.5.0(picomatch@4.0.4):
         optionalDependencies:
             picomatch: 4.0.4
 
-    get-east-asian-width@1.4.0: {}
+    get-east-asian-width@1.5.0: {}
 
-    git-hooks-list@4.1.1: {}
+    git-hooks-list@4.2.1: {}
 
     husky@9.1.7: {}
 
     is-fullwidth-code-point@5.1.0:
         dependencies:
-            get-east-asian-width: 1.4.0
+            get-east-asian-width: 1.5.0
 
     is-plain-obj@4.1.0: {}
 
@@ -492,24 +499,24 @@ snapshots:
 
     listr2@9.0.5:
         dependencies:
-            cli-truncate: 5.1.1
+            cli-truncate: 5.2.0
             colorette: 2.0.20
-            eventemitter3: 5.0.1
+            eventemitter3: 5.0.4
             log-update: 6.1.0
             rfdc: 1.4.1
             wrap-ansi: 9.0.2
 
     log-update@6.1.0:
         dependencies:
-            ansi-escapes: 7.2.0
+            ansi-escapes: 7.3.0
             cli-cursor: 5.0.0
             slice-ansi: 7.1.2
-            strip-ansi: 7.1.2
+            strip-ansi: 7.2.0
             wrap-ansi: 9.0.2
 
     mimic-function@5.0.1: {}
 
-    npm-check-updates@19.6.6: {}
+    npm-check-updates@20.0.0: {}
 
     onetime@7.0.0:
         dependencies:
@@ -542,7 +549,7 @@ snapshots:
 
     rfdc@1.4.1: {}
 
-    semver@7.7.3: {}
+    semver@7.7.4: {}
 
     signal-exit@4.1.0: {}
 
@@ -551,16 +558,21 @@ snapshots:
             ansi-styles: 6.2.3
             is-fullwidth-code-point: 5.1.0
 
-    sort-object-keys@2.0.1: {}
+    slice-ansi@8.0.0:
+        dependencies:
+            ansi-styles: 6.2.3
+            is-fullwidth-code-point: 5.1.0
+
+    sort-object-keys@2.1.0: {}
 
     sort-package-json@3.6.1:
         dependencies:
             detect-indent: 7.0.2
             detect-newline: 4.0.1
-            git-hooks-list: 4.1.1
+            git-hooks-list: 4.2.1
             is-plain-obj: 4.1.0
-            semver: 7.7.3
-            sort-object-keys: 2.0.1
+            semver: 7.7.4
+            sort-object-keys: 2.1.0
             tinyglobby: 0.2.15
 
     string-argv@0.3.2: {}
@@ -568,15 +580,15 @@ snapshots:
     string-width@7.2.0:
         dependencies:
             emoji-regex: 10.6.0
-            get-east-asian-width: 1.4.0
-            strip-ansi: 7.1.2
+            get-east-asian-width: 1.5.0
+            strip-ansi: 7.2.0
 
-    string-width@8.1.0:
+    string-width@8.2.0:
         dependencies:
-            get-east-asian-width: 1.4.0
-            strip-ansi: 7.1.2
+            get-east-asian-width: 1.5.0
+            strip-ansi: 7.2.0
 
-    strip-ansi@7.1.2:
+    strip-ansi@7.2.0:
         dependencies:
             ansi-regex: 6.2.2
 
@@ -593,6 +605,6 @@ snapshots:
         dependencies:
             ansi-styles: 6.2.3
             string-width: 7.2.0
-            strip-ansi: 7.1.2
+            strip-ansi: 7.2.0
 
     yaml@2.8.3: {}
