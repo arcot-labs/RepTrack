@@ -16,6 +16,9 @@ jobs:
         runs-on: self-hosted
         environment: test
         steps:
+            - name: set cache dirs
+              run: echo "PNPM_STORE_DIR=$HOME/.cache/pnpm/store" >> $GITHUB_ENV
+
             - name: checkout
               uses: actions/checkout@v6
               with:
@@ -52,8 +55,7 @@ jobs:
         environment: test
         steps:
             - name: set cache dir
-              run: |
-                  echo "UV_CACHE_DIR=$HOME/.cache/uv" >> $GITHUB_ENV
+              run: echo "UV_CACHE_DIR=$HOME/.cache/uv" >> $GITHUB_ENV
 
             - name: checkout
               uses: actions/checkout@v6
