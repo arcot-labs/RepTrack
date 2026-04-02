@@ -15,7 +15,7 @@ vi.mock('@/lib/logger', () => ({
     logger: loggerMocks,
 }))
 
-const envMock = vi.hoisted(() => ({ env: { API_URL: '' } }))
+const envMock = vi.hoisted(() => ({ getEnv: () => ({ API_URL: '' }) }))
 vi.mock('@/config/env', () => envMock)
 
 const okResponse = HttpResponse.json('ok')
@@ -23,13 +23,13 @@ const unauthorizedResponse = new HttpResponse('unauthorized', { status: 401 })
 const errorResponse = new HttpResponse('error', { status: 500 })
 
 beforeEach(() => {
-    envMock.env.API_URL = ''
+    envMock.getEnv = () => ({ API_URL: '' })
     Object.values(loggerMocks).forEach((mock) => mock.mockReset())
 })
 
 describe('configureApiClient', () => {
     it('sets up axios instance with base url and credentials', () => {
-        envMock.env.API_URL = 'https://api.localhost'
+        envMock.getEnv = () => ({ API_URL: 'https://api.localhost' })
         const axiosInstance = configureApiClient()
 
         expect(axiosInstance.defaults.baseURL).toBe('https://api.localhost')

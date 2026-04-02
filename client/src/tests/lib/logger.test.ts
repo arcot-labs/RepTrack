@@ -7,7 +7,7 @@ let consoleErrorSpy: ReturnType<typeof vi.spyOn>
 
 const loadLoggerWithEnv = async (envValue: string) => {
     vi.resetModules()
-    vi.doMock('@/config/env', () => ({ env: { ENV: envValue } }))
+    vi.doMock('@/config/env', () => ({ getEnv: () => ({ ENV: envValue }) }))
     return import('@/lib/logger')
 }
 

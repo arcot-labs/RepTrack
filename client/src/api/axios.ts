@@ -4,7 +4,7 @@ import {
     type RefreshTokenData,
 } from '@/api/generated'
 import { client } from '@/api/generated/client.gen'
-import { env } from '@/config/env'
+import { getEnv } from '@/config/env'
 import { logger } from '@/lib/logger'
 import axios, { AxiosError } from 'axios'
 
@@ -19,7 +19,7 @@ const loginUrl = client.buildUrl<LoginData>({
 
 export function configureApiClient() {
     const axiosInstance = axios.create({
-        baseURL: env.API_URL,
+        baseURL: getEnv().API_URL,
         withCredentials: true,
     })
 

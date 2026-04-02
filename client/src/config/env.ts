@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { EnvSchema, type RawEnvSource } from '@/models/env'
 
 export const buildEnv = (envSource: RawEnvSource = import.meta.env) => {
@@ -11,7 +12,13 @@ export const buildEnv = (envSource: RawEnvSource = import.meta.env) => {
     )
     const parsedEnv = EnvSchema.safeParse(env)
     if (!parsedEnv.success) throw Error('Failed to parse env vars')
+    logger.info('Parsed env vars:', parsedEnv.data)
     return parsedEnv.data
 }
 
-export const env = buildEnv()
+let cachedEnv: ReturnType<typeof buildEnv> | null = null
+
+export const getEnv = () => {
+    cachedEnv ??= buildEnv()
+    return cachedEnv
+}

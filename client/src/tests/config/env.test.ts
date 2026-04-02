@@ -1,5 +1,13 @@
 import { buildEnv } from '@/config/env'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+const loggerMocks = vi.hoisted(() => ({
+    info: vi.fn(),
+}))
+
+vi.mock('@/lib/logger', () => ({
+    logger: loggerMocks,
+}))
 
 describe('buildEnv', () => {
     it('reduces VITE_ keys into parsed env object', () => {
@@ -34,5 +42,37 @@ describe('buildEnv', () => {
         })
 
         expect(parsed.IMAGE_TAG).toBe('true')
+    })
+})
+
+const loadGetEnv = async () => (await import('@/config/env')).getEnv()
+
+describe('getEnv', () => {
+    beforeEach(() => {
+        vi.resetModules()
+        vi.stubEnv('VITE_ENV', 'test')
+        vi.stubEnv('VITE_IMAGE_TAG', 'img-tag')
+        vi.stubEnv('VITE_API_URL', 'https://example.com')
+    })
+
+    it('builds env from stubbed VITE vars', async () => {
+        const env = await loadGetEnv()
+
+        expect(env).toMatchObject({
+            ENV: 'test',
+            IMAGE_TAG: 'img-tag',
+            API_URL: 'https://example.com',
+        })
+    })
+
+    it('returns cached env on subsequent calls', async () => {
+        const first = await loadGetEnv()
+
+        vi.stubEnv('VITE_IMAGE_TAG', 'another-tag')
+
+        const second = await loadGetEnv()
+
+        expect(second).toBe(first)
+        expect(second.IMAGE_TAG).toBe('img-tag')
     })
 })
