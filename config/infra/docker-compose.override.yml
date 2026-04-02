@@ -112,13 +112,13 @@ services:
             watch:
                 - path: ../../client/public
                   action: sync
-                  target: /src/public
+                  target: /app/public
                 - path: ../../client/src
                   action: sync
-                  target: /src/src
+                  target: /app/src
                 - path: ../../client/index.html
                   action: sync
-                  target: /src/index.html
+                  target: /app/index.html
                 - path: ../../client/Dockerfile
                   action: rebuild
                 - path: ../../client/package.json
