@@ -1,6 +1,6 @@
 import { SessionContext, useSession } from '@/auth/session'
 import type { SessionContextType } from '@/models/session'
-import { createUser } from '@/tests/mocks/handlers'
+import { createUser } from '@/tests/mocks/handlers/user'
 import { renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it } from 'vitest'

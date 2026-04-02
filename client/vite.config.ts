@@ -25,7 +25,11 @@ export default defineConfig({
         coverage: {
             provider: 'v8',
             include: ['src/**/*.{ts,tsx}'],
-            exclude: ['src/api/generated/**', 'src/components/ui/**'],
+            exclude: [
+                'src/api/generated/**',
+                'src/components/ui/**',
+                'src/tests/**',
+            ],
         },
     },
 })
