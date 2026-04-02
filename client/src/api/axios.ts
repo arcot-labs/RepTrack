@@ -9,7 +9,6 @@ import { logger } from '@/lib/logger'
 import axios, { AxiosError } from 'axios'
 
 // created for type safety
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
 const refreshUrl = client.buildUrl<RefreshTokenData>({
     url: '/api/auth/refresh-token',
 })
@@ -30,18 +29,17 @@ export function configureApiClient() {
         reject: (error: unknown) => void
     }[] = []
 
-    const processQueue = (error: unknown, tokenUpdated = false) => {
+    const processQueue = (error: unknown) => {
         failedQueue.forEach(({ resolve, reject }) => {
             if (error) reject(error)
-            else resolve(tokenUpdated)
+            else resolve()
         })
         failedQueue = []
     }
 
     axiosInstance.interceptors.response.use(
         (res) => {
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access
-            logger.debug(`API response: ${res.request?.responseURL}`, res)
+            logger.debug(`API response: ${String(res.config.url)}`, res)
             return res
         },
         async (error: AxiosError) => {
@@ -74,13 +72,13 @@ export function configureApiClient() {
                     const { error } = await AuthService.refreshToken()
                     if (!error) {
                         logger.info('Success refreshing token')
-                        processQueue(null, true)
+                        processQueue(null)
                         return await axiosInstance(originalRequest)
                     }
                     const refreshError = new Error('Failed to refresh token', {
                         cause: error,
                     })
-                    processQueue(refreshError, false)
+                    processQueue(refreshError)
                     throw refreshError
                 } finally {
                     isRefreshing = false
@@ -94,4 +92,5 @@ export function configureApiClient() {
     client.setConfig({
         axios: axiosInstance,
     })
+    return axiosInstance
 }

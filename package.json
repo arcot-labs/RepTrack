@@ -3,11 +3,12 @@
     "private": true,
     "scripts": {
         "check:py": "uv run --project server pyright",
-        "format": "npm run prettier && npm run format:py",
+        "format": "pnpm run prettier && pnpm run format:py",
         "format:py": "uv run --project server ruff format server",
-        "lint": "npm run lint:py && npm run check:py && cd client && npm run lint",
+        "preinstall": "npx only-allow pnpm",
+        "lint": "pnpm run lint:py && pnpm run check:py && cd client && pnpm run lint",
         "lint:py": "uv run --project server ruff check server --fix",
-        "prepare": "husky && npm run sort-package-jsons",
+        "prepare": "husky && pnpm run sort-package-jsons",
         "prettier": "prettier . --write",
         "sort-package-jsons": "sort-package-json && sort-package-json client/package.json"
     },
@@ -25,7 +26,7 @@
     "devDependencies": {
         "husky": "^9.1.7",
         "lint-staged": "^16.4.0",
-        "npm-check-updates": "^19.6.6",
+        "npm-check-updates": "^20.0.0",
         "prettier": "^3.8.1",
         "prettier-plugin-organize-imports": "^4.3.0",
         "prettier-plugin-tailwindcss": "^0.7.2",

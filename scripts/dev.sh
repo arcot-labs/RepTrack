@@ -26,7 +26,7 @@ if [ "$SKIP_INSTALL_DEPS" = false ]; then
     uv sync
 
     cd "$CLIENT_DIR"
-    npm i
+    pnpm i
 else
     echo "Skipping dependency installation"
 fi

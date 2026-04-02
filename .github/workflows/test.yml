@@ -1,4 +1,4 @@
-name: CI / Test Server
+name: CI / Test Client and Server
 
 on:
     workflow_dispatch:
@@ -11,6 +11,39 @@ permissions:
     contents: none
 
 jobs:
+    test-client:
+        name: Test Client
+        runs-on: self-hosted
+        environment: test
+        steps:
+            - name: checkout
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.event.pull_request.head.sha || github.ref_name }}
+
+            - name: setup node
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 'lts/*'
+                  cache: 'pnpm'
+                  cache-dependency-path: client/pnpm-lock.yaml
+
+            - name: setup pnpm
+              uses: pnpm/action-setup@v5
+
+            - name: set pnpm config
+              run: |
+                  pnpm config set store-dir "$PNPM_STORE_DIR"
+                  pnpm config list
+
+            - name: install deps
+              working-directory: client
+              run: pnpm i --frozen-lockfile
+
+            - name: run tests with coverage
+              working-directory: client
+              run: pnpm run test:coverage
+
     test-server:
         name: Test Server
         runs-on: self-hosted

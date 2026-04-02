@@ -16,7 +16,7 @@ Install dependencies:
 
 ```bash
 envsubst
-npm
+pnpm
 uv
 watchexec
 ```

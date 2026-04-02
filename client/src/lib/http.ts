@@ -43,3 +43,8 @@ export async function handleApiError(
     }
     notify.error(options.fallbackMessage)
 }
+
+export const _internal = {
+    isHttpError,
+    isHttpValidationError,
+}

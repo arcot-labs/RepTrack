@@ -41,8 +41,7 @@ jobs:
                       project: server
         steps:
             - name: set cache dir
-              run: |
-                  echo "NPM_CONFIG_CACHE=$HOME/.cache/npm" >> $GITHUB_ENV
+              run: echo "PNPM_STORE_DIR=$HOME/.cache/pnpm/store" >> $GITHUB_ENV
 
             - name: checkout
               uses: actions/checkout@v6
@@ -55,8 +54,18 @@ jobs:
               with:
                   node-version: 'lts/*'
                   check-latest: true
-                  cache: 'npm'
-                  cache-dependency-path: client/package-lock.json
+                  cache: 'pnpm'
+                  cache-dependency-path: client/pnpm-lock.yaml
+
+            - name: setup pnpm - typescript
+              if: matrix.language == 'typescript'
+              uses: pnpm/action-setup@v5
+
+            - name: set pnpm config - typescript
+              if: matrix.language == 'typescript'
+              run: |
+                  pnpm config set store-dir "$PNPM_STORE_DIR"
+                  pnpm config list
 
             - name: initialize codeql - actions
               if: matrix.language == 'actions'
@@ -94,9 +103,8 @@ jobs:
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                  npm config ls
-                  npm ci
-                  npm run build
+                  pnpm i --frozen-lockfile
+                  pnpm run build
 
             - name: run codeql
               uses: github/codeql-action/analyze@v4
