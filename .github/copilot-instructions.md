@@ -31,6 +31,8 @@ RepTrack is a full-stack strength-training tracker:
 - Build: `pnpm run build`
 - Lint (auto-fix): `pnpm run lint`
 - Regenerate OpenAPI client: `pnpm run generate-api`
+- Tests (Vitest): `pnpm run test -- <path-to-test>`
+- Coverage: `pnpm run test:coverage` (includes `src/tests/**/*.{test,spec}.{ts,tsx}`)
 
 ## High-Level Architecture
 
@@ -84,6 +86,7 @@ agent-browser close
     - Prefer app override components like `@/components/ui/overrides/button` instead of base shadcn paths.
     - Prefer `@/` alias imports over deep relative paths.
     - Prefer `@/lib/notify` over direct `toast` import from `sonner`.
+- Client now includes dedicated Vitest suites under `client/src/tests/{lib,auth,config,api}` that exercise helpers such as `cn`, `notify`, `RequireAuth`, `SessionProvider`, and `configureApiClient`.
 - Test stack uses pytest + async fixtures with a Postgres Testcontainers instance (`postgres:18`) and savepoint-based rollback per test (`server/app/tests/fixtures/database.py`).
 - Shared test helpers belong in `utilities.py` under the relevant test scope; module-private test helpers/constants are prefixed with `_`.
 - Auth schema rule: usernames cannot be email-shaped strings (`RegisterRequest` validator in `server/app/models/schemas/auth.py`); login accepts username or email identifier.
