@@ -48,6 +48,12 @@ jobs:
               with:
                   ref: ${{ github.ref_name }}
 
+            - name: setup pnpm - typescript
+              if: matrix.language == 'typescript'
+              uses: pnpm/action-setup@v5
+              with:
+                  version: 10
+
             - name: setup node - typescript
               if: matrix.language == 'typescript'
               uses: actions/setup-node@v6
@@ -56,10 +62,6 @@ jobs:
                   check-latest: true
                   cache: 'pnpm'
                   cache-dependency-path: client/pnpm-lock.yaml
-
-            - name: setup pnpm - typescript
-              if: matrix.language == 'typescript'
-              uses: pnpm/action-setup@v5
 
             - name: set pnpm config - typescript
               if: matrix.language == 'typescript'
