@@ -99,32 +99,31 @@ services:
         build:
             context: ../../client
             target: dev
+            args:
+                - VITE_ENV=dev
+                - VITE_IMAGE_TAG=local
+                - VITE_API_URL=http://localhost:8000
 
         restart: no
         ports:
             - 5173:5173
 
-        environment:
-            - VITE_ENV=dev
-            - VITE_IMAGE_TAG=local
-            - VITE_API_URL=http://localhost:8000
-
         develop:
             watch:
                 - path: ../../client/public
                   action: sync
-                  target: /src/public
+                  target: /app/public
                 - path: ../../client/src
                   action: sync
-                  target: /src/src
+                  target: /app/src
                 - path: ../../client/index.html
                   action: sync
-                  target: /src/index.html
+                  target: /app/index.html
                 - path: ../../client/Dockerfile
                   action: rebuild
-                - path: ../../client/package-lock.json
-                  action: rebuild
                 - path: ../../client/package.json
+                  action: rebuild
+                - path: ../../client/pnpm-lock.yaml
                   action: rebuild
                 - path: ../../client/tsconfig.app.json
                   action: rebuild

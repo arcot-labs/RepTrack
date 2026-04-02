@@ -1,21 +1,24 @@
 import { logger } from '@/lib/logger'
-import { EnvSchema } from '@/models/env'
+import { EnvSchema, type RawEnvSource } from '@/models/env'
 
-const createEnv = () => {
-    const env = Object.entries(import.meta.env).reduce<Record<string, string>>(
-        (acc, curr: [string, string]) => {
-            const [key, value] = curr
-            if (key.startsWith('VITE_')) {
-                acc[key.replace('VITE_', '')] = value
-            }
+export const buildEnv = (envSource: RawEnvSource = import.meta.env) => {
+    const env = Object.entries(envSource).reduce<Record<string, string>>(
+        (acc, [key, value]) => {
+            if (key.startsWith('VITE_'))
+                acc[key.replace('VITE_', '')] = String(value)
             return acc
         },
         {}
     )
     const parsedEnv = EnvSchema.safeParse(env)
     if (!parsedEnv.success) throw Error('Failed to parse env vars')
-    logger.info('Loaded env vars:', parsedEnv.data)
+    logger.info('Parsed env vars:', parsedEnv.data)
     return parsedEnv.data
 }
 
-export const env = createEnv()
+let cachedEnv: ReturnType<typeof buildEnv> | null = null
+
+export const getEnv = () => {
+    cachedEnv ??= buildEnv()
+    return cachedEnv
+}

@@ -1,2 +1,2 @@
-package-lock.json
-client/package-lock.json
+pnpm-lock.yaml
+client/pnpm-lock.yaml

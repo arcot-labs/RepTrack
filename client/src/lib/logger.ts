@@ -1,9 +1,9 @@
-import { env } from '@/config/env'
+import { getEnv } from '@/config/env'
 
 /* eslint-disable no-console */
 export const logger = {
     debug: (...args: unknown[]) => {
-        if (env.ENV !== 'prod') console.debug(...args)
+        if (getEnv().ENV !== 'prod') console.debug(...args)
     },
     info: (...args: unknown[]) => {
         console.info(...args)

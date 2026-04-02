@@ -1,9 +1,10 @@
 import { cn } from '@/lib/utils'
+import type { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 
 interface NavItemProps {
     to: string
-    children: React.ReactNode
+    children: ReactNode
 }
 
 export function NavItem({ to, children }: NavItemProps) {

@@ -1,0 +1,86 @@
+name: CI / Test Client and Server
+
+on:
+    workflow_dispatch:
+    pull_request_target:
+        branches:
+            - stage
+            - main
+
+permissions:
+    contents: none
+
+jobs:
+    test-client:
+        name: Test Client
+        runs-on: self-hosted
+        environment: test
+        steps:
+            - name: set cache dirs
+              run: echo "PNPM_STORE_DIR=$HOME/.cache/pnpm/store" >> $GITHUB_ENV
+
+            - name: checkout
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.event.pull_request.head.sha || github.ref_name }}
+
+            - name: setup pnpm
+              uses: pnpm/action-setup@v5
+              with:
+                  version: latest
+
+            - name: setup node
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 'lts/*'
+                  cache: 'pnpm'
+                  cache-dependency-path: client/pnpm-lock.yaml
+
+            - name: set pnpm config
+              run: |
+                  pnpm config set store-dir "$PNPM_STORE_DIR"
+                  pnpm config list
+
+            - name: install deps
+              working-directory: client
+              run: pnpm i --frozen-lockfile
+
+            - name: run tests with coverage
+              working-directory: client
+              run: pnpm run test:coverage
+
+    test-server:
+        name: Test Server
+        runs-on: self-hosted
+        environment: test
+        steps:
+            - name: set cache dir
+              run: echo "UV_CACHE_DIR=$HOME/.cache/uv" >> $GITHUB_ENV
+
+            - name: checkout
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.event.pull_request.head.sha || github.ref_name }}
+
+            - name: setup uv
+              uses: astral-sh/setup-uv@v7
+              with:
+                  working-directory: server
+                  enable-cache: true
+                  cache-dependency-glob: uv.lock
+
+            - name: install deps
+              working-directory: server
+              run: uv sync
+
+            - name: run deptry
+              working-directory: server
+              run: make deptry
+
+            - name: run type checks
+              working-directory: server
+              run: make check
+
+            - name: run tests with coverage
+              working-directory: server
+              run: make cov

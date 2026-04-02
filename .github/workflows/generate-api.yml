@@ -23,7 +23,7 @@ jobs:
         steps:
             - name: set cache dirs
               run: |
-                  echo "NPM_CONFIG_CACHE=$HOME/.cache/npm" >> $GITHUB_ENV
+                  echo "PNPM_STORE_DIR=$HOME/.cache/pnpm/store" >> $GITHUB_ENV
                   echo "UV_CACHE_DIR=$HOME/.cache/uv" >> $GITHUB_ENV
 
             - name: unlock keychain
@@ -35,18 +35,26 @@ jobs:
               with:
                   ref: ${{ github.event.pull_request.base.ref }}
 
+            - name: setup pnpm
+              uses: pnpm/action-setup@v5
+              with:
+                  version: latest
+
             - name: setup node
               uses: actions/setup-node@v6
               with:
                   node-version: 'lts/*'
-                  cache: 'npm'
-                  cache-dependency-path: client/package-lock.json
+                  cache: 'pnpm'
+                  cache-dependency-path: client/pnpm-lock.yaml
+
+            - name: set pnpm config
+              run: |
+                  pnpm config set store-dir "$PNPM_STORE_DIR"
+                  pnpm config list
 
             - name: install deps - client
               working-directory: client
-              run: |
-                  npm config ls
-                  npm ci
+              run: pnpm i --frozen-lockfile
 
             - name: setup uv
               uses: astral-sh/setup-uv@v7

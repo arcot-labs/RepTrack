@@ -10,9 +10,9 @@ RepTrack is a full-stack strength-training tracker:
 
 ### Root (monorepo)
 
-- Format all: `npm run format`
-- Lint/typecheck all configured checks: `npm run lint`
-- Server typecheck only: `npm run check:py`
+- Format all: `pnpm run format`
+- Lint/typecheck all configured checks: `pnpm run lint`
+- Server typecheck only: `pnpm run check:py`
 
 ### Server (`cd server`)
 
@@ -27,10 +27,12 @@ RepTrack is a full-stack strength-training tracker:
 
 ### Client (`cd client`)
 
-- Dev server: `npm run dev`
-- Build: `npm run build`
-- Lint (auto-fix): `npm run lint`
-- Regenerate OpenAPI client: `npm run generate-api`
+- Dev server: `pnpm run dev`
+- Build: `pnpm run build`
+- Lint (auto-fix): `pnpm run lint`
+- Regenerate OpenAPI client: `pnpm run generate-api`
+- Tests (Vitest): `pnpm run test -- <path-to-test>`
+- Coverage: `pnpm run test:coverage` (includes `src/tests/**/*.{test,spec}.{ts,tsx}`)
 
 ## High-Level Architecture
 
@@ -84,6 +86,7 @@ agent-browser close
     - Prefer app override components like `@/components/ui/overrides/button` instead of base shadcn paths.
     - Prefer `@/` alias imports over deep relative paths.
     - Prefer `@/lib/notify` over direct `toast` import from `sonner`.
+- Client now includes dedicated Vitest suites under `client/src/tests/{lib,auth,config,api}` that exercise helpers such as `cn`, `notify`, `RequireAuth`, `SessionProvider`, and `configureApiClient`.
 - Test stack uses pytest + async fixtures with a Postgres Testcontainers instance (`postgres:18`) and savepoint-based rollback per test (`server/app/tests/fixtures/database.py`).
 - Shared test helpers belong in `utilities.py` under the relevant test scope; module-private test helpers/constants are prefixed with `_`.
 - Auth schema rule: usernames cannot be email-shaped strings (`RegisterRequest` validator in `server/app/models/schemas/auth.py`); login accepts username or email identifier.

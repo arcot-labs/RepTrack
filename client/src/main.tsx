@@ -3,7 +3,7 @@ import { App } from '@/App'
 import { AppRoutes } from '@/AppRoutes'
 import { SessionProvider } from '@/auth/SessionProvider'
 import { TooltipProvider } from '@/components/ui/overrides/tooltip'
-import { env } from '@/config/env'
+import { getEnv } from '@/config/env'
 import '@/index.css'
 import { ThemeProvider } from 'next-themes'
 import ReactDOM from 'react-dom/client'
@@ -11,7 +11,7 @@ import { BrowserRouter } from 'react-router-dom'
 import * as z from 'zod'
 import { en } from 'zod/locales'
 
-if (env.ENV !== 'prod') document.title = `RepTrack (${env.ENV})`
+if (getEnv().ENV !== 'prod') document.title = `RepTrack (${getEnv().ENV})`
 
 z.config(en())
 
