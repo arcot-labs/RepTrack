@@ -31,7 +31,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             value={{
                 user,
                 isLoading: isLoading,
-                authenticated: user !== null,
+                isAuthenticated: user !== null,
                 refresh: loadSession,
             }}
         >
