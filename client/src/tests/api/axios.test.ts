@@ -1,4 +1,5 @@
 import { configureApiClient } from '@/api/axios'
+import { client } from '@/api/generated/client.gen'
 import { loginUrl, refreshTokenUrl } from '@/tests/mocks/handlers/auth'
 import { errorUrl, protectedUrl, successUrl } from '@/tests/mocks/handlers/base'
 import { server } from '@/tests/mocks/server'
@@ -30,11 +31,18 @@ beforeEach(() => {
 describe('configureApiClient', () => {
     it('sets up axios instance with base url and credentials', () => {
         envMock.getEnv = () => ({ API_URL: 'https://api.localhost' })
+        const setConfigSpy = vi.spyOn(client, 'setConfig')
+
         const axiosInstance = configureApiClient()
 
         expect(axiosInstance.defaults.baseURL).toBe('https://api.localhost')
         expect(axiosInstance.defaults.withCredentials).toBe(true)
         expect(axiosInstance.interceptors.response.handlers).toHaveLength(1)
+        expect(setConfigSpy).toHaveBeenCalledExactlyOnceWith({
+            axios: axiosInstance,
+        })
+
+        setConfigSpy.mockRestore()
     })
 
     it('forwards success response', async () => {
@@ -108,10 +116,17 @@ describe('configureApiClient', () => {
 
     it('rejects error response for refresh url request', async () => {
         const axiosInstance = configureApiClient()
+        let refreshCallCount = 0
 
-        server.use(http.post(refreshTokenUrl, () => errorResponse.clone()))
+        server.use(
+            http.post(refreshTokenUrl, () => {
+                refreshCallCount += 1
+                return unauthorizedResponse.clone()
+            })
+        )
 
         await expect(axiosInstance.post(refreshTokenUrl)).rejects.toBeDefined()
+        expect(refreshCallCount).toBe(1)
 
         expect(loggerMocks.debug).toHaveBeenCalledOnce()
         expect(loggerMocks.info).not.toHaveBeenCalled()
@@ -119,10 +134,23 @@ describe('configureApiClient', () => {
 
     it('rejects error response for login url request', async () => {
         const axiosInstance = configureApiClient()
+        let loginCallCount = 0
+        let refreshCallCount = 0
 
-        server.use(http.post(loginUrl, () => errorResponse.clone()))
+        server.use(
+            http.post(loginUrl, () => {
+                loginCallCount += 1
+                return unauthorizedResponse.clone()
+            }),
+            http.post(refreshTokenUrl, () => {
+                refreshCallCount += 1
+                return new HttpResponse(null, { status: 204 })
+            })
+        )
 
         await expect(axiosInstance.post(loginUrl)).rejects.toBeDefined()
+        expect(loginCallCount).toBe(1)
+        expect(refreshCallCount).toBe(0)
 
         expect(loggerMocks.debug).toHaveBeenCalledOnce()
         expect(loggerMocks.info).not.toHaveBeenCalled()

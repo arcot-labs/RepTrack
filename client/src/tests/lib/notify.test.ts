@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const loggerMocks = {
     debug: vi.fn(),
@@ -28,6 +28,11 @@ const loadNotify = async () => {
 }
 
 describe('notify', () => {
+    beforeEach(() => {
+        Object.values(loggerMocks).forEach((mock) => mock.mockReset())
+        Object.values(toastMocks).forEach((mock) => mock.mockReset())
+    })
+
     it('logs debug and shows a success toast', async () => {
         const { notify } = await loadNotify()
 

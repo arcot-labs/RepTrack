@@ -124,6 +124,43 @@ describe('RequireGuest', () => {
         expect(screen.queryByText('guest')).not.toBeInTheDocument()
     })
 
+    it('falls back to root when return state exists without pathname', async () => {
+        useSessionMock.mockReturnValue(
+            makeSession({
+                isLoading: false,
+                isAuthenticated: true,
+            })
+        )
+
+        const RequireGuest = await loadRequireGuest()
+
+        render(
+            <MemoryRouter
+                initialEntries={[
+                    {
+                        pathname: '/login',
+                        state: { from: {} },
+                    },
+                ]}
+            >
+                <Routes>
+                    <Route
+                        path="/login"
+                        element={
+                            <RequireGuest>
+                                <div>guest</div>
+                            </RequireGuest>
+                        }
+                    />
+                    <Route path="/" element={<div>home</div>} />
+                </Routes>
+            </MemoryRouter>
+        )
+
+        expect(screen.getByText('home')).toBeInTheDocument()
+        expect(screen.queryByText('guest')).not.toBeInTheDocument()
+    })
+
     it('shows children for unauthenticated users', async () => {
         useSessionMock.mockReturnValue(
             makeSession({
