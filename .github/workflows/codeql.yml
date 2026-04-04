@@ -60,14 +60,21 @@ jobs:
               with:
                   node-version: 'lts/*'
                   check-latest: true
-                  cache: 'pnpm'
-                  cache-dependency-path: client/pnpm-lock.yaml
 
             - name: set pnpm config - typescript
               if: matrix.language == 'typescript'
               run: |
+                  mkdir -p "$PNPM_STORE_DIR"
                   pnpm config set store-dir "$PNPM_STORE_DIR"
                   pnpm config list
+
+            - name: cache pnpm store - typescript
+              if: matrix.language == 'typescript'
+              uses: actions/cache@v4
+              with:
+                  path: ${{ env.PNPM_STORE_DIR }}
+                  key: ${{ runner.os }}-pnpm-${{ hashFiles('client/pnpm-lock.yaml') }}
+                  restore-keys: ${{ runner.os }}-pnpm-
 
             - name: initialize codeql - actions
               if: matrix.language == 'actions'

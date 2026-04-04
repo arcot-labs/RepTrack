@@ -34,15 +34,19 @@ jobs:
               with:
                   node-version: 'lts/*'
                   check-latest: true
-                  cache: 'pnpm'
-                  cache-dependency-path: |
-                      pnpm-lock.yaml
-                      client/pnpm-lock.yaml
 
             - name: set pnpm config
               run: |
+                  mkdir -p "$PNPM_STORE_DIR"
                   pnpm config set store-dir "$PNPM_STORE_DIR"
                   pnpm config list
+
+            - name: cache pnpm store
+              uses: actions/cache@v4
+              with:
+                  path: ${{ env.PNPM_STORE_DIR }}
+                  key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml', 'client/pnpm-lock.yaml') }}
+                  restore-keys: ${{ runner.os }}-pnpm-
 
             - name: install deps - base
               run: pnpm i --frozen-lockfile --ignore-scripts
