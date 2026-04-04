@@ -104,9 +104,9 @@ export function UsersTable({ users, isLoading }: UsersTableProps) {
         <DataTable
             data={users}
             columns={columns}
+            toolbarConfig={toolbarConfig}
             pageSize={5}
             isLoading={isLoading}
-            toolbarConfig={toolbarConfig}
         />
     )
 }

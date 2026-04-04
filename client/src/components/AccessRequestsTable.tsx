@@ -295,9 +295,9 @@ export function AccessRequestsTable({
             <DataTable
                 data={requests}
                 columns={columns}
+                toolbarConfig={toolbarConfig}
                 pageSize={5}
                 isLoading={isLoading}
-                toolbarConfig={toolbarConfig}
             />
             <Dialog
                 open={confirmDialog.isOpen}

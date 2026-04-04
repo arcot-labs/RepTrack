@@ -1,3 +1,4 @@
+import { getMockProps } from '@/tests/utils'
 import { render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
@@ -123,10 +124,8 @@ describe('main bootstrap', () => {
         const rootElement = document.getElementById('root')
         expect(createRootMock).toHaveBeenCalledWith(rootElement)
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const renderedTree = rootRenderMock.mock.calls[0]?.[0]
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        render(renderedTree)
+        const renderedTree = getMockProps(rootRenderMock)
+        render(renderedTree as never)
 
         expect(themeProviderMock).toHaveBeenCalledExactlyOnceWith(
             expect.objectContaining({

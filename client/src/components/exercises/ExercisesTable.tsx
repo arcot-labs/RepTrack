@@ -420,10 +420,10 @@ export function ExercisesTable({
             <DataTable
                 data={displayedExercises}
                 columns={columns}
+                initialColumnVisibility={{ type: false }}
+                toolbarConfig={toolbarConfig}
                 pageSize={10}
                 isLoading={isLoading}
-                toolbarConfig={toolbarConfig}
-                initialColumnVisibility={{ type: false }}
             />
             <ExerciseFormDialog
                 open={formDialog.isOpen}
