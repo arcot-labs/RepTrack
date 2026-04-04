@@ -336,9 +336,9 @@ export function ExercisesTable({
             id: 'muscle_groups',
             meta: { viewLabel: 'Muscle Groups' },
             accessorFn: (row) =>
-                row.muscle_groups
-                    .map((group) => capitalizeWords(group.name))
-                    .join(', '),
+                row.muscle_groups.map((group) => String(group.id)),
+            getUniqueValues: (row) =>
+                row.muscle_groups.map((group) => String(group.id)),
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Muscle Groups" />
             ),
@@ -367,7 +367,7 @@ export function ExercisesTable({
                 const rowGroupIds = new Set(
                     row.original.muscle_groups.map((group) => String(group.id))
                 )
-                return filterValues.every((groupId) => rowGroupIds.has(groupId))
+                return filterValues.some((groupId) => rowGroupIds.has(groupId))
             },
             enableHiding: true,
         },
