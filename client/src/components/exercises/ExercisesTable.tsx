@@ -382,7 +382,6 @@ export function ExercisesTable({
 
     const toolbarConfig: DataTableToolbarConfig = {
         search: {
-            columnId: 'name',
             placeholder: 'Search exercises...',
             value: searchQuery,
             onChange: setSearchQuery,

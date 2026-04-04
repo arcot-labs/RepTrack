@@ -19,7 +19,7 @@ export function DataTableToolbar<TData>({
 }: DataTableToolbarProps<TData>) {
     const isFiltered = table.getState().columnFilters.length > 0
     const hasSecondaryControls = (config.filters?.length ?? 0) > 0 || isFiltered
-    const searchColumn = config.search
+    const searchColumn = config.search?.columnId
         ? table.getColumn(config.search.columnId)
         : undefined
     const isExternalSearch = typeof config.search?.onChange === 'function'
@@ -29,6 +29,7 @@ export function DataTableToolbar<TData>({
 
     return (
         <div className="space-y-2">
+            {/* search bar, view options, & actions (large screens) */}
             <div className="flex items-center">
                 <div className="min-w-0 flex-1">
                     {config.search && (
@@ -78,6 +79,8 @@ export function DataTableToolbar<TData>({
                     </div>
                 )}
             </div>
+
+            {/* filters & reset */}
             {hasSecondaryControls && (
                 <div className="flex flex-wrap items-center gap-2">
                     {config.filters?.map((filter) => {
@@ -105,6 +108,8 @@ export function DataTableToolbar<TData>({
                     )}
                 </div>
             )}
+
+            {/* actions (small screens) */}
             <div className="flex gap-2 sm:hidden">
                 {config.actions?.map((action, index) => (
                     <Button
