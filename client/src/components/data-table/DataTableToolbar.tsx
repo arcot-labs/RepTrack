@@ -88,8 +88,8 @@ export function DataTableToolbar<TData>({
                         return column ? (
                             <DataTableFacetedFilter
                                 key={filter.columnId}
-                                column={column}
                                 title={filter.title}
+                                column={column}
                                 options={filter.options}
                             />
                         ) : null

@@ -22,8 +22,8 @@ import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 
 interface DataTableFacetedFilterProps<TData, TValue> {
-    column?: Column<TData, TValue>
-    title?: string
+    title: string
+    column: Column<TData, TValue>
     options: {
         label: string
         value: string
@@ -31,13 +31,26 @@ interface DataTableFacetedFilterProps<TData, TValue> {
     }[]
 }
 
+const toggleFilterValue = <TData, TValue>(
+    isSelected: boolean,
+    column: Column<TData, TValue>,
+    value: string,
+    selectedValues: Set<string>
+) => {
+    if (isSelected) selectedValues.delete(value)
+    else selectedValues.add(value)
+
+    const filterValues = Array.from(selectedValues)
+    column.setFilterValue(filterValues.length ? filterValues : undefined)
+}
+
 export function DataTableFacetedFilter<TData, TValue>({
-    column,
     title,
+    column,
     options,
 }: DataTableFacetedFilterProps<TData, TValue>) {
-    const facets = column?.getFacetedUniqueValues()
-    const selectedValues = new Set(column?.getFilterValue() as string[])
+    const facets = column.getFacetedUniqueValues()
+    const selectedValues = new Set(column.getFilterValue() as string[])
 
     return (
         <Popover>
@@ -59,9 +72,11 @@ export function DataTableFacetedFilter<TData, TValue>({
                                 variant="secondary"
                                 className="rounded-sm px-1 font-normal lg:hidden"
                             >
+                                {/* selected (small screens) */}
                                 {selectedValues.size}
                             </Badge>
                             <div className="hidden gap-1 lg:flex">
+                                {/* selected (large screens) */}
                                 {selectedValues.size > 2 ? (
                                     <Badge
                                         variant="secondary"
@@ -91,7 +106,7 @@ export function DataTableFacetedFilter<TData, TValue>({
             </PopoverTrigger>
             <PopoverContent className="w-50 p-0" align="start">
                 <Command>
-                    <CommandInput placeholder={title} />
+                    <CommandInput placeholder={'Search...'} />
                     <CommandList>
                         <CommandEmpty>No results found.</CommandEmpty>
                         <CommandGroup>
@@ -103,19 +118,11 @@ export function DataTableFacetedFilter<TData, TValue>({
                                     <CommandItem
                                         key={option.value}
                                         onSelect={() => {
-                                            if (isSelected) {
-                                                selectedValues.delete(
-                                                    option.value
-                                                )
-                                            } else {
-                                                selectedValues.add(option.value)
-                                            }
-                                            const filterValues =
-                                                Array.from(selectedValues)
-                                            column?.setFilterValue(
-                                                filterValues.length
-                                                    ? filterValues
-                                                    : undefined
+                                            toggleFilterValue(
+                                                isSelected,
+                                                column,
+                                                option.value,
+                                                selectedValues
                                             )
                                         }}
                                     >
@@ -145,9 +152,9 @@ export function DataTableFacetedFilter<TData, TValue>({
                                 <CommandSeparator />
                                 <CommandGroup>
                                     <CommandItem
-                                        onSelect={() =>
-                                            column?.setFilterValue(undefined)
-                                        }
+                                        onSelect={() => {
+                                            column.setFilterValue(undefined)
+                                        }}
                                         className="justify-center text-center"
                                     >
                                         Clear filters
