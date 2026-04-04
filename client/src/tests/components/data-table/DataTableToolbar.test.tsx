@@ -1,3 +1,4 @@
+import { DataTableToolbar } from '@/components/data-table/DataTableToolbar'
 import type { DataTableToolbarConfig } from '@/models/data-table'
 import { getMockProps } from '@/tests/utils'
 import type { Table } from '@tanstack/react-table'
@@ -5,18 +6,27 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const spinnerMock = vi.fn(() => <div data-testid="mock-spinner" />)
-const viewOptionsMock = vi.fn(() => <div data-testid="mock-view-options" />)
-const facetedFilterMock = vi.fn(() => <div data-testid="mock-filter" />)
+const spinnerMock = vi.fn()
+const viewOptionsMock = vi.fn()
+const facetedFilterMock = vi.fn()
 
 vi.mock('@/components/ui/spinner', () => ({
-    Spinner: spinnerMock,
+    Spinner: (props: unknown) => {
+        spinnerMock(props)
+        return <div data-testid="mock-spinner" />
+    },
 }))
 vi.mock('@/components/data-table/DataTableFacetedFilter', () => ({
-    DataTableFacetedFilter: facetedFilterMock,
+    DataTableFacetedFilter: (props: unknown) => {
+        facetedFilterMock(props)
+        return <div data-testid="mock-filter" />
+    },
 }))
 vi.mock('@/components/data-table/DataTableViewOptions', () => ({
-    DataTableViewOptions: viewOptionsMock,
+    DataTableViewOptions: (props: unknown) => {
+        viewOptionsMock(props)
+        return <div data-testid="mock-view-options" />
+    },
 }))
 
 function createConfig(
@@ -41,14 +51,10 @@ function createTableMock(overrides?: Partial<Table<unknown>>) {
     } as unknown as Table<unknown>
 }
 
-const renderDataTableToolbar = async (
+const renderDataTableToolbar = (
     toolbarConfig: DataTableToolbarConfig,
     tableOverrides?: Partial<Table<unknown>>
 ) => {
-    const DataTableToolbar = (
-        await import('@/components/data-table/DataTableToolbar')
-    ).DataTableToolbar
-
     return render(
         <DataTableToolbar
             table={createTableMock(tableOverrides)}
@@ -62,8 +68,8 @@ describe('DataTableToolbar - search', () => {
         vi.clearAllMocks()
     })
 
-    it('uses config search value for external search', async () => {
-        await renderDataTableToolbar(
+    it('uses config search value for external search', () => {
+        renderDataTableToolbar(
             createConfig({
                 search: {
                     columnId: 'name',
@@ -77,13 +83,13 @@ describe('DataTableToolbar - search', () => {
         expect(screen.getByRole('textbox')).toHaveValue('hello')
     })
 
-    it('uses column filter value for internal search', async () => {
+    it('uses column filter value for internal search', () => {
         const getColumnMock = vi.fn(() => ({
             getFilterValue: vi.fn(() => 'existing'),
             setFilterValue: vi.fn(),
         }))
 
-        await renderDataTableToolbar(
+        renderDataTableToolbar(
             createConfig({
                 search: {
                     columnId: 'name',
@@ -98,14 +104,14 @@ describe('DataTableToolbar - search', () => {
         expect(screen.getByRole('textbox')).toHaveValue('existing')
     })
 
-    it('does not render search input when config.search is not provided', async () => {
-        await renderDataTableToolbar(createConfig())
+    it('does not render search input when config.search is not provided', () => {
+        renderDataTableToolbar(createConfig())
 
         expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
     })
 
-    it('renders search input when config.search is provided', async () => {
-        await renderDataTableToolbar(
+    it('renders search input when config.search is provided', () => {
+        renderDataTableToolbar(
             createConfig({
                 search: {
                     columnId: 'name',
@@ -120,7 +126,7 @@ describe('DataTableToolbar - search', () => {
     it('calls onChange for external search', async () => {
         const onChange = vi.fn()
 
-        await renderDataTableToolbar(
+        renderDataTableToolbar(
             createConfig({
                 search: {
                     columnId: 'name',
@@ -136,8 +142,8 @@ describe('DataTableToolbar - search', () => {
         expect(onChange).toHaveBeenCalled()
     })
 
-    it('falls back to empty string when search value is undefined', async () => {
-        await renderDataTableToolbar(
+    it('falls back to empty string when search value is undefined', () => {
+        renderDataTableToolbar(
             createConfig({
                 search: {
                     columnId: 'name',
@@ -158,7 +164,7 @@ describe('DataTableToolbar - search', () => {
             setFilterValue,
         }))
 
-        await renderDataTableToolbar(
+        renderDataTableToolbar(
             createConfig({
                 search: {
                     columnId: 'name',
@@ -175,8 +181,8 @@ describe('DataTableToolbar - search', () => {
         expect(setFilterValue).toHaveBeenCalled()
     })
 
-    it('shows spinner when search is loading', async () => {
-        await renderDataTableToolbar(
+    it('shows spinner when search is loading', () => {
+        renderDataTableToolbar(
             createConfig({
                 search: {
                     columnId: 'name',
@@ -195,14 +201,14 @@ describe('DataTableToolbar - view options', () => {
         vi.clearAllMocks()
     })
 
-    it('renders view options by default', async () => {
-        await renderDataTableToolbar(createConfig())
+    it('renders view options by default', () => {
+        renderDataTableToolbar(createConfig())
 
         expect(viewOptionsMock).toHaveBeenCalled()
     })
 
-    it('does not render view options when showViewOptions is false', async () => {
-        await renderDataTableToolbar(
+    it('does not render view options when showViewOptions is false', () => {
+        renderDataTableToolbar(
             createConfig({
                 showViewOptions: false,
             })
@@ -213,8 +219,8 @@ describe('DataTableToolbar - view options', () => {
         ).not.toBeInTheDocument()
     })
 
-    it('passes table to DataTableViewOptions', async () => {
-        await renderDataTableToolbar(createConfig())
+    it('passes table to DataTableViewOptions', () => {
+        renderDataTableToolbar(createConfig())
 
         expect(viewOptionsMock).toHaveBeenCalled()
 
@@ -231,14 +237,14 @@ describe('DataTableToolbar - actions', () => {
         vi.clearAllMocks()
     })
 
-    it('does not render actions when not provided', async () => {
-        await renderDataTableToolbar(createConfig())
+    it('does not render actions when not provided', () => {
+        renderDataTableToolbar(createConfig())
 
         expect(screen.queryByRole('button')).not.toBeInTheDocument()
     })
 
-    it('renders actions in both desktop and mobile sections', async () => {
-        await renderDataTableToolbar(
+    it('renders actions in both desktop and mobile sections', () => {
+        renderDataTableToolbar(
             createConfig({
                 actions: [
                     {
@@ -255,7 +261,7 @@ describe('DataTableToolbar - actions', () => {
     it('calls action on click', async () => {
         const onClick = vi.fn()
 
-        await renderDataTableToolbar(
+        renderDataTableToolbar(
             createConfig({
                 actions: [
                     {
@@ -274,10 +280,10 @@ describe('DataTableToolbar - actions', () => {
         expect(onClick).toHaveBeenCalledTimes(2)
     })
 
-    it('renders action icon when provided', async () => {
+    it('renders action icon when provided', () => {
         const Icon = () => <svg data-testid="mock-icon" />
 
-        await renderDataTableToolbar(
+        renderDataTableToolbar(
             createConfig({
                 actions: [
                     {
@@ -298,10 +304,10 @@ describe('DataTableToolbar - filters & reset', () => {
         vi.clearAllMocks()
     })
 
-    it('renders faceted filters when column exists', async () => {
+    it('renders faceted filters when column exists', () => {
         const getColumnMock = vi.fn(() => ({}))
 
-        await renderDataTableToolbar(
+        renderDataTableToolbar(
             createConfig({
                 filters: [
                     {
@@ -319,10 +325,10 @@ describe('DataTableToolbar - filters & reset', () => {
         expect(screen.getByTestId('mock-filter')).toBeInTheDocument()
     })
 
-    it('does not render filter when column does not exist', async () => {
+    it('does not render filter when column does not exist', () => {
         const getColumnMock = vi.fn(() => undefined)
 
-        await renderDataTableToolbar(
+        renderDataTableToolbar(
             createConfig({
                 filters: [
                     {
@@ -340,12 +346,12 @@ describe('DataTableToolbar - filters & reset', () => {
         expect(screen.queryByTestId('mock-filter')).not.toBeInTheDocument()
     })
 
-    it('passes correct props to DataTableFacetedFilter', async () => {
+    it('passes correct props to DataTableFacetedFilter', () => {
         const column = {}
 
         const getColumnMock = vi.fn(() => column)
 
-        await renderDataTableToolbar(
+        renderDataTableToolbar(
             createConfig({
                 filters: [
                     {
@@ -370,8 +376,8 @@ describe('DataTableToolbar - filters & reset', () => {
         })
     })
 
-    it('shows reset button when table is filtered', async () => {
-        await renderDataTableToolbar(createConfig(), {
+    it('shows reset button when table is filtered', () => {
+        renderDataTableToolbar(createConfig(), {
             getState: () =>
                 ({
                     columnFilters: [{}],
@@ -381,8 +387,8 @@ describe('DataTableToolbar - filters & reset', () => {
         expect(screen.getByText('Reset')).toBeInTheDocument()
     })
 
-    it('does not show reset button when table is not filtered', async () => {
-        await renderDataTableToolbar(createConfig(), {
+    it('does not show reset button when table is not filtered', () => {
+        renderDataTableToolbar(createConfig(), {
             getState: () =>
                 ({
                     columnFilters: [],
@@ -395,7 +401,7 @@ describe('DataTableToolbar - filters & reset', () => {
     it('resets filters when reset button is clicked', async () => {
         const resetColumnFilters = vi.fn()
 
-        await renderDataTableToolbar(createConfig(), {
+        renderDataTableToolbar(createConfig(), {
             getState: () =>
                 ({
                     columnFilters: [{}],

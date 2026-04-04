@@ -1,3 +1,4 @@
+import { RequireAuth } from '@/auth/RequireAuth'
 import type { SessionContextType } from '@/models/session'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
@@ -26,24 +27,19 @@ const makeSession = (
     ...overrides,
 })
 
-const loadRequireAuth = async () =>
-    (await import('@/auth/RequireAuth')).RequireAuth
-
 describe('RequireAuth', () => {
     beforeEach(() => {
         vi.clearAllMocks()
         useSessionMock.mockReturnValue(makeSession())
     })
 
-    it('shows loading component while session loading', async () => {
+    it('shows loading component while session loading', () => {
         useSessionMock.mockReturnValue(
             makeSession({
                 isLoading: true,
                 isAuthenticated: false,
             })
         )
-
-        const RequireAuth = await loadRequireAuth()
 
         render(
             <MemoryRouter>
@@ -57,15 +53,13 @@ describe('RequireAuth', () => {
         expect(screen.queryByText('secret')).not.toBeInTheDocument()
     })
 
-    it('redirects unauthenticated to /login with correct from path', async () => {
+    it('redirects unauthenticated to /login with correct from path', () => {
         useSessionMock.mockReturnValue(
             makeSession({
                 isLoading: false,
                 isAuthenticated: false,
             })
         )
-
-        const RequireAuth = await loadRequireAuth()
 
         function LoginPage() {
             const location = useLocation()
@@ -97,7 +91,7 @@ describe('RequireAuth', () => {
         expect(screen.queryByText('private')).not.toBeInTheDocument()
     })
 
-    it('renders for non-admin when admin not required', async () => {
+    it('renders for non-admin when admin not required', () => {
         useSessionMock.mockReturnValue(
             makeSession({
                 isLoading: false,
@@ -105,8 +99,6 @@ describe('RequireAuth', () => {
                 user: { is_admin: false } as SessionContextType['user'],
             })
         )
-
-        const RequireAuth = await loadRequireAuth()
 
         render(
             <MemoryRouter>
@@ -119,7 +111,7 @@ describe('RequireAuth', () => {
         expect(screen.getByText('member area')).toBeInTheDocument()
     })
 
-    it('redirects non-admin when admin required', async () => {
+    it('redirects non-admin when admin required', () => {
         useSessionMock.mockReturnValue(
             makeSession({
                 isLoading: false,
@@ -127,8 +119,6 @@ describe('RequireAuth', () => {
                 user: { is_admin: false } as SessionContextType['user'],
             })
         )
-
-        const RequireAuth = await loadRequireAuth()
 
         render(
             <MemoryRouter initialEntries={['/admin']}>
@@ -150,7 +140,7 @@ describe('RequireAuth', () => {
         expect(screen.queryByText('admin area')).not.toBeInTheDocument()
     })
 
-    it('renders for admin when admin required', async () => {
+    it('renders for admin when admin required', () => {
         useSessionMock.mockReturnValue(
             makeSession({
                 isLoading: false,
@@ -158,8 +148,6 @@ describe('RequireAuth', () => {
                 user: { is_admin: true } as SessionContextType['user'],
             })
         )
-
-        const RequireAuth = await loadRequireAuth()
 
         render(
             <MemoryRouter>

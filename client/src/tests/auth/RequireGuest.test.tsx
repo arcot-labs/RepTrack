@@ -1,3 +1,4 @@
+import { RequireGuest } from '@/auth/RequireGuest'
 import type { SessionContextType } from '@/models/session'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
@@ -26,24 +27,19 @@ const makeSession = (
     ...overrides,
 })
 
-const loadRequireGuest = async () =>
-    (await import('@/auth/RequireGuest')).RequireGuest
-
 describe('RequireGuest', () => {
     beforeEach(() => {
         vi.clearAllMocks()
         useSessionMock.mockReturnValue(makeSession())
     })
 
-    it('shows loading component while session loading', async () => {
+    it('shows loading component while session loading', () => {
         useSessionMock.mockReturnValue(
             makeSession({
                 isLoading: true,
                 isAuthenticated: false,
             })
         )
-
-        const RequireGuest = await loadRequireGuest()
 
         render(
             <MemoryRouter>
@@ -57,15 +53,13 @@ describe('RequireGuest', () => {
         expect(screen.queryByText('guest')).not.toBeInTheDocument()
     })
 
-    it('redirects authenticated users to root path when no return state is provided', async () => {
+    it('redirects authenticated users to root path when no return state is provided', () => {
         useSessionMock.mockReturnValue(
             makeSession({
                 isLoading: false,
                 isAuthenticated: true,
             })
         )
-
-        const RequireGuest = await loadRequireGuest()
 
         render(
             <MemoryRouter initialEntries={['/login']}>
@@ -87,15 +81,13 @@ describe('RequireGuest', () => {
         expect(screen.queryByText('guest')).not.toBeInTheDocument()
     })
 
-    it('redirects authenticated users back to page stored in state', async () => {
+    it('redirects authenticated users back to page stored in state', () => {
         useSessionMock.mockReturnValue(
             makeSession({
                 isLoading: false,
                 isAuthenticated: true,
             })
         )
-
-        const RequireGuest = await loadRequireGuest()
 
         render(
             <MemoryRouter
@@ -124,15 +116,13 @@ describe('RequireGuest', () => {
         expect(screen.queryByText('guest')).not.toBeInTheDocument()
     })
 
-    it('falls back to root when return state exists without pathname', async () => {
+    it('falls back to root when return state exists without pathname', () => {
         useSessionMock.mockReturnValue(
             makeSession({
                 isLoading: false,
                 isAuthenticated: true,
             })
         )
-
-        const RequireGuest = await loadRequireGuest()
 
         render(
             <MemoryRouter
@@ -161,14 +151,13 @@ describe('RequireGuest', () => {
         expect(screen.queryByText('guest')).not.toBeInTheDocument()
     })
 
-    it('shows children for unauthenticated users', async () => {
+    it('shows children for unauthenticated users', () => {
         useSessionMock.mockReturnValue(
             makeSession({
                 isLoading: false,
                 isAuthenticated: false,
             })
         )
-        const RequireGuest = await loadRequireGuest()
 
         render(
             <MemoryRouter>

@@ -1,3 +1,4 @@
+import { AppLayout } from '@/layout/AppLayout'
 import type { SessionContextType } from '@/models/session'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
@@ -15,14 +16,11 @@ const useSessionMock: MockedFunction<() => SessionContextType> = vi.fn()
 vi.mock('@/auth/session', () => ({
     useSession: () => useSessionMock(),
 }))
-
 vi.mock('@/components/HeaderActions', () => ({
     HeaderActions: () => <div>header actions</div>,
 }))
 
-const loadAppLayout = async () => (await import('@/layout/AppLayout')).AppLayout
-
-function renderLayout(AppLayout: Awaited<ReturnType<typeof loadAppLayout>>) {
+function renderLayout() {
     return render(
         <MemoryRouter>
             <Routes>
@@ -40,10 +38,8 @@ describe('AppLayout', () => {
         useSessionMock.mockReturnValue({ user: null } as never)
     })
 
-    it('renders navbar links and outlet content', async () => {
-        const AppLayout = await loadAppLayout()
-
-        renderLayout(AppLayout)
+    it('renders navbar links and outlet content', () => {
+        renderLayout()
 
         expect(screen.getByText('RepTrack')).toBeInTheDocument()
         expect(screen.getByText('Dashboard')).toBeInTheDocument()
@@ -65,22 +61,18 @@ describe('AppLayout', () => {
         ).toBeInTheDocument()
     })
 
-    it('hides admin link for non-admin user', async () => {
+    it('hides admin link for non-admin user', () => {
         useSessionMock.mockReturnValue({ user: { is_admin: false } } as never)
 
-        const AppLayout = await loadAppLayout()
-
-        renderLayout(AppLayout)
+        renderLayout()
 
         expect(screen.queryByText('Admin')).toBeNull()
     })
 
-    it('shows admin link for admin user', async () => {
+    it('shows admin link for admin user', () => {
         useSessionMock.mockReturnValue({ user: { is_admin: true } } as never)
 
-        const AppLayout = await loadAppLayout()
-
-        renderLayout(AppLayout)
+        renderLayout()
 
         expect(screen.getByText('Admin')).toBeInTheDocument()
 
