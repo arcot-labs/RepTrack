@@ -13,6 +13,7 @@ describe('NavItem', () => {
 
         const link = screen.getByRole('link', { name: 'Dashboard' })
         expect(link).toBeInTheDocument()
+        expect(link).toHaveAttribute('href', '/active')
         expect(link).toHaveClass('text-xl', 'font-medium', 'transition-colors')
     })
 
@@ -24,6 +25,7 @@ describe('NavItem', () => {
         )
 
         const link = screen.getByRole('link', { name: 'Active Link' })
+        expect(link).toHaveAttribute('aria-current', 'page')
         expect(link).toHaveClass('text-primary')
         expect(link).not.toHaveClass('text-muted-foreground')
     })
@@ -36,6 +38,7 @@ describe('NavItem', () => {
         )
 
         const link = screen.getByRole('link', { name: 'Inactive Link' })
+        expect(link).not.toHaveAttribute('aria-current', 'page')
         expect(link).toHaveClass('text-muted-foreground')
         expect(link).not.toHaveClass('text-primary')
     })

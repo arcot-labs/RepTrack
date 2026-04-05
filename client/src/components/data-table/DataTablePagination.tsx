@@ -21,7 +21,7 @@ interface DataTablePaginationProps<TData> {
 
 const getDisplayedPagesText = <TData,>(table: Table<TData>) => {
     const pageCount = table.getPageCount()
-    if (pageCount === 0) return `Page 1 of 1`
+    if (pageCount === 0) return 'Page 1 of 1'
 
     const pageIndex = table.getState().pagination.pageIndex
     return `Page ${String(pageIndex + 1)} of ${String(pageCount)}`
@@ -29,7 +29,7 @@ const getDisplayedPagesText = <TData,>(table: Table<TData>) => {
 
 const getDisplayedRowsText = <TData,>(table: Table<TData>) => {
     const totalRows = table.getFilteredRowModel().rows.length
-    if (totalRows === 0) return `0 rows`
+    if (totalRows === 0) return '0 rows'
 
     const pageIndex = table.getState().pagination.pageIndex
     const pageSize = table.getState().pagination.pageSize
@@ -45,6 +45,7 @@ export function DataTablePagination<TData>({
     return (
         <div className="flex items-center gap-2 text-xs md:px-4 md:text-sm">
             <div>
+                {/* pages & rows */}
                 <div className="text-muted-foreground">
                     {getDisplayedPagesText(table)}
                 </div>
@@ -66,6 +67,7 @@ export function DataTablePagination<TData>({
             </div>
             <div className="ml-auto flex items-center gap-2">
                 <div className="flex items-center gap-2 md:gap-2">
+                    {/* page size */}
                     <p className="text-muted-foreground">Page size</p>
                     <Select
                         value={String(table.getState().pagination.pageSize)}
@@ -94,6 +96,7 @@ export function DataTablePagination<TData>({
                     </Select>
                 </div>
                 <div className="flex">
+                    {/* pagination buttons */}
                     <Button
                         variant="outline"
                         size="icon"

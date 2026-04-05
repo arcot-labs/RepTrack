@@ -16,13 +16,12 @@ export function DataTableInlineRowActions<TData>({
     const menuItems = config.menuItems(rowData as TData)
 
     return (
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-1">
             {menuItems.map((item, index) => {
-                if (item.type === 'separator' || item.type === 'radio-group') {
+                if (item.type === 'separator' || item.type === 'radio-group')
                     throw Error(
                         'DataTableInlineRowActions does not support separator or radio-group menu items'
                     )
-                }
 
                 // action
                 return (
@@ -30,7 +29,7 @@ export function DataTableInlineRowActions<TData>({
                         key={index}
                         size="xs"
                         variant="outline"
-                        className={`${item.className ?? ''} h-5`}
+                        className={`${item.className ?? ''} h-7`}
                         onClick={() => void item.onSelect?.(rowData)}
                         disabled={item.disabled}
                     >

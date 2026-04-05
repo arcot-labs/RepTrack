@@ -13,6 +13,8 @@ interface DataTableSkeletonProps {
 }
 
 export function DataTableSkeleton({ columnCount }: DataTableSkeletonProps) {
+    const rowCount = 5
+
     return (
         <div className="overflow-hidden rounded-md border">
             <Table>
@@ -26,7 +28,7 @@ export function DataTableSkeleton({ columnCount }: DataTableSkeletonProps) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {Array.from({ length: 5 }).map((_, rowIndex) => (
+                    {Array.from({ length: rowCount }).map((_, rowIndex) => (
                         <TableRow key={rowIndex}>
                             {Array.from({ length: columnCount }).map(
                                 (_, cellIndex) => (

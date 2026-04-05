@@ -10,6 +10,10 @@ vi.mock('@/lib/logger', () => ({
 }))
 
 describe('buildEnv', () => {
+    beforeEach(() => {
+        vi.clearAllMocks()
+    })
+
     it('reduces VITE_ keys into parsed env object', () => {
         const parsed = buildEnv({
             VITE_ENV: 'stage',
@@ -24,6 +28,14 @@ describe('buildEnv', () => {
             IMAGE_TAG: 'tag-1',
             API_URL: 'https://example.com',
         })
+        expect(loggerMocks.info).toHaveBeenCalledExactlyOnceWith(
+            'Parsed env vars:',
+            expect.objectContaining({
+                ENV: 'stage',
+                IMAGE_TAG: 'tag-1',
+                API_URL: 'https://example.com',
+            })
+        )
     })
 
     it('throws when the schema validation fails', () => {
@@ -49,6 +61,7 @@ const loadGetEnv = async () => (await import('@/config/env')).getEnv()
 
 describe('getEnv', () => {
     beforeEach(() => {
+        vi.clearAllMocks()
         vi.resetModules()
         vi.stubEnv('VITE_ENV', 'test')
         vi.stubEnv('VITE_IMAGE_TAG', 'img-tag')
@@ -74,5 +87,6 @@ describe('getEnv', () => {
 
         expect(second).toBe(first)
         expect(second.IMAGE_TAG).toBe('img-tag')
+        expect(loggerMocks.info).toHaveBeenCalledTimes(1)
     })
 })

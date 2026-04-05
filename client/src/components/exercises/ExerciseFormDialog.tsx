@@ -516,15 +516,26 @@ export function ExerciseFormDialog({
                         )}
                     </Field>
                     {exercise?.user_id !== null && !isCreateMode && (
-                        <Field label="Last Updated">
-                            <div className="text-sm text-muted-foreground">
-                                {exercise?.updated_at
-                                    ? new Date(
-                                          exercise.updated_at
-                                      ).toLocaleString()
-                                    : '—'}
-                            </div>
-                        </Field>
+                        <>
+                            <Field label="Created">
+                                <div className="text-sm text-muted-foreground">
+                                    {exercise?.created_at
+                                        ? new Date(
+                                              exercise.created_at
+                                          ).toLocaleString()
+                                        : '—'}
+                                </div>
+                            </Field>
+                            <Field label="Last Updated">
+                                <div className="text-sm text-muted-foreground">
+                                    {exercise?.updated_at
+                                        ? new Date(
+                                              exercise.updated_at
+                                          ).toLocaleString()
+                                        : '—'}
+                                </div>
+                            </Field>
+                        </>
                     )}
                 </form>
                 <DialogFooter>

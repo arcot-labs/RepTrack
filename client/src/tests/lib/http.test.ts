@@ -97,6 +97,23 @@ describe('handleApiError', () => {
         expect(errorSpy).not.toHaveBeenCalled()
     })
 
+    it('propagates handler errors for matching http error code', async () => {
+        const handlerFailure = new Error('handler failed')
+        const handler = vi.fn(() => Promise.reject(handlerFailure))
+        const error: ErrorResponse = { code: 'SOME_CODE', detail: 'boom' }
+
+        await expect(
+            handleApiError(error, {
+                fallbackMessage: 'fallback',
+                httpErrorHandlers: {
+                    SOME_CODE: handler,
+                },
+            })
+        ).rejects.toThrow('handler failed')
+
+        expect(errorSpy).not.toHaveBeenCalled()
+    })
+
     it('shows error detail when no handler matches', async () => {
         const error: ErrorResponse = { code: 'OTHER', detail: 'failure' }
         const options: ApiErrorOptions = { fallbackMessage: 'fallback' }
@@ -127,6 +144,16 @@ describe('handleApiError', () => {
             2,
             'Validation error: missing field'
         )
+    })
+
+    it('does not notify for validation error with empty detail', async () => {
+        const validationError: HttpValidationError = {
+            detail: [],
+        }
+
+        await handleApiError(validationError, { fallbackMessage: 'fallback' })
+
+        expect(errorSpy).not.toHaveBeenCalled()
     })
 
     it('renders fallback message for unknown errors', async () => {

@@ -313,32 +313,13 @@ export function ExercisesTable({
             enableHiding: false,
         },
         {
-            accessorKey: 'description',
-            meta: {
-                headerClassName: 'hidden md:table-cell',
-                cellClassName: 'hidden md:table-cell',
-            },
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Description" />
-            ),
-            cell: ({ row }) =>
-                row.original.description ? (
-                    <DataTableTruncatedCell
-                        value={row.original.description}
-                        className="max-w-100 min-w-25 lg:max-w-150"
-                    />
-                ) : (
-                    '—'
-                ),
-            enableHiding: true,
-        },
-        {
             id: 'muscle_groups',
             meta: { viewLabel: 'Muscle Groups' },
             accessorFn: (row) =>
-                row.muscle_groups
-                    .map((group) => capitalizeWords(group.name))
-                    .join(', '),
+                // used for sorting
+                row.muscle_groups.map((group) => group.name).join(', '),
+            getUniqueValues: (row) =>
+                row.muscle_groups.map((group) => String(group.id)),
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Muscle Groups" />
             ),
@@ -367,10 +348,52 @@ export function ExercisesTable({
                 const rowGroupIds = new Set(
                     row.original.muscle_groups.map((group) => String(group.id))
                 )
-                return filterValues.every((groupId) => rowGroupIds.has(groupId))
+                return filterValues.some((groupId) => rowGroupIds.has(groupId))
             },
             enableHiding: true,
         },
+        {
+            accessorKey: 'description',
+            meta: { hideOnBelowMd: true },
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Description" />
+            ),
+            cell: ({ row }) =>
+                row.original.description ? (
+                    <DataTableTruncatedCell
+                        value={row.original.description}
+                        className="max-w-100 min-w-25 lg:max-w-150"
+                    />
+                ) : (
+                    '—'
+                ),
+            enableHiding: true,
+        },
+        {
+            accessorKey: 'created_at',
+            meta: { hideOnBelowMd: true },
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Created At" />
+            ),
+            cell: ({ row }) =>
+                row.original.user_id !== null
+                    ? new Date(row.original.created_at).toLocaleString()
+                    : '—',
+            enableHiding: true,
+        },
+        {
+            accessorKey: 'updated_at',
+            meta: { hideOnBelowMd: true },
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Updated At" />
+            ),
+            cell: ({ row }) =>
+                row.original.user_id !== null
+                    ? new Date(row.original.updated_at).toLocaleString()
+                    : '—',
+            enableHiding: true,
+        },
+        // virtual column for filtering
         {
             id: 'type',
             meta: { filterOnly: true },
@@ -382,7 +405,6 @@ export function ExercisesTable({
 
     const toolbarConfig: DataTableToolbarConfig = {
         search: {
-            columnId: 'name',
             placeholder: 'Search exercises...',
             value: searchQuery,
             onChange: setSearchQuery,
@@ -420,10 +442,10 @@ export function ExercisesTable({
             <DataTable
                 data={displayedExercises}
                 columns={columns}
+                initialColumnVisibility={{ type: false }}
+                toolbarConfig={toolbarConfig}
                 pageSize={10}
                 isLoading={isLoading}
-                toolbarConfig={toolbarConfig}
-                initialColumnVisibility={{ type: false }}
             />
             <ExerciseFormDialog
                 open={formDialog.isOpen}
