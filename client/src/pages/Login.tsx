@@ -1,7 +1,7 @@
 import { AuthService } from '@/api/generated'
 import { zLoginRequest } from '@/api/generated/zod.gen'
 import { useSession } from '@/auth/session'
-import { Field } from '@/components/forms/Field'
+import { FormField } from '@/components/FormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/overrides/button'
 import {
@@ -90,7 +90,7 @@ export function Login() {
                             void handleSubmit(onSubmit)(e)
                         }}
                     >
-                        <Field
+                        <FormField
                             label="Username or Email"
                             htmlFor="identifier"
                             error={errors.identifier?.message}
@@ -106,8 +106,8 @@ export function Login() {
                                 }
                                 {...register('identifier')}
                             />
-                        </Field>
-                        <Field
+                        </FormField>
+                        <FormField
                             label="Password"
                             htmlFor="password"
                             error={errors.password?.message}
@@ -122,7 +122,7 @@ export function Login() {
                                 }
                                 {...register('password')}
                             />
-                        </Field>
+                        </FormField>
                     </form>
                 </CardContent>
                 <CardFooter className="mt-2 mb-1 flex flex-col gap-3">

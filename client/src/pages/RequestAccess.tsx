@@ -1,6 +1,6 @@
 import { AuthService } from '@/api/generated'
 import { zRequestAccessRequest } from '@/api/generated/zod.gen'
-import { Field } from '@/components/forms/Field'
+import { FormField } from '@/components/FormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/overrides/button'
 import {
@@ -73,7 +73,7 @@ export function RequestAccess() {
                             void handleSubmit(onSubmit)(e)
                         }}
                     >
-                        <Field
+                        <FormField
                             label="First name"
                             htmlFor="first_name"
                             error={errors.first_name?.message}
@@ -89,8 +89,8 @@ export function RequestAccess() {
                                 }
                                 {...register('first_name')}
                             />
-                        </Field>
-                        <Field
+                        </FormField>
+                        <FormField
                             label="Last name"
                             htmlFor="last_name"
                             error={errors.last_name?.message}
@@ -104,8 +104,8 @@ export function RequestAccess() {
                                 }
                                 {...register('last_name')}
                             />
-                        </Field>
-                        <Field
+                        </FormField>
+                        <FormField
                             label="Email"
                             htmlFor="email"
                             error={errors.email?.message}
@@ -120,7 +120,7 @@ export function RequestAccess() {
                                 }
                                 {...register('email')}
                             />
-                        </Field>
+                        </FormField>
                     </form>
                 </CardContent>
                 <CardFooter className="mt-2 mb-1 flex flex-col gap-3">

@@ -11,11 +11,8 @@ export function Mermaid({ code }: { code: string }) {
     const id = useId()
 
     useEffect(() => {
-        if (!ref.current) return
         void mermaid.render(id, code).then(({ svg }) => {
-            if (ref.current) {
-                ref.current.innerHTML = svg
-            }
+            if (ref.current) ref.current.innerHTML = svg
         })
     }, [code, id])
 
