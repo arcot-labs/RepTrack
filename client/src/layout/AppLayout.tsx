@@ -8,6 +8,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/overrides/button'
+import { getEnv } from '@/config/env'
 import { NavItem } from '@/lib/nav'
 import { Menu } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
@@ -19,6 +20,7 @@ const navLinks = [
 
 export function AppLayout() {
     const { user } = useSession()
+    const { IMAGE_TAG: imageTag } = getEnv()
 
     return (
         <div
@@ -83,6 +85,22 @@ export function AppLayout() {
                     <Outlet />
                 </div>
             </main>
+            <footer className="bg-card text-xs text-muted-foreground">
+                <div className="mx-auto flex justify-between p-2">
+                    <div className="flex items-center gap-1">
+                        <span>Built by</span>
+                        <a
+                            className="text-primary underline-offset-4 hover:underline"
+                            href="https://github.com/arcot-labs/RepTrack"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            Aditya
+                        </a>
+                    </div>
+                    <span className="font-mono">v{imageTag}</span>
+                </div>
+            </footer>
         </div>
     )
 }
