@@ -1,3 +1,4 @@
+import { shouldTruncate } from '@/components/data-table/utils'
 import {
     Tooltip,
     TooltipContent,
@@ -22,11 +23,8 @@ export function DataTableTruncatedCell({
     const textRef = useRef<HTMLSpanElement | null>(null)
     const [isTruncated, setIsTruncated] = useState(false)
 
-    const checkTruncation = () => {
-        const textElement = textRef.current
-        if (!textElement) return
-
-        setIsTruncated(textElement.offsetWidth < textElement.scrollWidth)
+    const setTruncation = () => {
+        setIsTruncated(shouldTruncate(textRef.current))
     }
 
     return (
@@ -35,8 +33,8 @@ export function DataTableTruncatedCell({
                 <span
                     ref={textRef}
                     className={cn('block truncate', className)}
-                    onPointerEnter={checkTruncation}
-                    onFocus={checkTruncation}
+                    onPointerEnter={setTruncation}
+                    onFocus={setTruncation}
                 >
                     {value}
                 </span>
