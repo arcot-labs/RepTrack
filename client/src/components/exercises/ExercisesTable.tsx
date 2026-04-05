@@ -316,7 +316,8 @@ export function ExercisesTable({
             id: 'muscle_groups',
             meta: { viewLabel: 'Muscle Groups' },
             accessorFn: (row) =>
-                row.muscle_groups.map((group) => String(group.id)),
+                // used for sorting
+                row.muscle_groups.map((group) => group.name).join(', '),
             getUniqueValues: (row) =>
                 row.muscle_groups.map((group) => String(group.id)),
             header: ({ column }) => (
