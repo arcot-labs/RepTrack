@@ -1,4 +1,4 @@
-import { shouldTruncate } from '@/components/data-table/utils'
+import { isTruncatedText } from '@/components/data-table/utils'
 import {
     Tooltip,
     TooltipContent,
@@ -24,7 +24,7 @@ export function DataTableTruncatedCell({
     const [isTruncated, setIsTruncated] = useState(false)
 
     const setTruncation = () => {
-        setIsTruncated(shouldTruncate(textRef.current))
+        setIsTruncated(isTruncatedText(textRef.current))
     }
 
     return (
