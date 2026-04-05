@@ -125,6 +125,12 @@ export const CreateFeedbackRequestSchema = {
             minLength: 1,
             title: 'Url'
         },
+        build: {
+            type: 'string',
+            maxLength: 32,
+            minLength: 1,
+            title: 'Build'
+        },
         title: {
             type: 'string',
             maxLength: 1000,
@@ -150,6 +156,7 @@ export const CreateFeedbackRequestSchema = {
     required: [
         'type',
         'url',
+        'build',
         'title',
         'description'
     ],

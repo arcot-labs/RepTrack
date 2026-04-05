@@ -14,6 +14,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/overrides/button'
 import { Textarea } from '@/components/ui/textarea'
+import { getEnv } from '@/config/env'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -47,6 +48,7 @@ export function FeedbackFormDialog({ trigger }: FeedbackFormDialogProps) {
         resolver: zodResolver(feedbackFormSchema),
         defaultValues: {
             type: 'feedback',
+            build: getEnv().IMAGE_TAG,
             title: '',
             description: '',
         },

@@ -12,6 +12,7 @@ from ..utilities import HttpMethod, login_admin, make_http_request
 _MOCK_DATA = {
     "type": "feedback",
     "url": "https://example.com/page",
+    "build": "v1",
     "title": "Bug report",
     "description": "The page crashes when clicking submit.",
 }
@@ -66,5 +67,6 @@ async def test_create_feedback_invalid_body(client: AsyncClient, settings: Setti
     body = resp.json()
     assert body["detail"][0]["loc"] == ["body", "type"]
     assert body["detail"][1]["loc"] == ["body", "url"]
-    assert body["detail"][2]["loc"] == ["body", "title"]
-    assert body["detail"][3]["loc"] == ["body", "description"]
+    assert body["detail"][2]["loc"] == ["body", "build"]
+    assert body["detail"][3]["loc"] == ["body", "title"]
+    assert body["detail"][4]["loc"] == ["body", "description"]

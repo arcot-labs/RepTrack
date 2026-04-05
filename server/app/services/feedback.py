@@ -31,6 +31,7 @@ async def create_feedback(
         user_id=user.id,
         type=req.type,
         url=req.url,
+        build=req.build,
         title=req.title,
         description=req.description,
         files=stored_files,

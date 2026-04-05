@@ -52,6 +52,7 @@ class ApiGitHubService(GitHubService):
             f"**ID:** {feedback.id}",
             f"**User ID:** {feedback.user_id}",
             f"**URL:** {feedback.url}",
+            f"**Build:** {feedback.build}",
             "",
             "### Description",
             feedback.description,
