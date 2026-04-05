@@ -67,7 +67,11 @@ function getInitialColumnVisibilityState<TData, TValue>(
     // prevent responsive hiding if view options disabled
     if (!(toolbarConfig?.showViewOptions ?? true)) return baseColumnVisibility
 
-    if (window.matchMedia(MEDIUM_BREAKPOINT_QUERY).matches)
+    if (
+        typeof window === 'undefined' ||
+        typeof window.matchMedia !== 'function' ||
+        window.matchMedia(MEDIUM_BREAKPOINT_QUERY).matches
+    )
         return baseColumnVisibility
 
     const responsiveHiddenColumnIds = getResponsiveHiddenColumnIds(columns)
