@@ -44,13 +44,19 @@ jobs:
               uses: actions/setup-node@v6
               with:
                   node-version: 'lts/*'
-                  cache: 'pnpm'
-                  cache-dependency-path: client/pnpm-lock.yaml
 
             - name: set pnpm config
               run: |
+                  mkdir -p "$PNPM_STORE_DIR"
                   pnpm config set store-dir "$PNPM_STORE_DIR"
                   pnpm config list
+
+            - name: cache pnpm store
+              uses: actions/cache@v4
+              with:
+                  path: ${{ env.PNPM_STORE_DIR }}
+                  key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml', 'client/pnpm-lock.yaml') }}
+                  restore-keys: ${{ runner.os }}-pnpm-
 
             - name: install deps - client
               working-directory: client

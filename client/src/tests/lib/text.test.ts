@@ -8,6 +8,7 @@ describe('capitalizeWords', () => {
         expect(capitalizeWords('already Capitalized')).toBe(
             'Already Capitalized'
         )
+        expect(capitalizeWords('x1 y2')).toBe('X1 Y2')
     })
 })
 
@@ -16,6 +17,7 @@ describe('formatIdentifier', () => {
         expect(formatIdentifier('simpleValue')).toBe('Simple Value')
         expect(formatIdentifier('get_user_by-id')).toBe('Get User By Id')
         expect(formatIdentifier('  trim_me_too  ')).toBe('Trim Me Too')
+        expect(formatIdentifier('version2Value')).toBe('Version2 Value')
     })
 
     it('collapses underscores and hyphens into single spaces before capitalizing', () => {

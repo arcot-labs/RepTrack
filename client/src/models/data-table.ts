@@ -2,7 +2,7 @@ import type { ComponentType } from 'react'
 import type { ZodType } from 'zod'
 
 interface DataTableSearchConfig {
-    columnId: string
+    columnId?: string
     placeholder: string
     className?: string
     // for external search

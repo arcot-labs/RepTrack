@@ -95,6 +95,26 @@ describe('SessionProvider (hook)', () => {
         expect(result.current.user?.username).toBe('fresh-user')
         expect(loggerMocks.info).toHaveBeenCalledTimes(2)
     })
+
+    it('clears session on refresh failure after being authenticated', async () => {
+        const { result } = renderHook(() => useSession(), { wrapper })
+
+        await waitFor(() => {
+            expect(result.current.user).not.toBeNull()
+        })
+
+        server.use(
+            http.get(getCurrentUserUrl, () => unauthorizedResponse.clone())
+        )
+
+        await act(async () => {
+            await result.current.refresh()
+        })
+
+        expect(result.current.user).toBeNull()
+        expect(result.current.isAuthenticated).toBe(false)
+        expect(loggerMocks.info).toHaveBeenCalledTimes(1)
+    })
 })
 
 describe('SessionProvider (UI)', () => {

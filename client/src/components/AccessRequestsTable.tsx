@@ -191,38 +191,6 @@ export function AccessRequestsTable({
 
     const columns: ColumnDef<AccessRequestPublic>[] = [
         {
-            id: 'name',
-            accessorFn: (row) => `${row.first_name} ${row.last_name}`,
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Name" />
-            ),
-            enableHiding: false,
-        },
-        {
-            accessorKey: 'email',
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Email" />
-            ),
-            enableHiding: false,
-        },
-        {
-            accessorKey: 'status',
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Status" />
-            ),
-            cell: ({ row }) => {
-                return (
-                    <div className="-ml-2">
-                        <StatusBadge status={row.original.status} />
-                    </div>
-                )
-            },
-            filterFn: (row, id, value: string[]) => {
-                return value.includes(row.getValue(id))
-            },
-            enableHiding: false,
-        },
-        {
             id: 'actions',
             header: ({ column }) => (
                 <DataTableColumnHeader
@@ -245,16 +213,54 @@ export function AccessRequestsTable({
             enableHiding: false,
         },
         {
+            id: 'name',
+            accessorFn: (row) => `${row.first_name} ${row.last_name}`,
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Name" />
+            ),
+            enableHiding: false,
+        },
+        {
+            accessorKey: 'status',
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Status" />
+            ),
+            cell: ({ row }) => {
+                return (
+                    <div className="-ml-2">
+                        <StatusBadge status={row.original.status} />
+                    </div>
+                )
+            },
+            filterFn: (row, id, value: string[]) => {
+                return value.includes(row.getValue(id))
+            },
+            enableHiding: false,
+        },
+        {
+            accessorKey: 'email',
+            meta: { hideOnBelowMd: true },
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Email" />
+            ),
+            enableHiding: true,
+        },
+        {
+            meta: {
+                hideOnBelowMd: true,
+                viewLabel: 'Reviewed By',
+            },
             accessorKey: 'reviewer.username',
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Reviewed By" />
             ),
             cell: ({ row }) =>
                 row.original.reviewer ? row.original.reviewer.username : '—',
-            enableHiding: false,
+            enableHiding: true,
         },
         {
             accessorKey: 'reviewed_at',
+            meta: { hideOnBelowMd: true },
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Reviewed At" />
             ),
@@ -262,16 +268,27 @@ export function AccessRequestsTable({
                 row.original.reviewed_at
                     ? new Date(row.original.reviewed_at).toLocaleString()
                     : '—',
-            enableHiding: false,
+            enableHiding: true,
+        },
+        {
+            accessorKey: 'created_at',
+            meta: { hideOnBelowMd: true },
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Created At" />
+            ),
+            cell: ({ row }) =>
+                new Date(row.original.created_at).toLocaleString(),
+            enableHiding: true,
         },
         {
             accessorKey: 'updated_at',
+            meta: { hideOnBelowMd: true },
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Updated At" />
             ),
             cell: ({ row }) =>
                 new Date(row.original.updated_at).toLocaleString(),
-            enableHiding: false,
+            enableHiding: true,
         },
     ]
 
@@ -287,7 +304,7 @@ export function AccessRequestsTable({
                 options: getStatusFilterOptions(),
             },
         ],
-        showViewOptions: false,
+        showViewOptions: true,
     }
 
     return (
@@ -295,9 +312,9 @@ export function AccessRequestsTable({
             <DataTable
                 data={requests}
                 columns={columns}
+                toolbarConfig={toolbarConfig}
                 pageSize={5}
                 isLoading={isLoading}
-                toolbarConfig={toolbarConfig}
             />
             <Dialog
                 open={confirmDialog.isOpen}

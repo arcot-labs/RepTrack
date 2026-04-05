@@ -123,6 +123,9 @@ export const columns: ColumnDef<User>[] = [
 // set `meta.filterOnly: true`.
 // Pass its id with `false` via `initialColumnVisibility` on <DataTable>.
 //
+// To hide a column on smaller screens, use the `meta.hideOnBelowMd` property.
+// This only applies when toolbar view options are enabled so users can unhide it.
+//
 // Example:
 //   { id: 'role', meta: { filterOnly: true }, accessorFn: ..., filterFn: ... }
 //   <DataTable ... initialColumnVisibility={{ role: false }} />

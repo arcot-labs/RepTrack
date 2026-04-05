@@ -46,10 +46,11 @@ const columns: ColumnDef<UserPublic>[] = [
     },
     {
         accessorKey: 'email',
+        meta: { hideOnBelowMd: true },
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Email" />
         ),
-        enableHiding: false,
+        enableHiding: true,
     },
     {
         id: 'role',
@@ -70,12 +71,22 @@ const columns: ColumnDef<UserPublic>[] = [
         enableHiding: false,
     },
     {
+        accessorKey: 'created_at',
+        meta: { hideOnBelowMd: true },
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Created At" />
+        ),
+        cell: ({ row }) => new Date(row.original.created_at).toLocaleString(),
+        enableHiding: true,
+    },
+    {
         accessorKey: 'updated_at',
+        meta: { hideOnBelowMd: true },
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Updated At" />
         ),
         cell: ({ row }) => new Date(row.original.updated_at).toLocaleString(),
-        enableHiding: false,
+        enableHiding: true,
     },
 ]
 
@@ -91,7 +102,7 @@ const toolbarConfig: DataTableToolbarConfig = {
             options: getRoleFilterOptions(),
         },
     ],
-    showViewOptions: false,
+    showViewOptions: true,
 }
 
 interface UsersTableProps {
@@ -104,9 +115,9 @@ export function UsersTable({ users, isLoading }: UsersTableProps) {
         <DataTable
             data={users}
             columns={columns}
+            toolbarConfig={toolbarConfig}
             pageSize={5}
             isLoading={isLoading}
-            toolbarConfig={toolbarConfig}
         />
     )
 }
