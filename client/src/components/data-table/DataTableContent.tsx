@@ -7,6 +7,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import { cn } from '@/lib/utils'
 import {
     type Cell,
     flexRender,
@@ -71,8 +72,7 @@ function getCellClassName<TData, TValue>(
         | DataTableColumnMeta
         | undefined
     const isActionsColumn = cell.column.id === 'actions'
-    const paddingClass = isActionsColumn ? 'py-1' : ''
-    return 'h-10 ' + paddingClass + (cellMeta?.cellClassName ?? '')
+    return cn('h-10', isActionsColumn && 'py-1', cellMeta?.cellClassName)
 }
 
 function DataTableHeaderGroups<TData>({
