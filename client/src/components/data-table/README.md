@@ -1,88 +1,172 @@
 # Reusable Data Table Component
 
-A fully reusable data table component built with TanStack Table (React Table v8) and shadcn/ui. This component is designed to handle any type of data with customizable toolbars, filters, search, and row actions.
+A domain-agnostic, fully typed, TanStack Table (React Table v8) wrapper that layers shadcn/ui toolbar controls, pagination, filters, and row actions on top of every slice of data you need to show. It owns the configuration for sorting, filters, selection, responsive column hiding, and loading states so consuming pages never have to duplicate that logic.
 
-## Features
+## Key features
 
-- Fully type-safe with TypeScript generics
-- Configurable toolbar with search, filters, and actions
-- Customizable row actions menu
-- Built-in pagination, sorting, and filtering
-- Column visibility controls
-- Row selection support
-- Responsive design
+- **Full TanStack Table wiring** with sorting, filtering, pagination, faceting, and controlled visibility state.
+- **Toolbar with search, faceted filters, reset, view options, and custom actions.** Search can be wired to either a column filter or an external search hook; filters render badges for selected values and keep counts up to date.
+- **Column-centric helpers** like `DataTableColumnHeader`, `DataTableViewOptions`, and `DataTableTruncatedCell` so each cell/header keeps its behavior declarative.
+- **Row action helpers** that accept a Zod schema to parse/validate row data before calling action handlers, supporting dropdown menus or inline button lists.
+- **Skeleton, pagination, and empty-state handling** that match the rest of the UI kit so pages never render partial tables when loading.
+- **Selection utilities** (e.g., `createSelectColumn`) and responsive column hiding via `meta.hideOnBelowMd`.
 
-## API Reference
+## `<DataTable>` overview
 
-See component files for Props (e.g., `DataTable.tsx`)
+`DataTable<TData, TValue>` is the only component most pages need to import. It renders the toolbar, table body, pagination footer, and loading skeleton automatically.
 
-See `data-table.ts` for config types & interfaces
-
-## Basic Usage
-
-### 1. Define Data Type
-
-```typescript
-import { z } from 'zod'
-
-export const userSchema = z.object({
-    id: z.string(),
-    name: z.string(),
-    email: z.string(),
-    role: z.string(),
-    status: z.string(),
-})
-
-export type User = z.infer<typeof userSchema>
-
-const users: User[] = [
-    {
-        id: '1',
-        name: 'John Doe',
-        email: 'john@example.com',
-        role: 'admin',
-        status: 'active',
-    },
-    // ... more users
-]
+```tsx
+<DataTable
+    data={data}
+    columns={columns}
+    toolbarConfig={toolbarConfig}
+    pageSize={25}
+    isLoading={isLoading}
+/>
 ```
 
-### 2. Define Table Columns
+| Prop                      | Description                                                                                                                                                                                                |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`                    | Array of row data.                                                                                                                                                                                         |
+| `columns`                 | `ColumnDef` array (TanStack Table). Use helpers such as `DataTableColumnHeader`, `DataTableTruncatedCell`, `createSelectColumn`, and the row action components to keep your column definitions consistent. |
+| `initialColumnVisibility` | Optional visibility state. Falls back to responsive defaults that hide columns marked with `meta.hideOnBelowMd` when the viewport is narrower than 768px unless view options have been disabled.           |
+| `edgePaddingConfig`       | Controls which columns receive `pl-4`/`pr-4`; defaults to excluding the `actions` column so buttons align with the border.                                                                                 |
+| `toolbarConfig`           | Optional toolbar configuration (`DataTableToolbarConfig`).                                                                                                                                                 |
+| `pageSize`                | Initial page size (default: 10).                                                                                                                                                                           |
+| `isLoading`               | Toggles `DataTableSkeleton` while still rendering the pagination footer.                                                                                                                                   |
 
-```typescript
+When `toolbarConfig` is provided, the toolbar renders:
+
+- A search box wired to `search.columnId`; attaching `search.onChange`/`search.value` allows you to control the search externally without mutating column filters.
+- The view options trigger (unless `showViewOptions` is `false`) listing every column that can hide.
+- Toolbar actions, displayed inline on larger breakpoints and stacked on mobile.
+- Faceted filter buttons plus a Reset button whenever filters are configured or table state is filtered.
+
+## Column definitions and metadata
+
+Use standard TanStack `ColumnDef` definitions. The helpers in this folder keep column behavior consistent.
+
+- **`DataTableColumnHeader`** renders the dropdown for sorting, clearing, and hiding for sortable/hideable columns.
+- **`DataTableTruncatedCell`** wraps a string in a tooltip and only shows it when the text actually truncates.
+- **`DataTableColumnMeta`** (pass to `columnDef.meta`) supports:
+    - `viewLabel` – overrides the label shown in the view options menu.
+    - `filterOnly` – keeps a column in filters/search logic without showing it in the view menu.
+    - `hideOnBelowMd` – automatically hides the column on screens narrower than 768px when view toggles are enabled.
+    - `headerClassName` / `cellClassName` – custom classes applied after the edge padding calculations.
+
+Other helpers:
+
+- **`createSelectColumn()`** adds the checkbox selection column used by any table that needs multi-row actions.
+- **`DataTableInlineRowActions`** renders inline buttons for action-only menus (does not support separators or radio groups).
+- **`DataTableRowActions`** renders the full dropdown menu used for complex actions.
+
+## `DataTableToolbarConfig`
+
+```ts
+export interface DataTableToolbarConfig {
+    search?: {
+        columnId?: string
+        placeholder: string
+        className?: string
+        value?: string
+        onChange?: (value: string) => void
+        isLoading?: boolean
+    }
+    filters?: Array<{
+        columnId: string
+        title: string
+        options: FilterOption[]
+    }>
+    showViewOptions?: boolean
+    actions?: Array<{
+        label: string
+        onClick: () => void | Promise<void>
+        variant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost'
+        icon?: ComponentType<{ className?: string }>
+    }>
+}
+```
+
+- **Filters** render `DataTableFacetedFilter` popovers that display counts, selected badge chips, and a clear button when filters are active.
+- **Actions** render responsive buttons; large screens show them to the right of the search, smaller screens stack them below the filters.
+- **`search`** defaults to the column filter but can be wired to external state by supplying `value`/`onChange`.
+- **`showViewOptions`** defaults to `true`; disabling it also disables the responsive hiding logic described above.
+
+## Row actions configuration
+
+Row actions are backed by `DataTableRowActionsConfig`.
+
+```ts
+export interface DataTableRowActionsConfig<TData = unknown> {
+    schema: ZodType
+    menuItems: (row: TData) => MenuItemConfig[]
+}
+```
+
+`MenuItemConfig` variants:
+
+- `type: 'action'` – regular dropdown item with optional icon, shortcut, disabled flag, and `onSelect` callback.
+- `type: 'separator'` – renders a divider line.
+- `type: 'radio-group'` – renders a submenu with radio items; selecting one calls `onSelect` with the parsed row.
+
+`DataTableRowActions` (dropdown) and `DataTableInlineRowActions` both parse the row through `schema` before invoking `onSelect`, so your handlers always receive sanitized data.
+
+## Loading, empty, and pagination states
+
+- Setting `isLoading` to `true` renders `DataTableSkeleton`, a five-row placeholder that mirrors the current column count while still displaying the pagination footer.
+- If filtering removes all rows, the table renders a single row with the “No results” message that spans all columns.
+- The pagination footer (`DataTablePagination`) shows page counts, row ranges, selectable page sizes (5, 10, 25, 50), navigation buttons, and—if a selection column exists—the number of rows currently selected in the filtered set.
+
+## Example columns / usage
+
+```tsx
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
+import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
 import { DataTableRowActions } from '@/components/data-table/DataTableRowActions'
-import { Checkbox } from '@/components/ui/checkbox'
+import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncatedCell'
+import { createSelectColumn } from '@/components/data-table/DataTableSelectColumn'
+import type { User } from './types'
+
+const rowActionsConfig = {
+    schema: userSchema,
+    menuItems: (user) => [
+        {
+            type: 'action',
+            label: 'Details',
+            onSelect: (row) => console.log(row),
+        },
+        { type: 'separator' },
+        {
+            type: 'radio-group',
+            label: 'Role',
+            value: user.role,
+            options: [
+                { value: 'admin', label: 'Admin' },
+                { value: 'user', label: 'User' },
+            ],
+            onSelect: (row) => console.log(row),
+        },
+    ],
+}
 
 export const columns: ColumnDef<User>[] = [
-    // selection column
-    {
-        id: 'select',
-        header: ({ table }) => (
-            <Checkbox
-                checked={table.getIsAllPageRowsSelected()}
-                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                aria-label="Select all"
-            />
-        ),
-        cell: ({ row }) => (
-            <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(value) => row.toggleSelected(!!value)}
-                aria-label="Select row"
-            />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-    },
-    // data columns
+    createSelectColumn(),
     {
         accessorKey: 'name',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Name" />
         ),
-        cell: ({ row }) => <div>{row.getValue('name')}</div>,
+        cell: ({ row }) => (
+            <DataTableTruncatedCell
+                value={row.getValue('name')}
+                className="max-w-[120px]"
+            />
+        ),
+        meta: {
+            viewLabel: 'Full name',
+            hideOnBelowMd: true,
+        },
     },
     {
         accessorKey: 'email',
@@ -95,169 +179,20 @@ export const columns: ColumnDef<User>[] = [
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Role" />
         ),
-        filterFn: (row, id, value) => {
-            return value.includes(row.getValue(id))
-        },
+        meta: { filterOnly: true },
     },
-    {
-        accessorKey: 'status',
-        meta: { viewLabel: 'Status' },
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Status" />
-        ),
-        filterFn: (row, id, value) => {
-            return value.includes(row.getValue(id))
-        },
-    },
-    // actions column
     {
         id: 'actions',
-        cell: ({ row }) => <DataTableRowActions row={row} config={userRowActionsConfig} />,
+        cell: ({ row }) => (
+            <DataTableRowActions row={row} config={rowActionsConfig} />
+        ),
     },
 ]
-
-// To customize labels shown in the "View" column toggle menu,
-// set `meta.viewLabel` on each column definition.
-//
-// To use a column purely for filtering (hidden, not in View options),
-// set `meta.filterOnly: true`.
-// Pass its id with `false` via `initialColumnVisibility` on <DataTable>.
-//
-// To hide a column on smaller screens, use the `meta.hideOnBelowMd` property.
-// This only applies when toolbar view options are enabled so users can unhide it.
-//
-// Example:
-//   { id: 'role', meta: { filterOnly: true }, accessorFn: ..., filterFn: ... }
-//   <DataTable ... initialColumnVisibility={{ role: false }} />
 ```
 
-### 3. Configure Toolbar
+Pair this with a `toolbarConfig` that defines search, filters, and toolbar actions, then render `<DataTable>` as described above.
 
-```typescript
-import type { DataTableToolbarConfig } from '@/models/data-table'
-import { Shield, User as UserIcon } from 'lucide-react'
-
-export const userToolbarConfig: DataTableToolbarConfig = {
-    // search configuration
-    search: {
-        columnId: 'name',
-        placeholder: 'Search users...',
-        className: 'h-8 w-[150px] lg:w-[250px]',
-    },
-
-    // filter configurations
-    filters: [
-        {
-            columnId: 'role',
-            title: 'Role',
-            options: [
-                { label: 'Admin', value: 'admin', icon: Shield },
-                { label: 'User', value: 'user', icon: UserIcon },
-            ],
-        },
-        {
-            columnId: 'status',
-            title: 'Status',
-            options: [
-                { label: 'Active', value: 'active' },
-                { label: 'Inactive', value: 'inactive' },
-            ],
-        },
-    ],
-
-    // show column visibility controls
-    showViewOptions: true,
-
-    // toolbar actions
-    actions: [
-        {
-            label: 'Add User',
-            onClick: () => {
-                // handle add user
-                console.log('Add new user')
-            },
-            variant: 'default',
-        },
-    ],
-}
-```
-
-### 4. Configure Row Actions
-
-```typescript
-import type { DataTableRowActionsConfig } from '@/models/data-table'
-
-export const userRowActionsConfig: DataTableRowActionsConfig<User> = {
-    schema: userSchema,
-    menuItems: (user) => [
-        {
-            type: 'action',
-            label: 'View Details',
-            onSelect: (data) => {
-                console.log('View user:', data)
-            },
-        },
-        {
-            type: 'action',
-            label: 'Edit',
-            onSelect: (data) => {
-                console.log('Edit user:', data)
-            },
-        },
-        {
-            type: 'separator',
-            label: '',
-        },
-        {
-            type: 'radio-group',
-            label: 'Change Role',
-            value: user.role,
-            options: [
-                { label: 'Admin', value: 'admin' },
-                { label: 'User', value: 'user' },
-            ],
-            onSelect: (data) => {
-                console.log('Update role:', data)
-            },
-        },
-        {
-            type: 'separator',
-            label: '',
-        },
-        {
-            type: 'action',
-            label: 'Delete',
-            shortcut: '⌘⌫',
-            onSelect: (data) => {
-                console.log('Delete user:', data)
-            },
-        },
-    ],
-}
-```
-
-### 5. Use the DataTable Component
-
-```typescript
-import { DataTable } from '@/components/data-table/DataTable'
-
-export function UsersPage() {
-    return (
-        <div className="space-y-4">
-            <h1 className="text-xl font-bold">Users</h1>
-            <DataTable
-                data={users}
-                columns={columns}
-                toolbarConfig={userToolbarConfig}
-                pageSize={25}
-                isLoading={false}
-            />
-        </div>
-    )
-}
-```
-
-## See Also
+## See also
 
 - [TanStack Table Documentation](https://tanstack.com/table/v8)
 - [shadcn/ui Documentation](https://ui.shadcn.com/)
