@@ -64,8 +64,10 @@ function getInitialColumnVisibilityState<TData, TValue>(
 ): VisibilityState {
     const baseColumnVisibility = initialColumnVisibility ?? {}
 
-    // prevent responsive hiding if view options disabled
-    if (!(toolbarConfig?.showViewOptions ?? true)) return baseColumnVisibility
+    // prevent responsive hiding when toggles unavailable
+    const hasViewOptionsToggleUI =
+        !!toolbarConfig && (toolbarConfig.showViewOptions ?? true)
+    if (!hasViewOptionsToggleUI) return baseColumnVisibility
 
     if (
         typeof window === 'undefined' ||

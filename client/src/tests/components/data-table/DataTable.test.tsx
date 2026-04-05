@@ -188,6 +188,23 @@ describe('DataTable', () => {
         )
     })
 
+    it('does not apply responsive hidden defaults when toolbar config is missing', async () => {
+        matchMediaMock.mockReturnValue({ matches: false })
+
+        await renderDataTable(false, [
+            { accessorKey: 'name', meta: { hideOnBelowMd: true } },
+        ])
+
+        expect(useReactTableMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                state: expect.objectContaining({
+                    columnVisibility: {},
+                }),
+            })
+        )
+    })
+
     it('starts configured columns hidden below md when view options are enabled', async () => {
         matchMediaMock.mockReturnValue({ matches: false })
 
