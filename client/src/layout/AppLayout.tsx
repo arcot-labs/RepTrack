@@ -8,7 +8,6 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/overrides/button'
-import { getEnv } from '@/config/env'
 import { NavItem } from '@/lib/nav'
 import { Menu } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
@@ -20,7 +19,6 @@ const navLinks = [
 
 export function AppLayout() {
     const { user } = useSession()
-    const { IMAGE_TAG: imageTag } = getEnv()
 
     return (
         <div
@@ -86,7 +84,7 @@ export function AppLayout() {
                 </div>
             </main>
             <footer className="bg-card text-xs text-muted-foreground">
-                <div className="mx-auto flex justify-between p-2">
+                <div className="mx-auto flex justify-center p-2">
                     <div className="flex items-center gap-1">
                         <span>Built by</span>
                         <a
@@ -98,7 +96,6 @@ export function AppLayout() {
                             Aditya
                         </a>
                     </div>
-                    <span className="font-mono">v{imageTag}</span>
                 </div>
             </footer>
         </div>
