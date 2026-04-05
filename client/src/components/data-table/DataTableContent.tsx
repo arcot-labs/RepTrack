@@ -70,7 +70,9 @@ function getCellClassName<TData, TValue>(
     const cellMeta = cell.column.columnDef.meta as
         | DataTableColumnMeta
         | undefined
-    return 'h-10 ' + (cellMeta?.cellClassName ?? '')
+    const isActionsColumn = cell.column.id === 'actions'
+    const paddingClass = isActionsColumn ? 'py-1' : ''
+    return 'h-10 ' + paddingClass + (cellMeta?.cellClassName ?? '')
 }
 
 function DataTableHeaderGroups<TData>({
