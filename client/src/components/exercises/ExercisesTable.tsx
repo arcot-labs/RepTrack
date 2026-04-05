@@ -313,26 +313,6 @@ export function ExercisesTable({
             enableHiding: false,
         },
         {
-            accessorKey: 'description',
-            meta: {
-                headerClassName: 'hidden md:table-cell',
-                cellClassName: 'hidden md:table-cell',
-            },
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Description" />
-            ),
-            cell: ({ row }) =>
-                row.original.description ? (
-                    <DataTableTruncatedCell
-                        value={row.original.description}
-                        className="max-w-100 min-w-25 lg:max-w-150"
-                    />
-                ) : (
-                    '—'
-                ),
-            enableHiding: true,
-        },
-        {
             id: 'muscle_groups',
             meta: { viewLabel: 'Muscle Groups' },
             accessorFn: (row) =>
@@ -371,6 +351,48 @@ export function ExercisesTable({
             },
             enableHiding: true,
         },
+        {
+            accessorKey: 'description',
+            meta: { hideOnBelowMd: true },
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Description" />
+            ),
+            cell: ({ row }) =>
+                row.original.description ? (
+                    <DataTableTruncatedCell
+                        value={row.original.description}
+                        className="max-w-100 min-w-25 lg:max-w-150"
+                    />
+                ) : (
+                    '—'
+                ),
+            enableHiding: true,
+        },
+        {
+            accessorKey: 'created_at',
+            meta: { hideOnBelowMd: true },
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Created At" />
+            ),
+            cell: ({ row }) =>
+                row.original.user_id !== null
+                    ? new Date(row.original.created_at).toLocaleString()
+                    : '—',
+            enableHiding: true,
+        },
+        {
+            accessorKey: 'updated_at',
+            meta: { hideOnBelowMd: true },
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Updated At" />
+            ),
+            cell: ({ row }) =>
+                row.original.user_id !== null
+                    ? new Date(row.original.updated_at).toLocaleString()
+                    : '—',
+            enableHiding: true,
+        },
+        // virtual column for filtering
         {
             id: 'type',
             meta: { filterOnly: true },

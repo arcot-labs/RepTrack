@@ -6,8 +6,6 @@ import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/overrides/button'
 import { formatIdentifier } from '@/lib/text'
@@ -15,6 +13,7 @@ import { formatIdentifier } from '@/lib/text'
 export interface DataTableColumnMeta {
     viewLabel?: string
     filterOnly?: boolean
+    hideOnBelowMd?: boolean
     headerClassName?: string
     cellClassName?: string
 }
@@ -43,20 +42,18 @@ export function DataTableViewOptions<TData>({
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-37.5">
-                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
-                <DropdownMenuSeparator />
                 {table
                     .getAllColumns()
-                    .filter(
-                        (column) =>
+                    .filter((column) => {
+                        const meta = column.columnDef.meta as
+                            | DataTableColumnMeta
+                            | undefined
+                        return (
                             typeof column.accessorFn !== 'undefined' &&
                             column.getCanHide() &&
-                            !(
-                                column.columnDef.meta as
-                                    | DataTableColumnMeta
-                                    | undefined
-                            )?.filterOnly
-                    )
+                            !meta?.filterOnly
+                        )
+                    })
                     .map((column) => {
                         const columnLabel = getColumnViewLabel(
                             column.id,

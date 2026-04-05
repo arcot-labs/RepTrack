@@ -5,6 +5,7 @@ import {
 import { DataTablePagination } from '@/components/data-table/DataTablePagination'
 import { DataTableSkeleton } from '@/components/data-table/DataTableSkeleton'
 import { DataTableToolbar } from '@/components/data-table/DataTableToolbar'
+import { type DataTableColumnMeta } from '@/components/data-table/DataTableViewOptions'
 import type { DataTableToolbarConfig } from '@/models/data-table'
 import {
     type ColumnDef,
@@ -31,6 +32,58 @@ interface DataTableProps<TData, TValue> {
     isLoading: boolean
 }
 
+const MEDIUM_BREAKPOINT_QUERY = '(min-width: 768px)'
+
+function getResponsiveHiddenColumnIds<TData, TValue>(
+    columns: ColumnDef<TData, TValue>[]
+): string[] {
+    const hiddenColumnIds = new Set<string>()
+
+    for (const col of columns) {
+        const meta = col.meta as DataTableColumnMeta | undefined
+        if (!meta?.hideOnBelowMd || col.enableHiding === false) continue
+
+        if (typeof col.id === 'string') {
+            hiddenColumnIds.add(col.id)
+            continue
+        }
+        const accessorKey = (col as { accessorKey?: string }).accessorKey
+        if (typeof accessorKey === 'string') {
+            // replace path separator
+            hiddenColumnIds.add(accessorKey.replaceAll('.', '_'))
+        }
+    }
+
+    return [...hiddenColumnIds]
+}
+
+function getInitialColumnVisibilityState<TData, TValue>(
+    columns: ColumnDef<TData, TValue>[],
+    initialColumnVisibility?: VisibilityState,
+    toolbarConfig?: DataTableToolbarConfig
+): VisibilityState {
+    const baseColumnVisibility = initialColumnVisibility ?? {}
+
+    // prevent responsive hiding if view options disabled
+    if (!(toolbarConfig?.showViewOptions ?? true)) return baseColumnVisibility
+
+    if (window.matchMedia(MEDIUM_BREAKPOINT_QUERY).matches)
+        return baseColumnVisibility
+
+    const responsiveHiddenColumnIds = getResponsiveHiddenColumnIds(columns)
+    if (!responsiveHiddenColumnIds.length) return baseColumnVisibility
+
+    const responsiveVisibilityState = Object.fromEntries(
+        responsiveHiddenColumnIds.map((columnId) => [columnId, false])
+    ) as VisibilityState
+
+    // explicit initial visibility takes precedence over responsive defaults
+    return {
+        ...responsiveVisibilityState,
+        ...baseColumnVisibility,
+    }
+}
+
 export function DataTable<TData, TValue>({
     data,
     columns,
@@ -44,8 +97,13 @@ export function DataTable<TData, TValue>({
     isLoading,
 }: DataTableProps<TData, TValue>) {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-    const [columnVisibility, setColumnVisibility] = useState(
-        initialColumnVisibility ?? {}
+    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+        () =>
+            getInitialColumnVisibilityState(
+                columns,
+                initialColumnVisibility,
+                toolbarConfig
+            )
     )
     const [sorting, setSorting] = useState<SortingState>([])
     const [rowSelection, setRowSelection] = useState({})

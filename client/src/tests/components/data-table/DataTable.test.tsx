@@ -1,8 +1,13 @@
 import type { EdgePaddingConfig } from '@/components/data-table/DataTableContent'
 import type { DataTableToolbarConfig } from '@/models/data-table'
 import { getMockProps } from '@/tests/utils'
+import type { ColumnDef } from '@tanstack/react-table'
 import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+const matchMediaMock = vi.fn()
+
+window.matchMedia = matchMediaMock
 
 const useReactTableMock = vi.fn()
 const toolbarMock = vi.fn(() => <div data-testid="mock-toolbar" />)
@@ -32,6 +37,8 @@ vi.mock('@/components/data-table/DataTablePagination', () => ({
 
 const renderDataTable = async (
     isLoading: boolean,
+    columns: ColumnDef<unknown>[] = [],
+    initialColumnVisibility?: Record<string, boolean>,
     edgePaddingConfig?: EdgePaddingConfig,
     toolbarConfig?: DataTableToolbarConfig,
     pageSize?: number
@@ -42,10 +49,11 @@ const renderDataTable = async (
     return render(
         <DataTable
             data={[]}
-            columns={[]}
+            columns={columns}
             edgePaddingConfig={edgePaddingConfig}
             toolbarConfig={toolbarConfig}
             pageSize={pageSize}
+            initialColumnVisibility={initialColumnVisibility}
             isLoading={isLoading}
         />
     )
@@ -55,7 +63,192 @@ describe('DataTable', () => {
     beforeEach(() => {
         vi.resetModules()
         vi.clearAllMocks()
+        matchMediaMock.mockReturnValue({ matches: true })
         useReactTableMock.mockReturnValue({})
+    })
+
+    it('does not hide column with hideOnBelowMd when enableHiding is false', async () => {
+        matchMediaMock.mockReturnValue({ matches: false })
+
+        await renderDataTable(
+            false,
+            [
+                {
+                    accessorKey: 'name',
+                    meta: { hideOnBelowMd: true },
+                    enableHiding: false,
+                },
+            ],
+            undefined,
+            undefined,
+            { showViewOptions: true }
+        )
+
+        expect(useReactTableMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                state: expect.objectContaining({
+                    columnVisibility: {},
+                }),
+            })
+        )
+    })
+
+    it('uses column id for responsive hiding when set', async () => {
+        matchMediaMock.mockReturnValue({ matches: false })
+
+        await renderDataTable(
+            false,
+            [{ id: 'status', meta: { hideOnBelowMd: true } }],
+            undefined,
+            undefined,
+            { showViewOptions: true }
+        )
+
+        expect(useReactTableMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                state: expect.objectContaining({
+                    columnVisibility: { status: false },
+                }),
+            })
+        )
+    })
+
+    it('normalizes nested accessor keys for responsive hidden defaults', async () => {
+        matchMediaMock.mockReturnValue({ matches: false })
+
+        await renderDataTable(
+            false,
+            [
+                {
+                    accessorKey: 'reviewer.username',
+                    meta: { hideOnBelowMd: true },
+                },
+            ],
+            undefined,
+            undefined,
+            { showViewOptions: true }
+        )
+
+        expect(useReactTableMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                state: expect.objectContaining({
+                    columnVisibility: { reviewer_username: false },
+                }),
+            })
+        )
+    })
+
+    it('ignores column with hideOnBelowMd that has no id or accessorKey', async () => {
+        matchMediaMock.mockReturnValue({ matches: false })
+
+        await renderDataTable(
+            false,
+            [
+                {
+                    accessorFn: (row: unknown) => row,
+                    meta: { hideOnBelowMd: true },
+                } as never,
+            ],
+            undefined,
+            undefined,
+            { showViewOptions: true }
+        )
+
+        expect(useReactTableMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                state: expect.objectContaining({
+                    columnVisibility: {},
+                }),
+            })
+        )
+    })
+
+    it('does not apply responsive hidden defaults when view options are disabled', async () => {
+        matchMediaMock.mockReturnValue({ matches: false })
+
+        await renderDataTable(
+            false,
+            [{ accessorKey: 'name', meta: { hideOnBelowMd: true } }],
+            undefined,
+            undefined,
+            { showViewOptions: false }
+        )
+
+        expect(useReactTableMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                state: expect.objectContaining({
+                    columnVisibility: {},
+                }),
+            })
+        )
+    })
+
+    it('starts configured columns hidden below md when view options are enabled', async () => {
+        matchMediaMock.mockReturnValue({ matches: false })
+
+        await renderDataTable(
+            false,
+            [{ accessorKey: 'name', meta: { hideOnBelowMd: true } }],
+            undefined,
+            undefined,
+            { showViewOptions: true }
+        )
+
+        expect(useReactTableMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                state: expect.objectContaining({
+                    columnVisibility: { name: false },
+                }),
+            })
+        )
+    })
+
+    it('returns base visibility below md when no columns have hideOnBelowMd', async () => {
+        matchMediaMock.mockReturnValue({ matches: false })
+
+        await renderDataTable(
+            false,
+            [{ accessorKey: 'name' }],
+            undefined,
+            undefined,
+            { showViewOptions: true }
+        )
+
+        expect(useReactTableMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                state: expect.objectContaining({
+                    columnVisibility: {},
+                }),
+            })
+        )
+    })
+
+    it('maintains precedence of initial visibility over responsive defaults', async () => {
+        matchMediaMock.mockReturnValue({ matches: false })
+
+        await renderDataTable(
+            false,
+            [{ accessorKey: 'name', meta: { hideOnBelowMd: true } }],
+            { name: true },
+            undefined,
+            { showViewOptions: true }
+        )
+
+        expect(useReactTableMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                state: expect.objectContaining({
+                    columnVisibility: { name: true },
+                }),
+            })
+        )
     })
 
     it('does not render toolbar when config is not provided', async () => {
@@ -72,7 +265,7 @@ describe('DataTable', () => {
             },
         }
 
-        await renderDataTable(false, undefined, toolbarConfig)
+        await renderDataTable(false, [], undefined, undefined, toolbarConfig)
 
         expect(screen.getByTestId('mock-toolbar')).toBeInTheDocument()
 
@@ -149,7 +342,7 @@ describe('DataTable', () => {
             lastColumnExcludeIds: ['status'],
         }
 
-        await renderDataTable(false, customConfig)
+        await renderDataTable(false, [], undefined, customConfig)
 
         const contentProps = getMockProps(contentMock)
         expect(contentProps).toMatchObject({
@@ -174,7 +367,7 @@ describe('DataTable', () => {
     })
 
     it('uses provided pageSize', async () => {
-        await renderDataTable(false, undefined, undefined, 25)
+        await renderDataTable(false, [], undefined, undefined, undefined, 25)
 
         expect(useReactTableMock).toHaveBeenCalledWith(
             expect.objectContaining({
