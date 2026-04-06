@@ -190,16 +190,8 @@ export function ExercisesTable({
             if (error) {
                 await handleApiError(error, {
                     httpErrorHandlers: {
-                        exercise_update_not_allowed: async () => {
-                            notify.error(
-                                'You cannot delete this exercise. Reloading data'
-                            )
-                            await onReloadExercises()
-                        },
                         exercise_not_found: async () => {
-                            notify.error(
-                                'Exercise no longer exists. Reloading data'
-                            )
+                            notify.error('Exercise not found. Reloading data')
                             await onReloadExercises()
                         },
                     },
