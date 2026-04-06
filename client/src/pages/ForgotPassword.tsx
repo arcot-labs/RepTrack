@@ -1,6 +1,6 @@
 import { AuthService } from '@/api/generated'
 import { zForgotPasswordRequest } from '@/api/generated/zod.gen'
-import { Field } from '@/components/forms/Field'
+import { FormField } from '@/components/FormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/overrides/button'
 import {
@@ -59,7 +59,7 @@ export function ForgotPassword() {
                             void handleSubmit(onSubmit)(e)
                         }}
                     >
-                        <Field
+                        <FormField
                             label="Email"
                             htmlFor="email"
                             error={errors.email?.message}
@@ -74,7 +74,7 @@ export function ForgotPassword() {
                                 }
                                 {...register('email')}
                             />
-                        </Field>
+                        </FormField>
                     </form>
                 </CardContent>
                 <CardFooter className="mt-2 mb-1 flex flex-col gap-3">

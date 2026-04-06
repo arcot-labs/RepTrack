@@ -1,14 +1,14 @@
 import { Label } from '@/components/ui/label'
 import type { ReactNode } from 'react'
 
-export interface FieldProps {
+export interface FormFieldProps {
     label: string
     htmlFor?: string
     error?: string
     children: ReactNode
 }
 
-export function Field({ label, htmlFor, error, children }: FieldProps) {
+export function FormField({ label, htmlFor, error, children }: FormFieldProps) {
     return (
         <div className="space-y-1">
             <Label htmlFor={htmlFor}>{label}</Label>

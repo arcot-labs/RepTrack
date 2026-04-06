@@ -35,6 +35,7 @@ async def test_create_feedback(
     request = CreateFeedbackRequest(
         type=FeedbackType.feedback,
         url="https://example.com/page",
+        build="v1",
         title="Feedback title",
         description="Feedback description",
         files=[upload_file],
@@ -83,6 +84,7 @@ async def test_create_feedback_no_files(
     request = CreateFeedbackRequest(
         type=FeedbackType.feature,
         url="https://example.com/feature",
+        build="v1",
         title="Feature title",
         description="Feature description",
     )

@@ -9,7 +9,7 @@ import {
     zCreateExerciseRequest,
     zUpdateExerciseRequest,
 } from '@/api/generated/zod.gen'
-import { Field } from '@/components/forms/Field'
+import { FormField } from '@/components/FormField'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
     Dialog,
@@ -124,7 +124,8 @@ export function ExerciseFormDialog({
     const errors = isCreateMode ? createErrors : editErrors
 
     const selectedMuscleGroupIds = isCreateMode
-        ? (watchCreate('muscle_group_ids') ?? [])
+        ? // eslint-disable-next-line react-hooks/incompatible-library
+          (watchCreate('muscle_group_ids') ?? [])
         : (watchEdit('muscle_group_ids') ?? [])
 
     useEffect(() => {
@@ -384,7 +385,7 @@ export function ExerciseFormDialog({
                         else void handleSubmitEdit(onSubmitEditForm)(e)
                     }}
                 >
-                    <Field
+                    <FormField
                         label="Name"
                         htmlFor="exercise-name"
                         error={errors.name?.message}
@@ -403,8 +404,8 @@ export function ExerciseFormDialog({
                                     : registerEdit('name'))}
                             />
                         )}
-                    </Field>
-                    <Field
+                    </FormField>
+                    <FormField
                         label="Description"
                         htmlFor="exercise-description"
                         error={errors.description?.message}
@@ -423,8 +424,8 @@ export function ExerciseFormDialog({
                                     : registerEdit('description'))}
                             />
                         )}
-                    </Field>
-                    <Field
+                    </FormField>
+                    <FormField
                         label="Muscle Groups"
                         error={errors.muscle_group_ids?.message}
                     >
@@ -514,10 +515,10 @@ export function ExerciseFormDialog({
                                 </div>
                             </div>
                         )}
-                    </Field>
+                    </FormField>
                     {exercise?.user_id !== null && !isCreateMode && (
                         <>
-                            <Field label="Created">
+                            <FormField label="Created">
                                 <div className="text-sm text-muted-foreground">
                                     {exercise?.created_at
                                         ? new Date(
@@ -525,8 +526,8 @@ export function ExerciseFormDialog({
                                           ).toLocaleString()
                                         : '—'}
                                 </div>
-                            </Field>
-                            <Field label="Last Updated">
+                            </FormField>
+                            <FormField label="Last Updated">
                                 <div className="text-sm text-muted-foreground">
                                     {exercise?.updated_at
                                         ? new Date(
@@ -534,7 +535,7 @@ export function ExerciseFormDialog({
                                           ).toLocaleString()
                                         : '—'}
                                 </div>
-                            </Field>
+                            </FormField>
                         </>
                     )}
                 </form>

@@ -1,6 +1,6 @@
 import { FeedbackService } from '@/api/generated'
 import { zCreateFeedbackRequest } from '@/api/generated/zod.gen'
-import { Field } from '@/components/forms/Field'
+import { FormField } from '@/components/FormField'
 import {
     Dialog,
     DialogClose,
@@ -14,6 +14,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/overrides/button'
 import { Textarea } from '@/components/ui/textarea'
+import { getEnv } from '@/config/env'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -47,6 +48,7 @@ export function FeedbackFormDialog({ trigger }: FeedbackFormDialogProps) {
         resolver: zodResolver(feedbackFormSchema),
         defaultValues: {
             type: 'feedback',
+            build: getEnv().IMAGE_TAG,
             title: '',
             description: '',
         },
@@ -138,7 +140,7 @@ export function FeedbackFormDialog({ trigger }: FeedbackFormDialogProps) {
                         void handleSubmit(onSubmit)(e)
                     }}
                 >
-                    <Field
+                    <FormField
                         label="Title"
                         htmlFor="title"
                         error={errors.title?.message}
@@ -150,8 +152,8 @@ export function FeedbackFormDialog({ trigger }: FeedbackFormDialogProps) {
                             className={errors.title ? 'border-destructive' : ''}
                             {...register('title')}
                         />
-                    </Field>
-                    <Field
+                    </FormField>
+                    <FormField
                         label="Description"
                         htmlFor="description"
                         error={errors.description?.message}
@@ -170,8 +172,8 @@ export function FeedbackFormDialog({ trigger }: FeedbackFormDialogProps) {
                             {...register('description')}
                             rows={4}
                         />
-                    </Field>
-                    <Field label="Attach files (optional)" htmlFor="files">
+                    </FormField>
+                    <FormField label="Attach files (optional)" htmlFor="files">
                         <Input
                             id="files"
                             type="file"
@@ -186,7 +188,7 @@ export function FeedbackFormDialog({ trigger }: FeedbackFormDialogProps) {
                                 {files.length > 1 ? 's' : ''} selected
                             </p>
                         )}
-                    </Field>
+                    </FormField>
                 </form>
                 <DialogFooter>
                     <DialogClose asChild>

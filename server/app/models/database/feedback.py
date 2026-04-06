@@ -41,6 +41,10 @@ class Feedback(Base):
         TEXT,
         nullable=False,
     )
+    build: Mapped[str] = mapped_column(
+        TEXT,
+        nullable=False,
+    )
     title: Mapped[str] = mapped_column(
         TEXT,
         nullable=False,

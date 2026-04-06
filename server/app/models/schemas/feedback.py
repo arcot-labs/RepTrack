@@ -4,12 +4,18 @@ from fastapi import File, UploadFile
 from pydantic import BaseModel, Field, model_validator
 
 from app.models.enums import FeedbackType
-from app.models.schemas.types import FeedbackDescription, FeedbackTitle, FeedbackUrl
+from app.models.schemas.types import (
+    FeedbackBuild,
+    FeedbackDescription,
+    FeedbackTitle,
+    FeedbackUrl,
+)
 
 
 class CreateFeedbackRequest(BaseModel):
     type: FeedbackType
     url: FeedbackUrl
+    build: FeedbackBuild
     title: FeedbackTitle
     description: FeedbackDescription
     files: list[Annotated[UploadFile, File()]] = Field(default_factory=list[UploadFile])

@@ -9,12 +9,11 @@ export function Doc() {
     const { slug } = useParams()
     const content = slug ? getDoc(slug) : undefined
 
-    if (content === undefined) {
+    if (content === undefined)
         return <div className="text-muted-foreground">Document not found</div>
-    }
-    if (content.length === 0) {
+    if (content.length === 0)
         return <div className="text-muted-foreground">No content</div>
-    }
+
     return (
         <article className="prose max-w-none prose-neutral dark:prose-invert">
             <Markdown
@@ -25,9 +24,8 @@ export function Doc() {
                         const languageRegex = /language-(\w+)/
                         const match = languageRegex.exec(className ?? '')
                         const language = match?.[1]
-                        if (language === 'mermaid') {
+                        if (language === 'mermaid')
                             return <Mermaid code={children as string} />
-                        }
                         return <code className={className}>{children}</code>
                     },
                 }}

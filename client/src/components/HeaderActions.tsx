@@ -1,7 +1,7 @@
 import { AuthService } from '@/api/generated'
 import { useSession } from '@/auth/session'
 import { FeedbackFormDialog } from '@/components/FeedbackFormDialog'
-import { ModeToggle } from '@/components/ModeToggle'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/overrides/button'
 import { notify } from '@/lib/notify'
 import { LogOut, MessageCircle } from 'lucide-react'
@@ -25,7 +25,7 @@ export function HeaderActions() {
     return (
         <>
             <div className="hidden items-center gap-2 md:flex">
-                <ModeToggle />
+                <ThemeToggle />
                 <FeedbackFormDialog trigger={<Button>Feedback</Button>} />
                 <Button
                     variant="destructive"
@@ -35,7 +35,7 @@ export function HeaderActions() {
                 </Button>
             </div>
             <div className="flex items-center justify-end gap-2 py-1 md:hidden">
-                <ModeToggle />
+                <ThemeToggle />
                 <FeedbackFormDialog
                     trigger={
                         <Button size="icon" aria-label="Feedback">

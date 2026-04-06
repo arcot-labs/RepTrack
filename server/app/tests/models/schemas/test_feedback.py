@@ -18,6 +18,7 @@ def test_create_feedback_request():
     request = CreateFeedbackRequest(
         type=FeedbackType.feedback,
         url="https://example.com/page",
+        build="v1",
         title="UI feedback",
         description="Looks great overall",
         files=[small_file],
@@ -38,6 +39,7 @@ def test_create_feedback_request_large_file():
         CreateFeedbackRequest(
             type=FeedbackType.feature,
             url="https://example.com/feature",
+            build="v1",
             title="Feature request",
             description="Please add this feature",
             files=[large_file],
