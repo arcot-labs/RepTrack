@@ -19,10 +19,11 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/overrides/button'
+import { formatNullableDateTime } from '@/lib/datetime'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import { blueText, redText } from '@/lib/styles'
-import { capitalizeWords } from '@/lib/text'
+import { capitalizeWords, dash } from '@/lib/text'
 import type {
     DataTableRowActionsConfig,
     DataTableToolbarConfig,
@@ -280,7 +281,7 @@ export function ExercisesTable({
                         config={rowActionsConfig}
                     />
                 ) : (
-                    <div className="text-center">—</div>
+                    <div className="text-center">{dash}</div>
                 )
             },
             enableHiding: false,
@@ -333,7 +334,7 @@ export function ExercisesTable({
                         </span>
                     </>
                 ) : (
-                    '—'
+                    dash
                 )
             },
             filterFn: (row, _id, filterValues: string[]) => {
@@ -358,7 +359,7 @@ export function ExercisesTable({
                         className="max-w-100 min-w-25 lg:max-w-150"
                     />
                 ) : (
-                    '—'
+                    dash
                 ),
             enableHiding: true,
         },
@@ -370,8 +371,8 @@ export function ExercisesTable({
             ),
             cell: ({ row }) =>
                 row.original.user_id !== null
-                    ? new Date(row.original.created_at).toLocaleString()
-                    : '—',
+                    ? formatNullableDateTime(row.original.created_at)
+                    : dash,
             enableHiding: true,
         },
         {
@@ -382,8 +383,8 @@ export function ExercisesTable({
             ),
             cell: ({ row }) =>
                 row.original.user_id !== null
-                    ? new Date(row.original.updated_at).toLocaleString()
-                    : '—',
+                    ? formatNullableDateTime(row.original.updated_at)
+                    : dash,
             enableHiding: true,
         },
         // virtual column for filtering
@@ -462,9 +463,8 @@ export function ExercisesTable({
             <Dialog
                 open={deleteDialog.isOpen}
                 onOpenChange={(isOpen) => {
-                    if (!isDeleting) {
+                    if (!isDeleting)
                         setDeleteDialog((prev) => ({ ...prev, isOpen }))
-                    }
                 }}
             >
                 <DialogContent aria-describedby={undefined}>

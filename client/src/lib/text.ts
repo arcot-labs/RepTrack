@@ -1,3 +1,10 @@
+export const dash = '—'
+
+export const formatNullableString = (value?: string | null) => {
+    if (!value) return dash
+    return value
+}
+
 export const capitalizeWords = (str: string) =>
     str.replace(/\b\w/g, (char) => char.toUpperCase())
 
