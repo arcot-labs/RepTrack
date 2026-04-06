@@ -58,6 +58,7 @@ export function Exercises() {
     }
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         void loadExercises()
         void loadMuscleGroups()
     }, [])

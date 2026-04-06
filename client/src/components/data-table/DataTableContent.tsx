@@ -1,4 +1,8 @@
-import { type DataTableColumnMeta } from '@/components/data-table/DataTableViewOptions'
+import {
+    getCellClassName,
+    getEdgePaddingClassName,
+    getHeaderClassName,
+} from '@/components/data-table/utils'
 import {
     Table,
     TableBody,
@@ -7,11 +11,8 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { cn } from '@/lib/utils'
 import {
-    type Cell,
     flexRender,
-    type Header,
     type HeaderGroup,
     type Row,
     type Table as TableInstance,
@@ -28,54 +29,7 @@ interface DataTableContentProps<TData> {
     edgePaddingConfig: EdgePaddingConfig
 }
 
-const getEdgePaddingClassName = (
-    idx: number,
-    lastIdx: number,
-    columnId: string,
-    edgePaddingConfig: EdgePaddingConfig,
-    baseClassName?: string
-) => {
-    const paddingClasses = []
-
-    if (
-        idx === 0 &&
-        !edgePaddingConfig.firstColumnExcludeIds.includes(columnId)
-    )
-        paddingClasses.push('pl-4')
-
-    if (
-        idx === lastIdx &&
-        !edgePaddingConfig.lastColumnExcludeIds.includes(columnId)
-    )
-        paddingClasses.push('pr-4')
-
-    if (paddingClasses.length === 0) return baseClassName
-
-    return baseClassName
-        ? `${baseClassName} ${paddingClasses.join(' ')}`
-        : paddingClasses.join(' ')
-}
-
-function getHeaderClassName<TData, TValue>(
-    header: Header<TData, TValue>
-): string | undefined {
-    const headerMeta = header.column.columnDef.meta as
-        | DataTableColumnMeta
-        | undefined
-    return headerMeta?.headerClassName
-}
-
-function getCellClassName<TData, TValue>(
-    cell: Cell<TData, TValue>
-): string | undefined {
-    const cellMeta = cell.column.columnDef.meta as
-        | DataTableColumnMeta
-        | undefined
-    const isActionsColumn = cell.column.id === 'actions'
-    return cn('h-10', isActionsColumn && 'py-1', cellMeta?.cellClassName)
-}
-
-function DataTableHeaderGroups<TData>({
+export function DataTableHeaderGroups<TData>({
     table,
     edgePaddingConfig,
 }: {
@@ -95,7 +49,7 @@ function DataTableHeaderGroups<TData>({
     )
 }
 
-function DataTableHeaderRow<TData>({
+export function DataTableHeaderRow<TData>({
     headerGroup,
     edgePaddingConfig,
 }: {
@@ -128,7 +82,7 @@ function DataTableHeaderRow<TData>({
     )
 }
 
-function DataTableBodyRows<TData>({
+export function DataTableBodyRows<TData>({
     table,
     columnsLength,
     edgePaddingConfig,
@@ -163,7 +117,7 @@ function DataTableBodyRows<TData>({
     )
 }
 
-function DataTableBodyRow<TData>({
+export function DataTableBodyRow<TData>({
     row,
     edgePaddingConfig,
 }: {

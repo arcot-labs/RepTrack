@@ -75,6 +75,7 @@ export const zFeedbackType = z.enum(['feedback', 'feature']);
 export const zCreateFeedbackRequest = z.object({
     type: zFeedbackType,
     url: z.string().min(1).max(1000),
+    build: z.string().min(1).max(32),
     title: z.string().min(1).max(1000),
     description: z.string().min(1).max(10000),
     files: z.array(z.string()).optional()

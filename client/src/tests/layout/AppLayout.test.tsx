@@ -11,8 +11,15 @@ import {
     type MockedFunction,
 } from 'vitest'
 
+const loggerMocks = vi.hoisted(() => ({
+    info: vi.fn(),
+}))
+
 const useSessionMock: MockedFunction<() => SessionContextType> = vi.fn()
 
+vi.mock('@/lib/logger', () => ({
+    logger: loggerMocks,
+}))
 vi.mock('@/auth/session', () => ({
     useSession: () => useSessionMock(),
 }))

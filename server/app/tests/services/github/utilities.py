@@ -57,6 +57,7 @@ def feedback(feedback_type: FeedbackType, with_files: bool) -> Feedback:
         user_id=5,
         type=feedback_type,
         url="https://example.com/page",
+        build="v1",
         title="Title",
         description="Description",
         files=files,

@@ -23,6 +23,7 @@ Email = Annotated[EmailStr, Field(max_length=255)]
 FeedbackUrl = Annotated[str, Field(min_length=1, max_length=1000)]
 FeedbackTitle = Annotated[str, Field(min_length=1, max_length=1000)]
 FeedbackDescription = Annotated[str, Field(min_length=1, max_length=10000)]
+FeedbackBuild = Annotated[str, Field(min_length=1, max_length=32)]
 
 ExerciseName = Annotated[str, StringConstraints(min_length=1, max_length=255)]
 ExerciseDescription = Annotated[str, StringConstraints(max_length=1000)]

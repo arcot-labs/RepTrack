@@ -9,7 +9,6 @@ const { checkboxMock } = vi.hoisted(() => ({
         ({
             checked,
             onCheckedChange,
-            // TODO check if necessary
             'aria-label': ariaLabel,
         }: {
             checked?: boolean | 'indeterminate'

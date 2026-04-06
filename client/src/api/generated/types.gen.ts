@@ -73,6 +73,10 @@ export type CreateFeedbackRequest = {
      */
     url: string;
     /**
+     * Build
+     */
+    build: string;
+    /**
      * Title
      */
     title: string;

@@ -1,6 +1,6 @@
 import { AuthService } from '@/api/generated'
 import { zResetPasswordRequest } from '@/api/generated/zod.gen'
-import { Field } from '@/components/forms/Field'
+import { FormField } from '@/components/FormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/overrides/button'
 import {
@@ -84,7 +84,7 @@ export function ResetPassword() {
                             void handleSubmit(onSubmit)(e)
                         }}
                     >
-                        <Field
+                        <FormField
                             label="Token"
                             htmlFor="token"
                             error={errors.token?.message}
@@ -99,8 +99,8 @@ export function ResetPassword() {
                                 }
                                 {...register('token')}
                             />
-                        </Field>
-                        <Field
+                        </FormField>
+                        <FormField
                             label="New Password"
                             htmlFor="password"
                             error={errors.password?.message}
@@ -115,8 +115,8 @@ export function ResetPassword() {
                                 }
                                 {...register('password')}
                             />
-                        </Field>
-                        <Field
+                        </FormField>
+                        <FormField
                             label="Confirm Password"
                             htmlFor="confirmPassword"
                             error={errors.confirmPassword?.message}
@@ -133,7 +133,7 @@ export function ResetPassword() {
                                 }
                                 {...register('confirmPassword')}
                             />
-                        </Field>
+                        </FormField>
                     </form>
                 </CardContent>
                 <CardFooter className="mt-2 mb-1 flex flex-col gap-3">
