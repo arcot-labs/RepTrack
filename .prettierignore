@@ -1,3 +1,4 @@
+client/coverage/
 client/src/api/generated/
 dist/
 server/.venv/
