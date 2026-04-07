@@ -21,7 +21,7 @@ uv
 watchexec
 ```
 
-Start containers:
+Start containers (default containerized client/server):
 
 ```bash
 ./scripts/dev.sh
