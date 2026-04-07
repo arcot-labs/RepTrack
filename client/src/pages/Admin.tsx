@@ -66,7 +66,6 @@ export function Admin() {
     }
 
     useEffect(() => {
-         
         void loadAccessRequests()
         void loadUsers()
     }, [])

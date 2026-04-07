@@ -23,7 +23,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
 
     useEffect(() => {
-         
         void loadSession()
     }, [])
 

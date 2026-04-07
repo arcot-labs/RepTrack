@@ -58,7 +58,6 @@ export function Exercises() {
     }
 
     useEffect(() => {
-         
         void loadExercises()
         void loadMuscleGroups()
     }, [])
