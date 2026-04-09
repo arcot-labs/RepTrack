@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.set import Set
@@ -8,7 +10,7 @@ async def create_set(
     workout_exercise_id: int,
     set_number: int,
     reps: int | None = None,
-    weight: float | None = None,
+    weight: Decimal | None = None,
     unit: str | None = None,
     notes: str | None = None,
 ) -> Set:

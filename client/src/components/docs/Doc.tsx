@@ -15,7 +15,7 @@ export function Doc() {
         return <div className="text-muted-foreground">No content</div>
 
     return (
-        <article className="prose max-w-none prose-neutral dark:prose-invert">
+        <article className="prose max-w-none prose-neutral dark:prose-invert prose-code:font-normal prose-code:before:content-none prose-code:after:content-none">
             <Markdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeHighlight]}

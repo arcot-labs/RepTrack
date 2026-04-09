@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from fastapi import status
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -23,7 +25,7 @@ async def _make_request(
     workout_exercise_id: int,
     set_id: int,
     reps: int | None = None,
-    weight: float | None = None,
+    weight: Decimal | None = None,
     unit: str | None = None,
     notes: str | None = None,
 ):
@@ -33,7 +35,7 @@ async def _make_request(
         endpoint=f"/api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets/{set_id}",
         json={
             "reps": reps,
-            "weight": weight,
+            "weight": float(weight) if weight is not None else None,
             "unit": unit,
             "notes": notes,
         },
@@ -69,7 +71,7 @@ async def test_update_set(
         workout_exercise_id=workout_exercise.id,
         set_id=set_.id,
         reps=10,
-        weight=100,
+        weight=Decimal(100),
         unit="lb",
         notes="Updated notes",
     )

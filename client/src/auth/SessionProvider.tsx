@@ -30,7 +30,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         <SessionContext.Provider
             value={{
                 user,
-                isLoading: isLoading,
+                isLoading,
                 isAuthenticated: user !== null,
                 refresh: loadSession,
             }}

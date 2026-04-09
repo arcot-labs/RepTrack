@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 
 from pydantic import BaseModel
 
@@ -11,7 +12,7 @@ class SetPublic(BaseModel):
     workout_exercise_id: int
     set_number: int
     reps: int | None
-    weight: float | None
+    weight: Decimal | None
     unit: str | None
     notes: str | None
     created_at: datetime

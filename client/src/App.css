@@ -1,0 +1,5 @@
+.prose pre:has(.mermaid),
+.prose pre:has(svg) {
+    background-color: transparent;
+    border: 3px solid var(--border);
+}

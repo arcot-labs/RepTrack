@@ -66,4 +66,53 @@ describe('Mermaid', () => {
 
         expect(renderMock).toHaveBeenCalled()
     })
+
+    it('clears container when render fails', async () => {
+        renderMock.mockImplementationOnce(() => {
+            return new Promise((_resolve, reject) => {
+                reject(new Error('render failed'))
+            })
+        })
+
+        const { container } = render(<Mermaid code="graph TD; A-->B;" />)
+        const diagram = container.querySelector<HTMLDivElement>('.my-4')
+
+        expect(diagram).not.toBeNull()
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        diagram!.innerHTML = 'should be reset'
+
+        const renderPromise = renderMock.mock.results[0]
+            ?.value as Promise<unknown>
+        await expect(renderPromise).rejects.toThrow('render failed')
+        await waitFor(() => {
+            expect(diagram?.innerHTML).toBe('')
+        })
+    })
+
+    it('does not write innerHTML after unmounting while render fails', async () => {
+        renderMock.mockImplementationOnce(() => {
+            return new Promise((_resolve, reject) => {
+                reject(new Error('render failed'))
+            })
+        })
+
+        const { unmount, container } = render(
+            <Mermaid code="graph TD; A-->B;" />
+        )
+        const diagram = container.querySelector<HTMLDivElement>('.my-4')
+
+        expect(diagram).not.toBeNull()
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        diagram!.innerHTML = 'should remain'
+
+        unmount()
+
+        await waitFor(() => {
+            expect(renderMock).toHaveBeenCalled()
+        })
+
+        await waitFor(() => {
+            expect(diagram?.innerHTML).toBe('should remain')
+        })
+    })
 })

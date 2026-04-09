@@ -34,7 +34,7 @@ async def test_update_set(db_session: AsyncSession):
         workout_exercise_id=workout_exercise.id,
         set_number=1,
         reps=10,
-        weight=100,
+        weight=Decimal(100),
         unit="lb",
         notes="First set",
     )
@@ -127,7 +127,7 @@ async def test_update_set_no_changes(db_session: AsyncSession):
         workout_exercise_id=workout_exercise.id,
         set_number=1,
         reps=10,
-        weight=100,
+        weight=Decimal(100),
         unit="lb",
         notes="First set",
     )
@@ -165,7 +165,7 @@ async def test_update_set_no_reps(db_session: AsyncSession):
         workout_exercise_id=workout_exercise.id,
         set_number=1,
         reps=10,
-        weight=100,
+        weight=Decimal(100),
         unit="lb",
         notes="First set",
     )
@@ -207,7 +207,7 @@ async def test_update_set_no_weight(db_session: AsyncSession):
         workout_exercise_id=workout_exercise.id,
         set_number=1,
         reps=10,
-        weight=100,
+        weight=Decimal(100),
         unit="lb",
         notes="First set",
     )
@@ -249,7 +249,7 @@ async def test_update_set_no_unit(db_session: AsyncSession):
         workout_exercise_id=workout_exercise.id,
         set_number=1,
         reps=10,
-        weight=100,
+        weight=Decimal(100),
         unit="lb",
         notes="First set",
     )
@@ -291,7 +291,7 @@ async def test_update_set_no_notes(db_session: AsyncSession):
         workout_exercise_id=workout_exercise.id,
         set_number=1,
         reps=10,
-        weight=100,
+        weight=Decimal(100),
         unit="lb",
         notes="First set",
     )
@@ -333,7 +333,7 @@ async def test_update_set_null_values(db_session: AsyncSession):
         workout_exercise_id=workout_exercise.id,
         set_number=1,
         reps=10,
-        weight=100,
+        weight=Decimal(100),
         unit="lb",
         notes="First set",
     )

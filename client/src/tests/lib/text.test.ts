@@ -1,5 +1,21 @@
-import { capitalizeWords, formatIdentifier } from '@/lib/text'
+import {
+    capitalizeWords,
+    dash,
+    formatIdentifier,
+    formatNullableString,
+} from '@/lib/text'
 import { describe, expect, it } from 'vitest'
+
+describe('formatNullableString', () => {
+    it('returns provided string when present', () => {
+        expect(formatNullableString('value')).toBe('value')
+    })
+
+    it('returns dash placeholder for nullish values', () => {
+        expect(formatNullableString()).toBe(dash)
+        expect(formatNullableString(null)).toBe(dash)
+    })
+})
 
 describe('capitalizeWords', () => {
     it('uppercases each word boundary', () => {

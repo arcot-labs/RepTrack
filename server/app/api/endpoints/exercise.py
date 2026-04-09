@@ -80,7 +80,6 @@ async def get_exercise_endpoint(
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
         status.HTTP_401_UNAUTHORIZED: ErrorResponseModel,
-        status.HTTP_403_FORBIDDEN: ErrorResponseModel,
         status.HTTP_404_NOT_FOUND: ErrorResponseModel,
         status.HTTP_409_CONFLICT: ErrorResponseModel,
     },
@@ -101,7 +100,6 @@ async def update_exercise_endpoint(
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
         status.HTTP_401_UNAUTHORIZED: ErrorResponseModel,
-        status.HTTP_403_FORBIDDEN: ErrorResponseModel,
         status.HTTP_404_NOT_FOUND: ErrorResponseModel,
     },
 )

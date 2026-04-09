@@ -6,6 +6,8 @@ updates:
       schedule:
           interval: 'weekly'
           day: 'monday'
+      cooldown:
+          default-days: 1
       ignore:
           - dependency-name: '*'
             update-types: ['version-update:semver-major']
@@ -22,6 +24,8 @@ updates:
       schedule:
           interval: 'weekly'
           day: 'monday'
+      cooldown:
+          default-days: 1
       ignore:
           - dependency-name: '*'
             update-types: ['version-update:semver-major']
@@ -38,6 +42,8 @@ updates:
       schedule:
           interval: 'weekly'
           day: 'monday'
+      cooldown:
+          default-days: 1
       ignore:
           - dependency-name: '*'
             update-types: ['version-update:semver-major']
@@ -54,6 +60,8 @@ updates:
       schedule:
           interval: 'weekly'
           day: 'monday'
+      cooldown:
+          default-days: 1
       groups:
           client-docker:
               patterns:
@@ -67,6 +75,8 @@ updates:
       schedule:
           interval: 'weekly'
           day: 'monday'
+      cooldown:
+          default-days: 1
       groups:
           server-docker:
               patterns:
@@ -80,6 +90,8 @@ updates:
       schedule:
           interval: 'weekly'
           day: 'monday'
+      cooldown:
+          default-days: 1
       groups:
           github-actions:
               patterns:

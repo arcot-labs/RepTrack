@@ -47,8 +47,7 @@ export function configureApiClient() {
             if (!originalRequest) return Promise.reject(error)
 
             logger.debug(
-                // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                `API error response: ${originalRequest.url}`,
+                `API error response: ${String(originalRequest.url)}`,
                 error.response
             )
 

@@ -31,7 +31,7 @@ vi.mock('@/auth/session', () => ({
 vi.mock('@/components/ThemeToggle', () => ({
     ThemeToggle: () => <div data-testid="mock-theme-toggle" />,
 }))
-vi.mock('@/components/FeedbackFormDialog', () => ({
+vi.mock('@/components/feedback/FeedbackFormDialog', () => ({
     FeedbackFormDialog: ({ trigger }: { trigger: ReactElement }) => (
         <div data-testid="mock-feedback-dialog">{trigger}</div>
     ),
