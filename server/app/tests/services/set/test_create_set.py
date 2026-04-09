@@ -41,7 +41,7 @@ async def test_create_set(db_session: AsyncSession):
         user_id=user.id,
         req=CreateSetRequest(
             reps=10,
-            weight=Decimal(100),
+            weight=Decimal("100"),
             unit=SetUnit.lb,
             notes="Test set",
         ),
@@ -58,7 +58,7 @@ async def test_create_set(db_session: AsyncSession):
     assert set_.workout_exercise_id == workout_exercise.id
     assert set_.set_number == 1
     assert set_.reps == 10
-    assert set_.weight == 100.0
+    assert set_.weight == Decimal("100")
     assert set_.unit == "lb"
     assert set_.notes == "Test set"
 
