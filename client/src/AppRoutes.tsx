@@ -12,6 +12,7 @@ import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
 import { RequestAccess } from '@/pages/RequestAccess'
 import { ResetPassword } from '@/pages/ResetPassword'
+import { Workouts } from '@/pages/Workouts'
 import { Navigate, Route, Routes } from 'react-router-dom'
 
 export function AppRoutes() {
@@ -27,6 +28,7 @@ export function AppRoutes() {
             >
                 <Route index element={<Dashboard />} />
                 <Route path="exercises" element={<Exercises />} />
+                <Route path="workouts" element={<Workouts />} />
                 <Route path="docs" element={<Docs />}>
                     <Route index element={<DocsIndex />} />
                     <Route path=":slug" element={<Doc />} />

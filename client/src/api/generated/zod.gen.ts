@@ -198,7 +198,7 @@ export const zSetPublic = z.object({
     workout_exercise_id: z.int(),
     set_number: z.int(),
     reps: z.int().nullable(),
-    weight: z.number().nullable(),
+    weight: z.string().regex(/^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$/).nullable(),
     unit: z.string().nullable(),
     notes: z.string().nullable(),
     created_at: z.iso.datetime(),

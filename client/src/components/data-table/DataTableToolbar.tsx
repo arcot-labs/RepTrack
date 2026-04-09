@@ -30,7 +30,7 @@ export function DataTableToolbar<TData>({
     return (
         <div className="space-y-2">
             {/* search bar, view options, & actions (large screens) */}
-            <div className="flex items-center">
+            <div className="mb-0 flex items-center">
                 <div className="min-w-0 flex-1">
                     {config.search && (
                         <div className="relative">
@@ -82,7 +82,7 @@ export function DataTableToolbar<TData>({
 
             {/* filters & reset */}
             {hasSecondaryControls && (
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="mt-2 mb-0 flex flex-wrap items-center gap-2">
                     {config.filters?.map((filter) => {
                         const column = table.getColumn(filter.columnId)
                         return column ? (
@@ -110,19 +110,21 @@ export function DataTableToolbar<TData>({
             )}
 
             {/* actions (small screens) */}
-            <div className="flex gap-2 sm:hidden">
-                {config.actions?.map((action, index) => (
-                    <Button
-                        key={index}
-                        size="sm"
-                        variant={action.variant ?? 'default'}
-                        onClick={() => void action.onClick()}
-                    >
-                        {action.icon && <action.icon className="size-4" />}
-                        {action.label}
-                    </Button>
-                ))}
-            </div>
+            {config.actions && (
+                <div className="mt-2 flex gap-2 sm:hidden">
+                    {config.actions.map((action, index) => (
+                        <Button
+                            key={index}
+                            size="sm"
+                            variant={action.variant ?? 'default'}
+                            onClick={() => void action.onClick()}
+                        >
+                            {action.icon && <action.icon className="size-4" />}
+                            {action.label}
+                        </Button>
+                    ))}
+                </div>
+            )}
         </div>
     )
 }

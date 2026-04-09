@@ -6,25 +6,53 @@
 
 ## Development
 
-Copy `.env.example` to `.env` & populate variables
+### Prerequisites
+
+Copy the template and populate the environment variables:
 
 ```bash
 cp config/env/.env.example config/env/.env
 ```
 
-Install dependencies:
+Install the required utilities using `brew`:
+
+- `docker` (container runtime)
+- `watchexec` (file watcher for API regeneration)
+- `gnu-getopt` (for parsing GNU-style flags)
+- `uv` (Python dependency manager)
+- `pnpm` (JavaScript package manager)
+
+### Running the development environment
+
+`./scripts/dev.sh` orchestrates infrastructure + optional client/server processes. By default it:
+
+- verifies the `.env` file exists under `config/env`
+- installs backend dependencies via `uv sync` and frontend dependencies via `pnpm i`
+- runs `watchexec` on `server/app` to regenerate the OpenAPI spec + client whenever Python files change
+- starts Docker Compose for the required infrastructure services while watching for termination
+
+Options you can pass:
+
+- `--skip-install-deps` – skip `uv sync` / `pnpm i` (useful when dependencies already installed)
+- `--mode docker` (default) – run client and server containers along with infrastructure services
+- `--mode local` – only runs infrastructure containers, but runs `make dev` and `pnpm run dev` directly on your host
+- `--mode none` or `-n` – only runs infrastructure containers (no client/server)
+
+For example, to keep your host client/server running directly while still using the infra containers:
 
 ```bash
-envsubst
-pnpm
-uv
-watchexec
+./scripts/dev.sh --mode local
 ```
 
-Start containers:
+`dev.sh` traps SIGINT/TERM and tears down running `compose`, `watchexec`, and local processes automatically.
+
+## Regenerating the API spec & client
+
+`scripts/generate_api.sh` dumps the FastAPI OpenAPI spec, copies it to `config/openapi_spec.json`, and runs `pnpm run generate-api` in `client`. It skips client generation when the spec is unchanged unless you force it.
 
 ```bash
-./scripts/dev.sh
+./scripts/generate_api.sh        # regenerate when FastAPI changes
+./scripts/generate_api.sh -f     # force regeneration even if the spec already matches
 ```
 
 ## Testing GitHub Actions Workflows

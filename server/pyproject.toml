@@ -33,6 +33,9 @@ dev = [
     "types-pyjwt>=1.7.1",
 ]
 
+[tool.uv]
+exclude-newer = "1 day"
+
 [tool.pyright]
 typeCheckingMode = "strict"
 

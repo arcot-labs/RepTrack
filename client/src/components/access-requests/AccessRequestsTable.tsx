@@ -18,6 +18,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/overrides/button'
+import { formatNullableDateTime } from '@/lib/datetime'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import {
@@ -28,6 +29,7 @@ import {
     lightRedBackground,
     redText,
 } from '@/lib/styles'
+import { dash, formatNullableString } from '@/lib/text'
 import type {
     DataTableRowActionsConfig,
     DataTableToolbarConfig,
@@ -73,7 +75,7 @@ export function AccessRequestsTable({
     onReloadRequests,
 }: AccessRequestsTableProps) {
     const { user } = useSession()
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
+     
     const [isLoadingRequestIds, setIsLoadingRequestIds] = useState<Set<number>>(
         new Set()
     )
@@ -207,7 +209,7 @@ export function AccessRequestsTable({
                         config={rowActionsConfig}
                     />
                 ) : (
-                    <div className="text-center">—</div>
+                    <div className="text-center">{dash}</div>
                 )
             },
             enableHiding: false,
@@ -255,7 +257,7 @@ export function AccessRequestsTable({
                 <DataTableColumnHeader column={column} title="Reviewed By" />
             ),
             cell: ({ row }) =>
-                row.original.reviewer ? row.original.reviewer.username : '—',
+                formatNullableString(row.original.reviewer?.username),
             enableHiding: true,
         },
         {
@@ -264,10 +266,7 @@ export function AccessRequestsTable({
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Reviewed At" />
             ),
-            cell: ({ row }) =>
-                row.original.reviewed_at
-                    ? new Date(row.original.reviewed_at).toLocaleString()
-                    : '—',
+            cell: ({ row }) => formatNullableDateTime(row.original.reviewed_at),
             enableHiding: true,
         },
         {

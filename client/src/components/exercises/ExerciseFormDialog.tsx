@@ -23,9 +23,10 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/overrides/button'
 import { Spinner } from '@/components/ui/spinner'
+import { formatNullableDateTime } from '@/lib/datetime'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
-import { capitalizeWords } from '@/lib/text'
+import { capitalizeWords, dash, formatNullableString } from '@/lib/text'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -124,8 +125,7 @@ export function ExerciseFormDialog({
     const errors = isCreateMode ? createErrors : editErrors
 
     const selectedMuscleGroupIds = isCreateMode
-        ? // eslint-disable-next-line react-hooks/incompatible-library
-          (watchCreate('muscle_group_ids') ?? [])
+        ? (watchCreate('muscle_group_ids') ?? [])
         : (watchEdit('muscle_group_ids') ?? [])
 
     useEffect(() => {
@@ -392,7 +392,9 @@ export function ExerciseFormDialog({
                     >
                         {isViewMode ? (
                             <div className="text-sm text-muted-foreground">
-                                {capitalizeWords(exercise?.name ?? '—')}
+                                {capitalizeWords(
+                                    formatNullableString(exercise?.name)
+                                )}
                             </div>
                         ) : (
                             <Input
@@ -412,7 +414,7 @@ export function ExerciseFormDialog({
                     >
                         {isViewMode ? (
                             <div className="text-sm text-muted-foreground">
-                                {exercise?.description ?? '—'}
+                                {formatNullableString(exercise?.description)}
                             </div>
                         ) : (
                             <Input
@@ -450,7 +452,7 @@ export function ExerciseFormDialog({
                                 </div>
                             ) : (
                                 <span className="text-sm text-muted-foreground">
-                                    —
+                                    {dash}
                                 </span>
                             )
                         ) : (
@@ -520,20 +522,16 @@ export function ExerciseFormDialog({
                         <>
                             <FormField label="Created">
                                 <div className="text-sm text-muted-foreground">
-                                    {exercise?.created_at
-                                        ? new Date(
-                                              exercise.created_at
-                                          ).toLocaleString()
-                                        : '—'}
+                                    {formatNullableDateTime(
+                                        exercise?.created_at
+                                    )}
                                 </div>
                             </FormField>
                             <FormField label="Last Updated">
                                 <div className="text-sm text-muted-foreground">
-                                    {exercise?.updated_at
-                                        ? new Date(
-                                              exercise.updated_at
-                                          ).toLocaleString()
-                                        : '—'}
+                                    {formatNullableDateTime(
+                                        exercise?.updated_at
+                                    )}
                                 </div>
                             </FormField>
                         </>

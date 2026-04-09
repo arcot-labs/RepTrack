@@ -411,7 +411,7 @@ export type SetPublic = {
     /**
      * Weight
      */
-    weight: number | null;
+    weight: string | null;
     /**
      * Unit
      */
@@ -1092,10 +1092,6 @@ export type DeleteExerciseErrors = {
      */
     401: ErrorResponse;
     /**
-     * Forbidden
-     */
-    403: ErrorResponse;
-    /**
      * Not Found
      */
     404: ErrorResponse;
@@ -1171,10 +1167,6 @@ export type UpdateExerciseErrors = {
      * Unauthorized
      */
     401: ErrorResponse;
-    /**
-     * Forbidden
-     */
-    403: ErrorResponse;
     /**
      * Not Found
      */

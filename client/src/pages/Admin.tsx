@@ -4,14 +4,14 @@ import {
     type UserPublic,
     UserService,
 } from '@/api/generated'
-import { AccessRequestsTable } from '@/components/AccessRequestsTable'
+import { AccessRequestsTable } from '@/components/access-requests/AccessRequestsTable'
 import {
     Card,
     CardContent,
     CardHeader,
     CardTitle,
 } from '@/components/ui/overrides/card'
-import { UsersTable } from '@/components/UsersTable'
+import { UsersTable } from '@/components/users/UsersTable'
 import { handleApiError } from '@/lib/http'
 import { logger } from '@/lib/logger'
 import { useEffect, useState } from 'react'
@@ -66,7 +66,6 @@ export function Admin() {
     }
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         void loadAccessRequests()
         void loadUsers()
     }, [])
