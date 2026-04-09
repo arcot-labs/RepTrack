@@ -16,10 +16,11 @@ cp config/env/.env.example config/env/.env
 
 Install the required utilities using `brew`:
 
+- `docker` (container runtime)
+- `watchexec` (file watcher for API regeneration)
 - `gnu-getopt` (for parsing GNU-style flags)
 - `uv` (Python dependency manager)
 - `pnpm` (JavaScript package manager)
-- `watchexec` (file watcher for API regeneration)
 
 ### Running the development environment
 

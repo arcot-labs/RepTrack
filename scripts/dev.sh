@@ -9,6 +9,7 @@ require_command() {
 }
 
 require_command watchexec
+require_command docker
 require_command brew
 
 GNU_GETOPT="$(brew --prefix gnu-getopt)/bin/getopt"
