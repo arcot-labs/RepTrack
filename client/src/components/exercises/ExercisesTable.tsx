@@ -100,7 +100,6 @@ export function ExercisesTable({
     useEffect(() => {
         if (!debouncedSearchQuery) {
             searchRequestIdRef.current += 1
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             setSearchResults(null)
             setIsSearching(false)
             return

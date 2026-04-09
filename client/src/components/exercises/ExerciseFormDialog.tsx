@@ -125,8 +125,7 @@ export function ExerciseFormDialog({
     const errors = isCreateMode ? createErrors : editErrors
 
     const selectedMuscleGroupIds = isCreateMode
-        ? // eslint-disable-next-line react-hooks/incompatible-library
-          (watchCreate('muscle_group_ids') ?? [])
+        ? (watchCreate('muscle_group_ids') ?? [])
         : (watchEdit('muscle_group_ids') ?? [])
 
     useEffect(() => {

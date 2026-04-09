@@ -23,7 +23,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         void loadSession()
     }, [])
 
@@ -31,7 +30,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         <SessionContext.Provider
             value={{
                 user,
-                isLoading: isLoading,
+                isLoading,
                 isAuthenticated: user !== null,
                 refresh: loadSession,
             }}
