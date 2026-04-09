@@ -65,7 +65,7 @@ export function ExercisesTable({
     const searchRequestIdRef = useRef(0)
 
     const [isLoadingExerciseIds, setIsLoadingExerciseIds] = useState<
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
+         
         Set<number>
     >(new Set())
     const [isDeleting, setIsDeleting] = useState(false)
