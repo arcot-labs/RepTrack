@@ -70,7 +70,7 @@ async def test_create_set(
         workout_id=workout.id,
         workout_exercise_id=workout_exercise.id,
         reps=10,
-        weight=Decimal("100"),
+        weight=Decimal(100),
         unit="lb",
         notes="Test notes",
     )
@@ -224,7 +224,7 @@ async def test_create_set_number_conflict(
         workout_id=workout.id,
         workout_exercise_id=workout_exercise.id,
         reps=5,
-        weight=Decimal("100"),
+        weight=Decimal(100),
         unit="lb",
     )
 

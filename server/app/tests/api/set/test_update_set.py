@@ -71,7 +71,7 @@ async def test_update_set(
         workout_exercise_id=workout_exercise.id,
         set_id=set_.id,
         reps=10,
-        weight=Decimal("100"),
+        weight=Decimal(100),
         unit="lb",
         notes="Updated notes",
     )
