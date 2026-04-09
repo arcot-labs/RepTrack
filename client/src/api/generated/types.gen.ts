@@ -411,7 +411,7 @@ export type SetPublic = {
     /**
      * Weight
      */
-    weight: number | null;
+    weight: string | null;
     /**
      * Unit
      */

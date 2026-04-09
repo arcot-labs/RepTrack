@@ -726,7 +726,8 @@ export const SetPublicSchema = {
         weight: {
             anyOf: [
                 {
-                    type: 'number'
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
                 },
                 {
                     type: 'null'

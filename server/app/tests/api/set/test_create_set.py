@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from fastapi import status
 from httpx import AsyncClient
 from pytest import MonkeyPatch
@@ -28,7 +30,7 @@ async def _make_request(
     workout_id: int,
     workout_exercise_id: int,
     reps: int | None = None,
-    weight: float | None = None,
+    weight: Decimal | None = None,
     unit: str | None = None,
     notes: str | None = None,
 ):
@@ -38,7 +40,7 @@ async def _make_request(
         endpoint=f"/api/workouts/{workout_id}/exercises/{workout_exercise_id}/sets",
         json={
             "reps": reps,
-            "weight": weight,
+            "weight": float(weight) if weight is not None else None,
             "unit": unit,
             "notes": notes,
         },
@@ -68,7 +70,7 @@ async def test_create_set(
         workout_id=workout.id,
         workout_exercise_id=workout_exercise.id,
         reps=10,
-        weight=100,
+        weight=Decimal("100"),
         unit="lb",
         notes="Test notes",
     )
@@ -222,7 +224,7 @@ async def test_create_set_number_conflict(
         workout_id=workout.id,
         workout_exercise_id=workout_exercise.id,
         reps=5,
-        weight=100,
+        weight=Decimal("100"),
         unit="lb",
     )
 
