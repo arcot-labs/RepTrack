@@ -40,6 +40,15 @@ async def get_db_session(
         yield session
 
 
+def get_db_session_factory(
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> async_sessionmaker[AsyncSession]:
+    return get_db_sessionmaker(
+        settings.db.url,
+        settings.is_prod_like,
+    )
+
+
 access_token_cookie = APIKeyCookie(
     name=ACCESS_JWT_KEY,
 )

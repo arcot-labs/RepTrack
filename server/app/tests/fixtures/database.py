@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
     AsyncTransaction,
+    async_sessionmaker,
     create_async_engine,
 )
 from testcontainers.postgres import (  # pyright: ignore[reportMissingTypeStubs]
@@ -90,3 +91,11 @@ async def db_session(
 
     if db_transaction.is_active:
         await db_transaction.rollback()
+
+
+@pytest.fixture()
+def db_session_factory(db_engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
+    return async_sessionmaker(
+        bind=db_engine,
+        expire_on_commit=False,
+    )
