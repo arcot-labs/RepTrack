@@ -112,5 +112,7 @@ async def update_access_request_status(
         )
     else:
         background_tasks.add_task(
-            email_svc.send_access_request_rejected_email, settings, access_request
+            email_svc.send_access_request_rejected_email,
+            settings,
+            access_request,
         )

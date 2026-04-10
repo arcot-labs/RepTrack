@@ -93,7 +93,7 @@ async def request_access(
     admins = await get_admin_users(db_session)
     for admin in admins:
         background_tasks.add_task(
-            email_svc.send_access_request_notification,
+            email_svc.send_access_request_notification_email,
             settings,
             admin.email,
             access_request,

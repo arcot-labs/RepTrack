@@ -33,7 +33,7 @@ async def test_request_access(
 
     assert len(background_tasks.tasks) == 1
     task = background_tasks.tasks[0]
-    assert task.func == mock_email_svc.send_access_request_notification
+    assert task.func == mock_email_svc.send_access_request_notification_email
     assert isinstance(task.args[0], Settings)
     assert task.args[1] == settings.admin.email
     assert isinstance(task.args[2], AccessRequest)

@@ -43,11 +43,13 @@ def _access_request() -> AccessRequest:
     return access_request
 
 
-async def test_send_access_request_notification(anyio_backend: str, settings: Settings):
+async def test_send_access_request_notification_email(
+    anyio_backend: str, settings: Settings
+):
     _ = anyio_backend
     service = _SpyEmailService()
 
-    await service.send_access_request_notification(
+    await service.send_access_request_notification_email(
         settings=settings,
         admin_email="admin@example.com",
         access_request=_access_request(),
@@ -129,7 +131,7 @@ async def test_send_error(
 
     caplog.set_level("ERROR")
 
-    await service.send_access_request_notification(
+    await service.send_access_request_notification_email(
         settings=settings,
         admin_email="admin@example.com",
         access_request=access_request,
@@ -151,7 +153,8 @@ async def test_send_error(
 
     error_messages = [record.message for record in caplog.records]
     assert any(
-        "Failed to send access request notification" in msg for msg in error_messages
+        "Failed to send access request notification email" in msg
+        for msg in error_messages
     )
     assert any(
         "Failed to send access request approved email" in msg for msg in error_messages

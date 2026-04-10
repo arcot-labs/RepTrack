@@ -38,14 +38,14 @@ class EmailService(ABC):
         html: str | None = None,
     ) -> None: ...
 
-    async def send_access_request_notification(
+    async def send_access_request_notification_email(
         self,
         settings: Settings,
         admin_email: str,
         access_request: AccessRequest,
     ) -> None:
         logger.info(
-            f"Sending access request notification to {admin_email} for request id {access_request.id}"
+            f"Sending access request notification email to {admin_email} for request id {access_request.id}"
         )
 
         subject = f"New Access Request - {settings.project_name}"
@@ -62,7 +62,7 @@ class EmailService(ABC):
             )
         except Exception as e:
             logger.error(
-                f"Failed to send access request notification to {admin_email}: {e}"
+                f"Failed to send access request notification email to {admin_email}: {e}"
             )
 
     async def send_access_request_approved_email(
