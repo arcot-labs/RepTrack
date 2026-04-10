@@ -65,7 +65,6 @@ export function ExercisesTable({
     const searchRequestIdRef = useRef(0)
 
     const [isLoadingExerciseIds, setIsLoadingExerciseIds] = useState<
-         
         Set<number>
     >(new Set())
     const [isDeleting, setIsDeleting] = useState(false)

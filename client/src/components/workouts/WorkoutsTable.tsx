@@ -36,10 +36,9 @@ export function WorkoutsTable({
     isLoading,
     onReloadWorkouts,
 }: WorkoutsTableProps) {
-    const [isLoadingWorkoutIds, setIsLoadingWorkoutIds] = useState<
-         
-        Set<number>
-    >(new Set())
+    const [isLoadingWorkoutIds, setIsLoadingWorkoutIds] = useState<Set<number>>(
+        new Set()
+    )
     const [isDeleting, setIsDeleting] = useState(false)
 
     const [deleteDialog, setDeleteDialog] = useState<{
