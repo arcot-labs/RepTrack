@@ -1,17 +1,27 @@
-import type { UserPublic } from '@/api/generated/types.gen'
-import type { ColumnDef } from '@tanstack/react-table'
-import { render } from '@testing-library/react'
-import type { ReactElement } from 'react'
+import type { UserPublic } from '@/api/generated'
+import {
+    dataTableMock,
+    getColumn,
+    getDataTableProps,
+    hasAccessorFn,
+    hasAccessorKey,
+    hasFilterFn,
+    renderCell,
+    testHeader,
+} from '@/tests/components/utils'
+import { getMockProps } from '@/tests/utils'
+import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+// import last
 import { UsersTable } from '@/components/users/UsersTable'
 
-const dataTableMock = vi.fn()
+const roleBadgeMock = vi.fn()
 
-vi.mock('@/components/data-table/DataTable', () => ({
-    DataTable: (props: unknown) => {
-        dataTableMock(props)
-        return <div data-testid="mock-users-table" />
+vi.mock('@/components/users/RoleBadge', () => ({
+    RoleBadge: (props: unknown) => {
+        roleBadgeMock(props)
+        return <div data-testid="mock-role-badge" />
     },
 }))
 
@@ -39,91 +49,142 @@ const regularUser: UserPublic = {
 
 const defaultUsers = [adminUser, regularUser]
 
-type UsersTableProps = Parameters<typeof UsersTable>[0]
-
-const renderUsersTable = (overrides: Partial<UsersTableProps> = {}) =>
+const renderUsersTable = (
+    overrides: Partial<Parameters<typeof UsersTable>[0]> = {}
+) =>
     render(
         <UsersTable
             {...{ users: defaultUsers, isLoading: false, ...overrides }}
         />
     )
 
-describe('UsersTable', () => {
-    beforeEach(() => {
-        vi.clearAllMocks()
+beforeEach(() => {
+    vi.clearAllMocks()
+})
+
+describe('UsersTable - columns', () => {
+    it('configures name column', () => {
+        renderUsersTable()
+
+        const cols = getDataTableProps().columns
+        const col = getColumn(cols, (c) => c.id === 'name')
+
+        if (!hasAccessorFn(col))
+            throw new Error('Name column does not have an accessorFn')
+        expect(col.accessorFn(adminUser, 0)).toBe('Admin User')
+        expect(col.accessorFn(regularUser, 0)).toBe('Regular User')
+
+        testHeader(col, 'name', 'Name')
     })
 
-    it('passes users, toolbar config, and custom page size to DataTable', () => {
-        renderUsersTable({ users: defaultUsers, isLoading: true })
+    it('configures username column', () => {
+        renderUsersTable()
 
-        expect(dataTableMock).toHaveBeenCalledOnce()
-        const props = dataTableMock.mock.calls[0]?.[0] as {
-            data: UserPublic[]
-            isLoading: boolean
-            pageSize: number
-            toolbarConfig?: {
-                search?: { columnId: string; placeholder: string }
-                filters?: {
-                    columnId: string
-                    title: string
-                    options: { label: string; value: string }[]
-                }[]
-                showViewOptions?: boolean
-            }
+        const cols = getDataTableProps().columns
+        const col = getColumn(
+            cols,
+            (c) => hasAccessorKey(c) && c.accessorKey === 'username'
+        )
+
+        testHeader(col, 'username', 'Username')
+    })
+
+    it('configures email column', () => {
+        renderUsersTable()
+
+        const cols = getDataTableProps().columns
+        const col = getColumn(
+            cols,
+            (c) => hasAccessorKey(c) && c.accessorKey === 'email'
+        )
+
+        testHeader(col, 'email', 'Email')
+    })
+
+    it('configures role column', () => {
+        renderUsersTable()
+
+        const cols = getDataTableProps().columns
+        const col = getColumn(cols, (c) => c.id === 'role')
+
+        if (!hasAccessorFn(col))
+            throw new Error('Role column does not have an accessorFn')
+        expect(col.accessorFn(adminUser, 0)).toBe('admin')
+        expect(col.accessorFn(regularUser, 0)).toBe('user')
+
+        testHeader(col, 'role', 'Role')
+
+        renderCell(col, adminUser)
+        renderCell(col, regularUser)
+
+        const badges = screen.queryAllByTestId('mock-role-badge')
+        expect(badges).toHaveLength(2)
+        expect(roleBadgeMock).toHaveBeenCalledWith(
+            expect.objectContaining({ isAdmin: true })
+        )
+        expect(roleBadgeMock).toHaveBeenCalledWith(
+            expect.objectContaining({ isAdmin: false })
+        )
+
+        const mockRow = {
+            getValue: () => 'admin',
         }
 
-        expect(props.data).toBe(defaultUsers)
-        expect(props.isLoading).toBe(true)
-        expect(props.pageSize).toBe(5)
-        expect(props.toolbarConfig).toBeDefined()
-        expect(props.toolbarConfig?.search).toEqual({
-            columnId: 'name',
-            placeholder: 'Filter by name...',
-        })
-        expect(props.toolbarConfig?.filters).toHaveLength(1)
-        expect(props.toolbarConfig?.filters?.[0]).toEqual({
-            columnId: 'role',
-            title: 'Role',
-            options: [
-                { label: 'Admin', value: 'admin' },
-                { label: 'User', value: 'user' },
-            ],
-        })
-        expect(props.toolbarConfig?.showViewOptions).toBe(true)
+        if (!hasFilterFn(col))
+            throw new Error('Role column does not have a filterFn')
+        expect(col.filterFn(mockRow, 'role', ['admin'])).toBe(true)
+        expect(col.filterFn(mockRow, 'role', ['user'])).toBe(false)
     })
 
-    it('renders admin and user badges via the role column cell', () => {
+    it('configures created at column', () => {
+        renderUsersTable()
+
+        const cols = getDataTableProps().columns
+        const col = getColumn(
+            cols,
+            (c) => hasAccessorKey(c) && c.accessorKey === 'created_at'
+        )
+
+        testHeader(col, 'created_at', 'Created At')
+
+        const { getByText } = renderCell(col, adminUser)
+        const expected = new Date(adminUser.created_at).toLocaleString()
+        expect(getByText(expected)).toBeInTheDocument()
+    })
+
+    it('configures updated at column', () => {
+        renderUsersTable()
+
+        const cols = getDataTableProps().columns
+        const col = getColumn(
+            cols,
+            (c) => hasAccessorKey(c) && c.accessorKey === 'updated_at'
+        )
+
+        testHeader(col, 'updated_at', 'Updated At')
+
+        const { getByText } = renderCell(col, regularUser)
+        const expected = new Date(regularUser.updated_at).toLocaleString()
+        expect(getByText(expected)).toBeInTheDocument()
+    })
+})
+
+describe('UsersTable', () => {
+    it('passes props to DataTable', () => {
         renderUsersTable()
 
         expect(dataTableMock).toHaveBeenCalledOnce()
-        const columns = (
-            dataTableMock.mock.calls[0]?.[0] as {
-                columns: ColumnDef<UserPublic>[]
-            }
-        ).columns
-        const roleColumn = columns.find((column) => column.id === 'role')
-        expect(roleColumn).toBeDefined()
-
-        const renderBadge = (user: UserPublic) => {
+        const props = getMockProps(dataTableMock)
+        expect(props).toMatchObject({
+            data: defaultUsers,
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const cell =
-                typeof roleColumn?.cell === 'function'
-                    ? roleColumn.cell({ row: { original: user } } as never)
-                    : undefined
-            expect(cell).toBeDefined()
+            columns: expect.any(Array),
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            toolbarConfig: expect.any(Object),
+            pageSize: 5,
+            isLoading: false,
+        })
 
-            const { container } = render(cell as ReactElement)
-            return container.querySelector('[data-slot="badge"]')
-        }
-
-        const adminBadge = renderBadge(adminUser)
-        expect(adminBadge).toHaveTextContent('Admin')
-        expect(adminBadge).toHaveClass('bg-green-50')
-        expect(adminBadge).toHaveClass('text-green-700')
-
-        const userBadge = renderBadge(regularUser)
-        expect(userBadge).toHaveTextContent('User')
-        expect(userBadge).toHaveClass('bg-blue-50')
-        expect(userBadge).toHaveClass('text-blue-700')
+        expect(screen.getByTestId('mock-users-table')).toBeInTheDocument()
     })
 })
