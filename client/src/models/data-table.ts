@@ -39,7 +39,7 @@ export interface DataTableToolbarConfig {
 
 type MenuItemType = 'separator' | 'radio-group' | 'action'
 
-interface MenuItemConfig {
+export interface MenuItemConfig {
     type: MenuItemType
     label?: string
     shortcut?: string

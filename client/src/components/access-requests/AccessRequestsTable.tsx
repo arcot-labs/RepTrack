@@ -1,15 +1,16 @@
-import { AccessRequestService } from '@/api/generated'
-import { AccessRequestStatusSchema } from '@/api/generated/schemas.gen'
-import type {
-    AccessRequestPublic,
-    AccessRequestStatus,
-} from '@/api/generated/types.gen'
+import type { AccessRequestPublic } from '@/api/generated/types.gen'
 import { zAccessRequestPublic } from '@/api/generated/zod.gen'
 import { useSession } from '@/auth/session'
+import { StatusBadge } from '@/components/access-requests/StatusBadge'
+import { useConfirmDialog } from '@/components/access-requests/useConfirmDialog'
+import {
+    getAccessRequestRowActions,
+    getStatusFilterOptions,
+    updateAccessRequestStatus,
+} from '@/components/access-requests/utils'
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
-import { Badge } from '@/components/ui/badge'
 import {
     Dialog,
     DialogContent,
@@ -19,47 +20,13 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/overrides/button'
 import { formatNullableDateTime } from '@/lib/datetime'
-import { handleApiError } from '@/lib/http'
-import { notify } from '@/lib/notify'
-import {
-    blueText,
-    greenText,
-    lightBlueBackground,
-    lightGreenBackground,
-    lightRedBackground,
-    redText,
-} from '@/lib/styles'
 import { dash, formatNullableString } from '@/lib/text'
 import type {
     DataTableRowActionsConfig,
     DataTableToolbarConfig,
-    FilterOption,
 } from '@/models/data-table'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Check, X } from 'lucide-react'
 import { useState } from 'react'
-
-const blueBadgeClassName = `${lightBlueBackground} ${blueText}`
-const greenBadgeClassName = `${lightGreenBackground} ${greenText}`
-const redBadgeClassName = `${lightRedBackground} ${redText}`
-
-function StatusBadge({ status }: { status: AccessRequestStatus }) {
-    switch (status) {
-        case 'pending':
-            return <Badge className={blueBadgeClassName}>Pending</Badge>
-        case 'approved':
-            return <Badge className={greenBadgeClassName}>Approved</Badge>
-        case 'rejected':
-            return <Badge className={redBadgeClassName}>Rejected</Badge>
-    }
-}
-
-function getStatusFilterOptions(): FilterOption[] {
-    return AccessRequestStatusSchema.enum.map((status) => ({
-        label: status.charAt(0).toUpperCase() + status.slice(1),
-        value: status,
-    }))
-}
 
 interface AccessRequestsTableProps {
     requests: AccessRequestPublic[]
@@ -78,80 +45,16 @@ export function AccessRequestsTable({
     const [isLoadingRequestIds, setIsLoadingRequestIds] = useState<Set<number>>(
         new Set()
     )
-    const [confirmDialog, setConfirmDialog] = useState<{
-        isOpen: boolean
-        request: AccessRequestPublic | null
-        action: 'approved' | 'rejected' | null
-    }>({
-        isOpen: false,
-        request: null,
-        action: null,
-    })
-
-    const openConfirmDialog = (
-        request: AccessRequestPublic,
-        action: 'approved' | 'rejected'
-    ) => {
-        setConfirmDialog({
-            isOpen: true,
-            request,
-            action,
-        })
-    }
-
-    const closeConfirmDialog = () => {
-        setConfirmDialog({
-            isOpen: false,
-            request: null,
-            action: null,
-        })
-    }
-
-    const handleConfirmAction = () => {
-        if (confirmDialog.request && confirmDialog.action)
-            void handleUpdateStatus(confirmDialog.request, confirmDialog.action)
-        closeConfirmDialog()
-    }
-
-    const handleUpdateStatus = async (
-        request: AccessRequestPublic,
-        status: 'approved' | 'rejected'
-    ) => {
+    const confirmDialog = useConfirmDialog((request, action) => {
         setIsLoadingRequestIds((prev) => new Set(prev).add(request.id))
         try {
-            const { error } =
-                await AccessRequestService.updateAccessRequestStatus({
-                    path: {
-                        access_request_id: request.id,
-                    },
-                    body: {
-                        status: status,
-                    },
-                })
-            if (error) {
-                await handleApiError(error, {
-                    httpErrorHandlers: {
-                        access_request_not_pending: async () => {
-                            notify.warning(
-                                'Access request has already been reviewed. Reloading data'
-                            )
-                            await onReloadRequests()
-                        },
-                    },
-                    fallbackMessage: 'Failed to update access request status',
-                })
-                return
-            }
-            notify.success('Access request status updated')
-            const date = new Date().toISOString()
-            const updatedRequest = {
-                ...request,
-                status,
-                reviewed_at: date,
-                reviewer: user,
-                updated_at: date,
-            }
-            onRequestUpdated(updatedRequest)
+            void updateAccessRequestStatus(
+                request,
+                action,
+                user,
+                onRequestUpdated,
+                onReloadRequests
+            )
         } finally {
             setIsLoadingRequestIds((prev) => {
                 const next = new Set(prev)
@@ -159,34 +62,17 @@ export function AccessRequestsTable({
                 return next
             })
         }
-    }
+    })
 
     const rowActionsConfig: DataTableRowActionsConfig<AccessRequestPublic> = {
         schema: zAccessRequestPublic,
         menuItems: (row) => {
-            if (row.status !== 'pending') return []
-
             const isRowLoading = isLoadingRequestIds.has(row.id)
-            return [
-                {
-                    type: 'action',
-                    className: greenText,
-                    icon: Check,
-                    onSelect: () => {
-                        openConfirmDialog(row, 'approved')
-                    },
-                    disabled: isRowLoading,
-                },
-                {
-                    type: 'action',
-                    className: redText,
-                    icon: X,
-                    onSelect: () => {
-                        openConfirmDialog(row, 'rejected')
-                    },
-                    disabled: isRowLoading,
-                },
-            ]
+            return getAccessRequestRowActions(
+                row,
+                isRowLoading,
+                confirmDialog.open
+            )
         },
     }
 
@@ -315,15 +201,15 @@ export function AccessRequestsTable({
                 isLoading={isLoading}
             />
             <Dialog
-                open={confirmDialog.isOpen}
+                open={confirmDialog.state.isOpen}
                 onOpenChange={(isOpen) => {
-                    setConfirmDialog({ ...confirmDialog, isOpen })
+                    confirmDialog.setIsOpen(isOpen)
                 }}
             >
                 <DialogContent aria-describedby={undefined}>
                     <DialogHeader>
                         <DialogTitle>
-                            {confirmDialog.action === 'approved'
+                            {confirmDialog.state.action === 'approved'
                                 ? 'Approve Request'
                                 : 'Reject Request'}
                         </DialogTitle>
@@ -331,29 +217,29 @@ export function AccessRequestsTable({
                     <div className="text-sm">
                         Are you sure you want to{' '}
                         <span className="font-semibold">
-                            {confirmDialog.action === 'approved'
+                            {confirmDialog.state.action === 'approved'
                                 ? 'approve'
                                 : 'reject'}
                         </span>{' '}
                         this access request for{' '}
                         <span className="font-semibold">
-                            {confirmDialog.request?.first_name}{' '}
-                            {confirmDialog.request?.last_name}
+                            {confirmDialog.state.request?.first_name}{' '}
+                            {confirmDialog.state.request?.last_name}
                         </span>
                         ?
                         <div className="mt-2">This action is irreversible.</div>
                     </div>
                     <DialogFooter>
-                        <Button onClick={closeConfirmDialog}>Cancel</Button>
+                        <Button onClick={confirmDialog.close}>Cancel</Button>
                         <Button
-                            onClick={handleConfirmAction}
+                            onClick={confirmDialog.confirm}
                             variant={
-                                confirmDialog.action === 'approved'
+                                confirmDialog.state.action === 'approved'
                                     ? 'success'
                                     : 'destructive'
                             }
                         >
-                            {confirmDialog.action === 'approved'
+                            {confirmDialog.state.action === 'approved'
                                 ? 'Approve'
                                 : 'Reject'}
                         </Button>
