@@ -75,7 +75,7 @@ export function AccessRequestsTable({
     onReloadRequests,
 }: AccessRequestsTableProps) {
     const { user } = useSession()
-     
+
     const [isLoadingRequestIds, setIsLoadingRequestIds] = useState<Set<number>>(
         new Set()
     )
