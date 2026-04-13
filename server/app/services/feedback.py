@@ -1,6 +1,6 @@
 import logging
 
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.config import Settings
 from app.models.database.feedback import Feedback
@@ -15,10 +15,12 @@ logger = logging.getLogger(__name__)
 async def create_feedback(
     user: UserPublic,
     req: CreateFeedbackRequest,
-    db_session: AsyncSession,
+    db_session_factory: async_sessionmaker[AsyncSession],
     github_svc: GitHubService,
     settings: Settings,
 ):
+    """Runs as a background task, which must create its own database session"""
+
     logger.info(f"Creating feedback from user {user.username} with title: {req.title}")
 
     feedback_dir = settings.data_dir / "feedback"
@@ -36,10 +38,10 @@ async def create_feedback(
         description=req.description,
         files=stored_files,
     )
-
-    db_session.add(feedback)
-    await db_session.commit()
-    await db_session.refresh(feedback)
+    async with db_session_factory() as db_session:
+        db_session.add(feedback)
+        await db_session.commit()
+        await db_session.refresh(feedback)
 
     await github_svc.create_feedback_issue(feedback, settings)
 
