@@ -50,7 +50,7 @@ jobs:
 
             - name: setup pnpm - typescript
               if: matrix.language == 'typescript'
-              uses: pnpm/action-setup@v6
+              uses: pnpm/action-setup@v5
               with:
                   version: latest
 

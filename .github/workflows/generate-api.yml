@@ -36,7 +36,7 @@ jobs:
                   ref: ${{ github.event.pull_request.base.ref }}
 
             - name: setup pnpm
-              uses: pnpm/action-setup@v6
+              uses: pnpm/action-setup@v5
               with:
                   version: latest
 
@@ -44,6 +44,7 @@ jobs:
               uses: actions/setup-node@v6
               with:
                   node-version: 'lts/*'
+                  check-latest: true
 
             - name: set pnpm config
               run: |
