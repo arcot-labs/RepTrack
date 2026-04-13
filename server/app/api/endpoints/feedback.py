@@ -1,10 +1,13 @@
 from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Form, status
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.config import Settings, get_settings
-from app.core.dependencies import get_current_user, get_db_session
+from app.core.dependencies import (
+    get_current_user,
+    get_db_session_factory,
+)
 from app.models.schemas.errors import ErrorResponseModel
 from app.models.schemas.feedback import CreateFeedbackRequest
 from app.models.schemas.user import UserPublic
@@ -29,7 +32,9 @@ api_router = APIRouter(
 def create_feedback_endpoint(
     user: Annotated[UserPublic, Depends(get_current_user)],
     background_tasks: BackgroundTasks,
-    db_session: Annotated[AsyncSession, Depends(get_db_session)],
+    db_session_factory: Annotated[
+        async_sessionmaker[AsyncSession], Depends(get_db_session_factory)
+    ],
     github_svc: Annotated[GitHubService, Depends(get_github_service)],
     settings: Annotated[Settings, Depends(get_settings)],
     req: CreateFeedbackRequest = Form(..., media_type="multipart/form-data"),
@@ -38,7 +43,7 @@ def create_feedback_endpoint(
         create_feedback,
         user=user,
         req=req,
-        db_session=db_session,
+        db_session_factory=db_session_factory,
         github_svc=github_svc,
         settings=settings,
     )

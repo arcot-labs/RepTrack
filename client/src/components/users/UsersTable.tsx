@@ -1,25 +1,9 @@
 import type { UserPublic } from '@/api/generated/types.gen'
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
-import { Badge } from '@/components/ui/badge'
-import {
-    blueText,
-    greenText,
-    lightBlueBackground,
-    lightGreenBackground,
-} from '@/lib/styles'
+import { RoleBadge } from '@/components/users/RoleBadge'
 import type { DataTableToolbarConfig, FilterOption } from '@/models/data-table'
 import type { ColumnDef } from '@tanstack/react-table'
-
-const blueBadgeClassName = `${lightBlueBackground} ${blueText}`
-const greenBadgeClassName = `${lightGreenBackground} ${greenText}`
-
-function RoleBadge({ isAdmin }: { isAdmin: boolean }) {
-    if (isAdmin) {
-        return <Badge className={greenBadgeClassName}>Admin</Badge>
-    }
-    return <Badge className={blueBadgeClassName}>User</Badge>
-}
 
 function getRoleFilterOptions(): FilterOption[] {
     return [

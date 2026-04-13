@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock
 import pytest
 from fastapi import UploadFile
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.config import Settings
 from app.models.database.feedback import Feedback
@@ -16,6 +16,7 @@ from ..utilities import get_admin_user_public
 
 async def test_create_feedback(
     db_session: AsyncSession,
+    db_session_factory: async_sessionmaker[AsyncSession],
     mock_github_svc: AsyncMock,
     settings: Settings,
     monkeypatch: pytest.MonkeyPatch,
@@ -44,7 +45,7 @@ async def test_create_feedback(
     await create_feedback(
         user=user,
         req=request,
-        db_session=db_session,
+        db_session_factory=db_session_factory,
         github_svc=mock_github_svc,
         settings=settings,
     )
@@ -65,15 +66,16 @@ async def test_create_feedback(
         request.files,
         settings.data_dir / "feedback",
     )
-    mock_github_svc.create_feedback_issue.assert_awaited_once_with(
-        feedback,
-        settings,
-    )
+    mock_github_svc.create_feedback_issue.assert_awaited_once()
+    # cannot rely on feedback object identity due to separate session
+    assert mock_github_svc.create_feedback_issue.await_args.args[0].id == feedback.id
+    assert mock_github_svc.create_feedback_issue.await_args.args[1] is settings
 
 
 async def test_create_feedback_no_files(
     db_session: AsyncSession,
     mock_github_svc: AsyncMock,
+    db_session_factory: async_sessionmaker[AsyncSession],
     settings: Settings,
     monkeypatch: pytest.MonkeyPatch,
 ):
@@ -92,7 +94,7 @@ async def test_create_feedback_no_files(
     await create_feedback(
         user=user,
         req=request,
-        db_session=db_session,
+        db_session_factory=db_session_factory,
         github_svc=mock_github_svc,
         settings=settings,
     )
@@ -105,7 +107,6 @@ async def test_create_feedback_no_files(
     assert feedback.files == []
 
     store_files_mock.assert_not_awaited()
-    mock_github_svc.create_feedback_issue.assert_awaited_once_with(
-        feedback,
-        settings,
-    )
+    mock_github_svc.create_feedback_issue.assert_awaited_once()
+    assert mock_github_svc.create_feedback_issue.await_args.args[0].id == feedback.id
+    assert mock_github_svc.create_feedback_issue.await_args.args[1] is settings

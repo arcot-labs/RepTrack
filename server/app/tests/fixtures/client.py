@@ -5,11 +5,11 @@ import pytest
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 from meilisearch_python_sdk import AsyncClient as MSAsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app import create_app
 from app.core.config import Settings, get_settings
-from app.core.dependencies import get_db_session, get_ms_client
+from app.core.dependencies import get_db_session, get_db_session_factory, get_ms_client
 from app.services.email import EmailService, get_email_service
 from app.services.github import GitHubService, get_github_service
 
@@ -28,6 +28,7 @@ async def client(
     fastapi_app: FastAPI,
     settings: Settings,
     db_session: AsyncSession,
+    db_session_factory: async_sessionmaker[AsyncSession],
     ms_client: MSAsyncClient,
     mock_email_svc: EmailService,
     mock_github_svc: GitHubService,
@@ -40,11 +41,17 @@ async def client(
     async def override_get_db_session() -> AsyncGenerator[AsyncSession]:
         yield db_session
 
+    async def override_get_db_session_factory():
+        return db_session_factory
+
     async def override_get_ms_client() -> AsyncGenerator[MSAsyncClient]:
         yield ms_client
 
     fastapi_app.dependency_overrides[get_settings] = override_get_settings
     fastapi_app.dependency_overrides[get_db_session] = override_get_db_session
+    fastapi_app.dependency_overrides[get_db_session_factory] = (
+        override_get_db_session_factory
+    )
     fastapi_app.dependency_overrides[get_ms_client] = override_get_ms_client
     fastapi_app.dependency_overrides[get_email_service] = lambda: mock_email_svc
     fastapi_app.dependency_overrides[get_github_service] = lambda: mock_github_svc
@@ -57,6 +64,7 @@ async def client(
     finally:
         del fastapi_app.dependency_overrides[get_settings]
         del fastapi_app.dependency_overrides[get_db_session]
+        del fastapi_app.dependency_overrides[get_db_session_factory]
         del fastapi_app.dependency_overrides[get_ms_client]
         del fastapi_app.dependency_overrides[get_email_service]
         del fastapi_app.dependency_overrides[get_github_service]

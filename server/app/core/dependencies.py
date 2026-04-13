@@ -30,13 +30,19 @@ def get_db_sessionmaker(db_url: str, is_prod: bool):
     )
 
 
+def get_db_session_factory(
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> async_sessionmaker[AsyncSession]:
+    return get_db_sessionmaker(
+        settings.db.url,
+        settings.is_prod_like,
+    )
+
+
 async def get_db_session(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> AsyncGenerator[AsyncSession]:
-    async with get_db_sessionmaker(
-        settings.db.url,
-        settings.is_prod_like,
-    )() as session:
+    async with get_db_session_factory(settings)() as session:
         yield session
 
 
