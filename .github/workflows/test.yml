@@ -49,7 +49,7 @@ jobs:
 
             - name: install deps
               working-directory: client
-              run: pnpm i --frozen-lockfile
+              run: pnpm ci
 
             - name: run tests with coverage
               working-directory: client
