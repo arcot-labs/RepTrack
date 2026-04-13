@@ -47,21 +47,19 @@ export function AccessRequestsTable({
     )
     const confirmDialog = useConfirmDialog((request, action) => {
         setIsLoadingRequestIds((prev) => new Set(prev).add(request.id))
-        try {
-            void updateAccessRequestStatus(
-                request,
-                action,
-                user,
-                onRequestUpdated,
-                onReloadRequests
-            )
-        } finally {
+        void updateAccessRequestStatus(
+            request,
+            action,
+            user,
+            onRequestUpdated,
+            onReloadRequests
+        ).finally(() => {
             setIsLoadingRequestIds((prev) => {
                 const next = new Set(prev)
                 next.delete(request.id)
                 return next
             })
-        }
+        })
     })
 
     const rowActionsConfig: DataTableRowActionsConfig<AccessRequestPublic> = {
