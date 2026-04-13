@@ -74,28 +74,29 @@ async def db_transaction(
     db_connection: AsyncConnection,
 ) -> AsyncGenerator[AsyncTransaction]:
     async with db_connection.begin() as transaction:
-        yield transaction
+        try:
+            yield transaction
+        finally:
+            if transaction.is_active:
+                await transaction.rollback()
 
 
 @pytest.fixture()
-async def db_session(
+async def db_session_factory(
     db_connection: AsyncConnection,
     db_transaction: AsyncTransaction,
-) -> AsyncGenerator[AsyncSession]:
-    async_session = AsyncSession(
+) -> AsyncGenerator[async_sessionmaker[AsyncSession]]:
+    _ = db_transaction
+    yield async_sessionmaker(
         bind=db_connection,
         join_transaction_mode="create_savepoint",
         expire_on_commit=False,
     )
-    yield async_session
-
-    if db_transaction.is_active:
-        await db_transaction.rollback()
 
 
 @pytest.fixture()
-def db_session_factory(db_engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
-    return async_sessionmaker(
-        bind=db_engine,
-        expire_on_commit=False,
-    )
+async def db_session(
+    db_session_factory: async_sessionmaker[AsyncSession],
+) -> AsyncGenerator[AsyncSession]:
+    async with db_session_factory() as session:
+        yield session

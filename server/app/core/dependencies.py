@@ -30,16 +30,6 @@ def get_db_sessionmaker(db_url: str, is_prod: bool):
     )
 
 
-async def get_db_session(
-    settings: Annotated[Settings, Depends(get_settings)],
-) -> AsyncGenerator[AsyncSession]:
-    async with get_db_sessionmaker(
-        settings.db.url,
-        settings.is_prod_like,
-    )() as session:
-        yield session
-
-
 def get_db_session_factory(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> async_sessionmaker[AsyncSession]:
@@ -47,6 +37,13 @@ def get_db_session_factory(
         settings.db.url,
         settings.is_prod_like,
     )
+
+
+async def get_db_session(
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> AsyncGenerator[AsyncSession]:
+    async with get_db_session_factory(settings)() as session:
+        yield session
 
 
 access_token_cookie = APIKeyCookie(
