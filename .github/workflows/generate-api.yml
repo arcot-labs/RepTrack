@@ -60,7 +60,7 @@ jobs:
 
             - name: install deps - client
               working-directory: client
-              run: pnpm ci
+              run: pnpm i --frozen-lockfile
 
             - name: setup uv
               uses: astral-sh/setup-uv@v7

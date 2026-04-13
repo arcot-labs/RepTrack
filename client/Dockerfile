@@ -11,7 +11,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    pnpm ci
+    pnpm i --frozen-lockfile
 
 COPY public/ ./public/
 COPY src/ ./src/

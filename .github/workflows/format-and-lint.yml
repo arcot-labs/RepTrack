@@ -49,11 +49,11 @@ jobs:
                   restore-keys: ${{ runner.os }}-pnpm-
 
             - name: install deps - base
-              run: pnpm ci --ignore-scripts
+              run: pnpm i --frozen-lockfile --ignore-scripts
 
             - name: install deps - client
               working-directory: client
-              run: pnpm ci
+              run: pnpm i --frozen-lockfile
 
             - name: setup uv
               uses: astral-sh/setup-uv@v7
