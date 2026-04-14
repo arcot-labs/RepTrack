@@ -8,55 +8,68 @@ import { AccessRequestStatusSchema } from '@/api/generated/schemas.gen'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import { greenText, redText } from '@/lib/styles'
+import { capitalizeWords } from '@/lib/text'
 import type { FilterOption, MenuItemConfig } from '@/models/data-table'
 import { Check, X } from 'lucide-react'
 
-export function getStatusFilterOptions(): FilterOption[] {
-    return AccessRequestStatusSchema.enum.map((status) => ({
-        label: status.charAt(0).toUpperCase() + status.slice(1),
-        value: status,
-    }))
+export const setRequestLoading = (
+    setIsLoadingRequestIds: React.Dispatch<React.SetStateAction<Set<number>>>,
+    requestId: number,
+    isLoading: boolean
+) => {
+    setIsLoadingRequestIds((prev) => {
+        const next = new Set(prev)
+        if (isLoading) next.add(requestId)
+        else next.delete(requestId)
+        return next
+    })
 }
 
-export const updateAccessRequestStatus = async (
+export const handleConfirm = async (
     request: AccessRequestPublic,
     action: UpdateAccessRequestStatusRequest['status'],
     user: UserPublic | null,
     onRequestUpdated: (request: AccessRequestPublic) => void,
-    onReloadRequests: () => Promise<void>
+    onReloadRequests: () => Promise<void>,
+    setIsLoadingRequestIds: React.Dispatch<React.SetStateAction<Set<number>>>
 ) => {
-    const { error } = await AccessRequestService.updateAccessRequestStatus({
-        path: {
-            access_request_id: request.id,
-        },
-        body: {
-            status: action,
-        },
-    })
-    if (error) {
-        await handleApiError(error, {
-            httpErrorHandlers: {
-                access_request_not_pending: async () => {
-                    notify.warning(
-                        'Access request has already been reviewed. Reloading data'
-                    )
-                    await onReloadRequests()
-                },
+    setRequestLoading(setIsLoadingRequestIds, request.id, true)
+    try {
+        const { error } = await AccessRequestService.updateAccessRequestStatus({
+            path: {
+                access_request_id: request.id,
             },
-            fallbackMessage: 'Failed to update access request status',
+            body: {
+                status: action,
+            },
         })
-        return
+        if (error) {
+            await handleApiError(error, {
+                httpErrorHandlers: {
+                    access_request_not_pending: async () => {
+                        notify.warning(
+                            'Access request has already been reviewed. Reloading data'
+                        )
+                        await onReloadRequests()
+                    },
+                },
+                fallbackMessage: 'Failed to update access request status',
+            })
+            return
+        }
+        notify.success('Access request status updated')
+        const date = new Date().toISOString()
+        const updatedRequest = {
+            ...request,
+            status: action,
+            reviewed_at: date,
+            reviewer: user,
+            updated_at: date,
+        }
+        onRequestUpdated(updatedRequest)
+    } finally {
+        setRequestLoading(setIsLoadingRequestIds, request.id, false)
     }
-    notify.success('Access request status updated')
-    const date = new Date().toISOString()
-    const updatedRequest = {
-        ...request,
-        status: action,
-        reviewed_at: date,
-        reviewer: user,
-        updated_at: date,
-    }
-    onRequestUpdated(updatedRequest)
 }
 
 export const getAccessRequestRowActions = (
@@ -88,4 +101,11 @@ export const getAccessRequestRowActions = (
             disabled: isRowLoading,
         },
     ]
+}
+
+export function getStatusFilterOptions(): FilterOption[] {
+    return AccessRequestStatusSchema.enum.map((status) => ({
+        label: capitalizeWords(status),
+        value: status,
+    }))
 }

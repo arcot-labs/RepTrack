@@ -14,7 +14,7 @@ export function useConfirmDialog(
     onConfirm: (
         request: AccessRequestPublic,
         action: UpdateAccessRequestStatusRequest['status']
-    ) => void
+    ) => Promise<void>
 ) {
     const [state, setState] = useState<ConfirmDialogState>({
         isOpen: false,
@@ -34,16 +34,12 @@ export function useConfirmDialog(
     }
 
     const close = () => {
-        setState({
-            isOpen: false,
-            request: null,
-            action: null,
-        })
+        setState((prev) => ({ ...prev, isOpen: false }))
     }
 
-    const confirm = () => {
+    const confirm = async () => {
         if (state.request && state.action)
-            onConfirm(state.request, state.action)
+            await onConfirm(state.request, state.action)
         close()
     }
 
@@ -52,8 +48,5 @@ export function useConfirmDialog(
         open,
         close,
         confirm,
-        setIsOpen: (isOpen: boolean) => {
-            setState((prev) => ({ ...prev, isOpen }))
-        },
     }
 }
