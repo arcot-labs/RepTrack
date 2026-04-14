@@ -2,11 +2,11 @@ import type { AccessRequestPublic } from '@/api/generated/types.gen'
 import { zAccessRequestPublic } from '@/api/generated/zod.gen'
 import { useSession } from '@/auth/session'
 import { StatusBadge } from '@/components/access-requests/StatusBadge'
-import { useConfirmDialog } from '@/components/access-requests/useConfirmDialog'
+import { useConfirmDialog } from '@/components/access-requests/confirmDialog'
 import {
     getAccessRequestRowActions,
     getStatusFilterOptions,
-    updateAccessRequestStatus,
+    handleConfirm,
 } from '@/components/access-requests/utils'
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
@@ -45,21 +45,15 @@ export function AccessRequestsTable({
     const [isLoadingRequestIds, setIsLoadingRequestIds] = useState<Set<number>>(
         new Set()
     )
-    const confirmDialog = useConfirmDialog((request, action) => {
-        setIsLoadingRequestIds((prev) => new Set(prev).add(request.id))
-        void updateAccessRequestStatus(
+    const confirmDialog = useConfirmDialog(async (request, action) => {
+        await handleConfirm(
             request,
             action,
             user,
             onRequestUpdated,
-            onReloadRequests
-        ).finally(() => {
-            setIsLoadingRequestIds((prev) => {
-                const next = new Set(prev)
-                next.delete(request.id)
-                return next
-            })
-        })
+            onReloadRequests,
+            setIsLoadingRequestIds
+        )
     })
 
     const rowActionsConfig: DataTableRowActionsConfig<AccessRequestPublic> = {
@@ -131,11 +125,11 @@ export function AccessRequestsTable({
             enableHiding: true,
         },
         {
+            accessorKey: 'reviewer.username',
             meta: {
                 hideOnBelowMd: true,
                 viewLabel: 'Reviewed By',
             },
-            accessorKey: 'reviewer.username',
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Reviewed By" />
             ),
@@ -201,7 +195,8 @@ export function AccessRequestsTable({
             <Dialog
                 open={confirmDialog.state.isOpen}
                 onOpenChange={(isOpen) => {
-                    confirmDialog.setIsOpen(isOpen)
+                    if (isOpen) throw Error('Dialog should not open directly')
+                    confirmDialog.close()
                 }}
             >
                 <DialogContent aria-describedby={undefined}>
@@ -230,7 +225,9 @@ export function AccessRequestsTable({
                     <DialogFooter>
                         <Button onClick={confirmDialog.close}>Cancel</Button>
                         <Button
-                            onClick={confirmDialog.confirm}
+                            onClick={() => {
+                                void confirmDialog.confirm()
+                            }}
                             variant={
                                 confirmDialog.state.action === 'approved'
                                     ? 'success'

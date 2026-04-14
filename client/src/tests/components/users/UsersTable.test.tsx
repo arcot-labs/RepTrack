@@ -10,7 +10,7 @@ import {
     testHeader,
 } from '@/tests/components/utils'
 import { getMockProps } from '@/tests/utils'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // import last
@@ -66,7 +66,7 @@ describe('UsersTable - columns', () => {
     it('configures name column', () => {
         renderUsersTable()
 
-        const cols = getDataTableProps().columns
+        const cols = getDataTableProps<UserPublic>().columns
         const col = getColumn(cols, (c) => c.id === 'name')
 
         if (!hasAccessorFn(col))
@@ -80,7 +80,7 @@ describe('UsersTable - columns', () => {
     it('configures username column', () => {
         renderUsersTable()
 
-        const cols = getDataTableProps().columns
+        const cols = getDataTableProps<UserPublic>().columns
         const col = getColumn(
             cols,
             (c) => hasAccessorKey(c) && c.accessorKey === 'username'
@@ -92,7 +92,7 @@ describe('UsersTable - columns', () => {
     it('configures email column', () => {
         renderUsersTable()
 
-        const cols = getDataTableProps().columns
+        const cols = getDataTableProps<UserPublic>().columns
         const col = getColumn(
             cols,
             (c) => hasAccessorKey(c) && c.accessorKey === 'email'
@@ -104,7 +104,7 @@ describe('UsersTable - columns', () => {
     it('configures role column', () => {
         renderUsersTable()
 
-        const cols = getDataTableProps().columns
+        const cols = getDataTableProps<UserPublic>().columns
         const col = getColumn(cols, (c) => c.id === 'role')
 
         if (!hasAccessorFn(col))
@@ -114,14 +114,18 @@ describe('UsersTable - columns', () => {
 
         testHeader(col, 'role', 'Role')
 
-        renderCell(col, adminUser)
-        renderCell(col, regularUser)
-
-        const badges = screen.queryAllByTestId('mock-role-badge')
-        expect(badges).toHaveLength(2)
+        const adminCell = renderCell(col, adminUser)
+        expect(
+            within(adminCell.container).getByTestId('mock-role-badge')
+        ).toBeInTheDocument()
         expect(roleBadgeMock).toHaveBeenCalledWith(
             expect.objectContaining({ isAdmin: true })
         )
+
+        const regularCell = renderCell(col, regularUser)
+        expect(
+            within(regularCell.container).getByTestId('mock-role-badge')
+        ).toBeInTheDocument()
         expect(roleBadgeMock).toHaveBeenCalledWith(
             expect.objectContaining({ isAdmin: false })
         )
@@ -139,7 +143,7 @@ describe('UsersTable - columns', () => {
     it('configures created at column', () => {
         renderUsersTable()
 
-        const cols = getDataTableProps().columns
+        const cols = getDataTableProps<UserPublic>().columns
         const col = getColumn(
             cols,
             (c) => hasAccessorKey(c) && c.accessorKey === 'created_at'
@@ -155,7 +159,7 @@ describe('UsersTable - columns', () => {
     it('configures updated at column', () => {
         renderUsersTable()
 
-        const cols = getDataTableProps().columns
+        const cols = getDataTableProps<UserPublic>().columns
         const col = getColumn(
             cols,
             (c) => hasAccessorKey(c) && c.accessorKey === 'updated_at'
@@ -173,6 +177,8 @@ describe('UsersTable', () => {
     it('passes props to DataTable', () => {
         renderUsersTable()
 
+        expect(screen.getByTestId('mock-data-table')).toBeInTheDocument()
+
         expect(dataTableMock).toHaveBeenCalledOnce()
         const props = getMockProps(dataTableMock)
         expect(props).toMatchObject({
@@ -184,7 +190,5 @@ describe('UsersTable', () => {
             pageSize: 5,
             isLoading: false,
         })
-
-        expect(screen.getByTestId('mock-users-table')).toBeInTheDocument()
     })
 })
