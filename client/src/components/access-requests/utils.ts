@@ -73,21 +73,21 @@ export const handleConfirm = async (
 }
 
 export const getAccessRequestRowActions = (
-    row: AccessRequestPublic,
+    request: AccessRequestPublic,
     isRowLoading: boolean,
     openConfirmDialog: (
         request: AccessRequestPublic,
         action: UpdateAccessRequestStatusRequest['status']
     ) => void
 ): MenuItemConfig[] => {
-    if (row.status !== 'pending') return []
+    if (request.status !== 'pending') return []
     return [
         {
             type: 'action',
             className: greenText,
             icon: Check,
             onSelect: () => {
-                openConfirmDialog(row, 'approved')
+                openConfirmDialog(request, 'approved')
             },
             disabled: isRowLoading,
         },
@@ -96,7 +96,7 @@ export const getAccessRequestRowActions = (
             className: redText,
             icon: X,
             onSelect: () => {
-                openConfirmDialog(row, 'rejected')
+                openConfirmDialog(request, 'rejected')
             },
             disabled: isRowLoading,
         },

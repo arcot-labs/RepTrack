@@ -195,7 +195,7 @@ export function AccessRequestsTable({
             <Dialog
                 open={confirmDialog.state.isOpen}
                 onOpenChange={(isOpen) => {
-                    if (isOpen) throw Error('Dialog should not open directly')
+                    if (isOpen) return
                     confirmDialog.close()
                 }}
             >

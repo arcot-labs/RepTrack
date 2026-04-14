@@ -377,16 +377,14 @@ describe('AccessRequestsTable - dialog', () => {
         )
     })
 
-    it('throws if onOpenChange called with true', () => {
+    it('does nothing if onOpenChange called with true', () => {
         renderAccessRequestsTable()
 
         const dialogProps = getMockProps(dialogMock) as {
             onOpenChange: (isOpen: boolean) => void
         }
+        dialogProps.onOpenChange(true)
 
-        expect(() => {
-            dialogProps.onOpenChange(true)
-        }).toThrow('Dialog should not open directly')
         expect(confirmDialogMocks.close).not.toHaveBeenCalled()
     })
 
