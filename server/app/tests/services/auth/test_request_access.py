@@ -16,7 +16,9 @@ from app.services.auth import request_access
 
 
 async def test_request_access(
-    db_session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+    db_session: AsyncSession,
+    mock_email_svc: AsyncMock,
+    settings: Settings,
 ):
     new_email = "newuser@example.com"
     background_tasks = BackgroundTasks()
@@ -41,7 +43,9 @@ async def test_request_access(
 
 
 async def test_request_access_approved(
-    db_session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+    db_session: AsyncSession,
+    mock_email_svc: AsyncMock,
+    settings: Settings,
 ):
     approved_email = "approved@example.com"
     req = AccessRequest(
@@ -75,7 +79,9 @@ async def test_request_access_approved(
 
 
 async def test_request_access_existing_user(
-    db_session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+    db_session: AsyncSession,
+    mock_email_svc: AsyncMock,
+    settings: Settings,
 ):
     user = User(
         email="existing@example.com",
@@ -135,7 +141,9 @@ async def test_request_access_email_matches_username(
 
 
 async def test_request_access_pending(
-    db_session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+    db_session: AsyncSession,
+    mock_email_svc: AsyncMock,
+    settings: Settings,
 ):
     req = AccessRequest(
         email="pending@example.com",
@@ -162,7 +170,9 @@ async def test_request_access_pending(
 
 
 async def test_request_access_rejected(
-    db_session: AsyncSession, mock_email_svc: AsyncMock, settings: Settings
+    db_session: AsyncSession,
+    mock_email_svc: AsyncMock,
+    settings: Settings,
 ):
     req = AccessRequest(
         email="rejected@example.com",

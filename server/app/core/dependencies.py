@@ -18,6 +18,15 @@ from app.services.utilities.serializers import to_user_public
 logger = logging.getLogger(__name__)
 
 
+access_token_cookie = APIKeyCookie(
+    name=ACCESS_JWT_KEY,
+)
+
+refresh_token_cookie = APIKeyCookie(
+    name=REFRESH_JWT_KEY,
+)
+
+
 @cache
 def get_db_sessionmaker(db_url: str, is_prod: bool):
     engine = create_async_engine(
@@ -44,15 +53,6 @@ async def get_db_session(
 ) -> AsyncGenerator[AsyncSession]:
     async with get_db_session_factory(settings)() as session:
         yield session
-
-
-access_token_cookie = APIKeyCookie(
-    name=ACCESS_JWT_KEY,
-)
-
-refresh_token_cookie = APIKeyCookie(
-    name=REFRESH_JWT_KEY,
-)
 
 
 @cache
