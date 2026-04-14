@@ -56,6 +56,13 @@ jobs:
               working-directory: client
               run: pnpm run test:coverage
 
+            - name: upload coverage
+              uses: codecov/codecov-action@v5
+              with:
+                  directory: client
+                  token: ${{ secrets.CODECOV_TOKEN }}
+                  slug: arcot-labs/RepTrack
+
     test-server:
         name: Test Server
         runs-on: self-hosted
@@ -90,4 +97,11 @@ jobs:
 
             - name: run tests with coverage
               working-directory: server
-              run: make cov
+              run: make cov-xml
+
+            - name: upload coverage
+              uses: codecov/codecov-action@v5
+              with:
+                  directory: server
+                  token: ${{ secrets.CODECOV_TOKEN }}
+                  slug: arcot-labs/RepTrack
