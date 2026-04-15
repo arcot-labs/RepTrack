@@ -12,28 +12,15 @@ import { capitalizeWords } from '@/lib/text'
 import type { FilterOption, MenuItemConfig } from '@/models/data-table'
 import { Check, X } from 'lucide-react'
 
-export const setRequestLoading = (
-    setIsLoadingRequestIds: React.Dispatch<React.SetStateAction<Set<number>>>,
-    requestId: number,
-    isLoading: boolean
-) => {
-    setIsLoadingRequestIds((prev) => {
-        const next = new Set(prev)
-        if (isLoading) next.add(requestId)
-        else next.delete(requestId)
-        return next
-    })
-}
-
 export const handleConfirm = async (
     request: AccessRequestPublic,
     action: UpdateAccessRequestStatusRequest['status'],
     user: UserPublic | null,
     onRequestUpdated: (request: AccessRequestPublic) => void,
     onReloadRequests: () => Promise<void>,
-    setIsLoadingRequestIds: React.Dispatch<React.SetStateAction<Set<number>>>
+    setRowLoading: (requestId: number, isLoading: boolean) => void
 ) => {
-    setRequestLoading(setIsLoadingRequestIds, request.id, true)
+    setRowLoading(request.id, true)
     try {
         const { error } = await AccessRequestService.updateAccessRequestStatus({
             path: {
@@ -68,7 +55,7 @@ export const handleConfirm = async (
         }
         onRequestUpdated(updatedRequest)
     } finally {
-        setRequestLoading(setIsLoadingRequestIds, request.id, false)
+        setRowLoading(request.id, false)
     }
 }
 

@@ -7,7 +7,6 @@ import {
     getAccessRequestRowActions,
     getStatusFilterOptions,
     handleConfirm,
-    setRequestLoading,
 } from '@/components/access-requests/utils'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
@@ -64,57 +63,6 @@ const mockUser: UserPublic = {
 
 const mockTimestamp = '2026-04-13T12:00:00.000Z'
 
-describe('setRequestLoading', () => {
-    it('adds requestId to loading set', () => {
-        const initial = new Set<number>([2, 3])
-        let result: Set<number> = initial
-
-        const setIsLoadingRequestIds = (
-            value: Set<number> | ((prev: Set<number>) => Set<number>)
-        ) => {
-            if (typeof value === 'function')
-                result = (value as (prev: Set<number>) => Set<number>)(result)
-            else result = value
-        }
-
-        setRequestLoading(setIsLoadingRequestIds, 1, true)
-        expect([...result]).toEqual([2, 3, 1])
-    })
-
-    it('removes requestId from loading set', () => {
-        const initial = new Set<number>([1, 2, 3])
-        let result: Set<number> = initial
-
-        const setIsLoadingRequestIds = (
-            value: Set<number> | ((prev: Set<number>) => Set<number>)
-        ) => {
-            if (typeof value === 'function')
-                result = (value as (prev: Set<number>) => Set<number>)(result)
-            else result = value
-        }
-
-        setRequestLoading(setIsLoadingRequestIds, 2, false)
-        expect([...result]).toEqual([1, 3])
-    })
-
-    it('does not mutate original set', () => {
-        const initial = new Set<number>([1, 2])
-        let result: Set<number> = initial
-
-        const setIsLoadingRequestIds = (
-            value: Set<number> | ((prev: Set<number>) => Set<number>)
-        ) => {
-            if (typeof value === 'function')
-                result = (value as (prev: Set<number>) => Set<number>)(result)
-            else result = value
-        }
-
-        setRequestLoading(setIsLoadingRequestIds, 3, true)
-        expect(result).not.toBe(initial)
-        expect([...initial]).toEqual([1, 2])
-    })
-})
-
 describe('handleConfirm', () => {
     let successSpy: MockInstance<typeof notify.success>
     let warningSpy: MockInstance<typeof notify.warning>
@@ -135,7 +83,7 @@ describe('handleConfirm', () => {
 
         const onRequestUpdated = vi.fn()
         const onReloadRequests = vi.fn().mockResolvedValue(undefined)
-        const setIsLoadingAccessRequestIds = vi.fn()
+        const setRowLoading = vi.fn()
 
         await handleConfirm(
             mockRequest,
@@ -143,7 +91,7 @@ describe('handleConfirm', () => {
             mockUser,
             onRequestUpdated,
             onReloadRequests,
-            setIsLoadingAccessRequestIds
+            setRowLoading
         )
 
         expect(
@@ -152,7 +100,7 @@ describe('handleConfirm', () => {
             path: { access_request_id: mockRequest.id },
             body: { status: 'approved' },
         })
-        expect(setIsLoadingAccessRequestIds).toHaveBeenCalledTimes(2)
+        expect(setRowLoading).toHaveBeenCalledTimes(2)
     })
 
     it('handles success', async () => {
@@ -164,7 +112,7 @@ describe('handleConfirm', () => {
 
         const onRequestUpdated = vi.fn()
         const onReloadRequests = vi.fn().mockResolvedValue(undefined)
-        const setIsLoadingAccessRequestIds = vi.fn()
+        const setRowLoading = vi.fn()
 
         await handleConfirm(
             mockRequest,
@@ -172,7 +120,7 @@ describe('handleConfirm', () => {
             mockUser,
             onRequestUpdated,
             onReloadRequests,
-            setIsLoadingAccessRequestIds
+            setRowLoading
         )
 
         expect(successSpy).toHaveBeenCalledWith('Access request status updated')
@@ -185,7 +133,7 @@ describe('handleConfirm', () => {
                 updated_at: mockTimestamp,
             })
         )
-        expect(setIsLoadingAccessRequestIds).toHaveBeenCalledTimes(2)
+        expect(setRowLoading).toHaveBeenCalledTimes(2)
     })
 
     it('handles error', async () => {
@@ -199,7 +147,7 @@ describe('handleConfirm', () => {
 
         const onRequestUpdated = vi.fn()
         const onReloadRequests = vi.fn().mockResolvedValue(undefined)
-        const setIsLoadingAccessRequestIds = vi.fn()
+        const setRowLoading = vi.fn()
 
         await handleConfirm(
             mockRequest,
@@ -207,7 +155,7 @@ describe('handleConfirm', () => {
             mockUser,
             onRequestUpdated,
             onReloadRequests,
-            setIsLoadingAccessRequestIds
+            setRowLoading
         )
 
         expect(handleApiError).toHaveBeenCalledWith(
@@ -223,7 +171,7 @@ describe('handleConfirm', () => {
         )
         expect(successSpy).not.toHaveBeenCalled()
         expect(onRequestUpdated).not.toHaveBeenCalled()
-        expect(setIsLoadingAccessRequestIds).toHaveBeenCalledTimes(2)
+        expect(setRowLoading).toHaveBeenCalledTimes(2)
     })
 
     it('handles access_request_not_pending error', async () => {
@@ -246,7 +194,7 @@ describe('handleConfirm', () => {
 
         const onRequestUpdated = vi.fn()
         const onReloadRequests = vi.fn().mockResolvedValue(undefined)
-        const setIsLoadingAccessRequestIds = vi.fn()
+        const setRowLoading = vi.fn()
 
         await handleConfirm(
             mockRequest,
@@ -254,7 +202,7 @@ describe('handleConfirm', () => {
             mockUser,
             onRequestUpdated,
             onReloadRequests,
-            setIsLoadingAccessRequestIds
+            setRowLoading
         )
 
         expect(warningSpy).toHaveBeenCalledWith(
@@ -262,7 +210,7 @@ describe('handleConfirm', () => {
         )
         expect(onReloadRequests).toHaveBeenCalledOnce()
         expect(onRequestUpdated).not.toHaveBeenCalled()
-        expect(setIsLoadingAccessRequestIds).toHaveBeenCalledTimes(2)
+        expect(setRowLoading).toHaveBeenCalledTimes(2)
     })
 })
 

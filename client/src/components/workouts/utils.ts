@@ -8,25 +8,12 @@ import type {
 } from '@/models/data-table'
 import { ArrowUpRight, Plus, Trash } from 'lucide-react'
 
-export const setWorkoutLoading = (
-    setIsLoadingWorkoutIds: React.Dispatch<React.SetStateAction<Set<number>>>,
-    workoutId: number,
-    isLoading: boolean
-) => {
-    setIsLoadingWorkoutIds((prev) => {
-        const next = new Set(prev)
-        if (isLoading) next.add(workoutId)
-        else next.delete(workoutId)
-        return next
-    })
-}
-
 export const handleDelete = async (
     workoutId: number,
     onReloadWorkouts: () => Promise<void>,
-    setIsLoadingWorkoutIds: React.Dispatch<React.SetStateAction<Set<number>>>
+    setRowLoading: (workoutId: number, isLoading: boolean) => void
 ) => {
-    setWorkoutLoading(setIsLoadingWorkoutIds, workoutId, true)
+    setRowLoading(workoutId, true)
     try {
         const { error } = await WorkoutService.deleteWorkout({
             path: { workout_id: workoutId },
@@ -46,7 +33,7 @@ export const handleDelete = async (
         notify.success('Workout deleted')
         await onReloadWorkouts()
     } finally {
-        setWorkoutLoading(setIsLoadingWorkoutIds, workoutId, false)
+        setRowLoading(workoutId, false)
     }
 }
 

@@ -13,6 +13,7 @@ import {
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
+import { useRowLoading } from '@/components/data-table/rowLoading'
 import { useActionDialog } from '@/components/dialog'
 import {
     Dialog,
@@ -29,7 +30,6 @@ import type {
     DataTableToolbarConfig,
 } from '@/models/data-table'
 import type { ColumnDef } from '@tanstack/react-table'
-import { useState } from 'react'
 
 interface AccessRequestsTableProps {
     requests: AccessRequestPublic[]
@@ -45,9 +45,7 @@ export function AccessRequestsTable({
     onReloadRequests,
 }: AccessRequestsTableProps) {
     const { user } = useSession()
-    const [isLoadingRequestIds, setIsLoadingRequestIds] = useState<Set<number>>(
-        new Set()
-    )
+    const { isRowLoading, setRowLoading } = useRowLoading<number>()
     const confirmDialog = useActionDialog<
         AccessRequestPublic,
         UpdateAccessRequestStatusRequest['status']
@@ -58,17 +56,16 @@ export function AccessRequestsTable({
             user,
             onRequestUpdated,
             onReloadRequests,
-            setIsLoadingRequestIds
+            setRowLoading
         )
     })
 
     const rowActionsConfig: DataTableRowActionsConfig<AccessRequestPublic> = {
         schema: zAccessRequestPublic,
         menuItems: (row) => {
-            const isRowLoading = isLoadingRequestIds.has(row.id)
             return getAccessRequestRowActions(
                 row,
-                isRowLoading,
+                isRowLoading(row.id),
                 confirmDialog.open
             )
         },

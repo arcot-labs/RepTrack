@@ -4,6 +4,7 @@ import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
 import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncatedCell'
+import { useRowLoading } from '@/components/data-table/rowLoading'
 import { useDialog } from '@/components/dialog'
 import {
     Dialog,
@@ -25,7 +26,6 @@ import type {
     DataTableToolbarConfig,
 } from '@/models/data-table'
 import type { ColumnDef } from '@tanstack/react-table'
-import { useState } from 'react'
 
 interface WorkoutsTableProps {
     workouts: WorkoutBase[]
@@ -38,19 +38,20 @@ export function WorkoutsTable({
     isLoading,
     onReloadWorkouts,
 }: WorkoutsTableProps) {
-    const [isLoadingWorkoutIds, setIsLoadingWorkoutIds] = useState<Set<number>>(
-        new Set()
-    )
+    const { isRowLoading, setRowLoading } = useRowLoading<number>()
     const deleteDialog = useDialog<WorkoutBase>(async (workout) => {
         // TODO call handler
-        await handleDelete(workout.id, onReloadWorkouts, setIsLoadingWorkoutIds)
+        await handleDelete(workout.id, onReloadWorkouts, setRowLoading)
     })
 
     const rowActionsConfig: DataTableRowActionsConfig<WorkoutBase> = {
         schema: zWorkoutBase,
         menuItems: (row) => {
-            const isRowLoading = isLoadingWorkoutIds.has(row.id)
-            return getWorkoutRowActions(row, isRowLoading, deleteDialog.open)
+            return getWorkoutRowActions(
+                row,
+                isRowLoading(row.id),
+                deleteDialog.open
+            )
         },
     }
 
