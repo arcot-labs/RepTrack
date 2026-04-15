@@ -4,6 +4,7 @@ import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
 import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncatedCell'
+import { useDialog } from '@/components/dialog'
 import {
     Dialog,
     DialogContent,
@@ -12,7 +13,6 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/overrides/button'
-import { useDeleteDialog } from '@/components/workouts/deleteDialog'
 import {
     getWorkoutRowActions,
     getWorkoutToolbarActions,
@@ -41,7 +41,7 @@ export function WorkoutsTable({
     const [isLoadingWorkoutIds, setIsLoadingWorkoutIds] = useState<Set<number>>(
         new Set()
     )
-    const deleteDialog = useDeleteDialog(async (workout) => {
+    const deleteDialog = useDialog<WorkoutBase>(async (workout) => {
         // TODO call handler
         await handleDelete(workout.id, onReloadWorkouts, setIsLoadingWorkoutIds)
     })
@@ -161,7 +161,7 @@ export function WorkoutsTable({
                     <DialogFooter>
                         <Button onClick={deleteDialog.close}>Cancel</Button>
                         <Button
-                            onClick={() => void deleteDialog.delete()}
+                            onClick={() => void deleteDialog.confirm()}
                             variant="destructive"
                         >
                             Delete

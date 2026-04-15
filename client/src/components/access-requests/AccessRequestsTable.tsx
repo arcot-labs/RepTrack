@@ -1,8 +1,10 @@
-import type { AccessRequestPublic } from '@/api/generated/types.gen'
+import type {
+    AccessRequestPublic,
+    UpdateAccessRequestStatusRequest,
+} from '@/api/generated/types.gen'
 import { zAccessRequestPublic } from '@/api/generated/zod.gen'
 import { useSession } from '@/auth/session'
 import { StatusBadge } from '@/components/access-requests/StatusBadge'
-import { useConfirmDialog } from '@/components/access-requests/confirmDialog'
 import {
     getAccessRequestRowActions,
     getStatusFilterOptions,
@@ -11,6 +13,7 @@ import {
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
+import { useActionDialog } from '@/components/dialog'
 import {
     Dialog,
     DialogContent,
@@ -45,7 +48,10 @@ export function AccessRequestsTable({
     const [isLoadingRequestIds, setIsLoadingRequestIds] = useState<Set<number>>(
         new Set()
     )
-    const confirmDialog = useConfirmDialog(async (request, action) => {
+    const confirmDialog = useActionDialog<
+        AccessRequestPublic,
+        UpdateAccessRequestStatusRequest['status']
+    >(async (request, action) => {
         await handleConfirm(
             request,
             action,
@@ -216,8 +222,8 @@ export function AccessRequestsTable({
                         </span>{' '}
                         this access request for{' '}
                         <span className="font-semibold">
-                            {confirmDialog.state.request?.first_name}{' '}
-                            {confirmDialog.state.request?.last_name}
+                            {confirmDialog.state.payload?.first_name}{' '}
+                            {confirmDialog.state.payload?.last_name}
                         </span>
                         ?
                         <div className="mt-2">This action is irreversible.</div>
