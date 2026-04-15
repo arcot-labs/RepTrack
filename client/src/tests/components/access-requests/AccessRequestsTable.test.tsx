@@ -165,7 +165,7 @@ beforeEach(() => {
     dialogMocks.useActionDialog.mockReturnValue({
         state: {
             isOpen: false,
-            request: pendingRequest,
+            payload: pendingRequest,
             action: 'approved',
         },
         open: dialogMocks.open,
@@ -403,7 +403,7 @@ describe('AccessRequestsTable - dialog', () => {
         dialogMocks.useActionDialog.mockReturnValueOnce({
             state: {
                 isOpen: true,
-                request: pendingRequest,
+                payload: pendingRequest,
                 action: 'approved',
             },
             open: dialogMocks.open,
@@ -423,7 +423,7 @@ describe('AccessRequestsTable - dialog', () => {
         dialogMocks.useActionDialog.mockReturnValueOnce({
             state: {
                 isOpen: true,
-                request: pendingRequest,
+                payload: pendingRequest,
                 action: 'rejected',
             },
             open: dialogMocks.open,

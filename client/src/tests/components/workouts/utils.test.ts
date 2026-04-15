@@ -85,7 +85,7 @@ describe('handleDelete', () => {
 
         expect(successSpy).toHaveBeenCalledExactlyOnceWith('Workout deleted')
         expect(onWorkoutDeleted).toHaveBeenCalledExactlyOnceWith(mockWorkout.id)
-        expect(onReloadWorkouts).not.toHaveBeenCalledOnce()
+        expect(onReloadWorkouts).not.toHaveBeenCalled()
         expect(setRowLoading).toHaveBeenCalledTimes(2)
     })
 
@@ -104,9 +104,9 @@ describe('handleDelete', () => {
                 httpErrorHandlers: expect.objectContaining({}),
             })
         )
-        expect(successSpy).not.toHaveBeenCalledOnce()
-        expect(onWorkoutDeleted).not.toHaveBeenCalledOnce()
-        expect(onReloadWorkouts).not.toHaveBeenCalledOnce()
+        expect(successSpy).not.toHaveBeenCalled()
+        expect(onWorkoutDeleted).not.toHaveBeenCalled()
+        expect(onReloadWorkouts).not.toHaveBeenCalled()
         expect(setRowLoading).toHaveBeenCalledTimes(2)
     })
 
@@ -129,7 +129,7 @@ describe('handleDelete', () => {
         expect(errorSpy).toHaveBeenCalledExactlyOnceWith(
             'Workout not found. Reloading data'
         )
-        expect(onWorkoutDeleted).not.toHaveBeenCalledOnce()
+        expect(onWorkoutDeleted).not.toHaveBeenCalled()
         expect(onReloadWorkouts).toHaveBeenCalledOnce()
         expect(setRowLoading).toHaveBeenCalledTimes(2)
     })

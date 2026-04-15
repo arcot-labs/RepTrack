@@ -126,7 +126,7 @@ describe('handleUpdate', () => {
                 updated_at: mockTimestamp,
             })
         )
-        expect(onReloadRequests).not.toHaveBeenCalledOnce()
+        expect(onReloadRequests).not.toHaveBeenCalled()
         expect(setRowLoading).toHaveBeenCalledTimes(2)
     })
 
@@ -148,9 +148,9 @@ describe('handleUpdate', () => {
                 }),
             })
         )
-        expect(successSpy).not.toHaveBeenCalledOnce()
-        expect(onRequestUpdated).not.toHaveBeenCalledOnce()
-        expect(onReloadRequests).not.toHaveBeenCalledOnce()
+        expect(successSpy).not.toHaveBeenCalled()
+        expect(onRequestUpdated).not.toHaveBeenCalled()
+        expect(onReloadRequests).not.toHaveBeenCalled()
         expect(setRowLoading).toHaveBeenCalledTimes(2)
     })
 
@@ -173,7 +173,7 @@ describe('handleUpdate', () => {
         expect(warningSpy).toHaveBeenCalledExactlyOnceWith(
             'Access request has already been reviewed. Reloading data'
         )
-        expect(onRequestUpdated).not.toHaveBeenCalledOnce()
+        expect(onRequestUpdated).not.toHaveBeenCalled()
         expect(onReloadRequests).toHaveBeenCalledOnce()
         expect(setRowLoading).toHaveBeenCalledTimes(2)
     })
