@@ -1,22 +1,26 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
-interface DialogState<TPayload> {
+interface DialogState<TArgs extends unknown[]> {
     isOpen: boolean
-    payload: TPayload | null
+    isConfirming: boolean
+    args: TArgs | null
 }
 
-export function useDialog<TPayload>(
-    onConfirm: (payload: TPayload) => Promise<void>
+export function useDialog<TArgs extends unknown[]>(
+    onConfirm: (...args: TArgs) => Promise<void>
 ) {
-    const [state, setState] = useState<DialogState<TPayload>>({
+    const [state, setState] = useState<DialogState<TArgs>>({
         isOpen: false,
-        payload: null,
+        isConfirming: false,
+        args: null,
     })
+    const isConfirmingRef = useRef(false)
 
-    const open = (payload: TPayload) => {
+    const open = (...args: TArgs) => {
         setState({
             isOpen: true,
-            payload,
+            isConfirming: false,
+            args,
         })
     }
 
@@ -25,49 +29,18 @@ export function useDialog<TPayload>(
     }
 
     const confirm = async () => {
-        if (state.payload !== null) await onConfirm(state.payload)
-        close()
-    }
+        if (isConfirmingRef.current || state.args === null) return
 
-    return {
-        state,
-        open,
-        close,
-        confirm,
-    }
-}
+        isConfirmingRef.current = true
+        setState((prev) => ({ ...prev, isConfirming: true }))
 
-interface ActionDialogState<TPayload, TAction> {
-    isOpen: boolean
-    payload: TPayload | null
-    action: TAction | null
-}
-
-export function useActionDialog<TPayload, TAction>(
-    onConfirm: (payload: TPayload, action: TAction) => Promise<void>
-) {
-    const [state, setState] = useState<ActionDialogState<TPayload, TAction>>({
-        isOpen: false,
-        payload: null,
-        action: null,
-    })
-
-    const open = (payload: TPayload, action: TAction) => {
-        setState({
-            isOpen: true,
-            payload,
-            action,
-        })
-    }
-
-    const close = () => {
-        setState((prev) => ({ ...prev, isOpen: false }))
-    }
-
-    const confirm = async () => {
-        if (state.payload !== null && state.action !== null)
-            await onConfirm(state.payload, state.action)
-        close()
+        try {
+            await onConfirm(...state.args)
+            close()
+        } finally {
+            isConfirmingRef.current = false
+            setState((prev) => ({ ...prev, isConfirming: false }))
+        }
     }
 
     return {

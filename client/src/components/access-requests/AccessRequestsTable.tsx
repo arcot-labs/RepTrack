@@ -7,6 +7,7 @@ import { useSession } from '@/auth/session'
 import { StatusBadge } from '@/components/access-requests/StatusBadge'
 import {
     getAccessRequestRowActions,
+    getDialogConfirmButtonText,
     getStatusFilterOptions,
     handleUpdate,
 } from '@/components/access-requests/utils'
@@ -14,7 +15,7 @@ import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
 import { useRowLoading } from '@/components/data-table/rowLoading'
-import { useActionDialog } from '@/components/dialog'
+import { useDialog } from '@/components/dialog'
 import {
     Dialog,
     DialogContent,
@@ -46,19 +47,21 @@ export function AccessRequestsTable({
 }: AccessRequestsTableProps) {
     const { user } = useSession()
     const { isRowLoading, setRowLoading } = useRowLoading<number>()
-    const confirmDialog = useActionDialog<
-        AccessRequestPublic,
-        UpdateAccessRequestStatusRequest['status']
-    >(async (request, action) => {
-        await handleUpdate(
-            request,
-            action,
-            user,
-            onRequestUpdated,
-            onReloadRequests,
-            setRowLoading
-        )
-    })
+    const confirmDialog = useDialog(
+        async (
+            request: AccessRequestPublic,
+            action: UpdateAccessRequestStatusRequest['status']
+        ) => {
+            await handleUpdate(
+                request,
+                action,
+                user,
+                onRequestUpdated,
+                onReloadRequests,
+                setRowLoading
+            )
+        }
+    )
 
     const rowActionsConfig: DataTableRowActionsConfig<AccessRequestPublic> = {
         schema: zAccessRequestPublic,
@@ -198,14 +201,14 @@ export function AccessRequestsTable({
             <Dialog
                 open={confirmDialog.state.isOpen}
                 onOpenChange={(isOpen) => {
-                    if (isOpen) return
+                    if (isOpen || confirmDialog.state.isConfirming) return
                     confirmDialog.close()
                 }}
             >
                 <DialogContent aria-describedby={undefined}>
                     <DialogHeader>
                         <DialogTitle>
-                            {confirmDialog.state.action === 'approved'
+                            {confirmDialog.state.args?.[1] === 'approved'
                                 ? 'Approve Request'
                                 : 'Reject Request'}
                         </DialogTitle>
@@ -213,33 +216,40 @@ export function AccessRequestsTable({
                     <div className="text-sm">
                         Are you sure you want to{' '}
                         <span className="font-semibold">
-                            {confirmDialog.state.action === 'approved'
+                            {confirmDialog.state.args?.[1] === 'approved'
                                 ? 'approve'
                                 : 'reject'}
                         </span>{' '}
                         this access request for{' '}
                         <span className="font-semibold">
-                            {confirmDialog.state.payload?.first_name}{' '}
-                            {confirmDialog.state.payload?.last_name}
+                            {confirmDialog.state.args?.[0].first_name}{' '}
+                            {confirmDialog.state.args?.[0].last_name}
                         </span>
                         ?
                         <div className="mt-2">This action is irreversible.</div>
                     </div>
                     <DialogFooter>
-                        <Button onClick={confirmDialog.close}>Cancel</Button>
+                        <Button
+                            onClick={confirmDialog.close}
+                            disabled={confirmDialog.state.isConfirming}
+                        >
+                            Cancel
+                        </Button>
                         <Button
                             onClick={() => {
                                 void confirmDialog.confirm()
                             }}
                             variant={
-                                confirmDialog.state.action === 'approved'
+                                confirmDialog.state.args?.[1] === 'approved'
                                     ? 'success'
                                     : 'destructive'
                             }
+                            disabled={confirmDialog.state.isConfirming}
                         >
-                            {confirmDialog.state.action === 'approved'
-                                ? 'Approve'
-                                : 'Reject'}
+                            {getDialogConfirmButtonText(
+                                confirmDialog.state.args?.[1] ?? null,
+                                confirmDialog.state.isConfirming
+                            )}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

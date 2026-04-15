@@ -5,6 +5,7 @@ import {
 } from '@/api/generated'
 import {
     getAccessRequestRowActions,
+    getDialogConfirmButtonText,
     getStatusFilterOptions,
     handleUpdate,
 } from '@/components/access-requests/utils'
@@ -273,5 +274,21 @@ describe('getStatusFilterOptions', () => {
             'approved',
             'rejected',
         ])
+    })
+})
+
+describe('getDialogConfirmButtonText', () => {
+    it('returns correct text for confirming actions', () => {
+        expect(getDialogConfirmButtonText('approved', true)).toBe(
+            'Approving...'
+        )
+        expect(getDialogConfirmButtonText('rejected', true)).toBe(
+            'Rejecting...'
+        )
+    })
+
+    it('returns correct text for non-confirming actions', () => {
+        expect(getDialogConfirmButtonText('approved', false)).toBe('Approve')
+        expect(getDialogConfirmButtonText('rejected', false)).toBe('Reject')
     })
 })

@@ -41,7 +41,7 @@ export function WorkoutsTable({
     onReloadWorkouts,
 }: WorkoutsTableProps) {
     const { isRowLoading, setRowLoading } = useRowLoading<number>()
-    const deleteDialog = useDialog<number>(async (workoutId) => {
+    const deleteDialog = useDialog(async (workoutId: number) => {
         await handleDelete(
             workoutId,
             onWorkoutDeleted,
@@ -153,7 +153,7 @@ export function WorkoutsTable({
             <Dialog
                 open={deleteDialog.state.isOpen}
                 onOpenChange={(isOpen) => {
-                    if (isOpen) return
+                    if (isOpen || deleteDialog.state.isConfirming) return
                     deleteDialog.close()
                 }}
             >
@@ -166,12 +166,20 @@ export function WorkoutsTable({
                         <div className="mt-2">This action is irreversible.</div>
                     </div>
                     <DialogFooter>
-                        <Button onClick={deleteDialog.close}>Cancel</Button>
+                        <Button
+                            onClick={deleteDialog.close}
+                            disabled={deleteDialog.state.isConfirming}
+                        >
+                            Cancel
+                        </Button>
                         <Button
                             onClick={() => void deleteDialog.confirm()}
                             variant="destructive"
+                            disabled={deleteDialog.state.isConfirming}
                         >
-                            Delete
+                            {deleteDialog.state.isConfirming
+                                ? 'Deleting...'
+                                : 'Delete'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

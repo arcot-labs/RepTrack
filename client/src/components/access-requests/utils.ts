@@ -1,6 +1,6 @@
 import {
-    type AccessRequestPublic,
     AccessRequestService,
+    type AccessRequestPublic,
     type UpdateAccessRequestStatusRequest,
     type UserPublic,
 } from '@/api/generated'
@@ -95,4 +95,16 @@ export function getStatusFilterOptions(): FilterOption[] {
         label: capitalizeWords(status),
         value: status,
     }))
+}
+
+export function getDialogConfirmButtonText(
+    action: UpdateAccessRequestStatusRequest['status'] | null,
+    isConfirming: boolean
+): string {
+    switch (action) {
+        case 'approved':
+            return isConfirming ? 'Approving...' : 'Approve'
+        default:
+            return isConfirming ? 'Rejecting...' : 'Reject'
+    }
 }
