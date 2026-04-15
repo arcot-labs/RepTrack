@@ -5,9 +5,9 @@ import {
 } from '@/api/generated'
 import {
     getAccessRequestRowActions,
+    getDialogConfirmButtonText,
     getStatusFilterOptions,
-    handleConfirm,
-    setRequestLoading,
+    handleUpdate,
 } from '@/components/access-requests/utils'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
@@ -64,58 +64,32 @@ const mockUser: UserPublic = {
 
 const mockTimestamp = '2026-04-13T12:00:00.000Z'
 
-describe('setRequestLoading', () => {
-    it('adds requestId to loading set', () => {
-        const initial = new Set<number>([2, 3])
-        let result: Set<number> = initial
+const callHandleUpdate = async (
+    payload: { error: unknown } = { error: undefined },
+    request: AccessRequestPublic = mockRequest,
+    status: 'approved' | 'rejected' = 'approved',
+    user: UserPublic = mockUser
+) => {
+    vi.mocked(AccessRequestService).updateAccessRequestStatus.mockReturnValue(
+        Promise.resolve(payload) as never
+    )
 
-        const setIsLoadingRequestIds = (
-            value: Set<number> | ((prev: Set<number>) => Set<number>)
-        ) => {
-            if (typeof value === 'function')
-                result = (value as (prev: Set<number>) => Set<number>)(result)
-            else result = value
-        }
+    const onRequestUpdated = vi.fn()
+    const onReloadRequests = vi.fn().mockResolvedValue(undefined)
+    const setRowLoading = vi.fn()
 
-        setRequestLoading(setIsLoadingRequestIds, 1, true)
-        expect([...result]).toEqual([2, 3, 1])
-    })
+    await handleUpdate(
+        request,
+        status,
+        user,
+        onRequestUpdated,
+        onReloadRequests,
+        setRowLoading
+    )
+    return { onRequestUpdated, onReloadRequests, setRowLoading }
+}
 
-    it('removes requestId from loading set', () => {
-        const initial = new Set<number>([1, 2, 3])
-        let result: Set<number> = initial
-
-        const setIsLoadingRequestIds = (
-            value: Set<number> | ((prev: Set<number>) => Set<number>)
-        ) => {
-            if (typeof value === 'function')
-                result = (value as (prev: Set<number>) => Set<number>)(result)
-            else result = value
-        }
-
-        setRequestLoading(setIsLoadingRequestIds, 2, false)
-        expect([...result]).toEqual([1, 3])
-    })
-
-    it('does not mutate original set', () => {
-        const initial = new Set<number>([1, 2])
-        let result: Set<number> = initial
-
-        const setIsLoadingRequestIds = (
-            value: Set<number> | ((prev: Set<number>) => Set<number>)
-        ) => {
-            if (typeof value === 'function')
-                result = (value as (prev: Set<number>) => Set<number>)(result)
-            else result = value
-        }
-
-        setRequestLoading(setIsLoadingRequestIds, 3, true)
-        expect(result).not.toBe(initial)
-        expect([...initial]).toEqual([1, 2])
-    })
-})
-
-describe('handleConfirm', () => {
+describe('handleUpdate', () => {
     let successSpy: MockInstance<typeof notify.success>
     let warningSpy: MockInstance<typeof notify.warning>
 
@@ -127,56 +101,24 @@ describe('handleConfirm', () => {
     })
 
     it('calls service with correct path & body', async () => {
-        vi.mocked(
-            AccessRequestService
-        ).updateAccessRequestStatus.mockReturnValue(
-            Promise.resolve({ error: undefined }) as never
-        )
-
-        const onRequestUpdated = vi.fn()
-        const onReloadRequests = vi.fn().mockResolvedValue(undefined)
-        const setIsLoadingAccessRequestIds = vi.fn()
-
-        await handleConfirm(
-            mockRequest,
-            'approved',
-            mockUser,
-            onRequestUpdated,
-            onReloadRequests,
-            setIsLoadingAccessRequestIds
-        )
+        await callHandleUpdate()
 
         expect(
             vi.mocked(AccessRequestService).updateAccessRequestStatus
-        ).toHaveBeenCalledWith({
+        ).toHaveBeenCalledExactlyOnceWith({
             path: { access_request_id: mockRequest.id },
             body: { status: 'approved' },
         })
-        expect(setIsLoadingAccessRequestIds).toHaveBeenCalledTimes(2)
     })
 
     it('handles success', async () => {
-        vi.mocked(
-            AccessRequestService
-        ).updateAccessRequestStatus.mockReturnValue(
-            Promise.resolve({ error: null }) as never
+        const { onRequestUpdated, onReloadRequests, setRowLoading } =
+            await callHandleUpdate()
+
+        expect(successSpy).toHaveBeenCalledExactlyOnceWith(
+            'Access request status updated'
         )
-
-        const onRequestUpdated = vi.fn()
-        const onReloadRequests = vi.fn().mockResolvedValue(undefined)
-        const setIsLoadingAccessRequestIds = vi.fn()
-
-        await handleConfirm(
-            mockRequest,
-            'approved',
-            mockUser,
-            onRequestUpdated,
-            onReloadRequests,
-            setIsLoadingAccessRequestIds
-        )
-
-        expect(successSpy).toHaveBeenCalledWith('Access request status updated')
-        expect(onRequestUpdated).toHaveBeenCalledWith(
+        expect(onRequestUpdated).toHaveBeenCalledExactlyOnceWith(
             expect.objectContaining({
                 ...mockRequest,
                 status: 'approved',
@@ -185,32 +127,18 @@ describe('handleConfirm', () => {
                 updated_at: mockTimestamp,
             })
         )
-        expect(setIsLoadingAccessRequestIds).toHaveBeenCalledTimes(2)
+        expect(onReloadRequests).not.toHaveBeenCalled()
+        expect(setRowLoading).toHaveBeenCalledTimes(2)
     })
 
     it('handles error', async () => {
-        const mockError = { code: 'SOME_ERROR', detail: 'error' }
-        vi.mocked(
-            AccessRequestService
-        ).updateAccessRequestStatus.mockReturnValue(
-            Promise.resolve({ data: undefined, error: mockError }) as never
-        )
         vi.mocked(handleApiError).mockResolvedValue(undefined)
 
-        const onRequestUpdated = vi.fn()
-        const onReloadRequests = vi.fn().mockResolvedValue(undefined)
-        const setIsLoadingAccessRequestIds = vi.fn()
+        const mockError = { code: 'SOME_ERROR', detail: 'error' }
+        const { onRequestUpdated, onReloadRequests, setRowLoading } =
+            await callHandleUpdate({ error: mockError })
 
-        await handleConfirm(
-            mockRequest,
-            'approved',
-            mockUser,
-            onRequestUpdated,
-            onReloadRequests,
-            setIsLoadingAccessRequestIds
-        )
-
-        expect(handleApiError).toHaveBeenCalledWith(
+        expect(handleApiError).toHaveBeenCalledExactlyOnceWith(
             mockError,
             expect.objectContaining({
                 fallbackMessage: 'Failed to update access request status',
@@ -223,19 +151,11 @@ describe('handleConfirm', () => {
         )
         expect(successSpy).not.toHaveBeenCalled()
         expect(onRequestUpdated).not.toHaveBeenCalled()
-        expect(setIsLoadingAccessRequestIds).toHaveBeenCalledTimes(2)
+        expect(onReloadRequests).not.toHaveBeenCalled()
+        expect(setRowLoading).toHaveBeenCalledTimes(2)
     })
 
     it('handles access_request_not_pending error', async () => {
-        const mockError = {
-            code: 'access_request_not_pending',
-            detail: 'already reviewed',
-        }
-        vi.mocked(
-            AccessRequestService
-        ).updateAccessRequestStatus.mockReturnValue(
-            Promise.resolve({ data: undefined, error: mockError }) as never
-        )
         vi.mocked(handleApiError).mockImplementationOnce(
             async (error, options) => {
                 await options.httpErrorHandlers?.access_request_not_pending?.(
@@ -244,25 +164,19 @@ describe('handleConfirm', () => {
             }
         )
 
-        const onRequestUpdated = vi.fn()
-        const onReloadRequests = vi.fn().mockResolvedValue(undefined)
-        const setIsLoadingAccessRequestIds = vi.fn()
+        const mockError = {
+            code: 'access_request_not_pending',
+            detail: 'already reviewed',
+        }
+        const { onRequestUpdated, onReloadRequests, setRowLoading } =
+            await callHandleUpdate({ error: mockError })
 
-        await handleConfirm(
-            mockRequest,
-            'approved',
-            mockUser,
-            onRequestUpdated,
-            onReloadRequests,
-            setIsLoadingAccessRequestIds
-        )
-
-        expect(warningSpy).toHaveBeenCalledWith(
+        expect(warningSpy).toHaveBeenCalledExactlyOnceWith(
             'Access request has already been reviewed. Reloading data'
         )
-        expect(onReloadRequests).toHaveBeenCalledOnce()
         expect(onRequestUpdated).not.toHaveBeenCalled()
-        expect(setIsLoadingAccessRequestIds).toHaveBeenCalledTimes(2)
+        expect(onReloadRequests).toHaveBeenCalledOnce()
+        expect(setRowLoading).toHaveBeenCalledTimes(2)
     })
 })
 
@@ -284,12 +198,26 @@ describe('getAccessRequestRowActions', () => {
         expect(items).toHaveLength(2)
 
         const [approve, reject] = items
-        expect(approve?.className).toBe(greenText)
-        expect(approve?.icon).toBe(Check)
-        expect(approve?.disabled).toBe(false)
-        expect(reject?.className).toBe(redText)
-        expect(reject?.icon).toBe(X)
-        expect(reject?.disabled).toBe(false)
+        expect(approve).toEqual(
+            expect.objectContaining({
+                type: 'action',
+                className: greenText,
+                icon: Check,
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                onSelect: expect.any(Function),
+                disabled: false,
+            })
+        )
+        expect(reject).toEqual(
+            expect.objectContaining({
+                type: 'action',
+                className: redText,
+                icon: X,
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                onSelect: expect.any(Function),
+                disabled: false,
+            })
+        )
     })
 
     it('disables items when row is loading', () => {
@@ -308,7 +236,10 @@ describe('getAccessRequestRowActions', () => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         await items[0]!.onSelect!(undefined)
 
-        expect(openConfirmDialog).toHaveBeenCalledWith(mockRequest, 'approved')
+        expect(openConfirmDialog).toHaveBeenCalledExactlyOnceWith(
+            mockRequest,
+            'approved'
+        )
     })
 
     it('calls openConfirmDialog on reject', async () => {
@@ -321,7 +252,10 @@ describe('getAccessRequestRowActions', () => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         await items[1]!.onSelect!(undefined)
 
-        expect(openConfirmDialog).toHaveBeenCalledWith(mockRequest, 'rejected')
+        expect(openConfirmDialog).toHaveBeenCalledExactlyOnceWith(
+            mockRequest,
+            'rejected'
+        )
     })
 })
 
@@ -340,5 +274,21 @@ describe('getStatusFilterOptions', () => {
             'approved',
             'rejected',
         ])
+    })
+})
+
+describe('getDialogConfirmButtonText', () => {
+    it('returns correct text for confirming actions', () => {
+        expect(getDialogConfirmButtonText('approved', true)).toBe(
+            'Approving...'
+        )
+        expect(getDialogConfirmButtonText('rejected', true)).toBe(
+            'Rejecting...'
+        )
+    })
+
+    it('returns correct text for non-confirming actions', () => {
+        expect(getDialogConfirmButtonText('approved', false)).toBe('Approve')
+        expect(getDialogConfirmButtonText('rejected', false)).toBe('Reject')
     })
 })

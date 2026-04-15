@@ -32,6 +32,12 @@ export function Workouts() {
         }
     }
 
+    const handleWorkoutDeleted = (workoutId: number) => {
+        setWorkouts((prev) =>
+            prev.filter((workout) => workout.id !== workoutId)
+        )
+    }
+
     useEffect(() => {
         void loadWorkouts()
     }, [])
@@ -45,6 +51,7 @@ export function Workouts() {
                 <WorkoutsTable
                     workouts={workouts}
                     isLoading={isLoading}
+                    onWorkoutDeleted={handleWorkoutDeleted}
                     onReloadWorkouts={loadWorkouts}
                 />
             </CardContent>

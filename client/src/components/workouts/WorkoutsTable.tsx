@@ -1,9 +1,11 @@
-import { WorkoutService, type WorkoutBase } from '@/api/generated'
+import { type WorkoutBase } from '@/api/generated'
 import { zWorkoutBase } from '@/api/generated/zod.gen'
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
 import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncatedCell'
+import { useRowLoading } from '@/components/data-table/rowLoading'
+import { useDialog } from '@/components/dialog'
 import {
     Dialog,
     DialogContent,
@@ -12,116 +14,50 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/overrides/button'
+import {
+    getWorkoutRowActions,
+    getWorkoutToolbarActions,
+    handleDelete,
+} from '@/components/workouts/utils'
 import { formatDateTime, formatNullableDateTime } from '@/lib/datetime'
-import { handleApiError } from '@/lib/http'
-import { notify } from '@/lib/notify'
-import { redText } from '@/lib/styles'
 import { dash } from '@/lib/text'
 import type {
     DataTableRowActionsConfig,
     DataTableToolbarConfig,
 } from '@/models/data-table'
 import type { ColumnDef } from '@tanstack/react-table'
-import { ArrowUpRight, Plus, Trash } from 'lucide-react'
-import { useState } from 'react'
 
 interface WorkoutsTableProps {
     workouts: WorkoutBase[]
     isLoading: boolean
+    onWorkoutDeleted: (workoutId: number) => void
     onReloadWorkouts: () => Promise<void>
 }
 
 export function WorkoutsTable({
     workouts,
     isLoading,
+    onWorkoutDeleted,
     onReloadWorkouts,
 }: WorkoutsTableProps) {
-    const [isLoadingWorkoutIds, setIsLoadingWorkoutIds] = useState<Set<number>>(
-        new Set()
-    )
-    const [isDeleting, setIsDeleting] = useState(false)
-
-    const [deleteDialog, setDeleteDialog] = useState<{
-        isOpen: boolean
-        workout: WorkoutBase | null
-    }>({
-        isOpen: false,
-        workout: null,
+    const { isRowLoading, setRowLoading } = useRowLoading<number>()
+    const deleteDialog = useDialog(async (workoutId: number) => {
+        await handleDelete(
+            workoutId,
+            onWorkoutDeleted,
+            onReloadWorkouts,
+            setRowLoading
+        )
     })
-
-    const openDeleteDialog = (workout: WorkoutBase) => {
-        setDeleteDialog({ isOpen: true, workout })
-    }
-
-    const closeDeleteDialog = () => {
-        setDeleteDialog({ isOpen: false, workout: null })
-    }
-
-    const setWorkoutRowLoading = (workoutId: number, isLoading: boolean) => {
-        setIsLoadingWorkoutIds((prev) => {
-            const next = new Set(prev)
-            if (isLoading) next.add(workoutId)
-            else next.delete(workoutId)
-            return next
-        })
-    }
-
-    const handleDeleteWorkout = async () => {
-        const workout = deleteDialog.workout
-        if (!workout) return
-
-        setIsDeleting(true)
-        setWorkoutRowLoading(workout.id, true)
-        try {
-            const { error } = await WorkoutService.deleteWorkout({
-                path: { workout_id: workout.id },
-            })
-            if (error) {
-                await handleApiError(error, {
-                    httpErrorHandlers: {
-                        workout_not_found: async () => {
-                            notify.error('Workout not found. Reloading data')
-                            await onReloadWorkouts()
-                        },
-                    },
-                    fallbackMessage: 'Failed to delete workout',
-                })
-                closeDeleteDialog()
-                return
-            }
-            notify.success('Workout deleted')
-            await onReloadWorkouts()
-            closeDeleteDialog()
-        } finally {
-            setWorkoutRowLoading(workout.id, false)
-            setIsDeleting(false)
-        }
-    }
 
     const rowActionsConfig: DataTableRowActionsConfig<WorkoutBase> = {
         schema: zWorkoutBase,
         menuItems: (row) => {
-            const isRowLoading = isLoadingWorkoutIds.has(row.id)
-            return [
-                {
-                    type: 'action',
-                    icon: ArrowUpRight,
-                    onSelect: () => {
-                        notify.warning('Not yet implemented')
-                        // TODO open details page
-                        // void navigate(`/workouts/${String(row.id)}`)
-                    },
-                    disabled: isRowLoading,
-                },
-                {
-                    type: 'action',
-                    className: redText,
-                    icon: Trash,
-                    onSelect: () => {
-                        openDeleteDialog(row)
-                    },
-                },
-            ]
+            return getWorkoutRowActions(
+                row.id,
+                isRowLoading(row.id),
+                deleteDialog.open
+            )
         },
     }
 
@@ -200,16 +136,7 @@ export function WorkoutsTable({
             columnId: 'notes',
             placeholder: 'Filter by notes...',
         },
-        actions: [
-            {
-                label: 'Add Workout',
-                icon: Plus,
-                onClick: () => {
-                    // TODO open create dialog
-                    notify.warning('Not yet implemented')
-                },
-            },
-        ],
+        actions: getWorkoutToolbarActions(),
         showViewOptions: true,
     }
 
@@ -224,10 +151,10 @@ export function WorkoutsTable({
             />
             {/* TODO create dialog */}
             <Dialog
-                open={deleteDialog.isOpen}
+                open={deleteDialog.state.isOpen}
                 onOpenChange={(isOpen) => {
-                    if (!isDeleting)
-                        setDeleteDialog((prev) => ({ ...prev, isOpen }))
+                    if (isOpen || deleteDialog.state.isConfirming) return
+                    deleteDialog.close()
                 }}
             >
                 <DialogContent aria-describedby={undefined}>
@@ -240,17 +167,19 @@ export function WorkoutsTable({
                     </div>
                     <DialogFooter>
                         <Button
-                            onClick={closeDeleteDialog}
-                            disabled={isDeleting}
+                            onClick={deleteDialog.close}
+                            disabled={deleteDialog.state.isConfirming}
                         >
                             Cancel
                         </Button>
                         <Button
+                            onClick={() => void deleteDialog.confirm()}
                             variant="destructive"
-                            onClick={() => void handleDeleteWorkout()}
-                            disabled={isDeleting}
+                            disabled={deleteDialog.state.isConfirming}
                         >
-                            {isDeleting ? 'Deleting...' : 'Delete'}
+                            {deleteDialog.state.isConfirming
+                                ? 'Deleting...'
+                                : 'Delete'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

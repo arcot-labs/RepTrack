@@ -35,9 +35,5 @@ async def _run() -> None:
     logger.info("Finished full Meilisearch reindex")
 
 
-def main() -> None:
-    asyncio.run(_run())
-
-
 if __name__ == "__main__":
-    main()
+    asyncio.run(_run())

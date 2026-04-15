@@ -1,8 +1,9 @@
 import type { AccessRequestPublic, ReviewerPublic } from '@/api/generated'
 import {
     getAccessRequestRowActions,
+    getDialogConfirmButtonText,
     getStatusFilterOptions,
-    handleConfirm,
+    handleUpdate,
 } from '@/components/access-requests/utils'
 import { dash } from '@/lib/text'
 import {
@@ -17,22 +18,22 @@ import {
 } from '@/tests/components/utils'
 import { getMockProps } from '@/tests/utils'
 import { render, screen } from '@testing-library/react'
+import { act } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // import last
 import { AccessRequestsTable } from '@/components/access-requests/AccessRequestsTable'
 import userEvent from '@testing-library/user-event'
-import { act } from 'react'
 
 const statusBadgeMock = vi.fn()
 const onRequestUpdatedMock = vi.fn()
 const onReloadRequestsMock = vi.fn()
 
-const confirmDialogMocks = vi.hoisted(() => ({
+const dialogMocks = vi.hoisted(() => ({
     open: vi.fn(),
     close: vi.fn(),
     confirm: vi.fn(),
-    useConfirmDialog: vi.fn(),
+    useDialog: vi.fn(),
 }))
 
 const dialogMock = vi.hoisted(() => vi.fn())
@@ -55,13 +56,14 @@ vi.mock('@/components/access-requests/StatusBadge', () => ({
 }))
 
 vi.mock('@/components/access-requests/utils', () => ({
-    handleConfirm: vi.fn(),
+    handleUpdate: vi.fn(),
     getAccessRequestRowActions: vi.fn(),
     getStatusFilterOptions: vi.fn(),
+    getDialogConfirmButtonText: vi.fn(),
 }))
 
-vi.mock('@/components/access-requests/confirmDialog', () => ({
-    useConfirmDialog: confirmDialogMocks.useConfirmDialog,
+vi.mock('@/components/dialog', () => ({
+    useDialog: dialogMocks.useDialog,
 }))
 
 vi.mock('@/components/data-table/DataTableInlineRowActions', () => ({
@@ -149,6 +151,29 @@ const renderAccessRequestsTable = (
         />
     )
 
+const mockDialogState = ({
+    isOpen = false,
+    isConfirming = false,
+    args = [pendingRequest, 'approved'],
+} = {}) => {
+    dialogMocks.useDialog.mockReturnValue({
+        state: {
+            isOpen,
+            isConfirming,
+            args,
+        },
+        open: dialogMocks.open,
+        close: dialogMocks.close,
+        confirm: dialogMocks.confirm,
+    })
+}
+
+const getDialogProps = () => {
+    return getMockProps(dialogMock) as {
+        onOpenChange: (isOpen: boolean) => void
+    }
+}
+
 beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(getAccessRequestRowActions).mockReturnValue([
@@ -162,16 +187,17 @@ beforeEach(() => {
     vi.mocked(getStatusFilterOptions).mockReturnValue([
         { label: 'Pending', value: 'pending' },
     ])
-    confirmDialogMocks.useConfirmDialog.mockReturnValue({
-        state: {
-            isOpen: false,
-            request: pendingRequest,
-            action: 'approved',
-        },
-        open: confirmDialogMocks.open,
-        close: confirmDialogMocks.close,
-        confirm: confirmDialogMocks.confirm,
-    })
+    mockDialogState()
+    // dialogMocks.useDialog.mockReturnValue({
+    //     state: {
+    //         isOpen: false,
+    //         isConfirming: false,
+    //         args: [pendingRequest, 'approved'],
+    //     },
+    //     open: dialogMocks.open,
+    //     close: dialogMocks.close,
+    //     confirm: dialogMocks.confirm,
+    // })
 })
 
 describe('AccessRequestsTable - columns', () => {
@@ -351,14 +377,14 @@ describe('AccessRequestsTable', () => {
 })
 
 describe('AccessRequestsTable - dialog', () => {
-    it('calls handleConfirm in callback', async () => {
+    it('calls handleUpdate in callback', async () => {
         renderAccessRequestsTable()
 
         expect(screen.getByTestId('mock-dialog')).toBeInTheDocument()
 
-        expect(confirmDialogMocks.useConfirmDialog).toHaveBeenCalledOnce()
+        expect(dialogMocks.useDialog).toHaveBeenCalledOnce()
 
-        const onConfirm = getMockProps(confirmDialogMocks.useConfirmDialog)
+        const onConfirm = getMockProps(dialogMocks.useDialog)
         expect(onConfirm).toBeTypeOf('function')
 
         await act(async () => {
@@ -367,7 +393,7 @@ describe('AccessRequestsTable - dialog', () => {
             await Promise.resolve()
         })
 
-        expect(handleConfirm).toHaveBeenCalledWith(
+        expect(handleUpdate).toHaveBeenCalledWith(
             pendingRequest,
             'approved',
             { id: 1, username: 'test-user' },
@@ -377,40 +403,40 @@ describe('AccessRequestsTable - dialog', () => {
         )
     })
 
-    it('throws if onOpenChange called with true', () => {
+    it('does nothing if onOpenChange called with true', () => {
         renderAccessRequestsTable()
 
-        const dialogProps = getMockProps(dialogMock) as {
-            onOpenChange: (isOpen: boolean) => void
-        }
+        const dialogProps = getDialogProps()
+        dialogProps.onOpenChange(true)
 
-        expect(() => {
-            dialogProps.onOpenChange(true)
-        }).toThrow('Dialog should not open directly')
-        expect(confirmDialogMocks.close).not.toHaveBeenCalled()
+        expect(dialogMocks.close).not.toHaveBeenCalled()
+    })
+
+    it('does nothing if onOpenChange called when dialog already confirming', () => {
+        mockDialogState({
+            isOpen: true,
+            isConfirming: true,
+        })
+        renderAccessRequestsTable()
+
+        const dialogProps = getDialogProps()
+        dialogProps.onOpenChange(false)
+
+        expect(dialogMocks.close).not.toHaveBeenCalled()
     })
 
     it('closes dialog when onOpenChange called with false', () => {
         renderAccessRequestsTable()
 
-        const dialogProps = getMockProps(dialogMock) as {
-            onOpenChange: (isOpen: boolean) => void
-        }
+        const dialogProps = getDialogProps()
         dialogProps.onOpenChange(false)
 
-        expect(confirmDialogMocks.close).toHaveBeenCalledOnce()
+        expect(dialogMocks.close).toHaveBeenCalledOnce()
     })
 
     it('shows correct dialog content for approve', () => {
-        confirmDialogMocks.useConfirmDialog.mockReturnValueOnce({
-            state: {
-                isOpen: true,
-                request: pendingRequest,
-                action: 'approved',
-            },
-            open: confirmDialogMocks.open,
-            close: confirmDialogMocks.close,
-            confirm: confirmDialogMocks.confirm,
+        mockDialogState({
+            isOpen: true,
         })
         renderAccessRequestsTable()
 
@@ -422,15 +448,9 @@ describe('AccessRequestsTable - dialog', () => {
     })
 
     it('shows correct dialog content for reject', () => {
-        confirmDialogMocks.useConfirmDialog.mockReturnValueOnce({
-            state: {
-                isOpen: true,
-                request: pendingRequest,
-                action: 'rejected',
-            },
-            open: confirmDialogMocks.open,
-            close: confirmDialogMocks.close,
-            confirm: confirmDialogMocks.confirm,
+        mockDialogState({
+            isOpen: true,
+            args: [pendingRequest, 'rejected'],
         })
         renderAccessRequestsTable()
 
@@ -441,12 +461,46 @@ describe('AccessRequestsTable - dialog', () => {
         )
     })
 
-    it('calls confirm when button clicked', async () => {
+    it('disables buttons when dialog is confirming', () => {
+        vi.mocked(getDialogConfirmButtonText).mockReturnValueOnce(
+            'Approving...'
+        )
+
+        mockDialogState({
+            isOpen: true,
+            isConfirming: true,
+        })
         renderAccessRequestsTable()
 
-        const button = screen.getByText('Approve')
+        const cancelButton = screen.getByText('Cancel')
+        const approvingButton = screen.getByText('Approving...')
+
+        expect(cancelButton).toBeDisabled()
+        expect(approvingButton).toBeDisabled()
+    })
+
+    it('calls confirm when button clicked', async () => {
+        vi.mocked(getDialogConfirmButtonText).mockReturnValueOnce('Reject')
+
+        renderAccessRequestsTable()
+
+        const button = screen.getByText('Reject')
         await userEvent.click(button)
 
-        expect(confirmDialogMocks.confirm).toHaveBeenCalledOnce()
+        expect(dialogMocks.confirm).toHaveBeenCalledOnce()
+    })
+
+    it('passes null for action when args are not set', () => {
+        vi.mocked(getDialogConfirmButtonText).mockReturnValueOnce('Reject')
+
+        mockDialogState({
+            isOpen: true,
+            // @ts-expect-error args set null intentionally
+            args: null,
+        })
+
+        renderAccessRequestsTable()
+
+        expect(getDialogConfirmButtonText).toHaveBeenCalledWith(null, false)
     })
 })

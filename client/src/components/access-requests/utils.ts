@@ -1,6 +1,6 @@
 import {
-    type AccessRequestPublic,
     AccessRequestService,
+    type AccessRequestPublic,
     type UpdateAccessRequestStatusRequest,
     type UserPublic,
 } from '@/api/generated'
@@ -12,28 +12,15 @@ import { capitalizeWords } from '@/lib/text'
 import type { FilterOption, MenuItemConfig } from '@/models/data-table'
 import { Check, X } from 'lucide-react'
 
-export const setRequestLoading = (
-    setIsLoadingRequestIds: React.Dispatch<React.SetStateAction<Set<number>>>,
-    requestId: number,
-    isLoading: boolean
-) => {
-    setIsLoadingRequestIds((prev) => {
-        const next = new Set(prev)
-        if (isLoading) next.add(requestId)
-        else next.delete(requestId)
-        return next
-    })
-}
-
-export const handleConfirm = async (
+export const handleUpdate = async (
     request: AccessRequestPublic,
     action: UpdateAccessRequestStatusRequest['status'],
     user: UserPublic | null,
     onRequestUpdated: (request: AccessRequestPublic) => void,
     onReloadRequests: () => Promise<void>,
-    setIsLoadingRequestIds: React.Dispatch<React.SetStateAction<Set<number>>>
+    setRowLoading: (requestId: number, isLoading: boolean) => void
 ) => {
-    setRequestLoading(setIsLoadingRequestIds, request.id, true)
+    setRowLoading(request.id, true)
     try {
         const { error } = await AccessRequestService.updateAccessRequestStatus({
             path: {
@@ -68,26 +55,26 @@ export const handleConfirm = async (
         }
         onRequestUpdated(updatedRequest)
     } finally {
-        setRequestLoading(setIsLoadingRequestIds, request.id, false)
+        setRowLoading(request.id, false)
     }
 }
 
 export const getAccessRequestRowActions = (
-    row: AccessRequestPublic,
+    request: AccessRequestPublic,
     isRowLoading: boolean,
     openConfirmDialog: (
         request: AccessRequestPublic,
         action: UpdateAccessRequestStatusRequest['status']
     ) => void
 ): MenuItemConfig[] => {
-    if (row.status !== 'pending') return []
+    if (request.status !== 'pending') return []
     return [
         {
             type: 'action',
             className: greenText,
             icon: Check,
             onSelect: () => {
-                openConfirmDialog(row, 'approved')
+                openConfirmDialog(request, 'approved')
             },
             disabled: isRowLoading,
         },
@@ -96,7 +83,7 @@ export const getAccessRequestRowActions = (
             className: redText,
             icon: X,
             onSelect: () => {
-                openConfirmDialog(row, 'rejected')
+                openConfirmDialog(request, 'rejected')
             },
             disabled: isRowLoading,
         },
@@ -108,4 +95,16 @@ export function getStatusFilterOptions(): FilterOption[] {
         label: capitalizeWords(status),
         value: status,
     }))
+}
+
+export function getDialogConfirmButtonText(
+    action: UpdateAccessRequestStatusRequest['status'] | null,
+    isConfirming: boolean
+): string {
+    switch (action) {
+        case 'approved':
+            return isConfirming ? 'Approving...' : 'Approve'
+        default:
+            return isConfirming ? 'Rejecting...' : 'Reject'
+    }
 }
