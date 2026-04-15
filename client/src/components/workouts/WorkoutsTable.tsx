@@ -30,25 +30,31 @@ import type { ColumnDef } from '@tanstack/react-table'
 interface WorkoutsTableProps {
     workouts: WorkoutBase[]
     isLoading: boolean
+    onWorkoutDeleted: (workoutId: number) => void
     onReloadWorkouts: () => Promise<void>
 }
 
 export function WorkoutsTable({
     workouts,
     isLoading,
+    onWorkoutDeleted,
     onReloadWorkouts,
 }: WorkoutsTableProps) {
     const { isRowLoading, setRowLoading } = useRowLoading<number>()
-    const deleteDialog = useDialog<WorkoutBase>(async (workout) => {
-        // TODO call handler
-        await handleDelete(workout.id, onReloadWorkouts, setRowLoading)
+    const deleteDialog = useDialog<number>(async (workoutId) => {
+        await handleDelete(
+            workoutId,
+            onWorkoutDeleted,
+            onReloadWorkouts,
+            setRowLoading
+        )
     })
 
     const rowActionsConfig: DataTableRowActionsConfig<WorkoutBase> = {
         schema: zWorkoutBase,
         menuItems: (row) => {
             return getWorkoutRowActions(
-                row,
+                row.id,
                 isRowLoading(row.id),
                 deleteDialog.open
             )

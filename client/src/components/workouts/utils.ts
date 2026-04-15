@@ -1,15 +1,16 @@
-import { WorkoutService, type WorkoutBase } from '@/api/generated'
+import { WorkoutService } from '@/api/generated'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import { redText } from '@/lib/styles'
 import type {
-    DataTableToolbarConfig,
+    DataTableToolbarAction,
     MenuItemConfig,
 } from '@/models/data-table'
 import { ArrowUpRight, Plus, Trash } from 'lucide-react'
 
 export const handleDelete = async (
     workoutId: number,
+    onWorkoutDeleted: (workoutId: number) => void,
     onReloadWorkouts: () => Promise<void>,
     setRowLoading: (workoutId: number, isLoading: boolean) => void
 ) => {
@@ -31,16 +32,16 @@ export const handleDelete = async (
             return
         }
         notify.success('Workout deleted')
-        await onReloadWorkouts()
+        onWorkoutDeleted(workoutId)
     } finally {
         setRowLoading(workoutId, false)
     }
 }
 
 export const getWorkoutRowActions = (
-    workout: WorkoutBase,
+    workoutId: number,
     isRowLoading: boolean,
-    openDeleteDialog: (workout: WorkoutBase) => void
+    openDeleteDialog: (workoutId: number) => void
 ): MenuItemConfig[] => {
     return [
         {
@@ -49,7 +50,7 @@ export const getWorkoutRowActions = (
             onSelect: () => {
                 // TODO open details page
                 notify.warning('Not yet implemented')
-                // void navigate(`/workouts/${String(workout.id)}`)
+                // void navigate(`/workouts/${String(workoutId)}`)
             },
             disabled: isRowLoading,
         },
@@ -58,21 +59,20 @@ export const getWorkoutRowActions = (
             className: redText,
             icon: Trash,
             onSelect: () => {
-                openDeleteDialog(workout)
+                openDeleteDialog(workoutId)
             },
             disabled: isRowLoading,
         },
     ]
 }
 
-export const getWorkoutToolbarActions =
-    (): DataTableToolbarConfig['actions'] => [
-        {
-            label: 'Add Workout',
-            icon: Plus,
-            onClick: () => {
-                // TODO open create dialog
-                notify.warning('Not yet implemented')
-            },
+export const getWorkoutToolbarActions = (): DataTableToolbarAction[] => [
+    {
+        label: 'Add Workout',
+        icon: Plus,
+        onClick: () => {
+            // TODO open create dialog
+            notify.warning('Not yet implemented')
         },
-    ]
+    },
+]

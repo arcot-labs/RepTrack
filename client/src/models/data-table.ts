@@ -23,7 +23,7 @@ interface DataTableFilterConfig {
     options: FilterOption[]
 }
 
-interface DataTableToolbarAction {
+export interface DataTableToolbarAction {
     label: string
     onClick: () => void | Promise<void>
     variant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost'
