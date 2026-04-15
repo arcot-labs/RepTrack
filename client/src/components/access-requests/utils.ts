@@ -12,7 +12,7 @@ import { capitalizeWords } from '@/lib/text'
 import type { FilterOption, MenuItemConfig } from '@/models/data-table'
 import { Check, X } from 'lucide-react'
 
-export const handleConfirm = async (
+export const handleUpdate = async (
     request: AccessRequestPublic,
     action: UpdateAccessRequestStatusRequest['status'],
     user: UserPublic | null,

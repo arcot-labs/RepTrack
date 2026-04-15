@@ -2,7 +2,7 @@ import type { AccessRequestPublic, ReviewerPublic } from '@/api/generated'
 import {
     getAccessRequestRowActions,
     getStatusFilterOptions,
-    handleConfirm,
+    handleUpdate,
 } from '@/components/access-requests/utils'
 import { dash } from '@/lib/text'
 import {
@@ -55,7 +55,7 @@ vi.mock('@/components/access-requests/StatusBadge', () => ({
 }))
 
 vi.mock('@/components/access-requests/utils', () => ({
-    handleConfirm: vi.fn(),
+    handleUpdate: vi.fn(),
     getAccessRequestRowActions: vi.fn(),
     getStatusFilterOptions: vi.fn(),
 }))
@@ -351,7 +351,7 @@ describe('AccessRequestsTable', () => {
 })
 
 describe('AccessRequestsTable - dialog', () => {
-    it('calls handleConfirm in callback', async () => {
+    it('calls handleUpdate in callback', async () => {
         renderAccessRequestsTable()
 
         expect(screen.getByTestId('mock-dialog')).toBeInTheDocument()
@@ -367,7 +367,7 @@ describe('AccessRequestsTable - dialog', () => {
             await Promise.resolve()
         })
 
-        expect(handleConfirm).toHaveBeenCalledWith(
+        expect(handleUpdate).toHaveBeenCalledWith(
             pendingRequest,
             'approved',
             { id: 1, username: 'test-user' },

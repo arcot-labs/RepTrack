@@ -8,7 +8,7 @@ import { StatusBadge } from '@/components/access-requests/StatusBadge'
 import {
     getAccessRequestRowActions,
     getStatusFilterOptions,
-    handleConfirm,
+    handleUpdate,
 } from '@/components/access-requests/utils'
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
@@ -50,7 +50,7 @@ export function AccessRequestsTable({
         AccessRequestPublic,
         UpdateAccessRequestStatusRequest['status']
     >(async (request, action) => {
-        await handleConfirm(
+        await handleUpdate(
             request,
             action,
             user,
