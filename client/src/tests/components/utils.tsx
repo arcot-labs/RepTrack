@@ -1,4 +1,3 @@
-import type { UserPublic } from '@/api/generated'
 import { getMockProps } from '@/tests/utils'
 import type { ColumnDef } from '@tanstack/react-table'
 import { render, screen } from '@testing-library/react'
@@ -10,7 +9,7 @@ export const headerMock = vi.fn()
 vi.mock('@/components/data-table/DataTable', () => ({
     DataTable: (props: unknown) => {
         dataTableMock(props)
-        return <div data-testid="mock-users-table" />
+        return <div data-testid="mock-data-table" />
     },
 }))
 
@@ -21,10 +20,11 @@ vi.mock('@/components/data-table/DataTableColumnHeader', () => ({
     },
 }))
 
-export const getDataTableProps = () =>
-    getMockProps(dataTableMock) as {
-        columns: ColumnDef<UserPublic>[]
+export function getDataTableProps<T>() {
+    return getMockProps(dataTableMock) as {
+        columns: ColumnDef<T>[]
     }
+}
 
 export function hasAccessorFn<T>(
     col: ColumnDef<T>
@@ -56,18 +56,18 @@ export function hasFilterFn<T>(col: ColumnDef<T>): col is ColumnDef<T> & {
     return 'filterFn' in col && typeof col.filterFn === 'function'
 }
 
-export function getColumn(
-    columns: ColumnDef<UserPublic>[],
-    predicate: (col: ColumnDef<UserPublic>) => boolean
-): ColumnDef<UserPublic> {
+export function getColumn<T>(
+    columns: ColumnDef<T>[],
+    predicate: (col: ColumnDef<T>) => boolean
+): ColumnDef<T> {
     const col = columns.find(predicate)
     expect(col).toBeDefined()
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return col!
 }
 
-export function testHeader(
-    column: ColumnDef<UserPublic>,
+export function testHeader<T>(
+    column: ColumnDef<T>,
     id: string,
     expectedTitle: string
 ) {
@@ -88,7 +88,7 @@ export function testHeader(
     )
 }
 
-export function renderCell(column: ColumnDef<UserPublic>, row: UserPublic) {
+export function renderCell<T>(column: ColumnDef<T>, row: T) {
     if (!hasCell(column)) throw new Error('Column does not have a cell')
 
     const cell = column.cell({

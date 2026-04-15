@@ -13,7 +13,9 @@ on:
             - client/Dockerfile
             - client/index.html
             - client/nginx.conf
-            - client/package*.json
+            - client/package.json
+            - client/pnpm-lock.yaml
+            - client/pnpm-workspace.yaml
             - client/tsconfig*.json
             - client/vite.config.ts
             - config/**

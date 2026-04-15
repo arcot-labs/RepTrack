@@ -9,7 +9,9 @@ on:
             - .github/workflows/*.yml
             - client/public/**
             - client/src/**
-            - client/package*.json
+            - client/package.json
+            - client/pnpm-lock.yaml
+            - client/pnpm-workspace.yaml
             - client/tsconfig*.json
             - client/vite.config.ts
             - client/index.html

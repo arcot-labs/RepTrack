@@ -1,16 +1,21 @@
-import type { AccessRequestPublic } from '@/api/generated/types.gen'
+import type {
+    AccessRequestPublic,
+    UpdateAccessRequestStatusRequest,
+} from '@/api/generated/types.gen'
 import { zAccessRequestPublic } from '@/api/generated/zod.gen'
 import { useSession } from '@/auth/session'
 import { StatusBadge } from '@/components/access-requests/StatusBadge'
-import { useConfirmDialog } from '@/components/access-requests/useConfirmDialog'
 import {
     getAccessRequestRowActions,
+    getDialogConfirmButtonText,
     getStatusFilterOptions,
-    updateAccessRequestStatus,
+    handleUpdate,
 } from '@/components/access-requests/utils'
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
+import { useRowLoading } from '@/components/data-table/rowLoading'
+import { useDialog } from '@/components/dialog'
 import {
     Dialog,
     DialogContent,
@@ -26,7 +31,6 @@ import type {
     DataTableToolbarConfig,
 } from '@/models/data-table'
 import type { ColumnDef } from '@tanstack/react-table'
-import { useState } from 'react'
 
 interface AccessRequestsTableProps {
     requests: AccessRequestPublic[]
@@ -42,33 +46,29 @@ export function AccessRequestsTable({
     onReloadRequests,
 }: AccessRequestsTableProps) {
     const { user } = useSession()
-    const [isLoadingRequestIds, setIsLoadingRequestIds] = useState<Set<number>>(
-        new Set()
+    const { isRowLoading, setRowLoading } = useRowLoading<number>()
+    const confirmDialog = useDialog(
+        async (
+            request: AccessRequestPublic,
+            action: UpdateAccessRequestStatusRequest['status']
+        ) => {
+            await handleUpdate(
+                request,
+                action,
+                user,
+                onRequestUpdated,
+                onReloadRequests,
+                setRowLoading
+            )
+        }
     )
-    const confirmDialog = useConfirmDialog((request, action) => {
-        setIsLoadingRequestIds((prev) => new Set(prev).add(request.id))
-        void updateAccessRequestStatus(
-            request,
-            action,
-            user,
-            onRequestUpdated,
-            onReloadRequests
-        ).finally(() => {
-            setIsLoadingRequestIds((prev) => {
-                const next = new Set(prev)
-                next.delete(request.id)
-                return next
-            })
-        })
-    })
 
     const rowActionsConfig: DataTableRowActionsConfig<AccessRequestPublic> = {
         schema: zAccessRequestPublic,
         menuItems: (row) => {
-            const isRowLoading = isLoadingRequestIds.has(row.id)
             return getAccessRequestRowActions(
                 row,
-                isRowLoading,
+                isRowLoading(row.id),
                 confirmDialog.open
             )
         },
@@ -131,11 +131,11 @@ export function AccessRequestsTable({
             enableHiding: true,
         },
         {
+            accessorKey: 'reviewer.username',
             meta: {
                 hideOnBelowMd: true,
                 viewLabel: 'Reviewed By',
             },
-            accessorKey: 'reviewer.username',
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Reviewed By" />
             ),
@@ -201,13 +201,14 @@ export function AccessRequestsTable({
             <Dialog
                 open={confirmDialog.state.isOpen}
                 onOpenChange={(isOpen) => {
-                    confirmDialog.setIsOpen(isOpen)
+                    if (isOpen || confirmDialog.state.isConfirming) return
+                    confirmDialog.close()
                 }}
             >
                 <DialogContent aria-describedby={undefined}>
                     <DialogHeader>
                         <DialogTitle>
-                            {confirmDialog.state.action === 'approved'
+                            {confirmDialog.state.args?.[1] === 'approved'
                                 ? 'Approve Request'
                                 : 'Reject Request'}
                         </DialogTitle>
@@ -215,31 +216,40 @@ export function AccessRequestsTable({
                     <div className="text-sm">
                         Are you sure you want to{' '}
                         <span className="font-semibold">
-                            {confirmDialog.state.action === 'approved'
+                            {confirmDialog.state.args?.[1] === 'approved'
                                 ? 'approve'
                                 : 'reject'}
                         </span>{' '}
                         this access request for{' '}
                         <span className="font-semibold">
-                            {confirmDialog.state.request?.first_name}{' '}
-                            {confirmDialog.state.request?.last_name}
+                            {confirmDialog.state.args?.[0].first_name}{' '}
+                            {confirmDialog.state.args?.[0].last_name}
                         </span>
                         ?
                         <div className="mt-2">This action is irreversible.</div>
                     </div>
                     <DialogFooter>
-                        <Button onClick={confirmDialog.close}>Cancel</Button>
                         <Button
-                            onClick={confirmDialog.confirm}
+                            onClick={confirmDialog.close}
+                            disabled={confirmDialog.state.isConfirming}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                void confirmDialog.confirm()
+                            }}
                             variant={
-                                confirmDialog.state.action === 'approved'
+                                confirmDialog.state.args?.[1] === 'approved'
                                     ? 'success'
                                     : 'destructive'
                             }
+                            disabled={confirmDialog.state.isConfirming}
                         >
-                            {confirmDialog.state.action === 'approved'
-                                ? 'Approve'
-                                : 'Reject'}
+                            {getDialogConfirmButtonText(
+                                confirmDialog.state.args?.[1] ?? null,
+                                confirmDialog.state.isConfirming
+                            )}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

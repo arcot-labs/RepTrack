@@ -18,8 +18,8 @@ importers:
                 specifier: ^16.4.0
                 version: 16.4.0
             npm-check-updates:
-                specifier: ^20.0.1
-                version: 20.0.1
+                specifier: ^21.0.0
+                version: 21.0.0
             prettier:
                 specifier: ^3.8.2
                 version: 3.8.2
@@ -203,12 +203,12 @@ packages:
             }
         engines: { node: '>=18' }
 
-    npm-check-updates@20.0.1:
+    npm-check-updates@21.0.0:
         resolution:
             {
-                integrity: sha512-YuzpyL1Od5dJzpeETVh2H5o1I8tpi0zkf6v7k7rXwUDfiDliBX9dgVIb7FlEfp8Lu2RtECAv63ZHm/rqpIhYsw==,
+                integrity: sha512-iGFLoW1QWsEDLR6Cnklyk+iHTf20hS84o79idR6AKhjSwk0whMdCd5FS0bTgEe6gMrRnJ0fGr2P6BEZ2zOelYg==,
             }
-        engines: { node: '>=20.0.0', npm: '>=8.12.1' }
+        engines: { node: ^20.19.0 || ^22.12.0 || >=24.0.0, npm: '>=10.0.0' }
         hasBin: true
 
     onetime@7.0.0:
@@ -516,7 +516,7 @@ snapshots:
 
     mimic-function@5.0.1: {}
 
-    npm-check-updates@20.0.1: {}
+    npm-check-updates@21.0.0: {}
 
     onetime@7.0.0:
         dependencies:

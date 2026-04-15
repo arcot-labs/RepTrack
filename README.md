@@ -1,5 +1,9 @@
+[![Coverage](https://codecov.io/gh/arcot-labs/RepTrack/graph/badge.svg?token=3YVNF9OHS7)](https://codecov.io/gh/arcot-labs/RepTrack)
+
 [![CI / Test Server](https://github.com/arcot-labs/RepTrack/actions/workflows/test.yml/badge.svg)](https://github.com/arcot-labs/RepTrack/actions/workflows/test.yml)
+
 [![CI / Build Images](https://github.com/arcot-labs/RepTrack/actions/workflows/build.yml/badge.svg)](https://github.com/arcot-labs/RepTrack/actions/workflows/build.yml)
+
 [![CD / Deploy Application](https://github.com/arcot-labs/RepTrack/actions/workflows/deploy.yml/badge.svg)](https://github.com/arcot-labs/RepTrack/actions/workflows/deploy.yml)
 
 # RepTrack
