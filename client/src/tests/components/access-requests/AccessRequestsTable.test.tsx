@@ -188,16 +188,6 @@ beforeEach(() => {
         { label: 'Pending', value: 'pending' },
     ])
     mockDialogState()
-    // dialogMocks.useDialog.mockReturnValue({
-    //     state: {
-    //         isOpen: false,
-    //         isConfirming: false,
-    //         args: [pendingRequest, 'approved'],
-    //     },
-    //     open: dialogMocks.open,
-    //     close: dialogMocks.close,
-    //     confirm: dialogMocks.confirm,
-    // })
 })
 
 describe('AccessRequestsTable - columns', () => {
