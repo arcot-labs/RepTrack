@@ -35,12 +35,18 @@ async def client(
 ) -> AsyncGenerator[AsyncClient]:
     logger.info("Setting up test client")
 
+    async def override_get_db_session() -> AsyncGenerator[AsyncSession]:
+        yield db_session
+
+    async def override_get_ms_client() -> AsyncGenerator[MSAsyncClient]:
+        yield ms_client
+
     fastapi_app.dependency_overrides[get_settings] = lambda: settings
     fastapi_app.dependency_overrides[get_db_session_factory] = lambda: (
         db_session_factory
     )
-    fastapi_app.dependency_overrides[get_db_session] = lambda: db_session
-    fastapi_app.dependency_overrides[get_ms_client] = lambda: ms_client
+    fastapi_app.dependency_overrides[get_db_session] = override_get_db_session
+    fastapi_app.dependency_overrides[get_ms_client] = override_get_ms_client
     fastapi_app.dependency_overrides[get_email_service] = lambda: mock_email_svc
     fastapi_app.dependency_overrides[get_github_service] = lambda: mock_github_svc
 
