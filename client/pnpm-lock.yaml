@@ -3384,12 +3384,11 @@ packages:
                 integrity: sha512-7ZgogeTnjuHbo+ct10G9Ffp0mif17idi0IyWNVA/wcwcm7NPOD/WEHVP3n7n3MhXqxoIYm8d6MuZohYWIZ4T3w==,
             }
 
-    dompurify@3.3.2:
+    dompurify@3.4.0:
         resolution:
             {
-                integrity: sha512-6obghkliLdmKa56xdbLOpUZ43pAR6xFy1uOrxBaIDjT+yaRuuybLjGS9eVBoSR/UPU5fq3OXClEHLJNGvbxKpQ==,
+                integrity: sha512-nolgK9JcaUXMSmW+j1yaSvaEaoXYHwWyGJlkoCTghc97KgGDDSnpoU/PlEnw63Ah+TGKFOyY+X5LnxaWbCSfXg==,
             }
-        engines: { node: '>=20' }
 
     dotenv@17.3.1:
         resolution:
@@ -8077,7 +8076,7 @@ snapshots:
 
     dom-accessibility-api@0.6.3: {}
 
-    dompurify@3.3.2:
+    dompurify@3.4.0:
         optionalDependencies:
             '@types/trusted-types': 2.0.7
 
@@ -8773,7 +8772,7 @@ snapshots:
             d3-sankey: 0.12.3
             dagre-d3-es: 7.0.14
             dayjs: 1.11.19
-            dompurify: 3.3.2
+            dompurify: 3.4.0
             katex: 0.16.27
             khroma: 2.1.0
             lodash-es: 4.17.23
