@@ -18,12 +18,12 @@ import {
 } from '@/tests/components/utils'
 import { getMockProps } from '@/tests/utils'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { act } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // import last
 import { AccessRequestsTable } from '@/components/access-requests/AccessRequestsTable'
-import userEvent from '@testing-library/user-event'
 
 const statusBadgeMock = vi.fn()
 const onRequestUpdatedMock = vi.fn()
@@ -383,7 +383,7 @@ describe('AccessRequestsTable - dialog', () => {
             await Promise.resolve()
         })
 
-        expect(handleUpdate).toHaveBeenCalledWith(
+        expect(handleUpdate).toHaveBeenCalledExactlyOnceWith(
             pendingRequest,
             'approved',
             { id: 1, username: 'test-user' },
