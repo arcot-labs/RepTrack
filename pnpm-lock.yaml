@@ -21,17 +21,17 @@ importers:
                 specifier: ^21.0.0
                 version: 21.0.0
             prettier:
-                specifier: ^3.8.2
-                version: 3.8.2
+                specifier: ^3.8.3
+                version: 3.8.3
             prettier-plugin-organize-imports:
                 specifier: ^4.3.0
-                version: 4.3.0(prettier@3.8.2)(typescript@5.9.3)
+                version: 4.3.0(prettier@3.8.3)(typescript@5.9.3)
             prettier-plugin-tailwindcss:
                 specifier: ^0.7.2
-                version: 0.7.2(prettier-plugin-organize-imports@4.3.0(prettier@3.8.2)(typescript@5.9.3))(prettier@3.8.2)
+                version: 0.7.2(prettier-plugin-organize-imports@4.3.0(prettier@3.8.3)(typescript@5.9.3))(prettier@3.8.3)
             prettier-plugin-toml:
                 specifier: 2.0.6
-                version: 2.0.6(prettier@3.8.2)
+                version: 2.0.6(prettier@3.8.3)
 
 packages:
     '@taplo/core@0.2.0':
@@ -305,10 +305,10 @@ packages:
         peerDependencies:
             prettier: ^3.0.3
 
-    prettier@3.8.2:
+    prettier@3.8.3:
         resolution:
             {
-                integrity: sha512-8c3mgTe0ASwWAJK+78dpviD+A8EqhndQPUBpNUIPt6+xWlIigCwfN01lWr9MAede4uqXGTEKeQWTvzb3vjia0Q==,
+                integrity: sha512-7igPTM53cGHMW8xWuVTydi2KO233VFiTNyF5hLJqpilHfmn8C8gPf+PS7dUT64YcXFbiMGZxS9pCSxL/Dxm/Jw==,
             }
         engines: { node: '>=14' }
         hasBin: true
@@ -524,23 +524,23 @@ snapshots:
 
     picomatch@4.0.4: {}
 
-    prettier-plugin-organize-imports@4.3.0(prettier@3.8.2)(typescript@5.9.3):
+    prettier-plugin-organize-imports@4.3.0(prettier@3.8.3)(typescript@5.9.3):
         dependencies:
-            prettier: 3.8.2
+            prettier: 3.8.3
             typescript: 5.9.3
 
-    prettier-plugin-tailwindcss@0.7.2(prettier-plugin-organize-imports@4.3.0(prettier@3.8.2)(typescript@5.9.3))(prettier@3.8.2):
+    prettier-plugin-tailwindcss@0.7.2(prettier-plugin-organize-imports@4.3.0(prettier@3.8.3)(typescript@5.9.3))(prettier@3.8.3):
         dependencies:
-            prettier: 3.8.2
+            prettier: 3.8.3
         optionalDependencies:
-            prettier-plugin-organize-imports: 4.3.0(prettier@3.8.2)(typescript@5.9.3)
+            prettier-plugin-organize-imports: 4.3.0(prettier@3.8.3)(typescript@5.9.3)
 
-    prettier-plugin-toml@2.0.6(prettier@3.8.2):
+    prettier-plugin-toml@2.0.6(prettier@3.8.3):
         dependencies:
             '@taplo/lib': 0.5.0
-            prettier: 3.8.2
+            prettier: 3.8.3
 
-    prettier@3.8.2: {}
+    prettier@3.8.3: {}
 
     restore-cursor@5.1.0:
         dependencies:
