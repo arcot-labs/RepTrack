@@ -219,15 +219,13 @@ export function ExerciseFormDialog({
             .filter((group): group is MuscleGroupPublic => !!group)
     }, [muscleGroups, searchResults])
 
-    const handleAttemptCloseDialog = (e: Event) => {
-        if (isDirty && !confirm('Discard changes?')) {
-            e.preventDefault()
-        }
+    const attemptClose = () => {
+        if (isSubmitting) return
+        if (isDirty && !confirm('Discard changes?')) return
+        close()
     }
 
-    const closeDialog = () => {
-        if (isCreateMode) resetCreate(defaultCreateExerciseFormValues)
-        else if (!isViewMode) resetEdit(defaultUpdateExerciseFormValues)
+    const close = () => {
         onOpenChange(false)
     }
 
@@ -282,19 +280,19 @@ export function ExerciseFormDialog({
         }
         notify.success('Exercise created')
         await onSuccess()
-        closeDialog()
+        close()
     }
 
     const onSubmitEditForm = async (form: UpdateExerciseForm) => {
         if (!exercise) {
             notify.error('Exercise data is missing. Try again')
-            closeDialog()
+            close()
             return
         }
 
         if (!isEditDirty) {
             notify.warning('No changes to save')
-            closeDialog()
+            close()
             return
         }
 
@@ -316,7 +314,7 @@ export function ExerciseFormDialog({
                     httpErrorHandlers: {
                         exercise_not_found: async () => {
                             notify.error('Exercise not found. Reloading data')
-                            closeDialog()
+                            close()
                             await onReloadExercises()
                         },
                         muscle_group_not_found: async () => {
@@ -338,7 +336,7 @@ export function ExerciseFormDialog({
             }
             notify.success('Exercise updated')
             await onSuccess()
-            closeDialog()
+            close()
         } finally {
             onRowLoadingChange(exercise.id, false)
         }
@@ -358,15 +356,19 @@ export function ExerciseFormDialog({
             open={open}
             onOpenChange={() => {
                 // only triggered on close (open state controlled by parent)
-                if (!isSubmitting) closeDialog()
+                attemptClose()
             }}
         >
             <DialogContent
                 aria-describedby={undefined}
                 onPointerDownOutside={(e) => {
-                    handleAttemptCloseDialog(e)
+                    e.preventDefault()
+                    attemptClose()
                 }}
-                showCloseButton={false}
+                onEscapeKeyDown={(e) => {
+                    e.preventDefault()
+                    attemptClose()
+                }}
             >
                 <DialogHeader>
                     <DialogTitle>{formDialogTitle}</DialogTitle>
@@ -543,7 +545,8 @@ export function ExerciseFormDialog({
                             variant="destructive"
                             disabled={isSubmitting}
                             onClick={(e) => {
-                                handleAttemptCloseDialog(e as unknown as Event)
+                                e.preventDefault()
+                                attemptClose()
                             }}
                         >
                             {isViewMode ? 'Close' : 'Cancel'}

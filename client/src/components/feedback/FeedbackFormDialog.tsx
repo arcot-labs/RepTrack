@@ -59,6 +59,27 @@ export function FeedbackFormDialog({ trigger }: FeedbackFormDialogProps) {
     // eslint-disable-next-line react-hooks/incompatible-library
     const type = watch('type')
 
+    const handleOpenChange = (nextOpen: boolean) => {
+        if (nextOpen) {
+            reset()
+            setFiles([])
+            setOpen(true)
+            return
+        }
+        attemptClose()
+    }
+
+    const attemptClose = () => {
+        if (isSubmitting) return
+        const hasChanges = isDirty || files.length > 0
+        if (hasChanges && !confirm('Discard changes?')) return
+        close()
+    }
+
+    const close = () => {
+        setOpen(false)
+    }
+
     const onSubmit = async (form: FeedbackForm) => {
         const { error } = await FeedbackService.createFeedback({
             body: {
@@ -74,28 +95,21 @@ export function FeedbackFormDialog({ trigger }: FeedbackFormDialogProps) {
             return
         }
         notify.success('Feedback submitted')
-        reset()
-        setFiles([])
-        setOpen(false)
-    }
-
-    const onAttemptClose = (e: Event) => {
-        if ((isDirty || files.length > 0) && !confirm('Discard changes?')) {
-            e.preventDefault()
-        } else {
-            reset()
-            setFiles([])
-        }
+        close()
     }
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>{trigger}</DialogTrigger>
             <DialogContent
                 onPointerDownOutside={(e) => {
-                    onAttemptClose(e)
+                    e.preventDefault()
+                    attemptClose()
                 }}
-                showCloseButton={false}
+                onEscapeKeyDown={(e) => {
+                    e.preventDefault()
+                    attemptClose()
+                }}
             >
                 <DialogHeader className="text-left">
                     <DialogTitle>Feedback</DialogTitle>
@@ -196,7 +210,8 @@ export function FeedbackFormDialog({ trigger }: FeedbackFormDialogProps) {
                             variant="destructive"
                             disabled={isSubmitting}
                             onClick={(e) => {
-                                onAttemptClose(e as unknown as Event)
+                                e.preventDefault()
+                                attemptClose()
                             }}
                         >
                             Cancel
