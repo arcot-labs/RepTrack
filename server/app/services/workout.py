@@ -1,14 +1,9 @@
 import logging
-from collections.abc import Sequence
 from datetime import UTC, datetime
-from typing import Any
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.models.database.workout import Workout
-from app.models.database.workout_exercise import WorkoutExercise
 from app.models.errors import WorkoutNotFound
 from app.models.schemas.workout import (
     CreateWorkoutRequest,
@@ -16,25 +11,24 @@ from app.models.schemas.workout import (
     WorkoutBase,
     WorkoutPublic,
 )
-from app.services.utilities.queries import get_owned_workout
+from app.services.queries.workout import (
+    select_workout_by_id,
+    select_workouts,
+)
 from app.services.utilities.serializers import to_workout_base, to_workout_public
 
 logger = logging.getLogger(__name__)
 
 
-async def _query_workouts(
+async def get_owned_workout(
+    workout_id: int,
+    user_id: int,
     db_session: AsyncSession,
-    base: bool,
-    *where_clauses: Any,
-) -> Sequence[Workout]:
-    query = select(Workout).where(*where_clauses).order_by(Workout.started_at.desc())
-    if not base:
-        query = query.options(
-            selectinload(Workout.exercises).selectinload(WorkoutExercise.exercise),
-            selectinload(Workout.exercises).selectinload(WorkoutExercise.sets),
-        )
-    result = await db_session.execute(query)
-    return result.scalars().all()
+) -> Workout:
+    workout = await select_workout_by_id(db_session, workout_id)
+    if not workout or workout.user_id != user_id:
+        raise WorkoutNotFound()
+    return workout
 
 
 async def create_workout(
@@ -60,7 +54,7 @@ async def get_workouts(
 ) -> list[WorkoutBase]:
     logger.info(f"Getting workouts for user {user_id}")
 
-    workouts = await _query_workouts(
+    workouts = await select_workouts(
         db_session,
         True,
         Workout.user_id == user_id,
@@ -75,7 +69,7 @@ async def get_workout(
 ) -> WorkoutPublic:
     logger.info(f"Getting workout {workout_id} for user {user_id}")
 
-    workouts = await _query_workouts(
+    workouts = await select_workouts(
         db_session,
         False,
         Workout.id == workout_id,

@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.workout import Workout
 from app.models.errors import WorkoutNotFound
+from app.services.queries.workout import select_workouts
 from app.services.workout import (
-    _query_workouts,  # pyright: ignore[reportPrivateUsage]
     delete_workout,
 )
 
@@ -18,7 +18,7 @@ async def test_delete_workout(db_session: AsyncSession):
 
     await delete_workout(workout.id, user.id, db_session)
 
-    workouts = await _query_workouts(db_session, True, Workout.id == workout.id)
+    workouts = await select_workouts(db_session, True, Workout.id == workout.id)
     assert workouts == []
 
 

@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.database.exercise import Exercise
 from app.models.database.muscle_group import MuscleGroup
 from app.models.schemas.exercise import ExercisePublic
-from app.services.utilities.queries import query_exercises
+from app.services.queries.exercise import select_exercises
 from app.services.utilities.serializers import to_exercise_public
 
 from ..utilities import HttpMethod, make_http_request
@@ -39,7 +39,7 @@ async def create_exercise_via_api(
             "muscle_group_ids": muscle_group_ids or [],
         },
     )
-    exercises = await query_exercises(
+    exercises = await select_exercises(
         db_session,
         False,
         Exercise.name == name,

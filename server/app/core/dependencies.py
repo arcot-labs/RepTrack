@@ -12,7 +12,7 @@ from app.core.config import Settings, get_settings
 from app.core.security import ACCESS_JWT_KEY, REFRESH_JWT_KEY, verify_jwt
 from app.models.errors import InsufficientPermissions, InvalidCredentials
 from app.models.schemas.user import UserPublic
-from app.services.user import get_user_by_username
+from app.services.queries.user import select_user_by_username
 from app.services.utilities.serializers import to_user_public
 
 logger = logging.getLogger(__name__)
@@ -79,7 +79,7 @@ async def get_current_user(
     logger.info("Getting current user using jwt")
 
     username = verify_jwt(token, settings)
-    user = await get_user_by_username(username, db_session)
+    user = await select_user_by_username(db_session, username)
     if not user:
         raise InvalidCredentials()
 
