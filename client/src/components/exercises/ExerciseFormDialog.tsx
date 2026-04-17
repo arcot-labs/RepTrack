@@ -9,7 +9,6 @@ import {
     zUpdateExerciseRequest,
 } from '@/api/generated/zod.gen'
 import { FormField } from '@/components/FormField'
-import { useRemoteSearch } from '@/components/remoteSearch'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
     Dialog,
@@ -23,6 +22,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/overrides/button'
 import { Spinner } from '@/components/ui/spinner'
+import { useRemoteSearch } from '@/components/useRemoteSearch'
 import { formatNullableDateTime } from '@/lib/datetime'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'

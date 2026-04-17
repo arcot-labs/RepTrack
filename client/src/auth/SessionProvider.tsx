@@ -1,5 +1,5 @@
 import { type UserPublic, UserService } from '@/api/generated'
-import { SessionContext } from '@/auth/session'
+import { SessionContext } from '@/auth/useSession'
 import { logger } from '@/lib/logger'
 import { type ReactNode, useEffect, useState } from 'react'
 

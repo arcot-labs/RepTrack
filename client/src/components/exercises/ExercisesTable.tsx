@@ -9,14 +9,14 @@ import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
 import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncatedCell'
-import { useRowLoading } from '@/components/data-table/rowLoading'
-import { useDialog } from '@/components/dialog'
+import { useRowLoading } from '@/components/data-table/useRowLoading'
 import { ExerciseFormDialog } from '@/components/exercises/ExerciseFormDialog'
 import {
     getExerciseRowActions,
     handleDelete,
 } from '@/components/exercises/utils'
-import { useRemoteSearch } from '@/components/remoteSearch'
+import { useDialog } from '@/components/useDialog'
+import { useRemoteSearch } from '@/components/useRemoteSearch'
 import { formatNullableDateTime } from '@/lib/datetime'
 import { capitalizeWords, dash } from '@/lib/text'
 import type {

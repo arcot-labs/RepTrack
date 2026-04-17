@@ -3,7 +3,7 @@ import type {
     UpdateAccessRequestStatusRequest,
 } from '@/api/generated/types.gen'
 import { zAccessRequestPublic } from '@/api/generated/zod.gen'
-import { useSession } from '@/auth/session'
+import { useSession } from '@/auth/useSession'
 import { StatusBadge } from '@/components/access-requests/StatusBadge'
 import {
     getAccessRequestRowActions,
@@ -15,8 +15,8 @@ import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
-import { useRowLoading } from '@/components/data-table/rowLoading'
-import { useDialog } from '@/components/dialog'
+import { useRowLoading } from '@/components/data-table/useRowLoading'
+import { useDialog } from '@/components/useDialog'
 import { formatNullableDateTime } from '@/lib/datetime'
 import { dash, formatNullableString } from '@/lib/text'
 import type {

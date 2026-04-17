@@ -25,7 +25,7 @@ const notifyErrorMock = vi.spyOn(notify, 'error')
 vi.mock('react-router-dom', () => ({
     useNavigate: () => navigateMock,
 }))
-vi.mock('@/auth/session', () => ({
+vi.mock('@/auth/useSession', () => ({
     useSession: () => useSessionMock(),
 }))
 vi.mock('@/components/ThemeToggle', () => ({

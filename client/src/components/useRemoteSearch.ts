@@ -1,7 +1,7 @@
 import { handleApiError } from '@/lib/http'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-interface RemoteSearchProps<TItem, TResult> {
+interface UseRemoteSearchProps<TItem, TResult> {
     items: TItem[]
     enabled?: boolean
     fallbackMessage: string
@@ -23,7 +23,7 @@ export function useRemoteSearch<TItem, TResult>({
     search,
     getItemId,
     getResultId,
-}: RemoteSearchProps<TItem, TResult>) {
+}: UseRemoteSearchProps<TItem, TResult>) {
     const [searchQuery, setSearchQuery] = useState('')
     const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
     const [isSearching, setIsSearching] = useState(false)

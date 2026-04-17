@@ -5,8 +5,8 @@ import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
 import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncatedCell'
-import { useRowLoading } from '@/components/data-table/rowLoading'
-import { useDialog } from '@/components/dialog'
+import { useRowLoading } from '@/components/data-table/useRowLoading'
+import { useDialog } from '@/components/useDialog'
 import {
     getWorkoutRowActions,
     getWorkoutToolbarActions,

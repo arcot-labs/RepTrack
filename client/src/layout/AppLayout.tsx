@@ -1,4 +1,4 @@
-import { useSession } from '@/auth/session'
+import { useSession } from '@/auth/useSession'
 import { HeaderActions } from '@/components/HeaderActions'
 import {
     DropdownMenu,

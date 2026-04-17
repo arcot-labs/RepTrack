@@ -1,7 +1,7 @@
 import {
     updateLoadingIds,
     useRowLoading,
-} from '@/components/data-table/rowLoading'
+} from '@/components/data-table/useRowLoading'
 import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 

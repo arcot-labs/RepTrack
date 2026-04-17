@@ -1,4 +1,4 @@
-import { useDialog } from '@/components/dialog'
+import { useDialog } from '@/components/useDialog'
 import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 

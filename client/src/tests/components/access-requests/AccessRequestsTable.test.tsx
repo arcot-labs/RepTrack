@@ -38,7 +38,7 @@ const dialogMocks = vi.hoisted(() => ({
 const confirmDialogMock = vi.hoisted(() => vi.fn())
 const inlineRowActionsMock = vi.hoisted(() => vi.fn())
 
-vi.mock('@/auth/session', () => ({
+vi.mock('@/auth/useSession', () => ({
     useSession: () => ({
         user: {
             id: 1,
@@ -61,7 +61,7 @@ vi.mock('@/components/access-requests/utils', () => ({
     getDialogConfirmButtonText: vi.fn(),
 }))
 
-vi.mock('@/components/dialog', () => ({
+vi.mock('@/components/useDialog', () => ({
     useDialog: dialogMocks.useDialog,
 }))
 

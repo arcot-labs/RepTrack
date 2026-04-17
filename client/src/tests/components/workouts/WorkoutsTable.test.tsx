@@ -31,7 +31,7 @@ const confirmDialogMock = vi.hoisted(() => vi.fn())
 const inlineRowActionsMock = vi.hoisted(() => vi.fn())
 const truncatedCellMock = vi.hoisted(() => vi.fn())
 
-vi.mock('@/auth/session', () => ({
+vi.mock('@/auth/useSession', () => ({
     useSession: () => ({
         user: {
             id: 1,
@@ -46,7 +46,7 @@ vi.mock('@/components/workouts/utils', () => ({
     getWorkoutToolbarActions: vi.fn(),
 }))
 
-vi.mock('@/components/dialog', () => ({
+vi.mock('@/components/useDialog', () => ({
     useDialog: dialogMocks.useDialog,
 }))
 

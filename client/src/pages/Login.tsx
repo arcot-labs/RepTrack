@@ -1,6 +1,6 @@
 import { AuthService } from '@/api/generated'
 import { zLoginRequest } from '@/api/generated/zod.gen'
-import { useSession } from '@/auth/session'
+import { useSession } from '@/auth/useSession'
 import { FormField } from '@/components/FormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/overrides/button'

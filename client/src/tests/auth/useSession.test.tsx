@@ -1,4 +1,4 @@
-import { SessionContext, useSession } from '@/auth/session'
+import { SessionContext, useSession } from '@/auth/useSession'
 import type { SessionContextType } from '@/models/session'
 import { createUser } from '@/tests/mocks/handlers/user'
 import { renderHook } from '@testing-library/react'
