@@ -25,7 +25,7 @@ export function ForgotPassword() {
         handleSubmit,
         formState: { errors, isSubmitting },
         reset,
-    } = useForm<ForgotPasswordForm>({
+    } = useForm({
         resolver: zodResolver(zForgotPasswordRequest),
         mode: 'onSubmit',
         reValidateMode: 'onChange',

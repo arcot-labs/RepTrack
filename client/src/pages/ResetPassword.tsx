@@ -40,7 +40,7 @@ export function ResetPassword() {
         handleSubmit,
         formState: { errors, isSubmitting },
         reset,
-    } = useForm<ResetPasswordForm>({
+    } = useForm({
         resolver: zodResolver(zResetPasswordFormSchema),
         mode: 'onSubmit',
         reValidateMode: 'onChange',
