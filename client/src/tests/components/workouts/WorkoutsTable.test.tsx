@@ -12,7 +12,6 @@ import {
 } from '@/tests/components/utils'
 import { getMockProps } from '@/tests/utils'
 import { act, render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // import last
@@ -28,7 +27,7 @@ const dialogMocks = vi.hoisted(() => ({
     useDialog: vi.fn(),
 }))
 
-const dialogMock = vi.hoisted(() => vi.fn())
+const confirmDialogMock = vi.hoisted(() => vi.fn())
 const inlineRowActionsMock = vi.hoisted(() => vi.fn())
 const truncatedCellMock = vi.hoisted(() => vi.fn())
 
@@ -51,6 +50,14 @@ vi.mock('@/components/dialog', () => ({
     useDialog: dialogMocks.useDialog,
 }))
 
+vi.mock('@/components/ConfirmDialog', () => ({
+    ConfirmDialog: (props: unknown) => {
+        confirmDialogMock(props)
+        const p = props as { children: React.ReactNode }
+        return <div data-testid="mock-confirm-dialog">{p.children}</div>
+    },
+}))
+
 vi.mock('@/components/data-table/DataTableInlineRowActions', () => ({
     DataTableInlineRowActions: (props: unknown) => {
         inlineRowActionsMock(props)
@@ -63,26 +70,6 @@ vi.mock('@/components/data-table/DataTableTruncatedCell', () => ({
         truncatedCellMock(props)
         return <div data-testid="mock-truncated-cell" />
     },
-}))
-
-vi.mock('@/components/ui/dialog', () => ({
-    Dialog: (props: unknown) => {
-        dialogMock(props)
-        const p = props as { children: React.ReactNode }
-        return <div data-testid="mock-dialog">{p.children}</div>
-    },
-    DialogContent: ({ children }: { children: React.ReactNode }) => (
-        <div data-testid="mock-dialog-content">{children}</div>
-    ),
-    DialogHeader: ({ children }: { children: React.ReactNode }) => (
-        <div>{children}</div>
-    ),
-    DialogTitle: ({ children }: { children: React.ReactNode }) => (
-        <div>{children}</div>
-    ),
-    DialogFooter: ({ children }: { children: React.ReactNode }) => (
-        <div>{children}</div>
-    ),
 }))
 
 vi.mock('@/lib/datetime', () => ({
@@ -134,8 +121,12 @@ const mockDialogState = ({
 }
 
 const getDialogProps = () => {
-    return getMockProps(dialogMock) as {
+    return getMockProps(confirmDialogMock) as {
         onOpenChange: (isOpen: boolean) => void
+        onConfirm: () => void
+        onCancel: () => void
+        title: string
+        isConfirming: boolean
     }
 }
 
@@ -316,7 +307,7 @@ describe('WorkoutsTable - dialog', () => {
     it('calls handleDelete in callback', async () => {
         renderWorkoutsTable()
 
-        expect(screen.getByTestId('mock-dialog')).toBeInTheDocument()
+        expect(screen.getByTestId('mock-confirm-dialog')).toBeInTheDocument()
 
         expect(dialogMocks.useDialog).toHaveBeenCalledOnce()
 
@@ -374,33 +365,48 @@ describe('WorkoutsTable - dialog', () => {
         })
         renderWorkoutsTable()
 
-        expect(screen.getByText('Delete Workout')).toBeInTheDocument()
-        const content = screen.getByTestId('mock-dialog-content')
+        const dialogProps = getDialogProps()
+        expect(dialogProps.title).toBe('Delete Workout')
+
+        const content = screen.getByTestId('mock-confirm-dialog')
         expect(content).toHaveTextContent(
             'Are you sure you want to delete this workout?'
         )
     })
 
-    it('disables buttons when dialog is confirming', () => {
+    it('passes isConfirming when confirming', () => {
         mockDialogState({
             isOpen: true,
             isConfirming: true,
         })
         renderWorkoutsTable()
 
-        const cancelButton = screen.getByText('Cancel')
-        const deletingButton = screen.getByText('Deleting...')
+        const dialogProps = getDialogProps()
 
-        expect(cancelButton).toBeDisabled()
-        expect(deletingButton).toBeDisabled()
+        expect(dialogProps.isConfirming).toBe(true)
     })
 
-    it('calls confirm when button clicked', async () => {
+    it('calls confirm when ConfirmDialog onConfirm invoked', async () => {
         renderWorkoutsTable()
 
-        const button = screen.getByText('Delete')
-        await userEvent.click(button)
+        const dialogProps = getDialogProps()
+        await act(async () => {
+            dialogProps.onConfirm()
+            await Promise.resolve()
+        })
 
         expect(dialogMocks.confirm).toHaveBeenCalledOnce()
+    })
+
+    it('calls close when ConfirmDialog onCancel invoked', async () => {
+        renderWorkoutsTable()
+
+        const dialogProps = getDialogProps()
+        await act(async () => {
+            dialogProps.onCancel()
+            await Promise.resolve()
+        })
+
+        expect(dialogMocks.close).toHaveBeenCalledOnce()
     })
 })

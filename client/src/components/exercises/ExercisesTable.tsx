@@ -4,6 +4,7 @@ import {
     type MuscleGroupPublic,
 } from '@/api/generated'
 import { zExercisePublic } from '@/api/generated/zod.gen'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
@@ -16,14 +17,6 @@ import {
     handleDelete,
 } from '@/components/exercises/utils'
 import { useRemoteSearch } from '@/components/remoteSearch'
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/overrides/button'
 import { formatNullableDateTime } from '@/lib/datetime'
 import { capitalizeWords, dash } from '@/lib/text'
 import type {
@@ -332,44 +325,26 @@ export function ExercisesTable({
                 onReloadMuscleGroups={onReloadMuscleGroups}
                 onRowLoadingChange={setRowLoading}
             />
-            <Dialog
+            <ConfirmDialog
                 open={deleteDialog.state.isOpen}
+                isConfirming={deleteDialog.state.isConfirming}
+                title="Delete Exercise"
                 onOpenChange={(isOpen) => {
                     if (isOpen || deleteDialog.state.isConfirming) return
                     deleteDialog.close()
                 }}
+                onCancel={deleteDialog.close}
+                onConfirm={() => void deleteDialog.confirm()}
+                confirmLabel={
+                    deleteDialog.state.isConfirming ? 'Deleting...' : 'Delete'
+                }
             >
-                <DialogContent aria-describedby={undefined}>
-                    <DialogHeader>
-                        <DialogTitle>Delete Exercise</DialogTitle>
-                    </DialogHeader>
-                    <div className="text-sm">
-                        Are you sure you want to delete{' '}
-                        <span className="font-semibold">
-                            {deleteDialog.state.args?.[0].name}
-                        </span>
-                        ?
-                        <div className="mt-2">This action is irreversible.</div>
-                    </div>
-                    <DialogFooter>
-                        <Button
-                            onClick={deleteDialog.close}
-                            disabled={deleteDialog.state.isConfirming}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={() => void deleteDialog.confirm()}
-                            disabled={deleteDialog.state.isConfirming}
-                        >
-                            {deleteDialog.state.isConfirming
-                                ? 'Deleting...'
-                                : 'Delete'}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                Are you sure you want to delete{' '}
+                <span className="font-semibold">
+                    {deleteDialog.state.args?.[0].name}
+                </span>
+                ?<div className="mt-2">This action is irreversible.</div>
+            </ConfirmDialog>
         </>
     )
 }

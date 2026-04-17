@@ -1,19 +1,12 @@
 import { type WorkoutBase } from '@/api/generated'
 import { zWorkoutBase } from '@/api/generated/zod.gen'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
 import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncatedCell'
 import { useRowLoading } from '@/components/data-table/rowLoading'
 import { useDialog } from '@/components/dialog'
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/overrides/button'
 import {
     getWorkoutRowActions,
     getWorkoutToolbarActions,
@@ -149,40 +142,23 @@ export function WorkoutsTable({
                 isLoading={isLoading}
             />
             {/* TODO create dialog */}
-            <Dialog
+            <ConfirmDialog
                 open={deleteDialog.state.isOpen}
+                isConfirming={deleteDialog.state.isConfirming}
+                title="Delete Workout"
                 onOpenChange={(isOpen) => {
                     if (isOpen || deleteDialog.state.isConfirming) return
                     deleteDialog.close()
                 }}
+                onCancel={deleteDialog.close}
+                onConfirm={() => void deleteDialog.confirm()}
+                confirmLabel={
+                    deleteDialog.state.isConfirming ? 'Deleting...' : 'Delete'
+                }
             >
-                <DialogContent aria-describedby={undefined}>
-                    <DialogHeader>
-                        <DialogTitle>Delete Workout</DialogTitle>
-                    </DialogHeader>
-                    <div className="text-sm">
-                        Are you sure you want to delete this workout?
-                        <div className="mt-2">This action is irreversible.</div>
-                    </div>
-                    <DialogFooter>
-                        <Button
-                            onClick={deleteDialog.close}
-                            disabled={deleteDialog.state.isConfirming}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            onClick={() => void deleteDialog.confirm()}
-                            variant="destructive"
-                            disabled={deleteDialog.state.isConfirming}
-                        >
-                            {deleteDialog.state.isConfirming
-                                ? 'Deleting...'
-                                : 'Delete'}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                Are you sure you want to delete this workout?
+                <div className="mt-2">This action is irreversible.</div>
+            </ConfirmDialog>
         </>
     )
 }

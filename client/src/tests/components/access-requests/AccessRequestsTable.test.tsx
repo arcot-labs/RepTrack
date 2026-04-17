@@ -18,7 +18,6 @@ import {
 } from '@/tests/components/utils'
 import { getMockProps } from '@/tests/utils'
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { act } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -36,7 +35,7 @@ const dialogMocks = vi.hoisted(() => ({
     useDialog: vi.fn(),
 }))
 
-const dialogMock = vi.hoisted(() => vi.fn())
+const confirmDialogMock = vi.hoisted(() => vi.fn())
 const inlineRowActionsMock = vi.hoisted(() => vi.fn())
 
 vi.mock('@/auth/session', () => ({
@@ -66,31 +65,19 @@ vi.mock('@/components/dialog', () => ({
     useDialog: dialogMocks.useDialog,
 }))
 
+vi.mock('@/components/ConfirmDialog', () => ({
+    ConfirmDialog: (props: unknown) => {
+        confirmDialogMock(props)
+        const p = props as { children: React.ReactNode }
+        return <div data-testid="mock-confirm-dialog">{p.children}</div>
+    },
+}))
+
 vi.mock('@/components/data-table/DataTableInlineRowActions', () => ({
     DataTableInlineRowActions: (props: unknown) => {
         inlineRowActionsMock(props)
         return <div data-testid="mock-inline-row-actions" />
     },
-}))
-
-vi.mock('@/components/ui/dialog', () => ({
-    Dialog: (props: unknown) => {
-        dialogMock(props)
-        const p = props as { children: React.ReactNode }
-        return <div data-testid="mock-dialog">{p.children}</div>
-    },
-    DialogContent: ({ children }: { children: React.ReactNode }) => (
-        <div data-testid="mock-dialog-content">{children}</div>
-    ),
-    DialogHeader: ({ children }: { children: React.ReactNode }) => (
-        <div>{children}</div>
-    ),
-    DialogTitle: ({ children }: { children: React.ReactNode }) => (
-        <div>{children}</div>
-    ),
-    DialogFooter: ({ children }: { children: React.ReactNode }) => (
-        <div>{children}</div>
-    ),
 }))
 
 const pendingRequest: AccessRequestPublic = {
@@ -169,8 +156,13 @@ const mockDialogState = ({
 }
 
 const getDialogProps = () => {
-    return getMockProps(dialogMock) as {
+    return getMockProps(confirmDialogMock) as {
         onOpenChange: (isOpen: boolean) => void
+        onConfirm: () => void
+        onCancel: () => void
+        title: string
+        confirmVariant: string
+        isConfirming: boolean
     }
 }
 
@@ -370,7 +362,7 @@ describe('AccessRequestsTable - dialog', () => {
     it('calls handleUpdate in callback', async () => {
         renderAccessRequestsTable()
 
-        expect(screen.getByTestId('mock-dialog')).toBeInTheDocument()
+        expect(screen.getByTestId('mock-confirm-dialog')).toBeInTheDocument()
 
         expect(dialogMocks.useDialog).toHaveBeenCalledOnce()
 
@@ -430,8 +422,11 @@ describe('AccessRequestsTable - dialog', () => {
         })
         renderAccessRequestsTable()
 
-        expect(screen.getByText('Approve Request')).toBeInTheDocument()
-        const content = screen.getByTestId('mock-dialog-content')
+        const dialogProps = getDialogProps()
+        expect(dialogProps.title).toBe('Approve Request')
+        expect(dialogProps.confirmVariant).toBe('success')
+
+        const content = screen.getByTestId('mock-confirm-dialog')
         expect(content).toHaveTextContent(
             'Are you sure you want to approve this access request'
         )
@@ -444,14 +439,17 @@ describe('AccessRequestsTable - dialog', () => {
         })
         renderAccessRequestsTable()
 
-        expect(screen.getByText('Reject Request')).toBeInTheDocument()
-        const content = screen.getByTestId('mock-dialog-content')
+        const dialogProps = getDialogProps()
+        expect(dialogProps.title).toBe('Reject Request')
+        expect(dialogProps.confirmVariant).toBe('destructive')
+
+        const content = screen.getByTestId('mock-confirm-dialog')
         expect(content).toHaveTextContent(
             'Are you sure you want to reject this access request'
         )
     })
 
-    it('disables buttons when dialog is confirming', () => {
+    it('passes isConfirming when dialog is confirming', () => {
         vi.mocked(getDialogConfirmButtonText).mockReturnValueOnce(
             'Approving...'
         )
@@ -462,20 +460,21 @@ describe('AccessRequestsTable - dialog', () => {
         })
         renderAccessRequestsTable()
 
-        const cancelButton = screen.getByText('Cancel')
-        const approvingButton = screen.getByText('Approving...')
+        const dialogProps = getDialogProps()
 
-        expect(cancelButton).toBeDisabled()
-        expect(approvingButton).toBeDisabled()
+        expect(dialogProps.isConfirming).toBe(true)
     })
 
-    it('calls confirm when button clicked', async () => {
+    it('calls confirm when ConfirmDialog onConfirm invoked', async () => {
         vi.mocked(getDialogConfirmButtonText).mockReturnValueOnce('Reject')
 
         renderAccessRequestsTable()
 
-        const button = screen.getByText('Reject')
-        await userEvent.click(button)
+        const dialogProps = getDialogProps()
+        await act(async () => {
+            dialogProps.onConfirm()
+            await Promise.resolve()
+        })
 
         expect(dialogMocks.confirm).toHaveBeenCalledOnce()
     })
