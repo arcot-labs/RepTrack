@@ -4,16 +4,15 @@ from typing import cast
 from meilisearch_python_sdk import AsyncClient
 from meilisearch_python_sdk.models.search import SearchResults
 from meilisearch_python_sdk.models.settings import MeilisearchSettings
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.exercise import Exercise
-from app.models.database.muscle_group import MuscleGroup
 from app.models.enums import SearchIndex
 from app.models.schemas.exercise import ExerciseDocument
 from app.models.schemas.muscle_group import MuscleGroupPublic
 from app.models.schemas.search import SearchRequest
-from app.services.utilities.queries import query_exercises
+from app.services.queries.exercise import select_exercises
+from app.services.queries.muscle_group import select_muscle_groups
 from app.services.utilities.serializers import (
     to_exercise_document,
     to_exercise_search_result,
@@ -58,8 +57,7 @@ async def _index_muscle_groups(
     db_session: AsyncSession,
     ms_client: AsyncClient,
 ) -> int:
-    result = await db_session.execute(select(MuscleGroup))
-    muscle_groups = result.scalars().all()
+    muscle_groups = await select_muscle_groups(db_session)
     docs = [to_muscle_group_public(mg) for mg in muscle_groups]
 
     settings = MeilisearchSettings(
@@ -81,7 +79,7 @@ async def _index_exercises(
     db_session: AsyncSession,
     ms_client: AsyncClient,
 ) -> int:
-    exercises = await query_exercises(db_session, base=False)
+    exercises = await select_exercises(db_session, base=False)
     docs = [to_exercise_document(e) for e in exercises]
 
     settings = MeilisearchSettings(

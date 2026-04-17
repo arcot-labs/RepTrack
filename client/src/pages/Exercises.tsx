@@ -39,6 +39,12 @@ export function Exercises() {
         }
     }
 
+    const handleExerciseDeleted = (exerciseId: number) => {
+        setExercises((prevExercises) =>
+            prevExercises.filter((exercise) => exercise.id !== exerciseId)
+        )
+    }
+
     const loadMuscleGroups = async () => {
         setIsLoadingMuscleGroups(true)
         try {
@@ -72,6 +78,7 @@ export function Exercises() {
                     exercises={exercises}
                     muscleGroups={muscleGroups}
                     isLoading={isLoadingExercises || isLoadingMuscleGroups}
+                    onExerciseDeleted={handleExerciseDeleted}
                     onReloadExercises={loadExercises}
                     onReloadMuscleGroups={loadMuscleGroups}
                 />

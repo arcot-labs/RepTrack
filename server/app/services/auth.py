@@ -29,8 +29,14 @@ from app.models.errors import (
     InvalidToken,
     UsernameTaken,
 )
-from app.services.access_request import get_latest_access_request_by_email
-from app.services.user import get_admin_users, get_user_by_email, get_user_by_username
+from app.services.queries.access_request import (
+    select_latest_access_request_by_email,
+)
+from app.services.queries.user import (
+    select_admin_users,
+    select_user_by_email,
+    select_user_by_username,
+)
 
 from .email import EmailService
 
@@ -49,12 +55,12 @@ async def request_access(
     """Returns True if access was already approved, False otherwise"""
     logger.info(f"Requesting access for email: {email}")
 
-    existing_user_by_email = await get_user_by_email(email, db_session)
-    existing_user_by_username = await get_user_by_username(email, db_session)
+    existing_user_by_email = await select_user_by_email(db_session, email)
+    existing_user_by_username = await select_user_by_username(db_session, email)
     if existing_user_by_email or existing_user_by_username:
         raise EmailInUse()
 
-    existing_request = await get_latest_access_request_by_email(email, db_session)
+    existing_request = await select_latest_access_request_by_email(db_session, email)
     if existing_request:
         logger.info(
             f"Found existing access request for email {email} with id {existing_request.id}"
@@ -90,7 +96,7 @@ async def request_access(
     db_session.add(access_request)
     await db_session.commit()
 
-    admins = await get_admin_users(db_session)
+    admins = await select_admin_users(db_session)
     for admin in admins:
         background_tasks.add_task(
             email_svc.send_access_request_notification_email,
@@ -118,8 +124,8 @@ async def register(
     if access_request.status != AccessRequestStatus.APPROVED:
         raise InvalidToken()
 
-    existing_user_by_username = await get_user_by_username(username, db_session)
-    existing_user_by_email = await get_user_by_email(username, db_session)
+    existing_user_by_username = await select_user_by_username(db_session, username)
+    existing_user_by_email = await select_user_by_email(db_session, username)
     if existing_user_by_username or existing_user_by_email:
         raise UsernameTaken()
 
@@ -150,7 +156,7 @@ async def request_password_reset(
         logger.warning("Password reset requested for admin email, ignoring")
         return
 
-    user = await get_user_by_email(email, db_session)
+    user = await select_user_by_email(db_session, email)
     if not user:
         logger.info(f"Password reset requested for unregistered email: {email}")
         return
@@ -213,7 +219,7 @@ async def refresh(db_session: AsyncSession, token: str, settings: Settings) -> s
     logger.info("Refreshing access token")
 
     username = verify_jwt(token, settings)
-    user = await get_user_by_username(username, db_session)
+    user = await select_user_by_username(db_session, username)
     if not user:
         raise InvalidCredentials()
 

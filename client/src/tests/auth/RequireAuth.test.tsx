@@ -13,7 +13,7 @@ import {
 
 const useSessionMock: MockedFunction<() => SessionContextType> = vi.fn()
 
-vi.mock('@/auth/session', () => ({
+vi.mock('@/auth/useSession', () => ({
     useSession: () => useSessionMock(),
 }))
 

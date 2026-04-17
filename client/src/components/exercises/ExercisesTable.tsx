@@ -1,49 +1,21 @@
-import {
-    ExerciseService,
-    SearchService,
-    type ExercisePublic,
-    type ExerciseSearchResult,
-    type MuscleGroupPublic,
-} from '@/api/generated'
-import { zExercisePublic } from '@/api/generated/zod.gen'
+import { type ExercisePublic, type MuscleGroupPublic } from '@/api/generated'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
 import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncatedCell'
+import { useRowLoading } from '@/components/data-table/useRowLoading'
 import { ExerciseFormDialog } from '@/components/exercises/ExerciseFormDialog'
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/overrides/button'
+import { useExercisesTableController } from '@/components/exercises/useExercisesTableController'
 import { formatNullableDateTime } from '@/lib/datetime'
-import { handleApiError } from '@/lib/http'
-import { notify } from '@/lib/notify'
-import { blueText, redText } from '@/lib/styles'
 import { capitalizeWords, dash } from '@/lib/text'
-import type {
-    DataTableRowActionsConfig,
-    DataTableToolbarConfig,
-    FilterOption,
-} from '@/models/data-table'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Copy, Eye, Pencil, Plus, Trash } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
-
-function getTypeFilterOptions(): FilterOption[] {
-    return [
-        { label: 'System', value: 'system' },
-        { label: 'Custom', value: 'custom' },
-    ]
-}
 
 interface ExercisesTableProps {
     exercises: ExercisePublic[]
     muscleGroups: MuscleGroupPublic[]
     isLoading: boolean
+    onExerciseDeleted: (exerciseId: number) => void
     onReloadExercises: () => Promise<void>
     onReloadMuscleGroups: () => Promise<void>
 }
@@ -52,214 +24,30 @@ export function ExercisesTable({
     exercises,
     muscleGroups,
     isLoading,
+    onExerciseDeleted,
     onReloadExercises,
     onReloadMuscleGroups,
 }: ExercisesTableProps) {
-    const [searchQuery, setSearchQuery] = useState('')
-    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
-    const [isSearching, setIsSearching] = useState(false)
-    const [searchResults, setSearchResults] = useState<
-        ExerciseSearchResult[] | null
-    >(null)
-    const [searchRefreshTick, setSearchRefreshTick] = useState(0)
-    const searchRequestIdRef = useRef(0)
-
-    const [isLoadingExerciseIds, setIsLoadingExerciseIds] = useState<
-        Set<number>
-    >(new Set())
-    const [isDeleting, setIsDeleting] = useState(false)
-
-    const [formDialog, setFormDialog] = useState<{
-        isOpen: boolean
-        mode: 'create' | 'edit' | 'view'
-        exercise: ExercisePublic | null
-    }>({
-        isOpen: false,
-        mode: 'create',
-        exercise: null,
+    const { isRowLoading, setRowLoading } = useRowLoading<number>()
+    const {
+        deleteDialog,
+        displayedExercises,
+        formDialog,
+        onExerciseFormOpenChange,
+        onExerciseFormSuccess,
+        onReloadExercises: reloadExercises,
+        onReloadMuscleGroups: reloadMuscleGroups,
+        rowActionsConfig,
+        toolbarConfig,
+    } = useExercisesTableController({
+        exercises,
+        muscleGroups,
+        isRowLoading,
+        onExerciseDeleted,
+        onReloadExercises,
+        onReloadMuscleGroups,
+        setRowLoading,
     })
-
-    const [deleteDialog, setDeleteDialog] = useState<{
-        isOpen: boolean
-        exercise: ExercisePublic | null
-    }>({
-        isOpen: false,
-        exercise: null,
-    })
-
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            setDebouncedSearchQuery(searchQuery.trim())
-        }, 300)
-        return () => {
-            clearTimeout(timeout)
-        }
-    }, [searchQuery])
-
-    useEffect(() => {
-        if (!debouncedSearchQuery) {
-            searchRequestIdRef.current += 1
-            setSearchResults(null)
-            setIsSearching(false)
-            return
-        }
-        const requestId = searchRequestIdRef.current + 1
-        searchRequestIdRef.current = requestId
-        setIsSearching(true)
-        void (async () => {
-            const { data, error } = await SearchService.searchExercises({
-                body: {
-                    query: debouncedSearchQuery,
-                    limit: Math.min(exercises.length, 1000),
-                },
-            })
-            // only update results for latest request
-            if (requestId !== searchRequestIdRef.current) return
-            if (error) {
-                await handleApiError(error, {
-                    fallbackMessage: 'Failed to search exercises',
-                })
-                setSearchResults(null)
-                return
-            }
-            setSearchResults(data)
-        })().finally(() => {
-            if (requestId === searchRequestIdRef.current) setIsSearching(false)
-        })
-    }, [debouncedSearchQuery, exercises.length, searchRefreshTick])
-
-    const refreshSearchResults = () => {
-        if (!debouncedSearchQuery) return
-        setSearchRefreshTick((prev) => prev + 1)
-    }
-
-    const displayedExercises = useMemo(() => {
-        if (!searchResults) return exercises
-        const byId = new Map(
-            exercises.map((exercise) => [exercise.id, exercise])
-        )
-        return searchResults
-            .map((hit) => byId.get(hit.id))
-            .filter((exercise): exercise is ExercisePublic => !!exercise)
-    }, [exercises, searchResults])
-
-    const openCreateDialog = (exercise?: ExercisePublic) => {
-        setFormDialog({
-            isOpen: true,
-            mode: 'create',
-            exercise: exercise ?? null,
-        })
-    }
-
-    const openEditDialog = (exercise: ExercisePublic) => {
-        setFormDialog({ isOpen: true, mode: 'edit', exercise })
-    }
-
-    const openViewDialog = (exercise: ExercisePublic) => {
-        setFormDialog({ isOpen: true, mode: 'view', exercise })
-    }
-
-    const openDeleteDialog = (exercise: ExercisePublic) => {
-        setDeleteDialog({ isOpen: true, exercise })
-    }
-
-    const closeDeleteDialog = () => {
-        setDeleteDialog({ isOpen: false, exercise: null })
-    }
-
-    const setExerciseRowLoading = (exerciseId: number, isLoading: boolean) => {
-        setIsLoadingExerciseIds((prev) => {
-            const next = new Set(prev)
-            if (isLoading) next.add(exerciseId)
-            else next.delete(exerciseId)
-            return next
-        })
-    }
-
-    const handleDeleteExercise = async () => {
-        const exercise = deleteDialog.exercise
-        if (!exercise) return
-
-        setIsDeleting(true)
-        setExerciseRowLoading(exercise.id, true)
-        try {
-            const { error } = await ExerciseService.deleteExercise({
-                path: { exercise_id: exercise.id },
-            })
-            if (error) {
-                await handleApiError(error, {
-                    httpErrorHandlers: {
-                        exercise_not_found: async () => {
-                            notify.error('Exercise not found. Reloading data')
-                            await onReloadExercises()
-                        },
-                    },
-                    fallbackMessage: 'Failed to delete exercise',
-                })
-                closeDeleteDialog()
-                return
-            }
-            notify.success('Exercise deleted')
-            await onReloadExercises()
-            refreshSearchResults()
-            closeDeleteDialog()
-        } finally {
-            setExerciseRowLoading(exercise.id, false)
-            setIsDeleting(false)
-        }
-    }
-
-    const rowActionsConfig: DataTableRowActionsConfig<ExercisePublic> = {
-        schema: zExercisePublic,
-        menuItems: (row) => {
-            if (row.user_id === null)
-                return [
-                    {
-                        type: 'action',
-                        icon: Eye,
-                        onSelect: () => {
-                            openViewDialog(row)
-                        },
-                    },
-                    {
-                        type: 'action',
-                        className: blueText,
-                        icon: Copy,
-                        onSelect: () => {
-                            openCreateDialog(row)
-                        },
-                    },
-                ]
-
-            const isRowLoading = isLoadingExerciseIds.has(row.id)
-            return [
-                {
-                    type: 'action',
-                    icon: Pencil,
-                    onSelect: () => {
-                        openEditDialog(row)
-                    },
-                    disabled: isRowLoading,
-                },
-                {
-                    type: 'action',
-                    className: blueText,
-                    icon: Copy,
-                    onSelect: () => {
-                        openCreateDialog(row)
-                    },
-                },
-                {
-                    type: 'action',
-                    className: redText,
-                    icon: Trash,
-                    onSelect: () => {
-                        openDeleteDialog(row)
-                    },
-                },
-            ]
-        },
-    }
 
     const columns: ColumnDef<ExercisePublic>[] = [
         {
@@ -395,40 +183,6 @@ export function ExercisesTable({
         },
     ]
 
-    const toolbarConfig: DataTableToolbarConfig = {
-        search: {
-            placeholder: 'Search exercises...',
-            value: searchQuery,
-            onChange: setSearchQuery,
-            isLoading: isSearching,
-        },
-        filters: [
-            {
-                columnId: 'type',
-                title: 'Type',
-                options: getTypeFilterOptions(),
-            },
-            {
-                columnId: 'muscle_groups',
-                title: 'Muscle Groups',
-                options: muscleGroups.map((group) => ({
-                    label: capitalizeWords(group.name),
-                    value: String(group.id),
-                })),
-            },
-        ],
-        actions: [
-            {
-                label: 'Add Exercise',
-                icon: Plus,
-                onClick: () => {
-                    openCreateDialog()
-                },
-            },
-        ],
-        showViewOptions: true,
-    }
-
     return (
         <>
             <DataTable
@@ -444,56 +198,37 @@ export function ExercisesTable({
                 mode={formDialog.mode}
                 exercise={formDialog.exercise}
                 muscleGroups={muscleGroups}
-                isRowLoading={isLoadingExerciseIds.has(
-                    formDialog.exercise?.id ?? -1
-                )}
-                onOpenChange={(isOpen) => {
-                    setFormDialog((prev) => ({ ...prev, isOpen }))
-                }}
-                onSuccess={async () => {
-                    await onReloadExercises()
-                    refreshSearchResults()
-                }}
-                onReloadExercises={onReloadExercises}
-                onReloadMuscleGroups={onReloadMuscleGroups}
-                onRowLoadingChange={setExerciseRowLoading}
+                isRowLoading={
+                    formDialog.exercise
+                        ? isRowLoading(formDialog.exercise.id)
+                        : false
+                }
+                onOpenChange={onExerciseFormOpenChange}
+                onSuccess={onExerciseFormSuccess}
+                onReloadExercises={reloadExercises}
+                onReloadMuscleGroups={reloadMuscleGroups}
+                onRowLoadingChange={setRowLoading}
             />
-            <Dialog
-                open={deleteDialog.isOpen}
+            <ConfirmDialog
+                open={deleteDialog.state.isOpen}
+                isConfirming={deleteDialog.state.isConfirming}
+                title="Delete Exercise"
                 onOpenChange={(isOpen) => {
-                    if (!isDeleting)
-                        setDeleteDialog((prev) => ({ ...prev, isOpen }))
+                    if (isOpen || deleteDialog.state.isConfirming) return
+                    deleteDialog.close()
                 }}
+                onCancel={deleteDialog.close}
+                onConfirm={() => void deleteDialog.confirm()}
+                confirmLabel={
+                    deleteDialog.state.isConfirming ? 'Deleting...' : 'Delete'
+                }
             >
-                <DialogContent aria-describedby={undefined}>
-                    <DialogHeader>
-                        <DialogTitle>Delete Exercise</DialogTitle>
-                    </DialogHeader>
-                    <div className="text-sm">
-                        Are you sure you want to delete{' '}
-                        <span className="font-semibold">
-                            {deleteDialog.exercise?.name}
-                        </span>
-                        ?
-                        <div className="mt-2">This action is irreversible.</div>
-                    </div>
-                    <DialogFooter>
-                        <Button
-                            onClick={closeDeleteDialog}
-                            disabled={isDeleting}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={() => void handleDeleteExercise()}
-                            disabled={isDeleting}
-                        >
-                            {isDeleting ? 'Deleting...' : 'Delete'}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                Are you sure you want to delete{' '}
+                <span className="font-semibold">
+                    {deleteDialog.state.args?.[0].name}
+                </span>
+                ?<div className="mt-2">This action is irreversible.</div>
+            </ConfirmDialog>
         </>
     )
 }

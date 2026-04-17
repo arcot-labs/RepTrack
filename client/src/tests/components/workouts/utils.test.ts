@@ -2,7 +2,7 @@ import { WorkoutService, type WorkoutBase } from '@/api/generated'
 import {
     getWorkoutRowActions,
     getWorkoutToolbarActions,
-    handleDelete,
+    handleDeleteWorkout,
 } from '@/components/workouts/utils'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
@@ -50,7 +50,7 @@ const callHandleDelete = async (
     const onReloadWorkouts = vi.fn()
     const setRowLoading = vi.fn()
 
-    await handleDelete(
+    await handleDeleteWorkout(
         workoutId,
         onWorkoutDeleted,
         onReloadWorkouts,
@@ -59,7 +59,7 @@ const callHandleDelete = async (
     return { onWorkoutDeleted, onReloadWorkouts, setRowLoading }
 }
 
-describe('handleDelete', () => {
+describe('handleDeleteWorkout', () => {
     let successSpy: MockInstance<typeof notify.success>
     let errorSpy: MockInstance<typeof notify.error>
 

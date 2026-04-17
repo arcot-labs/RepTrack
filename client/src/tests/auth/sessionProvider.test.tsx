@@ -1,5 +1,5 @@
-import { useSession } from '@/auth/session'
 import { SessionProvider } from '@/auth/SessionProvider'
+import { useSession } from '@/auth/useSession'
 import { getCurrentUserUrl, testUser } from '@/tests/mocks/handlers/user'
 import { server } from '@/tests/mocks/server'
 import { render, renderHook, screen, waitFor } from '@testing-library/react'

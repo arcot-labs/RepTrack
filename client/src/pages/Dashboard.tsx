@@ -1,4 +1,4 @@
-import { useSession } from '@/auth/session'
+import { useSession } from '@/auth/useSession'
 
 export function Dashboard() {
     const { user } = useSession()

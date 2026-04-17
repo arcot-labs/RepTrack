@@ -3,27 +3,20 @@ import type {
     UpdateAccessRequestStatusRequest,
 } from '@/api/generated/types.gen'
 import { zAccessRequestPublic } from '@/api/generated/zod.gen'
-import { useSession } from '@/auth/session'
+import { useSession } from '@/auth/useSession'
 import { StatusBadge } from '@/components/access-requests/StatusBadge'
 import {
     getAccessRequestRowActions,
     getDialogConfirmButtonText,
     getStatusFilterOptions,
-    handleUpdate,
+    handleUpdateAccessRequest,
 } from '@/components/access-requests/utils'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
-import { useRowLoading } from '@/components/data-table/rowLoading'
-import { useDialog } from '@/components/dialog'
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/overrides/button'
+import { useRowLoading } from '@/components/data-table/useRowLoading'
+import { useDialog } from '@/components/useDialog'
 import { formatNullableDateTime } from '@/lib/datetime'
 import { dash, formatNullableString } from '@/lib/text'
 import type {
@@ -52,7 +45,7 @@ export function AccessRequestsTable({
             request: AccessRequestPublic,
             action: UpdateAccessRequestStatusRequest['status']
         ) => {
-            await handleUpdate(
+            await handleUpdateAccessRequest(
                 request,
                 action,
                 user,
@@ -65,13 +58,12 @@ export function AccessRequestsTable({
 
     const rowActionsConfig: DataTableRowActionsConfig<AccessRequestPublic> = {
         schema: zAccessRequestPublic,
-        menuItems: (row) => {
-            return getAccessRequestRowActions(
+        menuItems: (row) =>
+            getAccessRequestRowActions(
                 row,
                 isRowLoading(row.id),
                 confirmDialog.open
-            )
-        },
+            ),
     }
 
     const columns: ColumnDef<AccessRequestPublic>[] = [
@@ -198,62 +190,45 @@ export function AccessRequestsTable({
                 pageSize={5}
                 isLoading={isLoading}
             />
-            <Dialog
+            <ConfirmDialog
                 open={confirmDialog.state.isOpen}
+                isConfirming={confirmDialog.state.isConfirming}
+                title={
+                    confirmDialog.state.args?.[1] === 'approved'
+                        ? 'Approve Request'
+                        : 'Reject Request'
+                }
                 onOpenChange={(isOpen) => {
                     if (isOpen || confirmDialog.state.isConfirming) return
                     confirmDialog.close()
                 }}
+                onCancel={confirmDialog.close}
+                onConfirm={() => {
+                    void confirmDialog.confirm()
+                }}
+                confirmVariant={
+                    confirmDialog.state.args?.[1] === 'approved'
+                        ? 'success'
+                        : 'destructive'
+                }
+                confirmLabel={getDialogConfirmButtonText(
+                    confirmDialog.state.args?.[1] ?? null,
+                    confirmDialog.state.isConfirming
+                )}
             >
-                <DialogContent aria-describedby={undefined}>
-                    <DialogHeader>
-                        <DialogTitle>
-                            {confirmDialog.state.args?.[1] === 'approved'
-                                ? 'Approve Request'
-                                : 'Reject Request'}
-                        </DialogTitle>
-                    </DialogHeader>
-                    <div className="text-sm">
-                        Are you sure you want to{' '}
-                        <span className="font-semibold">
-                            {confirmDialog.state.args?.[1] === 'approved'
-                                ? 'approve'
-                                : 'reject'}
-                        </span>{' '}
-                        this access request for{' '}
-                        <span className="font-semibold">
-                            {confirmDialog.state.args?.[0].first_name}{' '}
-                            {confirmDialog.state.args?.[0].last_name}
-                        </span>
-                        ?
-                        <div className="mt-2">This action is irreversible.</div>
-                    </div>
-                    <DialogFooter>
-                        <Button
-                            onClick={confirmDialog.close}
-                            disabled={confirmDialog.state.isConfirming}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            onClick={() => {
-                                void confirmDialog.confirm()
-                            }}
-                            variant={
-                                confirmDialog.state.args?.[1] === 'approved'
-                                    ? 'success'
-                                    : 'destructive'
-                            }
-                            disabled={confirmDialog.state.isConfirming}
-                        >
-                            {getDialogConfirmButtonText(
-                                confirmDialog.state.args?.[1] ?? null,
-                                confirmDialog.state.isConfirming
-                            )}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                Are you sure you want to{' '}
+                <span className="font-semibold">
+                    {confirmDialog.state.args?.[1] === 'approved'
+                        ? 'approve'
+                        : 'reject'}
+                </span>{' '}
+                this access request for{' '}
+                <span className="font-semibold">
+                    {confirmDialog.state.args?.[0].first_name}{' '}
+                    {confirmDialog.state.args?.[0].last_name}
+                </span>
+                ?<div className="mt-2">This action is irreversible.</div>
+            </ConfirmDialog>
         </>
     )
 }

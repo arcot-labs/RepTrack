@@ -147,13 +147,15 @@ async def test_create_set_set_number_conflict(
         set_number=1,
     )
 
-    async def mock_get_next_set_number(
-        workout_exercise_id: int, db_session: AsyncSession
+    async def mock_select_next_set_number(
+        db_session: AsyncSession,
+        workout_exercise_id: int,
     ) -> int:
         return 1
 
     monkeypatch.setattr(
-        "app.services.set._get_next_set_number", mock_get_next_set_number
+        "app.services.set.select_next_set_number",
+        mock_select_next_set_number,
     )
 
     with pytest.raises(SetNumberConflict):
@@ -186,13 +188,14 @@ async def test_create_set_unhandled_integrity_error(
         set_number=1,
     )
 
-    async def mock_get_next_set_number(
-        workout_exercise_id: int, db_session: AsyncSession
+    async def mock_select_next_set_number(
+        db_session: AsyncSession, workout_exercise_id: int
     ) -> int:
         return 1
 
     monkeypatch.setattr(
-        "app.services.set._get_next_set_number", mock_get_next_set_number
+        "app.services.set.select_next_set_number",
+        mock_select_next_set_number,
     )
 
     with patch("app.services.set.is_unique_violation", return_value=False):

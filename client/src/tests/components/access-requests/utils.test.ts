@@ -7,7 +7,7 @@ import {
     getAccessRequestRowActions,
     getDialogConfirmButtonText,
     getStatusFilterOptions,
-    handleUpdate,
+    handleUpdateAccessRequest,
 } from '@/components/access-requests/utils'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
@@ -78,7 +78,7 @@ const callHandleUpdate = async (
     const onReloadRequests = vi.fn().mockResolvedValue(undefined)
     const setRowLoading = vi.fn()
 
-    await handleUpdate(
+    await handleUpdateAccessRequest(
         request,
         status,
         user,
@@ -89,7 +89,7 @@ const callHandleUpdate = async (
     return { onRequestUpdated, onReloadRequests, setRowLoading }
 }
 
-describe('handleUpdate', () => {
+describe('handleUpdateAccessRequest', () => {
     let successSpy: MockInstance<typeof notify.success>
     let warningSpy: MockInstance<typeof notify.warning>
 
