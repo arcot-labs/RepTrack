@@ -40,7 +40,7 @@ export function Register() {
         handleSubmit,
         formState: { errors, isSubmitting },
         reset,
-    } = useForm<RegisterForm>({
+    } = useForm({
         resolver: zodResolver(zRegisterFormSchema),
         mode: 'onSubmit',
         reValidateMode: 'onChange',

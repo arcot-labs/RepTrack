@@ -83,7 +83,7 @@ export function ExerciseFormDialog({
             isSubmitting: isCreateSubmitting,
         },
         reset: resetCreate,
-    } = useForm<CreateExerciseForm>({
+    } = useForm({
         resolver: zodResolver(zCreateExerciseRequest),
         defaultValues: defaultCreateExerciseFormValues,
         mode: 'onSubmit',
