@@ -6,7 +6,7 @@ import {
 import { zExercisePublic } from '@/api/generated/zod.gen'
 import {
     getExerciseRowActions,
-    handleDelete,
+    handleDeleteExercise,
 } from '@/components/exercises/utils'
 import { useDialog } from '@/components/useDialog'
 import { useRemoteSearch } from '@/components/useRemoteSearch'
@@ -103,7 +103,7 @@ export function useExercisesTableController({
     })
 
     const deleteDialog = useDialog(async (exercise: ExercisePublic) => {
-        await handleDelete(
+        await handleDeleteExercise(
             exercise.id,
             onExerciseDeleted,
             refreshSearchResults,
@@ -129,14 +129,14 @@ export function useExercisesTableController({
             getExerciseRowActions(
                 row,
                 isRowLoading(row.id),
-                (exercise) => {
-                    openFormDialog('view', exercise)
+                (e) => {
+                    openFormDialog('view', e)
                 },
-                (exercise) => {
-                    openFormDialog('create', exercise)
+                (e) => {
+                    openFormDialog('create', e)
                 },
-                (exercise) => {
-                    openFormDialog('edit', exercise)
+                (e) => {
+                    openFormDialog('edit', e)
                 },
                 deleteDialog.open
             ),

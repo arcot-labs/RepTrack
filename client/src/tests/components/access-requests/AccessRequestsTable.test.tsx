@@ -3,7 +3,7 @@ import {
     getAccessRequestRowActions,
     getDialogConfirmButtonText,
     getStatusFilterOptions,
-    handleUpdate,
+    handleUpdateAccessRequest,
 } from '@/components/access-requests/utils'
 import { dash } from '@/lib/text'
 import {
@@ -55,7 +55,7 @@ vi.mock('@/components/access-requests/StatusBadge', () => ({
 }))
 
 vi.mock('@/components/access-requests/utils', () => ({
-    handleUpdate: vi.fn(),
+    handleUpdateAccessRequest: vi.fn(),
     getAccessRequestRowActions: vi.fn(),
     getStatusFilterOptions: vi.fn(),
     getDialogConfirmButtonText: vi.fn(),
@@ -375,7 +375,7 @@ describe('AccessRequestsTable - dialog', () => {
             await Promise.resolve()
         })
 
-        expect(handleUpdate).toHaveBeenCalledExactlyOnceWith(
+        expect(handleUpdateAccessRequest).toHaveBeenCalledExactlyOnceWith(
             pendingRequest,
             'approved',
             { id: 1, username: 'test-user' },

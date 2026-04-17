@@ -9,7 +9,7 @@ import {
     getAccessRequestRowActions,
     getDialogConfirmButtonText,
     getStatusFilterOptions,
-    handleUpdate,
+    handleUpdateAccessRequest,
 } from '@/components/access-requests/utils'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { DataTable } from '@/components/data-table/DataTable'
@@ -45,7 +45,7 @@ export function AccessRequestsTable({
             request: AccessRequestPublic,
             action: UpdateAccessRequestStatusRequest['status']
         ) => {
-            await handleUpdate(
+            await handleUpdateAccessRequest(
                 request,
                 action,
                 user,

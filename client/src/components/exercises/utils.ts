@@ -5,7 +5,7 @@ import { blueText, redText } from '@/lib/styles'
 import type { MenuItemConfig } from '@/models/data-table'
 import { Copy, Eye, Pencil, Trash } from 'lucide-react'
 
-export const handleDelete = async (
+export const handleDeleteExercise = async (
     exerciseId: number,
     onExerciseDeleted: (exerciseId: number) => void,
     refreshSearchResults: () => void,

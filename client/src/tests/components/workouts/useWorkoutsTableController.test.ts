@@ -3,7 +3,7 @@ import { useWorkoutsTableController } from '@/components/workouts/useWorkoutsTab
 import {
     getWorkoutRowActions,
     getWorkoutToolbarActions,
-    handleDelete,
+    handleDeleteWorkout,
 } from '@/components/workouts/utils'
 import { getMockProps } from '@/tests/utils'
 import { act, renderHook } from '@testing-library/react'
@@ -21,7 +21,7 @@ vi.mock('@/components/useDialog', () => ({
 }))
 
 vi.mock('@/components/workouts/utils', () => ({
-    handleDelete: vi.fn(),
+    handleDeleteWorkout: vi.fn(),
     getWorkoutRowActions: vi.fn(),
     getWorkoutToolbarActions: vi.fn(),
 }))
@@ -121,7 +121,7 @@ describe('useWorkoutsTableController', () => {
             await Promise.resolve()
         })
 
-        expect(handleDelete).toHaveBeenCalledExactlyOnceWith(
+        expect(handleDeleteWorkout).toHaveBeenCalledExactlyOnceWith(
             workout.id,
             onWorkoutDeletedMock,
             onReloadWorkoutsMock,

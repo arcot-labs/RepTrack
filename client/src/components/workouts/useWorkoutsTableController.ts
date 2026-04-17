@@ -4,7 +4,7 @@ import { useDialog } from '@/components/useDialog'
 import {
     getWorkoutRowActions,
     getWorkoutToolbarActions,
-    handleDelete,
+    handleDeleteWorkout,
 } from '@/components/workouts/utils'
 import type {
     DataTableRowActionsConfig,
@@ -42,7 +42,7 @@ export function useWorkoutsTableController({
     setRowLoading,
 }: UseWorkoutsTableControllerProps): UseWorkoutsTableControllerResult {
     const deleteDialog = useDialog(async (workoutId: number) => {
-        await handleDelete(
+        await handleDeleteWorkout(
             workoutId,
             onWorkoutDeleted,
             onReloadWorkouts,
