@@ -10,8 +10,7 @@ on:
                 required: true
                 type: string
 
-permissions:
-    contents: none
+permissions: {}
 
 jobs:
     deploy-infra:
@@ -20,58 +19,56 @@ jobs:
         environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name }}
         steps:
             - name: checkout
-              uses: actions/checkout@v6
-
-            - name: create .env file
-              working-directory: config/env
-              run: |
-                  > .env
-                  echo "PROJECT=${{ vars.PROJECT }}" >> .env
-                  echo "PROD=${{ github.ref_name == 'main' && 'true' || 'false' }}" >> .env
-                  echo "DOMAIN=${{ secrets.DOMAIN }}" >> .env
-
-                  echo "DOCKER_REGISTRY=${{ secrets.DOCKER_REGISTRY }}" >> .env
-                  echo "TAG=${{ inputs.tag }}" >> .env
-
-                  echo "TRAEFIK_NETWORK=${{ github.ref_name == 'main' && 'traefik-public' || 'traefik-stage-public' }}" >> .env
-
-                  echo "ENV=${{ vars.ENV }}" >> .env
-                  echo "LOG_LEVEL=${{ vars.LOG_LEVEL }}" >> .env
-                  echo "CLIENT_URL=${{ secrets.CLIENT_URL }}" >> .env
-
-                  echo "ADMIN__USERNAME=${{ secrets.ADMIN__USERNAME }}" >> .env
-                  echo "ADMIN__EMAIL=${{ secrets.ADMIN__EMAIL }}" >> .env
-                  echo "ADMIN__FIRST_NAME=${{ secrets.ADMIN__FIRST_NAME }}" >> .env
-                  echo "ADMIN__LAST_NAME=${{ secrets.ADMIN__LAST_NAME }}" >> .env
-                  echo "ADMIN__PASSWORD=${{ secrets.ADMIN__PASSWORD }}" >> .env
-
-                  echo "JWT__SECRET_KEY=${{ secrets.JWT__SECRET_KEY }}" >> .env
-                  echo "JWT__ALGORITHM=${{ secrets.JWT__ALGORITHM }}" >> .env
-                  echo "JWT__ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.JWT__ACCESS_TOKEN_EXPIRE_MINUTES }}" >> .env
-                  echo "JWT__REFRESH_TOKEN_EXPIRE_DAYS=${{ secrets.JWT__REFRESH_TOKEN_EXPIRE_DAYS }}" >> .env
-
-                  # exclude host & port
-                  echo "DB__NAME=${{ secrets.DB__NAME }}" >> .env
-                  echo "DB__USER=${{ secrets.DB__USER }}" >> .env
-                  echo "DB__PASSWORD=${{ secrets.DB__PASSWORD }}" >> .env
-
-                  # exclude host & port
-                  echo "MS__MASTER_KEY=${{ secrets.MS__MASTER_KEY }}" >> .env
-
-                  echo "EMAIL__BACKEND=smtp" >> .env
-                  echo "EMAIL__EMAIL_FROM=${{ secrets.EMAIL__EMAIL_FROM }}" >> .env
-                  # exclude host
-                  echo "EMAIL__SMTP_PORT=${{ secrets.EMAIL__SMTP_PORT }}" >> .env
-                  echo "EMAIL__SMTP_USERNAME=${{ secrets.EMAIL__SMTP_USERNAME }}" >> .env
-                  echo "EMAIL__SMTP_PASSWORD=${{ secrets.EMAIL__SMTP_PASSWORD }}" >> .env
-
-                  echo "GH__BACKEND=api" >> .env
-                  echo "GH__REPO_OWNER=${{ secrets.GH__REPO_OWNER }}" >> .env
-                  echo "GH__TOKEN=${{ secrets.GH__TOKEN }}" >> .env
-                  echo "GH__ISSUE_ASSIGNEE=${{ secrets.GH__ISSUE_ASSIGNEE }}" >> .env
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+              with:
+                  persist-credentials: false
 
             - name: start containers
               working-directory: config/infra
+              env:
+                  PROJECT: ${{ vars.PROJECT }}
+                  PROD: ${{ github.ref_name == 'main' && 'true' || 'false' }}
+                  DOMAIN: ${{ secrets.DOMAIN }}
+
+                  DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+                  TAG: ${{ inputs.tag }}
+
+                  TRAEFIK_NETWORK: ${{ github.ref_name == 'main' && 'traefik-public' || 'traefik-stage-public' }}
+
+                  ENV: ${{ vars.ENV }}
+                  LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+                  CLIENT_URL: ${{ secrets.CLIENT_URL }}
+
+                  ADMIN__USERNAME: ${{ secrets.ADMIN__USERNAME }}
+                  ADMIN__EMAIL: ${{ secrets.ADMIN__EMAIL }}
+                  ADMIN__FIRST_NAME: ${{ secrets.ADMIN__FIRST_NAME }}
+                  ADMIN__LAST_NAME: ${{ secrets.ADMIN__LAST_NAME }}
+                  ADMIN__PASSWORD: ${{ secrets.ADMIN__PASSWORD }}
+
+                  JWT__SECRET_KEY: ${{ secrets.JWT__SECRET_KEY }}
+                  JWT__ALGORITHM: ${{ secrets.JWT__ALGORITHM }}
+                  JWT__ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.JWT__ACCESS_TOKEN_EXPIRE_MINUTES }}
+                  JWT__REFRESH_TOKEN_EXPIRE_DAYS: ${{ secrets.JWT__REFRESH_TOKEN_EXPIRE_DAYS }}
+
+                  # exclude host & port
+                  DB__NAME: ${{ secrets.DB__NAME }}
+                  DB__USER: ${{ secrets.DB__USER }}
+                  DB__PASSWORD: ${{ secrets.DB__PASSWORD }}
+
+                  # exclude host & port
+                  MS__MASTER_KEY: ${{ secrets.MS__MASTER_KEY }}
+
+                  EMAIL__BACKEND: smtp
+                  EMAIL__EMAIL_FROM: ${{ secrets.EMAIL__EMAIL_FROM }}
+                  # exclude host
+                  EMAIL__SMTP_PORT: ${{ secrets.EMAIL__SMTP_PORT }}
+                  EMAIL__SMTP_USERNAME: ${{ secrets.EMAIL__SMTP_USERNAME }}
+                  EMAIL__SMTP_PASSWORD: ${{ secrets.EMAIL__SMTP_PASSWORD }}
+
+                  GH__BACKEND: api
+                  GH__REPO_OWNER: ${{ secrets.GH__REPO_OWNER }}
+                  GH__TOKEN: ${{ secrets.GH__TOKEN }}
+                  GH__ISSUE_ASSIGNEE: ${{ secrets.GH__ISSUE_ASSIGNEE }}
               run: |
-                  docker compose --env-file ../env/.env -f docker-compose.yml pull
-                  docker compose --env-file ../env/.env -f docker-compose.yml up -d
+                  docker compose -f docker-compose.yml pull
+                  docker compose -f docker-compose.yml up -d
