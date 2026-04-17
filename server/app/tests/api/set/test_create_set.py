@@ -210,13 +210,15 @@ async def test_create_set_number_conflict(
     db_session.add(existing)
     await db_session.commit()
 
-    async def mock_get_next_set_number(
-        workout_exercise_id: int, db_session: AsyncSession
+    async def mock_select_next_set_number(
+        db_session: AsyncSession,
+        workout_exercise_id: int,
     ) -> int:
         return 1
 
     monkeypatch.setattr(
-        "app.services.set._get_next_set_number", mock_get_next_set_number
+        "app.services.set.select_next_set_number",
+        mock_select_next_set_number,
     )
 
     resp = await _make_request(

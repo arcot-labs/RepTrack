@@ -3,7 +3,6 @@ import {
     SearchService,
     type ExercisePublic,
     type MuscleGroupPublic,
-    type MuscleGroupSearchResult,
 } from '@/api/generated'
 import {
     zCreateExerciseRequest,
@@ -23,12 +22,13 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/overrides/button'
 import { Spinner } from '@/components/ui/spinner'
+import { useRemoteSearch } from '@/components/useRemoteSearch'
 import { formatNullableDateTime } from '@/lib/datetime'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import { capitalizeWords, dash, formatNullableString } from '@/lib/text'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -72,14 +72,6 @@ export function ExerciseFormDialog({
     onReloadMuscleGroups,
     onRowLoadingChange,
 }: ExerciseFormDialogProps) {
-    const [searchQuery, setSearchQuery] = useState('')
-    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
-    const [isSearching, setIsSearching] = useState(false)
-    const [searchResults, setSearchResults] = useState<
-        MuscleGroupSearchResult[] | null
-    >(null)
-    const searchRequestIdRef = useRef(0)
-
     const {
         register: registerCreate,
         handleSubmit: handleSubmitCreate,
@@ -91,7 +83,7 @@ export function ExerciseFormDialog({
             isSubmitting: isCreateSubmitting,
         },
         reset: resetCreate,
-    } = useForm<CreateExerciseForm>({
+    } = useForm({
         resolver: zodResolver(zCreateExerciseRequest),
         defaultValues: defaultCreateExerciseFormValues,
         mode: 'onSubmit',
@@ -123,6 +115,25 @@ export function ExerciseFormDialog({
         (isCreateMode ? isCreateSubmitting : isEditSubmitting) || isRowLoading
     const isDirty = isCreateMode ? isCreateDirty : isEditDirty
     const errors = isCreateMode ? createErrors : editErrors
+    const {
+        searchQuery,
+        setSearchQuery,
+        isSearching,
+        displayedItems: displayedMuscleGroups,
+    } = useRemoteSearch({
+        items: muscleGroups,
+        enabled: open && !isViewMode,
+        fallbackMessage: 'Failed to search muscle groups',
+        search: (query, limit) =>
+            SearchService.searchMuscleGroups({
+                body: {
+                    query,
+                    limit,
+                },
+            }),
+        getItemId: (muscleGroup) => muscleGroup.id,
+        getResultId: (searchResult) => searchResult.id,
+    })
 
     const selectedMuscleGroupIds = isCreateMode
         ? (watchCreate('muscle_group_ids') ?? [])
@@ -161,63 +172,6 @@ export function ExerciseFormDialog({
         }
         resetEdit(defaultUpdateExerciseFormValues)
     }, [open, isCreateMode, exercise, resetCreate, resetEdit])
-
-    useEffect(() => {
-        if (!open || isViewMode) {
-            setSearchQuery('')
-            setDebouncedSearchQuery('')
-            setSearchResults(null)
-            setIsSearching(false)
-            return
-        }
-        const timeout = setTimeout(() => {
-            setDebouncedSearchQuery(searchQuery.trim())
-        }, 300)
-        return () => {
-            clearTimeout(timeout)
-        }
-    }, [searchQuery, open, isViewMode])
-
-    useEffect(() => {
-        if (!open || isViewMode || !debouncedSearchQuery) {
-            searchRequestIdRef.current += 1
-            setSearchResults(null)
-            setIsSearching(false)
-            return
-        }
-        const requestId = searchRequestIdRef.current + 1
-        searchRequestIdRef.current = requestId
-        setIsSearching(true)
-        void (async () => {
-            const { data, error } = await SearchService.searchMuscleGroups({
-                body: {
-                    query: debouncedSearchQuery,
-                    limit: Math.min(muscleGroups.length, 1000),
-                },
-            })
-            if (requestId !== searchRequestIdRef.current) return
-            if (error) {
-                await handleApiError(error, {
-                    fallbackMessage: 'Failed to search muscle groups',
-                })
-                setSearchResults(null)
-                return
-            }
-            setSearchResults(data)
-        })().finally(() => {
-            if (requestId === searchRequestIdRef.current) setIsSearching(false)
-        })
-    }, [debouncedSearchQuery, muscleGroups.length, open, isViewMode])
-
-    const displayedMuscleGroups = useMemo(() => {
-        if (!searchResults) {
-            return muscleGroups
-        }
-        const byId = new Map(muscleGroups.map((group) => [group.id, group]))
-        return searchResults
-            .map((hit) => byId.get(hit.id))
-            .filter((group): group is MuscleGroupPublic => !!group)
-    }, [muscleGroups, searchResults])
 
     const attemptClose = () => {
         if (isSubmitting) return

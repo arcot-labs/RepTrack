@@ -1,6 +1,5 @@
 import logging
 
-from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,23 +15,14 @@ from app.models.errors import (
     WorkoutExercisePositionConflict,
 )
 from app.models.schemas.workout_exercise import CreateWorkoutExerciseRequest
-from app.services.utilities.queries import get_owned_workout, query_exercises
+from app.services.queries.exercise import select_exercises
+from app.services.queries.workout_exercise import (
+    select_next_workout_exercise_position,
+    select_workout_exercises,
+)
+from app.services.workout import get_owned_workout
 
 logger = logging.getLogger(__name__)
-
-
-async def _get_next_workout_exercise_position(
-    workout_id: int,
-    db_session: AsyncSession,
-) -> int:
-    result = await db_session.execute(
-        select(
-            func.coalesce(func.max(WorkoutExercise.position), 0),
-        ).where(
-            WorkoutExercise.workout_id == workout_id,
-        )
-    )
-    return int(result.scalar_one()) + 1
 
 
 async def create_workout_exercise(
@@ -46,7 +36,7 @@ async def create_workout_exercise(
     # validate workout existence & ownership
     await get_owned_workout(workout_id, user_id, db_session)
 
-    exercises = await query_exercises(
+    exercises = await select_exercises(
         db_session,
         False,
         Exercise.id == req.exercise_id,
@@ -56,7 +46,7 @@ async def create_workout_exercise(
     if not exercise:
         raise ExerciseNotFound()
 
-    position = await _get_next_workout_exercise_position(workout_id, db_session)
+    position = await select_next_workout_exercise_position(db_session, workout_id)
     workout_exercise = WorkoutExercise(
         workout_id=workout_id,
         exercise_id=req.exercise_id,
@@ -85,13 +75,14 @@ async def delete_workout_exercise(
 
     await get_owned_workout(workout_id, user_id, db_session)
 
-    result = await db_session.execute(
-        select(WorkoutExercise).where(
-            WorkoutExercise.id == workout_exercise_id,
-            WorkoutExercise.workout_id == workout_id,
-        )
+    result = await select_workout_exercises(
+        db_session,
+        True,
+        False,
+        WorkoutExercise.id == workout_exercise_id,
+        WorkoutExercise.workout_id == workout_id,
     )
-    workout_exercise = result.scalar_one_or_none()
+    workout_exercise = result[0] if result else None
     if not workout_exercise:
         raise WorkoutExerciseNotFound()
 

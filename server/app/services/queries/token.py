@@ -1,0 +1,38 @@
+from collections.abc import Sequence
+from typing import Any
+
+from sqlalchemy import func, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import InstrumentedAttribute, selectinload
+
+from app.models.database.password_reset_token import PasswordResetToken
+from app.models.database.registration_token import RegistrationToken
+
+
+async def select_tokens_by_prefix[T: (RegistrationToken, PasswordResetToken)](
+    db_session: AsyncSession,
+    model: type[T],
+    load_option: InstrumentedAttribute[Any],
+    prefix: str,
+) -> Sequence[T]:
+    result = await db_session.execute(
+        select(model)
+        .options(selectinload(load_option))
+        .where(model.token_prefix == prefix)
+        .where(model.used_at.is_(None))
+        .where(model.expires_at > func.now())
+        .order_by(model.created_at.desc())
+    )
+    return result.scalars().all()
+
+
+async def expire_tokens[T: (RegistrationToken, PasswordResetToken)](
+    db_session: AsyncSession,
+    model: type[T],
+    where_clauses: list[Any],
+) -> None:
+    await db_session.execute(
+        update(model)
+        .where(*where_clauses, model.expires_at > func.now())
+        .values(expires_at=func.now())
+    )

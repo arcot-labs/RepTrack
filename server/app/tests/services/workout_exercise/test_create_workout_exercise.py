@@ -120,12 +120,15 @@ async def test_create_workout_exercise_position_conflict(
         position=1,
     )
 
-    async def mock_get_next_position(workout_id: int, db_session: AsyncSession) -> int:
+    async def mock_select_next_position(
+        db_session: AsyncSession,
+        workout_id: int,
+    ) -> int:
         return 1
 
     monkeypatch.setattr(
-        "app.services.workout_exercise._get_next_workout_exercise_position",
-        mock_get_next_position,
+        "app.services.workout_exercise.select_next_workout_exercise_position",
+        mock_select_next_position,
     )
 
     with pytest.raises(WorkoutExercisePositionConflict):
@@ -152,12 +155,15 @@ async def test_create_workout_exercise_unhandled_integrity_error(
         position=1,
     )
 
-    async def mock_get_next_position(workout_id: int, db_session: AsyncSession) -> int:
+    async def mock_select_next_position(
+        db_session: AsyncSession,
+        workout_id: int,
+    ) -> int:
         return 1
 
     monkeypatch.setattr(
-        "app.services.workout_exercise._get_next_workout_exercise_position",
-        mock_get_next_position,
+        "app.services.workout_exercise.select_next_workout_exercise_position",
+        mock_select_next_position,
     )
 
     with patch("app.services.workout_exercise.is_unique_violation", return_value=False):

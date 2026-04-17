@@ -1,5 +1,5 @@
 import { AuthService } from '@/api/generated'
-import { useSession } from '@/auth/session'
+import { useSession } from '@/auth/useSession'
 import { FeedbackFormDialog } from '@/components/feedback/FeedbackFormDialog'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/overrides/button'

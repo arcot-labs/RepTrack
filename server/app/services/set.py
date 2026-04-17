@@ -1,6 +1,5 @@
 import logging
 
-from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,27 +12,11 @@ from app.models.errors import (
     WorkoutExerciseNotFound,
 )
 from app.models.schemas.set import CreateSetRequest, UpdateSetRequest
-from app.services.utilities.queries import (
-    get_owned_workout,
-    query_sets,
-    query_workout_exercises,
-)
+from app.services.queries.set import select_next_set_number, select_sets
+from app.services.queries.workout_exercise import select_workout_exercises
+from app.services.workout import get_owned_workout
 
 logger = logging.getLogger(__name__)
-
-
-async def _get_next_set_number(
-    workout_exercise_id: int,
-    db_session: AsyncSession,
-) -> int:
-    result = await db_session.execute(
-        select(
-            func.coalesce(func.max(Set.set_number), 0),
-        ).where(
-            Set.workout_exercise_id == workout_exercise_id,
-        )
-    )
-    return int(result.scalar_one()) + 1
 
 
 async def create_set(
@@ -50,8 +33,10 @@ async def create_set(
     # validate workout existence & ownership
     await get_owned_workout(workout_id, user_id, db_session)
 
-    result = await query_workout_exercises(
+    result = await select_workout_exercises(
         db_session,
+        False,
+        True,
         WorkoutExercise.id == workout_exercise_id,
         WorkoutExercise.workout_id == workout_id,
     )
@@ -59,7 +44,7 @@ async def create_set(
     if not workout_exercise:
         raise WorkoutExerciseNotFound()
 
-    set_number = await _get_next_set_number(workout_exercise_id, db_session)
+    set_number = await select_next_set_number(db_session, workout_exercise_id)
     set_ = Set(
         workout_exercise_id=workout_exercise_id,
         set_number=set_number,
@@ -92,7 +77,7 @@ async def update_set(
 
     await get_owned_workout(workout_id, user_id, db_session)
 
-    result = await query_sets(
+    result = await select_sets(
         db_session,
         Set.id == set_id,
         WorkoutExercise.id == workout_exercise_id,
@@ -129,7 +114,7 @@ async def delete_set(
 
     await get_owned_workout(workout_id, user_id, db_session)
 
-    result = await query_sets(
+    result = await select_sets(
         db_session,
         Set.id == set_id,
         WorkoutExercise.id == workout_exercise_id,

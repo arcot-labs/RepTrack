@@ -27,7 +27,7 @@ export function RequestAccess() {
         handleSubmit,
         formState: { errors, isSubmitting },
         reset,
-    } = useForm<RequestAccessForm>({
+    } = useForm({
         resolver: zodResolver(zRequestAccessRequest),
         mode: 'onSubmit',
         reValidateMode: 'onChange',

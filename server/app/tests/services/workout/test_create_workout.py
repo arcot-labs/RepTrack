@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.workout import Workout
 from app.models.schemas.workout import CreateWorkoutRequest
+from app.services.queries.workout import select_workouts
 from app.services.workout import (
-    _query_workouts,  # pyright: ignore[reportPrivateUsage]
     create_workout,
 )
 
@@ -26,7 +26,7 @@ async def test_create_workout(db_session: AsyncSession):
         db_session,
     )
 
-    workouts = await _query_workouts(db_session, False, Workout.user_id == user.id)
+    workouts = await select_workouts(db_session, False, Workout.user_id == user.id)
     workout = workouts[0] if workouts else None
 
     assert workout is not None

@@ -1,0 +1,28 @@
+name: CI / Review Dependencies
+
+on:
+    workflow_dispatch:
+    pull_request:
+        branches:
+            - stage
+            - main
+
+permissions: {}
+
+jobs:
+    review-dependencies:
+        name: Review Dependencies
+        runs-on: self-hosted
+        environment: ${{ github.base_ref == 'main' && 'prod' || github.base_ref }}
+        steps:
+            - name: checkout
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+              with:
+                  ref: ${{ github.event.pull_request.head.sha || github.ref_name }}
+                  persist-credentials: false
+
+            - name: run
+              uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
+              with:
+                  base-ref: ${{ github.event.pull_request.base.sha || github.event.repository.default_branch }}
+                  head-ref: ${{ github.event.pull_request.head.sha || github.sha }}

@@ -1,0 +1,32 @@
+name: Maintenance / Update stage after PR Merge
+
+on:
+    pull_request:
+        branches:
+            - stage
+        types:
+            - closed
+
+permissions: {}
+
+concurrency:
+    group: update-stage
+    cancel-in-progress: true
+
+jobs:
+    generate-api:
+        name: Generate API Client
+        if: github.event.pull_request.merged == true
+        uses: ./.github/workflows/generate-api.yml
+        permissions:
+            contents: write
+        secrets:
+            KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+
+    format-and-lint:
+        name: Format and Lint
+        if: github.event.pull_request.merged == true
+        needs: generate-api
+        uses: ./.github/workflows/format-and-lint.yml
+        permissions:
+            contents: write

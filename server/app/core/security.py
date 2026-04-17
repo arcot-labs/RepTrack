@@ -13,9 +13,13 @@ from app.models.database.password_reset_token import PasswordResetToken
 from app.models.database.registration_token import RegistrationToken
 from app.models.database.user import User
 from app.models.errors import InvalidCredentials
+from app.models.schemas.types import is_email_identifier
 from app.models.schemas.user import JWTData
-from app.services.token import expire_tokens, get_tokens_by_prefix
-from app.services.user import get_user_by_identifier
+from app.services.queries.token import expire_tokens, select_tokens_by_prefix
+from app.services.queries.user import (
+    select_user_by_email,
+    select_user_by_username,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +49,12 @@ async def _get_token[T: (RegistrationToken, PasswordResetToken)](
     db_session: AsyncSession,
 ) -> T | None:
     token_prefix = token_str[:TOKEN_PREFIX_LENGTH]
-    tokens = await get_tokens_by_prefix(model, load_option, token_prefix, db_session)
+    tokens = await select_tokens_by_prefix(
+        db_session,
+        model,
+        load_option,
+        token_prefix,
+    )
     for token in tokens:
         if verify_secret(token_str, token.token_hash):
             return token
@@ -83,9 +92,9 @@ async def expire_existing_registration_tokens(
         f"Expiring existing registration tokens for access request {access_request_id}"
     )
     await expire_tokens(
+        db_session,
         RegistrationToken,
         [RegistrationToken.access_request_id == access_request_id],
-        db_session,
     )
 
 
@@ -95,9 +104,9 @@ async def expire_existing_password_reset_tokens(
 ) -> None:
     logger.info(f"Expiring existing password reset tokens for user {user_id}")
     await expire_tokens(
+        db_session,
         PasswordResetToken,
         [PasswordResetToken.user_id == user_id],
-        db_session,
     )
 
 
@@ -135,12 +144,24 @@ def create_password_reset_token(
     )
 
 
+async def _get_user_by_identifier(
+    identifier: str,
+    db_session: AsyncSession,
+) -> User | None:
+    if is_email_identifier(identifier):
+        user = await select_user_by_email(db_session, identifier)
+        if user:
+            return user
+        return await select_user_by_username(db_session, identifier)
+    return await select_user_by_username(db_session, identifier)
+
+
 async def authenticate_user(
     identifier: str,
     password: str,
     db_session: AsyncSession,
 ) -> User | None:
-    user = await get_user_by_identifier(identifier, db_session)
+    user = await _get_user_by_identifier(identifier, db_session)
     if not user or not verify_secret(password, user.password_hash):
         return None
     return user

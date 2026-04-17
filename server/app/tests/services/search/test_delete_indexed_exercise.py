@@ -5,8 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.database.exercise import Exercise
 from app.models.enums import SearchIndex
 from app.models.schemas.exercise import ExerciseDocument
+from app.services.queries.exercise import select_exercises
 from app.services.search import delete_indexed_exercise, index_exercise, reindex
-from app.services.utilities.queries import query_exercises
 
 from ..exercise.utilities import create_exercise
 from ..muscle_group.utilities import create_muscle_group
@@ -31,7 +31,7 @@ async def test_delete_indexed_exercise(
         muscle_group_ids=[mg.id],
     )
 
-    exercises = await query_exercises(db_session, False, Exercise.id == exercise.id)
+    exercises = await select_exercises(db_session, False, Exercise.id == exercise.id)
     exercise = exercises[0]
     assert exercise is not None
 

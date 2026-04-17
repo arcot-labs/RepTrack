@@ -9,7 +9,7 @@ from app.models.database.exercise import Exercise
 from app.models.errors import ExerciseNameConflict, MuscleGroupNotFound
 from app.models.schemas.exercise import CreateExerciseRequest
 from app.services.exercise import create_exercise
-from app.services.utilities.queries import query_exercises
+from app.services.queries.exercise import select_exercises
 
 from ..muscle_group.utilities import get_muscle_group_id
 from ..utilities import create_user
@@ -37,7 +37,7 @@ async def test_create_exercise(
         ms_client,
     )
 
-    exercises = await query_exercises(
+    exercises = await select_exercises(
         db_session,
         False,
         Exercise.name == "Incline Bench",

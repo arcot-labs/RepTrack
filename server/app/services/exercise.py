@@ -2,7 +2,7 @@ import logging
 from datetime import UTC, datetime
 
 from meilisearch_python_sdk import AsyncClient
-from sqlalchemy import delete, select
+from sqlalchemy import delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,12 +19,15 @@ from app.models.schemas.exercise import (
     ExercisePublic,
     UpdateExerciseRequest,
 )
-from app.services.muscle_group import get_muscle_groups_by_ids
+from app.services.queries.exercise import (
+    select_exercise_by_id,
+    select_exercises,
+)
+from app.services.queries.muscle_group import select_muscle_groups_by_ids
 from app.services.search import (
     delete_indexed_exercise,
     index_exercise,
 )
-from app.services.utilities.queries import query_exercises
 from app.services.utilities.serializers import to_exercise_public
 
 logger = logging.getLogger(__name__)
@@ -35,12 +38,7 @@ async def _get_owned_exercise(
     user_id: int,
     db_session: AsyncSession,
 ) -> Exercise:
-    result = await db_session.execute(
-        select(Exercise).where(
-            Exercise.id == exercise_id,
-        )
-    )
-    exercise = result.scalar_one_or_none()
+    exercise = await select_exercise_by_id(db_session, exercise_id)
     if not exercise or user_id != exercise.user_id:
         raise ExerciseNotFound()
     return exercise
@@ -53,7 +51,7 @@ async def _index_exercise(
 ) -> int:
     logger.info(f"Indexing exercise {exercise.id}")
 
-    exercises = await query_exercises(
+    exercises = await select_exercises(
         db_session,
         False,
         Exercise.id == exercise.id,
@@ -76,7 +74,7 @@ async def create_exercise(
 ) -> None:
     logger.info(f"Creating exercise '{req.name}' for user {user_id}")
 
-    muscle_groups = await get_muscle_groups_by_ids(req.muscle_group_ids, db_session)
+    muscle_groups = await select_muscle_groups_by_ids(db_session, req.muscle_group_ids)
     if len(muscle_groups) != len(req.muscle_group_ids):
         raise MuscleGroupNotFound()
 
@@ -115,7 +113,7 @@ async def get_exercises(
 ) -> list[ExercisePublic]:
     logger.info(f"Getting exercises for user {user_id}")
 
-    exercises = await query_exercises(
+    exercises = await select_exercises(
         db_session,
         False,
         (Exercise.user_id.is_(None)) | (Exercise.user_id == user_id),
@@ -130,7 +128,7 @@ async def get_exercise(
 ) -> ExercisePublic:
     logger.info(f"Getting exercise {exercise_id} for user {user_id}")
 
-    exercises = await query_exercises(
+    exercises = await select_exercises(
         db_session,
         False,
         Exercise.id == exercise_id,
@@ -165,7 +163,10 @@ async def update_exercise(
 
     if "muscle_group_ids" in req.model_fields_set:
         assert req.muscle_group_ids is not None
-        muscle_groups = await get_muscle_groups_by_ids(req.muscle_group_ids, db_session)
+        muscle_groups = await select_muscle_groups_by_ids(
+            db_session,
+            req.muscle_group_ids,
+        )
         if len(muscle_groups) != len(req.muscle_group_ids):
             raise MuscleGroupNotFound()
 

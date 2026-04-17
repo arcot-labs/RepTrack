@@ -1,4 +1,4 @@
-import { useSession } from '@/auth/session'
+import { useSession } from '@/auth/useSession'
 import { Loading } from '@/components/Loading'
 import type { LocationState } from '@/models/location'
 import type { JSX } from 'react'

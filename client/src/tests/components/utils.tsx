@@ -56,6 +56,14 @@ export function hasFilterFn<T>(col: ColumnDef<T>): col is ColumnDef<T> & {
     return 'filterFn' in col && typeof col.filterFn === 'function'
 }
 
+export function hasGetUniqueValues<T>(
+    col: ColumnDef<T>
+): col is ColumnDef<T> & {
+    getUniqueValues: (row: T) => unknown
+} {
+    return 'getUniqueValues' in col && typeof col.getUniqueValues === 'function'
+}
+
 export function getColumn<T>(
     columns: ColumnDef<T>[],
     predicate: (col: ColumnDef<T>) => boolean

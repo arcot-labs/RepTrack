@@ -8,7 +8,7 @@ import type {
 } from '@/models/data-table'
 import { ArrowUpRight, Plus, Trash } from 'lucide-react'
 
-export const handleDelete = async (
+export const handleDeleteWorkout = async (
     workoutId: number,
     onWorkoutDeleted: (workoutId: number) => void,
     onReloadWorkouts: () => Promise<void>,

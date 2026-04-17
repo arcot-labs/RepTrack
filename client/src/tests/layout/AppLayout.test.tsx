@@ -20,7 +20,7 @@ const useSessionMock: MockedFunction<() => SessionContextType> = vi.fn()
 vi.mock('@/lib/logger', () => ({
     logger: loggerMocks,
 }))
-vi.mock('@/auth/session', () => ({
+vi.mock('@/auth/useSession', () => ({
     useSession: () => useSessionMock(),
 }))
 vi.mock('@/components/HeaderActions', () => ({
