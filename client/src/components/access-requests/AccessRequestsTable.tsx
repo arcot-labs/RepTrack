@@ -65,13 +65,12 @@ export function AccessRequestsTable({
 
     const rowActionsConfig: DataTableRowActionsConfig<AccessRequestPublic> = {
         schema: zAccessRequestPublic,
-        menuItems: (row) => {
-            return getAccessRequestRowActions(
+        menuItems: (row) =>
+            getAccessRequestRowActions(
                 row,
                 isRowLoading(row.id),
                 confirmDialog.open
-            )
-        },
+            ),
     }
 
     const columns: ColumnDef<AccessRequestPublic>[] = [

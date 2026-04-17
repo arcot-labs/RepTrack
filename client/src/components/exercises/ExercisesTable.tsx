@@ -11,7 +11,10 @@ import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncat
 import { useRowLoading } from '@/components/data-table/rowLoading'
 import { useDialog } from '@/components/dialog'
 import { ExerciseFormDialog } from '@/components/exercises/ExerciseFormDialog'
-import { handleDelete } from '@/components/exercises/utils'
+import {
+    getExerciseRowActions,
+    handleDelete,
+} from '@/components/exercises/utils'
 import { useRemoteSearch } from '@/components/remoteSearch'
 import {
     Dialog,
@@ -22,7 +25,6 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/overrides/button'
 import { formatNullableDateTime } from '@/lib/datetime'
-import { blueText, redText } from '@/lib/styles'
 import { capitalizeWords, dash } from '@/lib/text'
 import type {
     DataTableRowActionsConfig,
@@ -30,7 +32,7 @@ import type {
     FilterOption,
 } from '@/models/data-table'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Copy, Eye, Pencil, Plus, Trash } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useState } from 'react'
 
 function getTypeFilterOptions(): FilterOption[] {
@@ -98,12 +100,16 @@ export function ExercisesTable({
         )
     })
 
-    const openCreateDialog = (exercise?: ExercisePublic) => {
+    const openCreateDialog = () => {
         setFormDialog({
             isOpen: true,
             mode: 'create',
-            exercise: exercise ?? null,
+            exercise: null,
         })
+    }
+
+    const openCopyDialog = (exercise: ExercisePublic) => {
+        setFormDialog({ isOpen: true, mode: 'create', exercise })
     }
 
     const openEditDialog = (exercise: ExercisePublic) => {
@@ -116,53 +122,15 @@ export function ExercisesTable({
 
     const rowActionsConfig: DataTableRowActionsConfig<ExercisePublic> = {
         schema: zExercisePublic,
-        menuItems: (row) => {
-            if (row.user_id === null)
-                return [
-                    {
-                        type: 'action',
-                        icon: Eye,
-                        onSelect: () => {
-                            openViewDialog(row)
-                        },
-                    },
-                    {
-                        type: 'action',
-                        className: blueText,
-                        icon: Copy,
-                        onSelect: () => {
-                            openCreateDialog(row)
-                        },
-                    },
-                ]
-
-            return [
-                {
-                    type: 'action',
-                    icon: Pencil,
-                    onSelect: () => {
-                        openEditDialog(row)
-                    },
-                    disabled: isRowLoading(row.id),
-                },
-                {
-                    type: 'action',
-                    className: blueText,
-                    icon: Copy,
-                    onSelect: () => {
-                        openCreateDialog(row)
-                    },
-                },
-                {
-                    type: 'action',
-                    className: redText,
-                    icon: Trash,
-                    onSelect: () => {
-                        deleteDialog.open(row)
-                    },
-                },
-            ]
-        },
+        menuItems: (row) =>
+            getExerciseRowActions(
+                row,
+                isRowLoading(row.id),
+                openViewDialog,
+                openCopyDialog,
+                openEditDialog,
+                deleteDialog.open
+            ),
     }
 
     const columns: ColumnDef<ExercisePublic>[] = [
@@ -348,7 +316,11 @@ export function ExercisesTable({
                 mode={formDialog.mode}
                 exercise={formDialog.exercise}
                 muscleGroups={muscleGroups}
-                isRowLoading={isRowLoading(formDialog.exercise?.id ?? -1)}
+                isRowLoading={
+                    formDialog.exercise
+                        ? isRowLoading(formDialog.exercise.id)
+                        : false
+                }
                 onOpenChange={(isOpen) => {
                     setFormDialog((prev) => ({ ...prev, isOpen }))
                 }}

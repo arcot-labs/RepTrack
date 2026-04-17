@@ -52,13 +52,12 @@ export function WorkoutsTable({
 
     const rowActionsConfig: DataTableRowActionsConfig<WorkoutBase> = {
         schema: zWorkoutBase,
-        menuItems: (row) => {
-            return getWorkoutRowActions(
+        menuItems: (row) =>
+            getWorkoutRowActions(
                 row.id,
                 isRowLoading(row.id),
                 deleteDialog.open
-            )
-        },
+            ),
     }
 
     const columns: ColumnDef<WorkoutBase>[] = [
