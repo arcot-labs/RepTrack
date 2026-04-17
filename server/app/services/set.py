@@ -13,8 +13,8 @@ from app.models.errors import (
 )
 from app.models.schemas.set import CreateSetRequest, UpdateSetRequest
 from app.services.queries.set import select_next_set_number, select_sets
+from app.services.queries.workout_exercise import select_workout_exercises
 from app.services.workout import get_owned_workout
-from app.services.workout_exercise import select_workout_exercises
 
 logger = logging.getLogger(__name__)
 

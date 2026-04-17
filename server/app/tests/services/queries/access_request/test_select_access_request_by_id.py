@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.access_request import (
+from app.services.queries.access_request import (
     select_access_request_by_id,
 )
 from app.tests.core.security.utilities import create_access_request

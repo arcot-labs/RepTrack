@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.database.muscle_group import MuscleGroup
-from app.services.muscle_group import select_muscle_groups
+from app.services.queries.muscle_group import select_muscle_groups
 
 
 async def test_select_muscle_groups(db_session: AsyncSession):

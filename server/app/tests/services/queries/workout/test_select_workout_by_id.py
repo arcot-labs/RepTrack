@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy.exc import MissingGreenlet
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.workout import (
+from app.services.queries.workout import (
     select_workout_by_id,
 )
 
