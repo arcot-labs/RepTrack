@@ -92,6 +92,9 @@ updates:
           day: 'monday'
       cooldown:
           default-days: 7
+      ignore:
+          - dependency-name: 'pnpm/action-setup'
+            versions: ['>= 6']
       groups:
           github-actions:
               patterns:
