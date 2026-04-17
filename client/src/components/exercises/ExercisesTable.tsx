@@ -1,5 +1,4 @@
 import {
-    ExerciseService,
     SearchService,
     type ExercisePublic,
     type MuscleGroupPublic,
@@ -9,7 +8,10 @@ import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
 import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncatedCell'
+import { useRowLoading } from '@/components/data-table/rowLoading'
+import { useDialog } from '@/components/dialog'
 import { ExerciseFormDialog } from '@/components/exercises/ExerciseFormDialog'
+import { handleDelete } from '@/components/exercises/utils'
 import { useRemoteSearch } from '@/components/remoteSearch'
 import {
     Dialog,
@@ -20,8 +22,6 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/overrides/button'
 import { formatNullableDateTime } from '@/lib/datetime'
-import { handleApiError } from '@/lib/http'
-import { notify } from '@/lib/notify'
 import { blueText, redText } from '@/lib/styles'
 import { capitalizeWords, dash } from '@/lib/text'
 import type {
@@ -44,6 +44,7 @@ interface ExercisesTableProps {
     exercises: ExercisePublic[]
     muscleGroups: MuscleGroupPublic[]
     isLoading: boolean
+    onExerciseDeleted: (exerciseId: number) => void
     onReloadExercises: () => Promise<void>
     onReloadMuscleGroups: () => Promise<void>
 }
@@ -52,6 +53,7 @@ export function ExercisesTable({
     exercises,
     muscleGroups,
     isLoading,
+    onExerciseDeleted,
     onReloadExercises,
     onReloadMuscleGroups,
 }: ExercisesTableProps) {
@@ -75,11 +77,6 @@ export function ExercisesTable({
         getResultId: (searchResult) => searchResult.id,
     })
 
-    const [isLoadingExerciseIds, setIsLoadingExerciseIds] = useState<
-        Set<number>
-    >(new Set())
-    const [isDeleting, setIsDeleting] = useState(false)
-
     const [formDialog, setFormDialog] = useState<{
         isOpen: boolean
         mode: 'create' | 'edit' | 'view'
@@ -90,12 +87,15 @@ export function ExercisesTable({
         exercise: null,
     })
 
-    const [deleteDialog, setDeleteDialog] = useState<{
-        isOpen: boolean
-        exercise: ExercisePublic | null
-    }>({
-        isOpen: false,
-        exercise: null,
+    const { isRowLoading, setRowLoading } = useRowLoading<number>()
+    const deleteDialog = useDialog(async (exercise: ExercisePublic) => {
+        await handleDelete(
+            exercise.id,
+            onExerciseDeleted,
+            refreshSearchResults,
+            onReloadExercises,
+            setRowLoading
+        )
     })
 
     const openCreateDialog = (exercise?: ExercisePublic) => {
@@ -112,56 +112,6 @@ export function ExercisesTable({
 
     const openViewDialog = (exercise: ExercisePublic) => {
         setFormDialog({ isOpen: true, mode: 'view', exercise })
-    }
-
-    const openDeleteDialog = (exercise: ExercisePublic) => {
-        setDeleteDialog({ isOpen: true, exercise })
-    }
-
-    const closeDeleteDialog = () => {
-        setDeleteDialog({ isOpen: false, exercise: null })
-    }
-
-    const setExerciseRowLoading = (exerciseId: number, isLoading: boolean) => {
-        setIsLoadingExerciseIds((prev) => {
-            const next = new Set(prev)
-            if (isLoading) next.add(exerciseId)
-            else next.delete(exerciseId)
-            return next
-        })
-    }
-
-    const handleDeleteExercise = async () => {
-        const exercise = deleteDialog.exercise
-        if (!exercise) return
-
-        setIsDeleting(true)
-        setExerciseRowLoading(exercise.id, true)
-        try {
-            const { error } = await ExerciseService.deleteExercise({
-                path: { exercise_id: exercise.id },
-            })
-            if (error) {
-                await handleApiError(error, {
-                    httpErrorHandlers: {
-                        exercise_not_found: async () => {
-                            notify.error('Exercise not found. Reloading data')
-                            await onReloadExercises()
-                        },
-                    },
-                    fallbackMessage: 'Failed to delete exercise',
-                })
-                closeDeleteDialog()
-                return
-            }
-            notify.success('Exercise deleted')
-            await onReloadExercises()
-            refreshSearchResults()
-            closeDeleteDialog()
-        } finally {
-            setExerciseRowLoading(exercise.id, false)
-            setIsDeleting(false)
-        }
     }
 
     const rowActionsConfig: DataTableRowActionsConfig<ExercisePublic> = {
@@ -186,7 +136,6 @@ export function ExercisesTable({
                     },
                 ]
 
-            const isRowLoading = isLoadingExerciseIds.has(row.id)
             return [
                 {
                     type: 'action',
@@ -194,7 +143,7 @@ export function ExercisesTable({
                     onSelect: () => {
                         openEditDialog(row)
                     },
-                    disabled: isRowLoading,
+                    disabled: isRowLoading(row.id),
                 },
                 {
                     type: 'action',
@@ -209,7 +158,7 @@ export function ExercisesTable({
                     className: redText,
                     icon: Trash,
                     onSelect: () => {
-                        openDeleteDialog(row)
+                        deleteDialog.open(row)
                     },
                 },
             ]
@@ -399,9 +348,7 @@ export function ExercisesTable({
                 mode={formDialog.mode}
                 exercise={formDialog.exercise}
                 muscleGroups={muscleGroups}
-                isRowLoading={isLoadingExerciseIds.has(
-                    formDialog.exercise?.id ?? -1
-                )}
+                isRowLoading={isRowLoading(formDialog.exercise?.id ?? -1)}
                 onOpenChange={(isOpen) => {
                     setFormDialog((prev) => ({ ...prev, isOpen }))
                 }}
@@ -411,13 +358,13 @@ export function ExercisesTable({
                 }}
                 onReloadExercises={onReloadExercises}
                 onReloadMuscleGroups={onReloadMuscleGroups}
-                onRowLoadingChange={setExerciseRowLoading}
+                onRowLoadingChange={setRowLoading}
             />
             <Dialog
-                open={deleteDialog.isOpen}
+                open={deleteDialog.state.isOpen}
                 onOpenChange={(isOpen) => {
-                    if (!isDeleting)
-                        setDeleteDialog((prev) => ({ ...prev, isOpen }))
+                    if (isOpen || deleteDialog.state.isConfirming) return
+                    deleteDialog.close()
                 }}
             >
                 <DialogContent aria-describedby={undefined}>
@@ -427,24 +374,26 @@ export function ExercisesTable({
                     <div className="text-sm">
                         Are you sure you want to delete{' '}
                         <span className="font-semibold">
-                            {deleteDialog.exercise?.name}
+                            {deleteDialog.state.args?.[0].name}
                         </span>
                         ?
                         <div className="mt-2">This action is irreversible.</div>
                     </div>
                     <DialogFooter>
                         <Button
-                            onClick={closeDeleteDialog}
-                            disabled={isDeleting}
+                            onClick={deleteDialog.close}
+                            disabled={deleteDialog.state.isConfirming}
                         >
                             Cancel
                         </Button>
                         <Button
                             variant="destructive"
-                            onClick={() => void handleDeleteExercise()}
-                            disabled={isDeleting}
+                            onClick={() => void deleteDialog.confirm()}
+                            disabled={deleteDialog.state.isConfirming}
                         >
-                            {isDeleting ? 'Deleting...' : 'Delete'}
+                            {deleteDialog.state.isConfirming
+                                ? 'Deleting...'
+                                : 'Delete'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
