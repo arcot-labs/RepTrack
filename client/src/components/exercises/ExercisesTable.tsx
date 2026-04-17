@@ -2,7 +2,6 @@ import {
     ExerciseService,
     SearchService,
     type ExercisePublic,
-    type ExerciseSearchResult,
     type MuscleGroupPublic,
 } from '@/api/generated'
 import { zExercisePublic } from '@/api/generated/zod.gen'
@@ -11,6 +10,7 @@ import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHe
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
 import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncatedCell'
 import { ExerciseFormDialog } from '@/components/exercises/ExerciseFormDialog'
+import { useRemoteSearch } from '@/components/remoteSearch'
 import {
     Dialog,
     DialogContent,
@@ -31,7 +31,7 @@ import type {
 } from '@/models/data-table'
 import type { ColumnDef } from '@tanstack/react-table'
 import { Copy, Eye, Pencil, Plus, Trash } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useState } from 'react'
 
 function getTypeFilterOptions(): FilterOption[] {
     return [
@@ -55,14 +55,25 @@ export function ExercisesTable({
     onReloadExercises,
     onReloadMuscleGroups,
 }: ExercisesTableProps) {
-    const [searchQuery, setSearchQuery] = useState('')
-    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
-    const [isSearching, setIsSearching] = useState(false)
-    const [searchResults, setSearchResults] = useState<
-        ExerciseSearchResult[] | null
-    >(null)
-    const [searchRefreshTick, setSearchRefreshTick] = useState(0)
-    const searchRequestIdRef = useRef(0)
+    const {
+        searchQuery,
+        setSearchQuery,
+        isSearching,
+        refreshSearchResults,
+        displayedItems: displayedExercises,
+    } = useRemoteSearch({
+        items: exercises,
+        fallbackMessage: 'Failed to search exercises',
+        search: (query, limit) =>
+            SearchService.searchExercises({
+                body: {
+                    query,
+                    limit,
+                },
+            }),
+        getItemId: (exercise) => exercise.id,
+        getResultId: (searchResult) => searchResult.id,
+    })
 
     const [isLoadingExerciseIds, setIsLoadingExerciseIds] = useState<
         Set<number>
@@ -86,62 +97,6 @@ export function ExercisesTable({
         isOpen: false,
         exercise: null,
     })
-
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            setDebouncedSearchQuery(searchQuery.trim())
-        }, 300)
-        return () => {
-            clearTimeout(timeout)
-        }
-    }, [searchQuery])
-
-    useEffect(() => {
-        if (!debouncedSearchQuery) {
-            searchRequestIdRef.current += 1
-            setSearchResults(null)
-            setIsSearching(false)
-            return
-        }
-        const requestId = searchRequestIdRef.current + 1
-        searchRequestIdRef.current = requestId
-        setIsSearching(true)
-        void (async () => {
-            const { data, error } = await SearchService.searchExercises({
-                body: {
-                    query: debouncedSearchQuery,
-                    limit: Math.min(exercises.length, 1000),
-                },
-            })
-            // only update results for latest request
-            if (requestId !== searchRequestIdRef.current) return
-            if (error) {
-                await handleApiError(error, {
-                    fallbackMessage: 'Failed to search exercises',
-                })
-                setSearchResults(null)
-                return
-            }
-            setSearchResults(data)
-        })().finally(() => {
-            if (requestId === searchRequestIdRef.current) setIsSearching(false)
-        })
-    }, [debouncedSearchQuery, exercises.length, searchRefreshTick])
-
-    const refreshSearchResults = () => {
-        if (!debouncedSearchQuery) return
-        setSearchRefreshTick((prev) => prev + 1)
-    }
-
-    const displayedExercises = useMemo(() => {
-        if (!searchResults) return exercises
-        const byId = new Map(
-            exercises.map((exercise) => [exercise.id, exercise])
-        )
-        return searchResults
-            .map((hit) => byId.get(hit.id))
-            .filter((exercise): exercise is ExercisePublic => !!exercise)
-    }, [exercises, searchResults])
 
     const openCreateDialog = (exercise?: ExercisePublic) => {
         setFormDialog({
