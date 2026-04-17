@@ -1,5 +1,4 @@
 import type { WorkoutBase } from '@/api/generated'
-import { getWorkoutRowActions, handleDelete } from '@/components/workouts/utils'
 import { dash } from '@/lib/text'
 import type { DataTableRowActionsConfig } from '@/models/data-table'
 import {
@@ -20,34 +19,20 @@ import { WorkoutsTable } from '@/components/workouts/WorkoutsTable'
 const onWorkoutDeletedMock = vi.fn()
 const onReloadWorkoutsMock = vi.fn()
 
-const dialogMocks = vi.hoisted(() => ({
+const controllerMocks = vi.hoisted(() => ({
+    useWorkoutsTableController: vi.fn(),
     open: vi.fn(),
     close: vi.fn(),
     confirm: vi.fn(),
-    useDialog: vi.fn(),
+    menuItems: vi.fn(),
 }))
 
 const confirmDialogMock = vi.hoisted(() => vi.fn())
 const inlineRowActionsMock = vi.hoisted(() => vi.fn())
 const truncatedCellMock = vi.hoisted(() => vi.fn())
 
-vi.mock('@/auth/useSession', () => ({
-    useSession: () => ({
-        user: {
-            id: 1,
-            username: 'test-user',
-        },
-    }),
-}))
-
-vi.mock('@/components/workouts/utils', () => ({
-    handleDelete: vi.fn(),
-    getWorkoutRowActions: vi.fn(),
-    getWorkoutToolbarActions: vi.fn(),
-}))
-
-vi.mock('@/components/useDialog', () => ({
-    useDialog: dialogMocks.useDialog,
+vi.mock('@/components/workouts/useWorkoutsTableController', () => ({
+    useWorkoutsTableController: controllerMocks.useWorkoutsTableController,
 }))
 
 vi.mock('@/components/ConfirmDialog', () => ({
@@ -103,20 +88,38 @@ const renderWorkoutsTable = (
         />
     )
 
-const mockDialogState = ({
+const rowActionsConfig: DataTableRowActionsConfig<WorkoutBase> = {
+    schema: {} as DataTableRowActionsConfig<WorkoutBase>['schema'],
+    menuItems: controllerMocks.menuItems,
+}
+
+const toolbarConfig = {
+    search: {
+        columnId: 'notes',
+        placeholder: 'Filter by notes...',
+    },
+    actions: [],
+    showViewOptions: true,
+}
+
+const mockControllerState = ({
     isOpen = false,
     isConfirming = false,
     args = [workout.id],
 } = {}) => {
-    dialogMocks.useDialog.mockReturnValue({
-        state: {
-            isOpen,
-            isConfirming,
-            args,
+    controllerMocks.useWorkoutsTableController.mockReturnValue({
+        deleteDialog: {
+            state: {
+                isOpen,
+                isConfirming,
+                args,
+            },
+            open: controllerMocks.open,
+            close: controllerMocks.close,
+            confirm: controllerMocks.confirm,
         },
-        open: dialogMocks.open,
-        close: dialogMocks.close,
-        confirm: dialogMocks.confirm,
+        rowActionsConfig,
+        toolbarConfig,
     })
 }
 
@@ -132,7 +135,7 @@ const getDialogProps = () => {
 
 beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(getWorkoutRowActions).mockReturnValue([
+    controllerMocks.menuItems.mockReturnValue([
         {
             type: 'action',
             label: 'Open',
@@ -140,7 +143,7 @@ beforeEach(() => {
             disabled: false,
         },
     ])
-    mockDialogState()
+    mockControllerState()
 })
 
 describe('WorkoutsTable - columns', () => {
@@ -174,10 +177,8 @@ describe('WorkoutsTable - columns', () => {
         // invoke manually
         props.config.menuItems(props.row.original)
 
-        expect(getWorkoutRowActions).toHaveBeenCalledExactlyOnceWith(
-            workout.id,
-            false,
-            dialogMocks.open
+        expect(controllerMocks.menuItems).toHaveBeenCalledExactlyOnceWith(
+            workout
         )
     })
 
@@ -295,50 +296,42 @@ describe('WorkoutsTable', () => {
             data: [workout],
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             columns: expect.any(Array),
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            toolbarConfig: expect.any(Object),
+            toolbarConfig,
             pageSize: 10,
             isLoading: false,
         })
     })
+
+    it('passes table state to workouts controller', () => {
+        renderWorkoutsTable()
+
+        expect(
+            controllerMocks.useWorkoutsTableController
+        ).toHaveBeenCalledExactlyOnceWith(
+            expect.objectContaining({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                isRowLoading: expect.any(Function),
+                onReloadWorkouts: onReloadWorkoutsMock,
+                onWorkoutDeleted: onWorkoutDeletedMock,
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                setRowLoading: expect.any(Function),
+            })
+        )
+    })
 })
 
 describe('WorkoutsTable - dialog', () => {
-    it('calls handleDelete in callback', async () => {
-        renderWorkoutsTable()
-
-        expect(screen.getByTestId('mock-confirm-dialog')).toBeInTheDocument()
-
-        expect(dialogMocks.useDialog).toHaveBeenCalledOnce()
-
-        const onConfirm = getMockProps(dialogMocks.useDialog)
-        expect(onConfirm).toBeTypeOf('function')
-
-        await act(async () => {
-            // @ts-expect-error onConfirm is typed correctly
-            onConfirm(workout.id)
-            await Promise.resolve()
-        })
-
-        expect(handleDelete).toHaveBeenCalledExactlyOnceWith(
-            workout.id,
-            onWorkoutDeletedMock,
-            onReloadWorkoutsMock,
-            expect.any(Function)
-        )
-    })
-
     it('does nothing if onOpenChange called with true', () => {
         renderWorkoutsTable()
 
         const dialogProps = getDialogProps()
         dialogProps.onOpenChange(true)
 
-        expect(dialogMocks.close).not.toHaveBeenCalled()
+        expect(controllerMocks.close).not.toHaveBeenCalled()
     })
 
     it('does nothing if onOpenChange called when dialog already confirming', () => {
-        mockDialogState({
+        mockControllerState({
             isOpen: true,
             isConfirming: true,
         })
@@ -347,7 +340,7 @@ describe('WorkoutsTable - dialog', () => {
         const dialogProps = getDialogProps()
         dialogProps.onOpenChange(false)
 
-        expect(dialogMocks.close).not.toHaveBeenCalled()
+        expect(controllerMocks.close).not.toHaveBeenCalled()
     })
 
     it('closes dialog when onOpenChange called with false', () => {
@@ -356,11 +349,11 @@ describe('WorkoutsTable - dialog', () => {
         const dialogProps = getDialogProps()
         dialogProps.onOpenChange(false)
 
-        expect(dialogMocks.close).toHaveBeenCalledOnce()
+        expect(controllerMocks.close).toHaveBeenCalledOnce()
     })
 
     it('shows correct dialog content', () => {
-        mockDialogState({
+        mockControllerState({
             isOpen: true,
         })
         renderWorkoutsTable()
@@ -375,7 +368,7 @@ describe('WorkoutsTable - dialog', () => {
     })
 
     it('passes isConfirming when confirming', () => {
-        mockDialogState({
+        mockControllerState({
             isOpen: true,
             isConfirming: true,
         })
@@ -395,7 +388,7 @@ describe('WorkoutsTable - dialog', () => {
             await Promise.resolve()
         })
 
-        expect(dialogMocks.confirm).toHaveBeenCalledOnce()
+        expect(controllerMocks.confirm).toHaveBeenCalledOnce()
     })
 
     it('calls close when ConfirmDialog onCancel invoked', async () => {
@@ -407,6 +400,6 @@ describe('WorkoutsTable - dialog', () => {
             await Promise.resolve()
         })
 
-        expect(dialogMocks.close).toHaveBeenCalledOnce()
+        expect(controllerMocks.close).toHaveBeenCalledOnce()
     })
 })

@@ -1,9 +1,4 @@
-import {
-    SearchService,
-    type ExercisePublic,
-    type MuscleGroupPublic,
-} from '@/api/generated'
-import { zExercisePublic } from '@/api/generated/zod.gen'
+import { type ExercisePublic, type MuscleGroupPublic } from '@/api/generated'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
@@ -11,29 +6,10 @@ import { DataTableInlineRowActions } from '@/components/data-table/DataTableInli
 import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncatedCell'
 import { useRowLoading } from '@/components/data-table/useRowLoading'
 import { ExerciseFormDialog } from '@/components/exercises/ExerciseFormDialog'
-import {
-    getExerciseRowActions,
-    handleDelete,
-} from '@/components/exercises/utils'
-import { useDialog } from '@/components/useDialog'
-import { useRemoteSearch } from '@/components/useRemoteSearch'
+import { useExercisesTableController } from '@/components/exercises/useExercisesTableController'
 import { formatNullableDateTime } from '@/lib/datetime'
 import { capitalizeWords, dash } from '@/lib/text'
-import type {
-    DataTableRowActionsConfig,
-    DataTableToolbarConfig,
-    FilterOption,
-} from '@/models/data-table'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Plus } from 'lucide-react'
-import { useState } from 'react'
-
-function getTypeFilterOptions(): FilterOption[] {
-    return [
-        { label: 'System', value: 'system' },
-        { label: 'Custom', value: 'custom' },
-    ]
-}
 
 interface ExercisesTableProps {
     exercises: ExercisePublic[]
@@ -52,79 +28,26 @@ export function ExercisesTable({
     onReloadExercises,
     onReloadMuscleGroups,
 }: ExercisesTableProps) {
-    const {
-        searchQuery,
-        setSearchQuery,
-        isSearching,
-        refreshSearchResults,
-        displayedItems: displayedExercises,
-    } = useRemoteSearch({
-        items: exercises,
-        fallbackMessage: 'Failed to search exercises',
-        search: (query, limit) =>
-            SearchService.searchExercises({
-                body: {
-                    query,
-                    limit,
-                },
-            }),
-        getItemId: (exercise) => exercise.id,
-        getResultId: (searchResult) => searchResult.id,
-    })
-
-    const [formDialog, setFormDialog] = useState<{
-        isOpen: boolean
-        mode: 'create' | 'edit' | 'view'
-        exercise: ExercisePublic | null
-    }>({
-        isOpen: false,
-        mode: 'create',
-        exercise: null,
-    })
-
     const { isRowLoading, setRowLoading } = useRowLoading<number>()
-    const deleteDialog = useDialog(async (exercise: ExercisePublic) => {
-        await handleDelete(
-            exercise.id,
-            onExerciseDeleted,
-            refreshSearchResults,
-            onReloadExercises,
-            setRowLoading
-        )
+    const {
+        deleteDialog,
+        displayedExercises,
+        formDialog,
+        onExerciseFormOpenChange,
+        onExerciseFormSuccess,
+        onReloadExercises: reloadExercises,
+        onReloadMuscleGroups: reloadMuscleGroups,
+        rowActionsConfig,
+        toolbarConfig,
+    } = useExercisesTableController({
+        exercises,
+        muscleGroups,
+        isRowLoading,
+        onExerciseDeleted,
+        onReloadExercises,
+        onReloadMuscleGroups,
+        setRowLoading,
     })
-
-    const openCreateDialog = () => {
-        setFormDialog({
-            isOpen: true,
-            mode: 'create',
-            exercise: null,
-        })
-    }
-
-    const openCopyDialog = (exercise: ExercisePublic) => {
-        setFormDialog({ isOpen: true, mode: 'create', exercise })
-    }
-
-    const openEditDialog = (exercise: ExercisePublic) => {
-        setFormDialog({ isOpen: true, mode: 'edit', exercise })
-    }
-
-    const openViewDialog = (exercise: ExercisePublic) => {
-        setFormDialog({ isOpen: true, mode: 'view', exercise })
-    }
-
-    const rowActionsConfig: DataTableRowActionsConfig<ExercisePublic> = {
-        schema: zExercisePublic,
-        menuItems: (row) =>
-            getExerciseRowActions(
-                row,
-                isRowLoading(row.id),
-                openViewDialog,
-                openCopyDialog,
-                openEditDialog,
-                deleteDialog.open
-            ),
-    }
 
     const columns: ColumnDef<ExercisePublic>[] = [
         {
@@ -260,40 +183,6 @@ export function ExercisesTable({
         },
     ]
 
-    const toolbarConfig: DataTableToolbarConfig = {
-        search: {
-            placeholder: 'Search exercises...',
-            value: searchQuery,
-            onChange: setSearchQuery,
-            isLoading: isSearching,
-        },
-        filters: [
-            {
-                columnId: 'type',
-                title: 'Type',
-                options: getTypeFilterOptions(),
-            },
-            {
-                columnId: 'muscle_groups',
-                title: 'Muscle Groups',
-                options: muscleGroups.map((group) => ({
-                    label: capitalizeWords(group.name),
-                    value: String(group.id),
-                })),
-            },
-        ],
-        actions: [
-            {
-                label: 'Add Exercise',
-                icon: Plus,
-                onClick: () => {
-                    openCreateDialog()
-                },
-            },
-        ],
-        showViewOptions: true,
-    }
-
     return (
         <>
             <DataTable
@@ -314,15 +203,10 @@ export function ExercisesTable({
                         ? isRowLoading(formDialog.exercise.id)
                         : false
                 }
-                onOpenChange={(isOpen) => {
-                    setFormDialog((prev) => ({ ...prev, isOpen }))
-                }}
-                onSuccess={async () => {
-                    await onReloadExercises()
-                    refreshSearchResults()
-                }}
-                onReloadExercises={onReloadExercises}
-                onReloadMuscleGroups={onReloadMuscleGroups}
+                onOpenChange={onExerciseFormOpenChange}
+                onSuccess={onExerciseFormSuccess}
+                onReloadExercises={reloadExercises}
+                onReloadMuscleGroups={reloadMuscleGroups}
                 onRowLoadingChange={setRowLoading}
             />
             <ConfirmDialog

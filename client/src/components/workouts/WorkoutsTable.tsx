@@ -1,23 +1,13 @@
 import { type WorkoutBase } from '@/api/generated'
-import { zWorkoutBase } from '@/api/generated/zod.gen'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { DataTable } from '@/components/data-table/DataTable'
 import { DataTableColumnHeader } from '@/components/data-table/DataTableColumnHeader'
 import { DataTableInlineRowActions } from '@/components/data-table/DataTableInlineRowActions'
 import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncatedCell'
 import { useRowLoading } from '@/components/data-table/useRowLoading'
-import { useDialog } from '@/components/useDialog'
-import {
-    getWorkoutRowActions,
-    getWorkoutToolbarActions,
-    handleDelete,
-} from '@/components/workouts/utils'
+import { useWorkoutsTableController } from '@/components/workouts/useWorkoutsTableController'
 import { formatDateTime, formatNullableDateTime } from '@/lib/datetime'
 import { dash } from '@/lib/text'
-import type {
-    DataTableRowActionsConfig,
-    DataTableToolbarConfig,
-} from '@/models/data-table'
 import type { ColumnDef } from '@tanstack/react-table'
 
 interface WorkoutsTableProps {
@@ -34,24 +24,13 @@ export function WorkoutsTable({
     onReloadWorkouts,
 }: WorkoutsTableProps) {
     const { isRowLoading, setRowLoading } = useRowLoading<number>()
-    const deleteDialog = useDialog(async (workoutId: number) => {
-        await handleDelete(
-            workoutId,
-            onWorkoutDeleted,
+    const { deleteDialog, rowActionsConfig, toolbarConfig } =
+        useWorkoutsTableController({
+            isRowLoading,
             onReloadWorkouts,
-            setRowLoading
-        )
-    })
-
-    const rowActionsConfig: DataTableRowActionsConfig<WorkoutBase> = {
-        schema: zWorkoutBase,
-        menuItems: (row) =>
-            getWorkoutRowActions(
-                row.id,
-                isRowLoading(row.id),
-                deleteDialog.open
-            ),
-    }
+            onWorkoutDeleted,
+            setRowLoading,
+        })
 
     const columns: ColumnDef<WorkoutBase>[] = [
         {
@@ -122,15 +101,6 @@ export function WorkoutsTable({
             enableHiding: true,
         },
     ]
-
-    const toolbarConfig: DataTableToolbarConfig = {
-        search: {
-            columnId: 'notes',
-            placeholder: 'Filter by notes...',
-        },
-        actions: getWorkoutToolbarActions(),
-        showViewOptions: true,
-    }
 
     return (
         <>
