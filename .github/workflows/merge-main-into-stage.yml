@@ -7,8 +7,7 @@ on:
         types:
             - closed
 
-permissions:
-    contents: write
+permissions: {}
 
 concurrency:
     group: merge-main-into-stage
@@ -19,9 +18,11 @@ jobs:
         name: Merge main into stage
         if: github.event.pull_request.merged == true
         runs-on: self-hosted
+        permissions:
+            contents: write
         steps:
-            - name: checkout stage
-              uses: actions/checkout@v6
+            - name: checkout stage # zizmor: ignore[artipacked] - credentials needed for push
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
               with:
                   ref: stage
 

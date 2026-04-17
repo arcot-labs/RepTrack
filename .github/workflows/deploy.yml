@@ -29,8 +29,7 @@ concurrency:
     group: deploy-${{ github.ref_name }}
     cancel-in-progress: true
 
-permissions:
-    contents: none
+permissions: {}
 
 jobs:
     set-variables:
@@ -58,7 +57,10 @@ jobs:
         with:
             runner: ${{ needs.set-variables.outputs.runner }}
             tag: ${{ needs.set-variables.outputs.tag }}
-        secrets: inherit
+        secrets:
+            DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+            DOCKER_REGISTRY_USERNAME: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+            DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
 
     deploy-server:
         name: Deploy Server Image (Reusable)
@@ -67,7 +69,10 @@ jobs:
         with:
             runner: ${{ needs.set-variables.outputs.runner }}
             tag: ${{ needs.set-variables.outputs.tag }}
-        secrets: inherit
+        secrets:
+            DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+            DOCKER_REGISTRY_USERNAME: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+            DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
 
     deploy-infra:
         name: Deploy Infrastructure (Reusable)
@@ -76,4 +81,4 @@ jobs:
         with:
             runner: ${{ needs.set-variables.outputs.runner }}
             tag: ${{ needs.set-variables.outputs.tag }}
-        secrets: inherit
+        secrets: inherit # zizmor: ignore[secrets-inherit] - all secrets required

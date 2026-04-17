@@ -16,6 +16,10 @@ fi
 echo "API client code is up to date"
 echo
 
+echo "Scanning GitHub Actions files..."
+zizmor .github/**/*.yml
+echo
+
 echo "Formatting and linting staged files..."
 lint-staged
 echo

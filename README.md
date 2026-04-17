@@ -25,6 +25,7 @@ Install the required utilities using `brew`:
 - `gnu-getopt` (for parsing GNU-style flags)
 - `uv` (Python dependency manager)
 - `pnpm` (JavaScript package manager)
+- `zizmor` (GitHub Actions workflow linter used by the pre-commit hook)
 
 ### Running the development environment
 
