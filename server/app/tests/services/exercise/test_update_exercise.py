@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from unittest.mock import patch
 
 import pytest
@@ -192,6 +193,10 @@ async def test_update_exercise_only_muscle_groups(
         name="Bench",
         user_id=user.id,
     )
+    exercise.updated_at = datetime(2026, 1, 1, tzinfo=UTC)
+    await db_session.commit()
+    await db_session.refresh(exercise)
+
     original_updated_at = exercise.updated_at
     muscle_group_id = await get_muscle_group_id(db_session, name="chest")
 

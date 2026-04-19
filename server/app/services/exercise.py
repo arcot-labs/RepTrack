@@ -1,8 +1,7 @@
 import logging
-from datetime import UTC, datetime
 
 from meilisearch_python_sdk import AsyncClient
-from sqlalchemy import delete
+from sqlalchemy import delete, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -180,7 +179,7 @@ async def update_exercise(
                 ExerciseMuscleGroup(exercise_id=exercise_id, muscle_group_id=mg.id),
             )
         # manually update in case of only muscle group changes
-        exercise.updated_at = datetime.now(UTC)
+        exercise.updated_at = func.now()
 
     try:
         await db_session.commit()
