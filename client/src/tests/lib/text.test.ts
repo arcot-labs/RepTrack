@@ -3,6 +3,7 @@ import {
     dash,
     formatIdentifier,
     formatNullableString,
+    trimAndLowerText,
 } from '@/lib/text'
 import { describe, expect, it } from 'vitest'
 
@@ -25,6 +26,14 @@ describe('capitalizeWords', () => {
             'Already Capitalized'
         )
         expect(capitalizeWords('x1 y2')).toBe('X1 Y2')
+    })
+})
+
+describe('trimAndLowerText', () => {
+    it('trims surrounding whitespace and lowercases value', () => {
+        expect(trimAndLowerText('  User.Name@Example.COM  ')).toBe(
+            'user.name@example.com'
+        )
     })
 })
 

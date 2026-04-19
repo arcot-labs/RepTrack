@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/overrides/card'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
+import { isEmailValue, preprocessTrimAndLower } from '@/lib/validation'
 import type { LocationState } from '@/models/location'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -20,16 +21,15 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 const loginFormSchema = z.object({
-    identifier: z
-        .string()
-        .trim()
-        .refine((value) => {
+    identifier: preprocessTrimAndLower(
+        z.string().refine((value) => {
             const isEmailValid =
                 zLoginRequest.shape.email.safeParse(value).success
             const isUsernameValid =
                 zLoginRequest.shape.username.safeParse(value).success
             return isEmailValid || isUsernameValid
-        }, 'Enter a valid username or email'),
+        }, 'Enter a valid username or email')
+    ),
     password: zLoginRequest.shape.password,
 })
 
@@ -56,12 +56,11 @@ export function Login() {
     })
 
     const onSubmit = async (form: LoginForm) => {
-        const identifier = form.identifier.trim()
-        const isEmail = z.email().safeParse(identifier).success
+        const isEmail = isEmailValue(form.identifier)
         const body: LoginRequestBody = zLoginRequest.parse(
             isEmail
-                ? { email: identifier, password: form.password }
-                : { username: identifier, password: form.password }
+                ? { email: form.identifier, password: form.password }
+                : { username: form.identifier, password: form.password }
         )
         const { error } = await AuthService.login({ body })
         if (error) {

@@ -51,7 +51,7 @@ export function ResetPassword() {
 
     const onSubmit = async (form: ResetPasswordForm) => {
         const { error } = await AuthService.resetPassword({
-            body: form,
+            body: zResetPasswordRequest.parse(form),
         })
         if (error) {
             await handleApiError(error, {
