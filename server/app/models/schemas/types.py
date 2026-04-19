@@ -14,23 +14,6 @@ def is_email_identifier(identifier: str) -> bool:
         return False
 
 
-def TrimmedStr(
-    *,
-    min_length: int | None = None,
-    max_length: int | None = None,
-    to_lower: bool = False,
-):
-    return Annotated[
-        str,
-        StringConstraints(
-            strip_whitespace=True,
-            min_length=min_length,
-            max_length=max_length,
-            to_lower=to_lower,
-        ),
-    ]
-
-
 # string fields (except token & password) are trimmed
 # EmailStr automatically trims
 # email & username are lowercased
