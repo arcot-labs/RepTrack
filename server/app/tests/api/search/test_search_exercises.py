@@ -34,7 +34,7 @@ async def test_search_exercises(
     resp = await reindex_via_api(client)
     assert resp.status_code == status.HTTP_204_NO_CONTENT
 
-    resp = await _make_request(client, query=" ", limit=5)
+    resp = await _make_request(client, query=".", limit=5)
 
     assert resp.status_code == status.HTTP_200_OK
     body = resp.json()

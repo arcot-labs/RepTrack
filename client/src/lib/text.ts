@@ -5,6 +5,8 @@ export const formatNullableString = (value?: string | null) => {
     return value
 }
 
+export const trimAndLowerText = (value: string) => value.trim().toLowerCase()
+
 export const capitalizeWords = (str: string) =>
     str.replace(/\b\w/g, (char) => char.toUpperCase())
 

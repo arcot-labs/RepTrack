@@ -12,12 +12,17 @@ import {
 } from '@/components/ui/overrides/card'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
+import { preprocessTrim, preprocessTrimAndLower } from '@/lib/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
-type RequestAccessForm = z.infer<typeof zRequestAccessRequest>
+const requestAccessFormSchema = z.object({
+    email: preprocessTrimAndLower(zRequestAccessRequest.shape.email),
+    first_name: preprocessTrim(zRequestAccessRequest.shape.first_name),
+    last_name: preprocessTrim(zRequestAccessRequest.shape.last_name),
+})
 
 export function RequestAccess() {
     const navigate = useNavigate()
@@ -28,13 +33,15 @@ export function RequestAccess() {
         formState: { errors, isSubmitting },
         reset,
     } = useForm({
-        resolver: zodResolver(zRequestAccessRequest),
+        resolver: zodResolver(requestAccessFormSchema),
         mode: 'onSubmit',
         reValidateMode: 'onChange',
     })
 
-    const onSubmit = async (form: RequestAccessForm) => {
-        const { data, error } = await AuthService.requestAccess({ body: form })
+    const onSubmit = async (form: unknown) => {
+        const { data, error } = await AuthService.requestAccess({
+            body: requestAccessFormSchema.parse(form),
+        })
         if (error) {
             await handleApiError(error, {
                 httpErrorHandlers: {

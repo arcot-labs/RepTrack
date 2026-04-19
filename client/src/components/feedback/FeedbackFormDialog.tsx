@@ -17,17 +17,22 @@ import { Textarea } from '@/components/ui/textarea'
 import { getEnv } from '@/config/env'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
+import { preprocessTrim } from '@/lib/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { ReactElement } from 'react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-const feedbackFormSchema = zCreateFeedbackRequest.omit({
-    url: true,
-    files: true,
+const feedbackFormSchema = z.object({
+    type: zCreateFeedbackRequest.shape.type,
+    build: preprocessTrim(zCreateFeedbackRequest.shape.build),
+    title: preprocessTrim(zCreateFeedbackRequest.shape.title),
+    description: preprocessTrim(zCreateFeedbackRequest.shape.description),
 })
+
 type FeedbackForm = z.infer<typeof feedbackFormSchema>
+type FeedbackFormInput = z.input<typeof feedbackFormSchema>
 
 interface FeedbackFormDialogProps {
     trigger: ReactElement
@@ -44,7 +49,7 @@ export function FeedbackFormDialog({ trigger }: FeedbackFormDialogProps) {
         watch,
         formState: { errors, isDirty, isSubmitting },
         reset,
-    } = useForm<FeedbackForm>({
+    } = useForm<FeedbackFormInput, unknown, FeedbackForm>({
         resolver: zodResolver(feedbackFormSchema),
         defaultValues: {
             type: 'feedback',
@@ -83,7 +88,7 @@ export function FeedbackFormDialog({ trigger }: FeedbackFormDialogProps) {
     const onSubmit = async (form: FeedbackForm) => {
         const { error } = await FeedbackService.createFeedback({
             body: {
-                ...form,
+                ...feedbackFormSchema.parse(form),
                 url: window.location.href,
                 files: files,
             },

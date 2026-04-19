@@ -12,12 +12,22 @@ import {
 } from '@/components/ui/overrides/card'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
+import { isEmailValue, preprocessTrimAndLower } from '@/lib/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
-const zRegisterFormSchema = zRegisterRequest
+const registerFormSchema = z.object({
+    token: zRegisterRequest.shape.token,
+    username: preprocessTrimAndLower(zRegisterRequest.shape.username).refine(
+        (value) => !isEmailValue(value),
+        'Username cannot be an email address'
+    ),
+    password: zRegisterRequest.shape.password,
+})
+
+const zRegisterFormSchema = registerFormSchema
     .extend({
         confirmPassword: zRegisterRequest.shape.password,
     })
@@ -51,7 +61,7 @@ export function Register() {
 
     const onSubmit = async (form: RegisterForm) => {
         const { error } = await AuthService.register({
-            body: form,
+            body: registerFormSchema.parse(form),
         })
         if (error) {
             await handleApiError(error, {

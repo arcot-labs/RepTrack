@@ -272,6 +272,60 @@ describe('useRemoteSearch', () => {
         expect(handleApiError).not.toHaveBeenCalled()
     })
 
+    it('does not call search for query that is invalid after normalization', async () => {
+        const { result, search } = renderUseRemoteSearch()
+
+        act(() => {
+            result.current.setSearchQuery(` ${'a'.repeat(256)} `)
+        })
+        await advanceDebounce()
+        await flushPromises()
+
+        expect(search).not.toHaveBeenCalled()
+        expect(result.current.displayedItems).toEqual(items)
+        expect(result.current.isSearching).toBe(false)
+        expect(handleApiError).not.toHaveBeenCalled()
+    })
+
+    it('does not call search for query that becomes empty after trimming', async () => {
+        const { result, search } = renderUseRemoteSearch()
+
+        act(() => {
+            result.current.setSearchQuery('   ')
+        })
+        await advanceDebounce()
+        await flushPromises()
+
+        expect(search).not.toHaveBeenCalled()
+        expect(result.current.displayedItems).toEqual(items)
+        expect(result.current.isSearching).toBe(false)
+        expect(handleApiError).not.toHaveBeenCalled()
+    })
+
+    it('caps remote search limit at 1000 items', async () => {
+        const largeItems: TestItem[] = Array.from(
+            { length: 1005 },
+            (_, index) => ({
+                id: index + 1,
+                name: `Item ${String(index + 1)}`,
+            })
+        )
+        const { result, search } = renderUseRemoteSearch({
+            hookItems: largeItems,
+        })
+
+        search.mockResolvedValue({ data: [] })
+
+        act(() => {
+            result.current.setSearchQuery('legs')
+        })
+        await advanceDebounce()
+        await flushPromises()
+
+        expect(search).toHaveBeenCalledExactlyOnceWith('legs', 1000)
+        expect(result.current.isSearching).toBe(false)
+    })
+
     it('resets search state and cancels in-flight results when disabled', async () => {
         const pendingSearch = createDeferred<SearchResponse>()
         const { result, rerender, search } = renderUseRemoteSearch({
