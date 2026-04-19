@@ -14,27 +14,54 @@ def is_email_identifier(identifier: str) -> bool:
         return False
 
 
-Name = Annotated[str, StringConstraints(min_length=1, max_length=255)]
-Username = Annotated[str, StringConstraints(min_length=3, max_length=255)]
+def TrimmedStr(
+    *,
+    min_length: int | None = None,
+    max_length: int | None = None,
+    to_lower: bool = False,
+):
+    return Annotated[
+        str,
+        StringConstraints(
+            strip_whitespace=True,
+            min_length=min_length,
+            max_length=max_length,
+            to_lower=to_lower,
+        ),
+    ]
+
+
+# string fields (except token & password) are trimmed
+# EmailStr automatically trims
+# email & username are lowercased
+
+_TrimmedStr = Annotated[str, StringConstraints(strip_whitespace=True)]
+
+Name = Annotated[_TrimmedStr, StringConstraints(min_length=1, max_length=255)]
+Username = Annotated[
+    _TrimmedStr, StringConstraints(min_length=3, max_length=255, to_lower=True)
+]
 Password = Annotated[str, StringConstraints(min_length=8, max_length=64)]
 Token = Annotated[str, StringConstraints(min_length=1, max_length=64)]
-Email = Annotated[EmailStr, Field(max_length=255)]
+Email = Annotated[EmailStr, StringConstraints(max_length=255, to_lower=True)]
 
-FeedbackUrl = Annotated[str, Field(min_length=1, max_length=1000)]
-FeedbackTitle = Annotated[str, Field(min_length=1, max_length=1000)]
-FeedbackDescription = Annotated[str, Field(min_length=1, max_length=10000)]
-FeedbackBuild = Annotated[str, Field(min_length=1, max_length=32)]
+FeedbackUrl = Annotated[_TrimmedStr, StringConstraints(min_length=1, max_length=1000)]
+FeedbackTitle = Annotated[_TrimmedStr, StringConstraints(min_length=1, max_length=1000)]
+FeedbackDescription = Annotated[
+    _TrimmedStr, StringConstraints(min_length=1, max_length=10000)
+]
+FeedbackBuild = Annotated[_TrimmedStr, StringConstraints(min_length=1, max_length=32)]
 
-ExerciseName = Annotated[str, StringConstraints(min_length=1, max_length=255)]
-ExerciseDescription = Annotated[str, StringConstraints(max_length=1000)]
+ExerciseName = Annotated[_TrimmedStr, StringConstraints(min_length=1, max_length=255)]
+ExerciseDescription = Annotated[_TrimmedStr, StringConstraints(max_length=1000)]
 
 SetReps = Annotated[int, Field(ge=0)]
 SetWeight = Annotated[Decimal, Field(max_digits=6, decimal_places=2, ge=0)]
-SetNotes = Annotated[str, Field(max_length=1000)]
+SetNotes = Annotated[_TrimmedStr, StringConstraints(max_length=1000)]
 
-WorkoutExerciseNotes = Annotated[str, Field(max_length=1000)]
+WorkoutExerciseNotes = Annotated[_TrimmedStr, StringConstraints(max_length=1000)]
 
-WorkoutNotes = Annotated[str, Field(max_length=1000)]
+WorkoutNotes = Annotated[_TrimmedStr, StringConstraints(max_length=1000)]
 
-SearchQuery = Annotated[str, Field(min_length=1, max_length=255)]
+SearchQuery = Annotated[_TrimmedStr, StringConstraints(min_length=1, max_length=255)]
 SearchLimit = Annotated[int, Field(ge=0, le=1000)]
