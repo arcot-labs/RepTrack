@@ -54,6 +54,8 @@ export function FeedbackFormDialog({ trigger }: FeedbackFormDialogProps) {
         defaultValues: {
             type: 'feedback',
             build: getEnv().IMAGE_TAG,
+            title: '',
+            description: '',
         },
         mode: 'onSubmit',
         reValidateMode: 'onChange',
