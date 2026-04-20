@@ -7,6 +7,7 @@ import { DataTableTruncatedCell } from '@/components/data-table/DataTableTruncat
 import { useRowLoading } from '@/components/data-table/useRowLoading'
 import { ExerciseFormDialog } from '@/components/exercises/ExerciseFormDialog'
 import { useExercisesTableController } from '@/components/exercises/useExercisesTableController'
+import { formatExerciseName } from '@/components/exercises/utils'
 import { formatNullableDateTime } from '@/lib/datetime'
 import { capitalizeWords, dash } from '@/lib/text'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -80,11 +81,11 @@ export function ExercisesTable({
             cell: ({ row }) => (
                 <>
                     <span className="inline md:hidden">
-                        {capitalizeWords(row.original.name)}
+                        {formatExerciseName(row.original)}
                     </span>
                     <span className="hidden md:inline">
                         <DataTableTruncatedCell
-                            value={capitalizeWords(row.original.name)}
+                            value={formatExerciseName(row.original)}
                             className="max-w-50 min-w-25"
                         />
                     </span>

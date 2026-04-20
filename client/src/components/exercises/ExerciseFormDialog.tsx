@@ -8,6 +8,7 @@ import {
     zCreateExerciseRequest,
     zUpdateExerciseRequest,
 } from '@/api/generated/zod.gen'
+import { formatExerciseName } from '@/components/exercises/utils'
 import { FormField } from '@/components/FormField'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -361,9 +362,7 @@ export function ExerciseFormDialog({
                     >
                         {isViewMode ? (
                             <div className="text-sm text-muted-foreground">
-                                {capitalizeWords(
-                                    formatNullableString(exercise?.name)
-                                )}
+                                {exercise && formatExerciseName(exercise)}
                             </div>
                         ) : (
                             <Input

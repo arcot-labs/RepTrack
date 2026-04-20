@@ -1,5 +1,6 @@
 import { ExerciseService, type ExercisePublic } from '@/api/generated'
 import {
+    formatExerciseName,
     getExerciseRowActions,
     handleDeleteExercise,
 } from '@/components/exercises/utils'
@@ -13,6 +14,10 @@ vi.mock('@/api/generated', () => ({
     ExerciseService: {
         deleteExercise: vi.fn(),
     },
+}))
+
+vi.mock('@/lib/text', () => ({
+    capitalizeWords: vi.fn((value: string) => `${value} - capitalized`),
 }))
 
 vi.mock('@/lib/http', () => ({
@@ -59,6 +64,19 @@ const callHandleDelete = async (
         setRowLoading,
     }
 }
+
+describe('formatExerciseName', () => {
+    it('returns custom exercise name as is', () => {
+        expect(formatExerciseName(mockExercise)).toBe('Back Squat')
+    })
+
+    it('returns system exercise name capitalized', () => {
+        const systemExercise = { ...mockExercise, user_id: null }
+        expect(formatExerciseName(systemExercise)).toBe(
+            'Back Squat - capitalized'
+        )
+    })
+})
 
 describe('handleDeleteExercise', () => {
     let successSpy: MockInstance<typeof notify.success>

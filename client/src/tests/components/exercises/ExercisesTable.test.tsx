@@ -98,6 +98,12 @@ vi.mock('@/lib/text', async () => {
     }
 })
 
+vi.mock('@/components/exercises/utils', () => ({
+    formatExerciseName: vi.fn(
+        (exercise: ExercisePublic) => `${exercise.name} - formatted`
+    ),
+}))
+
 const muscleGroup: MuscleGroupPublic = {
     id: 10,
     name: 'quads',
@@ -277,11 +283,11 @@ describe('ExercisesTable - columns', () => {
         testHeader(col, 'name', 'Name')
 
         const cell = renderCell(col, customExercise)
-        expect(cell.getByText('back squat - capitalized')).toBeInTheDocument()
+        expect(cell.getByText('back squat - formatted')).toBeInTheDocument()
         expect(cell.getByTestId('mock-truncated-cell')).toBeInTheDocument()
         expect(truncatedCellMock).toHaveBeenCalledExactlyOnceWith(
             expect.objectContaining({
-                value: 'back squat - capitalized',
+                value: 'back squat - formatted',
             })
         )
     })

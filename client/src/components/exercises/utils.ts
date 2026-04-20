@@ -2,8 +2,14 @@ import { ExerciseService, type ExercisePublic } from '@/api/generated'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import { blueText, redText } from '@/lib/styles'
+import { capitalizeWords } from '@/lib/text'
 import type { MenuItemConfig } from '@/models/data-table'
 import { Copy, Eye, Pencil, Trash } from 'lucide-react'
+
+export const formatExerciseName = (exercise: ExercisePublic) => {
+    if (exercise.user_id !== null) return exercise.name
+    return capitalizeWords(exercise.name)
+}
 
 export const handleDeleteExercise = async (
     exerciseId: number,
