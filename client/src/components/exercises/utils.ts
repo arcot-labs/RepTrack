@@ -1,10 +1,21 @@
-import { ExerciseService, type ExercisePublic } from '@/api/generated'
+import {
+    ExerciseService,
+    type ExercisePublic,
+    type MuscleGroupPublic,
+} from '@/api/generated'
+import { zExercisePublic } from '@/api/generated/zod.gen'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import { blueText, redText } from '@/lib/styles'
 import { capitalizeWords } from '@/lib/text'
-import type { MenuItemConfig } from '@/models/data-table'
-import { Copy, Eye, Pencil, Trash } from 'lucide-react'
+import type {
+    DataTableRowActionsConfig,
+    DataTableToolbarConfig,
+    FilterOption,
+    MenuItemConfig,
+} from '@/models/data-table'
+import type { ExerciseFormDialogMode } from '@/models/exercises-table'
+import { Copy, Eye, Pencil, Plus, Trash } from 'lucide-react'
 
 export const formatExerciseName = (exercise: ExercisePublic) => {
     if (exercise.user_id !== null) return exercise.name
@@ -96,3 +107,88 @@ export const getExerciseRowActions = (
         },
     ]
 }
+
+interface ExerciseRowActionsConfigArgs {
+    isRowLoading: (id: number) => boolean
+    openFormDialog: (
+        mode: ExerciseFormDialogMode,
+        exercise?: ExercisePublic | null
+    ) => void
+    openDeleteDialog: (exercise: ExercisePublic) => void
+}
+
+export const getExerciseRowActionsConfig = ({
+    isRowLoading,
+    openFormDialog,
+    openDeleteDialog,
+}: ExerciseRowActionsConfigArgs): DataTableRowActionsConfig<ExercisePublic> => ({
+    schema: zExercisePublic,
+    menuItems: (row) =>
+        getExerciseRowActions(
+            row,
+            isRowLoading(row.id),
+            (exercise) => {
+                openFormDialog('view', exercise)
+            },
+            (exercise) => {
+                openFormDialog('create', exercise)
+            },
+            (exercise) => {
+                openFormDialog('edit', exercise)
+            },
+            openDeleteDialog
+        ),
+})
+
+function getTypeFilterOptions(): FilterOption[] {
+    return [
+        { label: 'System', value: 'system' },
+        { label: 'Custom', value: 'custom' },
+    ]
+}
+
+interface ExerciseToolbarConfigArgs {
+    searchQuery: string
+    setSearchQuery: (value: string) => void
+    isSearching: boolean
+    muscleGroups: MuscleGroupPublic[]
+    onCreateExercise: () => void
+}
+
+export const getExerciseToolbarConfig = ({
+    searchQuery,
+    setSearchQuery,
+    isSearching,
+    muscleGroups,
+    onCreateExercise,
+}: ExerciseToolbarConfigArgs): DataTableToolbarConfig => ({
+    search: {
+        placeholder: 'Search exercises...',
+        value: searchQuery,
+        onChange: setSearchQuery,
+        isLoading: isSearching,
+    },
+    filters: [
+        {
+            columnId: 'type',
+            title: 'Type',
+            options: getTypeFilterOptions(),
+        },
+        {
+            columnId: 'muscle_groups',
+            title: 'Muscle Groups',
+            options: muscleGroups.map((group) => ({
+                label: capitalizeWords(group.name),
+                value: String(group.id),
+            })),
+        },
+    ],
+    actions: [
+        {
+            label: 'Add Exercise',
+            icon: Plus,
+            onClick: onCreateExercise,
+        },
+    ],
+    showViewOptions: true,
+})

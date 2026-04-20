@@ -2,6 +2,8 @@ import { ExerciseService, type ExercisePublic } from '@/api/generated'
 import {
     formatExerciseName,
     getExerciseRowActions,
+    getExerciseRowActionsConfig,
+    getExerciseToolbarConfig,
     handleDeleteExercise,
 } from '@/components/exercises/utils'
 import { handleApiError } from '@/lib/http'
@@ -348,5 +350,108 @@ describe('getExerciseRowActions', () => {
         await items[2]!.onSelect!(undefined)
 
         expect(openDeleteDialog).toHaveBeenCalledExactlyOnceWith(mockExercise)
+    })
+})
+
+describe('getExerciseRowActionsConfig', () => {
+    it('builds row actions config and forwards callbacks', () => {
+        const isRowLoading = vi.fn(() => true)
+        const openFormDialog = vi.fn()
+        const openDeleteDialog = vi.fn()
+
+        const config = getExerciseRowActionsConfig({
+            isRowLoading,
+            openFormDialog,
+            openDeleteDialog,
+        })
+
+        expect(config.schema).toBeDefined()
+
+        const items = config.menuItems(mockExercise)
+
+        expect(isRowLoading).toHaveBeenCalledExactlyOnceWith(mockExercise.id)
+        expect(items).toHaveLength(3)
+
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        void items[0]!.onSelect!(undefined)
+        expect(openFormDialog).toHaveBeenCalledWith('edit', mockExercise)
+
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        void items[1]!.onSelect!(undefined)
+        expect(openFormDialog).toHaveBeenCalledWith('create', mockExercise)
+
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        void items[2]!.onSelect!(undefined)
+        expect(openDeleteDialog).toHaveBeenCalledWith(mockExercise)
+    })
+
+    it('builds shared-exercise actions with view and copy callbacks', () => {
+        const sharedExercise = { ...mockExercise, user_id: null }
+        const openFormDialog = vi.fn()
+
+        const config = getExerciseRowActionsConfig({
+            isRowLoading: vi.fn(() => false),
+            openFormDialog,
+            openDeleteDialog: vi.fn(),
+        })
+
+        const items = config.menuItems(sharedExercise)
+
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        void items[0]!.onSelect!(undefined)
+        expect(openFormDialog).toHaveBeenCalledWith('view', sharedExercise)
+
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        void items[1]!.onSelect!(undefined)
+        expect(openFormDialog).toHaveBeenCalledWith('create', sharedExercise)
+    })
+})
+
+describe('getExerciseToolbarConfig', () => {
+    it('builds search, filters, and action config', async () => {
+        const setSearchQuery = vi.fn()
+        const onCreateExercise = vi.fn()
+
+        const config = getExerciseToolbarConfig({
+            searchQuery: 'squat',
+            setSearchQuery,
+            isSearching: true,
+            muscleGroups: [
+                {
+                    id: 10,
+                    name: 'quads',
+                    description: 'Quadriceps muscles',
+                },
+            ],
+            onCreateExercise,
+        })
+
+        expect(config).toMatchObject({
+            search: {
+                placeholder: 'Search exercises...',
+                value: 'squat',
+                onChange: setSearchQuery,
+                isLoading: true,
+            },
+            filters: [
+                {
+                    columnId: 'type',
+                    title: 'Type',
+                    options: [
+                        { label: 'System', value: 'system' },
+                        { label: 'Custom', value: 'custom' },
+                    ],
+                },
+                {
+                    columnId: 'muscle_groups',
+                    title: 'Muscle Groups',
+                    options: [{ label: 'quads - capitalized', value: '10' }],
+                },
+            ],
+            showViewOptions: true,
+        })
+
+        await config.actions?.[0]?.onClick()
+        expect(onCreateExercise).toHaveBeenCalledOnce()
     })
 })
