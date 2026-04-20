@@ -24,6 +24,8 @@ const requestAccessFormSchema = z.object({
     last_name: preprocessTrim(zRequestAccessRequest.shape.last_name),
 })
 
+type RequestAccessForm = z.infer<typeof requestAccessFormSchema>
+
 export function RequestAccess() {
     const navigate = useNavigate()
 
@@ -38,7 +40,7 @@ export function RequestAccess() {
         reValidateMode: 'onChange',
     })
 
-    const onSubmit = async (form: unknown) => {
+    const onSubmit = async (form: RequestAccessForm) => {
         const { data, error } = await AuthService.requestAccess({
             body: requestAccessFormSchema.parse(form),
         })
