@@ -1,8 +1,12 @@
 import { configureApiClient } from '@/api/axios'
+import type { LoginData, RefreshTokenData } from '@/api/generated'
 import { client } from '@/api/generated/client.gen'
-import { loginUrl, refreshTokenUrl } from '@/tests/mocks/handlers/auth'
-import { errorUrl, protectedUrl, successUrl } from '@/tests/mocks/handlers/base'
-import { server } from '@/tests/mocks/server'
+import {
+    errorUrl,
+    protectedUrl,
+    server,
+    successUrl,
+} from '@/tests/mocks/server'
 import { AxiosError } from 'axios'
 import { delay, http, HttpResponse } from 'msw'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -22,6 +26,15 @@ vi.mock('@/config/env', () => envMock)
 const okResponse = HttpResponse.json('ok')
 const unauthorizedResponse = new HttpResponse('unauthorized', { status: 401 })
 const errorResponse = new HttpResponse('error', { status: 500 })
+
+const loginUrl = client.buildUrl<LoginData>({
+    body: { username: '_', password: '_' },
+    url: '/api/auth/login',
+})
+
+const refreshTokenUrl = client.buildUrl<RefreshTokenData>({
+    url: '/api/auth/refresh-token',
+})
 
 beforeEach(() => {
     envMock.getEnv = () => ({ API_URL: '' })

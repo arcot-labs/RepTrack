@@ -1,15 +1,21 @@
+import { type UserPublic, UserService } from '@/api/generated'
 import { SessionProvider } from '@/auth/SessionProvider'
 import { useSession } from '@/auth/useSession'
-import { getCurrentUserUrl, testUser } from '@/tests/mocks/handlers/user'
-import { server } from '@/tests/mocks/server'
 import { render, renderHook, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { http, HttpResponse } from 'msw'
 import { act, type ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+const userServiceMock = vi.mocked(UserService)
+
 const loggerMocks = vi.hoisted(() => ({
     info: vi.fn(),
+}))
+
+vi.mock('@/api/generated', () => ({
+    UserService: {
+        getCurrentUser: vi.fn().mockResolvedValue({}),
+    },
 }))
 
 vi.mock('@/lib/logger', () => ({
@@ -35,14 +41,42 @@ function Consumer() {
     )
 }
 
-const unauthorizedResponse = new HttpResponse('Unauthorized', { status: 401 })
-const freshUserResponse = HttpResponse.json({
+const testUser: UserPublic = {
+    id: 1,
+    email: 'test@example.com',
+    username: 'testuser',
+    first_name: 'Test',
+    last_name: 'User',
+    is_admin: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+}
+
+const freshUser: UserPublic = {
     ...testUser,
     username: 'fresh-user',
-})
+}
+
+const currentUserResponse = {
+    data: testUser,
+    error: undefined,
+} as never
+
+const freshUserResponse = {
+    data: freshUser,
+    error: undefined,
+} as never
+
+const unauthorizedResponse = {
+    data: undefined,
+    error: { detail: 'Unauthorized' },
+} as never
 
 beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(userServiceMock.getCurrentUser).mockResolvedValue(
+        currentUserResponse
+    )
 })
 
 describe('SessionProvider (hook)', () => {
@@ -64,8 +98,8 @@ describe('SessionProvider (hook)', () => {
     })
 
     it('clears session when fetch fails', async () => {
-        server.use(
-            http.get(getCurrentUserUrl, () => unauthorizedResponse.clone())
+        vi.mocked(userServiceMock.getCurrentUser).mockResolvedValue(
+            unauthorizedResponse
         )
 
         const { result } = renderHook(() => useSession(), { wrapper })
@@ -80,13 +114,15 @@ describe('SessionProvider (hook)', () => {
     })
 
     it('refreshes session when refresh is invoked', async () => {
+        vi.mocked(userServiceMock.getCurrentUser)
+            .mockResolvedValueOnce(currentUserResponse)
+            .mockResolvedValueOnce(freshUserResponse)
+
         const { result } = renderHook(() => useSession(), { wrapper })
 
         await waitFor(() => {
             expect(result.current.user).not.toBeNull()
         })
-
-        server.use(http.get(getCurrentUserUrl, () => freshUserResponse.clone()))
 
         await act(async () => {
             await result.current.refresh()
@@ -97,15 +133,15 @@ describe('SessionProvider (hook)', () => {
     })
 
     it('clears session on refresh failure after being authenticated', async () => {
+        vi.mocked(userServiceMock.getCurrentUser)
+            .mockResolvedValueOnce(currentUserResponse)
+            .mockResolvedValueOnce(unauthorizedResponse)
+
         const { result } = renderHook(() => useSession(), { wrapper })
 
         await waitFor(() => {
             expect(result.current.user).not.toBeNull()
         })
-
-        server.use(
-            http.get(getCurrentUserUrl, () => unauthorizedResponse.clone())
-        )
 
         await act(async () => {
             await result.current.refresh()
@@ -126,8 +162,8 @@ describe('SessionProvider (UI)', () => {
     })
 
     it('handles unauthenticated state', async () => {
-        server.use(
-            http.get(getCurrentUserUrl, () => unauthorizedResponse.clone())
+        vi.mocked(userServiceMock.getCurrentUser).mockResolvedValue(
+            unauthorizedResponse
         )
 
         render(<Consumer />, { wrapper })
@@ -137,11 +173,13 @@ describe('SessionProvider (UI)', () => {
     })
 
     it('re-renders when session is refreshed', async () => {
+        vi.mocked(userServiceMock.getCurrentUser)
+            .mockResolvedValueOnce(currentUserResponse)
+            .mockResolvedValueOnce(freshUserResponse)
+
         render(<Consumer />, { wrapper })
 
         expect(await screen.findByText(testUser.username)).toBeInTheDocument()
-
-        server.use(http.get(getCurrentUserUrl, () => freshUserResponse.clone()))
 
         const user = userEvent.setup()
         await user.click(screen.getByRole('button', { name: /refresh/i }))
