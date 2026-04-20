@@ -8,11 +8,25 @@ require_command() {
     fi
 }
 
+require_command getopt
 require_command watchexec
 require_command docker
-require_command brew
 
-GNU_GETOPT="$(brew --prefix gnu-getopt)/bin/getopt"
+set +e
+getopt --test > /dev/null 2>&1
+status=$?
+set -e
+
+if [[ $status -eq 4 ]]; then
+    GNU_GETOPT="$(command -v getopt)"
+else
+    require_command brew
+    GNU_GETOPT="$(brew --prefix gnu-getopt)/bin/getopt"
+    if [[ ! -x "$GNU_GETOPT" ]]; then
+        echo "Error: GNU getopt not found" >&2
+        exit 1
+    fi
+fi
 
 print_help() {
     cat << EOF
