@@ -50,15 +50,10 @@ type CreateExerciseForm = z.infer<typeof createExerciseFormSchema>
 type UpdateExerciseForm = z.infer<typeof updateExerciseFormSchema>
 
 type CreateExerciseFormInput = z.input<typeof createExerciseFormSchema>
-type UpdateExerciseFormInput = z.input<typeof updateExerciseFormSchema>
+type ExerciseForm = CreateExerciseForm
+type ExerciseFormInput = CreateExerciseFormInput
 
-const defaultCreateExerciseFormValues: CreateExerciseForm = {
-    name: '',
-    description: '',
-    muscle_group_ids: [],
-}
-
-const defaultUpdateExerciseFormValues: UpdateExerciseForm = {
+const defaultExerciseFormValues: ExerciseForm = {
     name: '',
     description: '',
     muscle_group_ids: [],
@@ -90,49 +85,28 @@ export function ExerciseFormDialog({
     onRowLoadingChange,
 }: ExerciseFormDialogProps) {
     const {
-        register: registerCreate,
-        handleSubmit: handleSubmitCreate,
-        setValue: setValueCreate,
-        watch: watchCreate,
+        register,
+        handleSubmit,
+        setValue,
+        watch,
         formState: {
-            errors: createErrors,
-            isDirty: isCreateDirty,
-            isSubmitting: isCreateSubmitting,
+            errors,
+            isDirty,
+            dirtyFields,
+            isSubmitting: isFormSubmitting,
         },
-        reset: resetCreate,
-        resetField: resetFieldCreate,
-    } = useForm<CreateExerciseFormInput, unknown, CreateExerciseForm>({
+        reset,
+        resetField,
+    } = useForm<ExerciseFormInput, unknown, ExerciseForm>({
         resolver: zodResolver(createExerciseFormSchema),
-        defaultValues: defaultCreateExerciseFormValues,
-        mode: 'onSubmit',
-        reValidateMode: 'onChange',
-    })
-
-    const {
-        register: registerEdit,
-        handleSubmit: handleSubmitEdit,
-        setValue: setValueEdit,
-        watch: watchEdit,
-        formState: {
-            errors: editErrors,
-            isDirty: isEditDirty,
-            dirtyFields: editDirtyFields,
-            isSubmitting: isEditSubmitting,
-        },
-        reset: resetEdit,
-    } = useForm<UpdateExerciseFormInput, unknown, UpdateExerciseForm>({
-        resolver: zodResolver(updateExerciseFormSchema),
-        defaultValues: defaultUpdateExerciseFormValues,
+        defaultValues: defaultExerciseFormValues,
         mode: 'onSubmit',
         reValidateMode: 'onChange',
     })
 
     const isCreateMode = mode === 'create'
     const isViewMode = mode === 'view'
-    const isSubmitting =
-        (isCreateMode ? isCreateSubmitting : isEditSubmitting) || isRowLoading
-    const isDirty = isCreateMode ? isCreateDirty : isEditDirty
-    const errors = isCreateMode ? createErrors : editErrors
+    const isSubmitting = isFormSubmitting || isRowLoading
     const {
         searchQuery,
         setSearchQuery,
@@ -153,17 +127,15 @@ export function ExerciseFormDialog({
         getResultId: (searchResult) => searchResult.id,
     })
 
-    const selectedMuscleGroupIds = isCreateMode
-        ? // eslint-disable-next-line react-hooks/incompatible-library
-          (watchCreate('muscle_group_ids') ?? [])
-        : (watchEdit('muscle_group_ids') ?? [])
+    // eslint-disable-next-line react-hooks/incompatible-library
+    const selectedMuscleGroupIds = watch('muscle_group_ids') ?? []
 
     useEffect(() => {
         if (!open) return
         if (isCreateMode) {
             if (exercise) {
-                // copying existing exercise
-                resetCreate(
+                // copy existing
+                reset(
                     {
                         name: `${exercise.name} - copy`,
                         description: exercise.description,
@@ -178,19 +150,18 @@ export function ExerciseFormDialog({
                 )
                 return
             }
-            resetCreate(defaultCreateExerciseFormValues)
+            // create new
+            reset(defaultExerciseFormValues)
             return
         }
-        if (exercise) {
-            resetEdit({
-                name: exercise.name,
-                description: exercise.description,
-                muscle_group_ids: exercise.muscle_groups.map((mg) => mg.id),
-            })
-            return
-        }
-        resetEdit(defaultUpdateExerciseFormValues)
-    }, [open, isCreateMode, exercise, resetCreate, resetEdit])
+        // edit or view existing
+        if (!exercise) throw Error('Exercise data missing for edit/view mode')
+        reset({
+            name: exercise.name,
+            description: exercise.description,
+            muscle_group_ids: exercise.muscle_groups.map((mg) => mg.id),
+        })
+    }, [open, isCreateMode, exercise, reset])
 
     const attemptClose = () => {
         if (isSubmitting) return
@@ -208,19 +179,13 @@ export function ExerciseFormDialog({
         if (checked) selected.add(muscleGroupId)
         else selected.delete(muscleGroupId)
 
-        if (isCreateMode)
-            setValueCreate('muscle_group_ids', Array.from(selected), {
-                shouldDirty: true,
-                shouldValidate: true,
-            })
-        else
-            setValueEdit('muscle_group_ids', Array.from(selected), {
-                shouldDirty: true,
-                shouldValidate: true,
-            })
+        setValue('muscle_group_ids', Array.from(selected), {
+            shouldDirty: true,
+            shouldValidate: true,
+        })
     }
 
-    const onSubmitCreateForm = async (form: CreateExerciseForm) => {
+    const onSubmitCreateForm = async (form: ExerciseForm) => {
         const { error } = await ExerciseService.createExercise({
             body: createExerciseFormSchema.parse(form),
         })
@@ -237,7 +202,7 @@ export function ExerciseFormDialog({
                         notify.error(
                             'An exercise with that name already exists'
                         )
-                        resetFieldCreate('name')
+                        resetField('name')
                     },
                 },
                 fallbackMessage: 'Failed to create exercise',
@@ -249,25 +214,26 @@ export function ExerciseFormDialog({
         close()
     }
 
-    const onSubmitEditForm = async (form: UpdateExerciseForm) => {
+    const onSubmitEditForm = async (form: ExerciseForm) => {
         if (!exercise) {
             notify.error('Exercise data is missing. Try again')
             close()
             return
         }
 
-        if (!isEditDirty) {
+        if (!isDirty) {
             notify.warning('No changes to save')
             close()
             return
         }
 
-        const body: Partial<UpdateExerciseForm> = {}
         const parsedForm = updateExerciseFormSchema.parse(form)
-        if (editDirtyFields.name) body.name = parsedForm.name ?? ''
-        if (editDirtyFields.description)
+
+        const body: Partial<UpdateExerciseForm> = {}
+        if (dirtyFields.name) body.name = parsedForm.name ?? ''
+        if (dirtyFields.description)
             body.description = parsedForm.description ?? ''
-        if (editDirtyFields.muscle_group_ids)
+        if (dirtyFields.muscle_group_ids)
             body.muscle_group_ids = parsedForm.muscle_group_ids ?? []
 
         onRowLoadingChange(exercise.id, true)
@@ -294,7 +260,7 @@ export function ExerciseFormDialog({
                             notify.error(
                                 'An exercise with that name already exists'
                             )
-                            resetEdit({ name: exercise.name })
+                            resetField('name')
                         },
                     },
                     fallbackMessage: 'Failed to update exercise',
@@ -316,7 +282,7 @@ export function ExerciseFormDialog({
           : 'Edit Exercise'
     const formSubmitButtonText = isCreateMode ? 'Create' : 'Save'
     const formSubmittingButtonText = isCreateMode ? 'Creating...' : 'Saving...'
-    const cancelButtonDisabled = isSubmitting || !isDirty
+    const submitButtonDisabled = isSubmitting || !isDirty
 
     return (
         <Dialog
@@ -351,8 +317,8 @@ export function ExerciseFormDialog({
                     className="space-y-4"
                     onSubmit={(e) => {
                         if (isCreateMode)
-                            void handleSubmitCreate(onSubmitCreateForm)(e)
-                        else void handleSubmitEdit(onSubmitEditForm)(e)
+                            void handleSubmit(onSubmitCreateForm)(e)
+                        else void handleSubmit(onSubmitEditForm)(e)
                     }}
                 >
                     <FormField
@@ -369,9 +335,7 @@ export function ExerciseFormDialog({
                                 id="exercise-name"
                                 placeholder="e.g., Barbell Squat"
                                 aria-invalid={!!errors.name}
-                                {...(isCreateMode
-                                    ? registerCreate('name')
-                                    : registerEdit('name'))}
+                                {...register('name')}
                             />
                         )}
                     </FormField>
@@ -389,9 +353,7 @@ export function ExerciseFormDialog({
                                 id="exercise-description"
                                 placeholder="e.g., Lower-body compound movement"
                                 aria-invalid={!!errors.description}
-                                {...(isCreateMode
-                                    ? registerCreate('description')
-                                    : registerEdit('description'))}
+                                {...register('description')}
                             />
                         )}
                     </FormField>
@@ -523,7 +485,7 @@ export function ExerciseFormDialog({
                             form="exercise-form"
                             type="submit"
                             variant="success"
-                            disabled={cancelButtonDisabled}
+                            disabled={submitButtonDisabled}
                         >
                             {isSubmitting
                                 ? formSubmittingButtonText
