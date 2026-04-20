@@ -320,8 +320,9 @@ export function ExerciseFormDialog({
     return (
         <Dialog
             open={open}
-            onOpenChange={() => {
+            onOpenChange={(isOpen) => {
                 // only triggered on close (open state controlled by parent)
+                if (isOpen) return
                 attemptClose()
             }}
         >
