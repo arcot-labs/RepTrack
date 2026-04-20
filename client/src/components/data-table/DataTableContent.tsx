@@ -11,17 +11,13 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import type { EdgePaddingConfig } from '@/models/data-table'
 import {
     flexRender,
     type HeaderGroup,
     type Row,
     type Table as TableInstance,
 } from '@tanstack/react-table'
-
-export interface EdgePaddingConfig {
-    firstColumnExcludeIds: string[]
-    lastColumnExcludeIds: string[]
-}
 
 interface DataTableContentProps<TData> {
     table: TableInstance<TData>

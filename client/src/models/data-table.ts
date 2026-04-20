@@ -55,3 +55,16 @@ export interface DataTableRowActionsConfig<TData = unknown> {
     schema: ZodType
     menuItems: (row: TData) => MenuItemConfig[]
 }
+
+export interface EdgePaddingConfig {
+    firstColumnExcludeIds: string[]
+    lastColumnExcludeIds: string[]
+}
+
+export interface DataTableColumnMeta {
+    viewLabel?: string
+    filterOnly?: boolean
+    hideOnBelowMd?: boolean
+    headerClassName?: string
+    cellClassName?: string
+}
