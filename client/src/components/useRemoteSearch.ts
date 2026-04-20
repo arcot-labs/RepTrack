@@ -1,5 +1,13 @@
+import { zSearchRequest } from '@/api/generated/zod.gen'
 import { handleApiError } from '@/lib/http'
+import { preprocessTrim } from '@/lib/validation'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { z } from 'zod'
+
+const searchRequestSchema = z.object({
+    query: preprocessTrim(zSearchRequest.shape.query),
+    limit: zSearchRequest.shape.limit,
+})
 
 interface UseRemoteSearchProps<TItem, TResult> {
     items: TItem[]
@@ -74,11 +82,26 @@ export function useRemoteSearch<TItem, TResult>({
         // previous effect handles clearing results & canceling requests
         if (!enabled || !debouncedSearchQuery) return
 
+        const parsedSearchRequest = searchRequestSchema.safeParse({
+            query: debouncedSearchQuery,
+            limit: Math.min(items.length, 1000),
+        })
+        if (!parsedSearchRequest.success) {
+            searchRequestIdRef.current += 1
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setSearchResults(null)
+            setIsSearching(false)
+            return
+        }
+
         const requestId = searchRequestIdRef.current + 1
         searchRequestIdRef.current = requestId
 
         void searchRef
-            .current(debouncedSearchQuery, Math.min(items.length, 1000))
+            .current(
+                parsedSearchRequest.data.query,
+                parsedSearchRequest.data.limit
+            )
             .then(async ({ data, error }) => {
                 if (requestId !== searchRequestIdRef.current) return
                 if (error) {

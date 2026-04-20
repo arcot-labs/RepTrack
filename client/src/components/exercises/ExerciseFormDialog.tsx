@@ -27,13 +27,29 @@ import { formatNullableDateTime } from '@/lib/datetime'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
 import { capitalizeWords, dash, formatNullableString } from '@/lib/text'
+import { preprocessTrim } from '@/lib/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-type CreateExerciseForm = z.infer<typeof zCreateExerciseRequest>
-type UpdateExerciseForm = z.infer<typeof zUpdateExerciseRequest>
+const createExerciseFormSchema = z.object({
+    name: preprocessTrim(zCreateExerciseRequest.shape.name),
+    description: preprocessTrim(zCreateExerciseRequest.shape.description),
+    muscle_group_ids: zCreateExerciseRequest.shape.muscle_group_ids,
+})
+
+const updateExerciseFormSchema = z.object({
+    name: preprocessTrim(zUpdateExerciseRequest.shape.name),
+    description: preprocessTrim(zUpdateExerciseRequest.shape.description),
+    muscle_group_ids: zUpdateExerciseRequest.shape.muscle_group_ids,
+})
+
+type CreateExerciseForm = z.infer<typeof createExerciseFormSchema>
+type UpdateExerciseForm = z.infer<typeof updateExerciseFormSchema>
+
+type CreateExerciseFormInput = z.input<typeof createExerciseFormSchema>
+type UpdateExerciseFormInput = z.input<typeof updateExerciseFormSchema>
 
 const defaultCreateExerciseFormValues: CreateExerciseForm = {
     name: '',
@@ -83,8 +99,9 @@ export function ExerciseFormDialog({
             isSubmitting: isCreateSubmitting,
         },
         reset: resetCreate,
-    } = useForm({
-        resolver: zodResolver(zCreateExerciseRequest),
+        resetField: resetFieldCreate,
+    } = useForm<CreateExerciseFormInput, unknown, CreateExerciseForm>({
+        resolver: zodResolver(createExerciseFormSchema),
         defaultValues: defaultCreateExerciseFormValues,
         mode: 'onSubmit',
         reValidateMode: 'onChange',
@@ -102,8 +119,8 @@ export function ExerciseFormDialog({
             isSubmitting: isEditSubmitting,
         },
         reset: resetEdit,
-    } = useForm({
-        resolver: zodResolver(zUpdateExerciseRequest),
+    } = useForm<UpdateExerciseFormInput, unknown, UpdateExerciseForm>({
+        resolver: zodResolver(updateExerciseFormSchema),
         defaultValues: defaultUpdateExerciseFormValues,
         mode: 'onSubmit',
         reValidateMode: 'onChange',
@@ -136,7 +153,8 @@ export function ExerciseFormDialog({
     })
 
     const selectedMuscleGroupIds = isCreateMode
-        ? (watchCreate('muscle_group_ids') ?? [])
+        ? // eslint-disable-next-line react-hooks/incompatible-library
+          (watchCreate('muscle_group_ids') ?? [])
         : (watchEdit('muscle_group_ids') ?? [])
 
     useEffect(() => {
@@ -202,15 +220,8 @@ export function ExerciseFormDialog({
     }
 
     const onSubmitCreateForm = async (form: CreateExerciseForm) => {
-        const name = form.name.trim()
-        const desc = form.description?.trim() ?? ''
-
         const { error } = await ExerciseService.createExercise({
-            body: {
-                name,
-                description: desc,
-                muscle_group_ids: form.muscle_group_ids,
-            },
+            body: createExerciseFormSchema.parse(form),
         })
         if (error) {
             await handleApiError(error, {
@@ -225,7 +236,7 @@ export function ExerciseFormDialog({
                         notify.error(
                             'An exercise with that name already exists'
                         )
-                        resetCreate({ ...form, name: '' })
+                        resetFieldCreate('name')
                     },
                 },
                 fallbackMessage: 'Failed to create exercise',
@@ -250,12 +261,13 @@ export function ExerciseFormDialog({
             return
         }
 
-        const body: UpdateExerciseForm = {}
-        if (editDirtyFields.name) body.name = form.name?.trim() ?? ''
+        const body: Partial<UpdateExerciseForm> = {}
+        const parsedForm = updateExerciseFormSchema.parse(form)
+        if (editDirtyFields.name) body.name = parsedForm.name ?? ''
         if (editDirtyFields.description)
-            body.description = form.description?.trim() ?? ''
+            body.description = parsedForm.description ?? ''
         if (editDirtyFields.muscle_group_ids)
-            body.muscle_group_ids = form.muscle_group_ids ?? []
+            body.muscle_group_ids = parsedForm.muscle_group_ids ?? []
 
         onRowLoadingChange(exercise.id, true)
         try {
@@ -281,7 +293,7 @@ export function ExerciseFormDialog({
                             notify.error(
                                 'An exercise with that name already exists'
                             )
-                            resetEdit({ ...form, name: exercise.name })
+                            resetEdit({ name: exercise.name })
                         },
                     },
                     fallbackMessage: 'Failed to update exercise',

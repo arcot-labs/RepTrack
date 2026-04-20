@@ -12,12 +12,17 @@ import {
 } from '@/components/ui/overrides/card'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
+import { preprocessTrimAndLower } from '@/lib/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import { z } from 'zod'
 
-type ForgotPasswordForm = z.infer<typeof zForgotPasswordRequest>
+const forgotPasswordFormSchema = z.object({
+    email: preprocessTrimAndLower(zForgotPasswordRequest.shape.email),
+})
+
+type ForgotPasswordForm = z.infer<typeof forgotPasswordFormSchema>
 
 export function ForgotPassword() {
     const {
@@ -26,13 +31,15 @@ export function ForgotPassword() {
         formState: { errors, isSubmitting },
         reset,
     } = useForm({
-        resolver: zodResolver(zForgotPasswordRequest),
+        resolver: zodResolver(forgotPasswordFormSchema),
         mode: 'onSubmit',
         reValidateMode: 'onChange',
     })
 
     const onSubmit = async (form: ForgotPasswordForm) => {
-        const { error } = await AuthService.forgotPassword({ body: form })
+        const { error } = await AuthService.forgotPassword({
+            body: forgotPasswordFormSchema.parse(form),
+        })
         if (error) {
             await handleApiError(error, {
                 fallbackMessage: 'Failed to request password reset',
