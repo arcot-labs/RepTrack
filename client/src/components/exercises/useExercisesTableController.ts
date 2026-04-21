@@ -3,36 +3,22 @@ import {
     type ExercisePublic,
     type MuscleGroupPublic,
 } from '@/api/generated'
-import { zExercisePublic } from '@/api/generated/zod.gen'
 import {
-    getExerciseRowActions,
+    getExerciseRowActionsConfig,
+    getExerciseToolbarConfig,
     handleDeleteExercise,
 } from '@/components/exercises/utils'
 import { useDialog } from '@/components/useDialog'
 import { useRemoteSearch } from '@/components/useRemoteSearch'
-import { capitalizeWords } from '@/lib/text'
 import type {
     DataTableRowActionsConfig,
     DataTableToolbarConfig,
-    FilterOption,
 } from '@/models/data-table'
-import { Plus } from 'lucide-react'
+import type {
+    ExerciseFormDialogMode,
+    ExerciseFormDialogState,
+} from '@/models/exercises-table'
 import { useState } from 'react'
-
-function getTypeFilterOptions(): FilterOption[] {
-    return [
-        { label: 'System', value: 'system' },
-        { label: 'Custom', value: 'custom' },
-    ]
-}
-
-type ExerciseFormDialogMode = 'create' | 'edit' | 'view'
-
-interface ExerciseFormDialogState {
-    isOpen: boolean
-    mode: ExerciseFormDialogMode
-    exercise: ExercisePublic | null
-}
 
 interface UseExercisesTableControllerProps {
     exercises: ExercisePublic[]
@@ -123,58 +109,22 @@ export function useExercisesTableController({
         })
     }
 
-    const rowActionsConfig: DataTableRowActionsConfig<ExercisePublic> = {
-        schema: zExercisePublic,
-        menuItems: (row) =>
-            getExerciseRowActions(
-                row,
-                isRowLoading(row.id),
-                (e) => {
-                    openFormDialog('view', e)
-                },
-                (e) => {
-                    openFormDialog('create', e)
-                },
-                (e) => {
-                    openFormDialog('edit', e)
-                },
-                deleteDialog.open
-            ),
-    }
+    const rowActionsConfig: DataTableRowActionsConfig<ExercisePublic> =
+        getExerciseRowActionsConfig({
+            isRowLoading,
+            openFormDialog,
+            openDeleteDialog: deleteDialog.open,
+        })
 
-    const toolbarConfig: DataTableToolbarConfig = {
-        search: {
-            placeholder: 'Search exercises...',
-            value: searchQuery,
-            onChange: setSearchQuery,
-            isLoading: isSearching,
+    const toolbarConfig: DataTableToolbarConfig = getExerciseToolbarConfig({
+        searchQuery,
+        setSearchQuery,
+        isSearching,
+        muscleGroups,
+        onCreateExercise: () => {
+            openFormDialog('create')
         },
-        filters: [
-            {
-                columnId: 'type',
-                title: 'Type',
-                options: getTypeFilterOptions(),
-            },
-            {
-                columnId: 'muscle_groups',
-                title: 'Muscle Groups',
-                options: muscleGroups.map((group) => ({
-                    label: capitalizeWords(group.name),
-                    value: String(group.id),
-                })),
-            },
-        ],
-        actions: [
-            {
-                label: 'Add Exercise',
-                icon: Plus,
-                onClick: () => {
-                    openFormDialog('create')
-                },
-            },
-        ],
-        showViewOptions: true,
-    }
+    })
 
     return {
         deleteDialog,

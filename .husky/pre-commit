@@ -4,6 +4,10 @@ set -Eeuo pipefail
 echo "Running pre-commit hook..."
 echo
 
+echo "Checking .gitignore and .megaignore files..."
+./scripts/check_ignore_files.sh
+echo
+
 echo "Forcing API client generation..."
 ./scripts/generate_api.sh -f
 

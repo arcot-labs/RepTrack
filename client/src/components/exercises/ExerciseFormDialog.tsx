@@ -1,15 +1,18 @@
+import { type ExercisePublic, type MuscleGroupPublic } from '@/api/generated'
+import { ExerciseMuscleGroupSelector } from '@/components/exercises/ExerciseMuscleGroupSelector'
 import {
-    ExerciseService,
-    SearchService,
-    type ExercisePublic,
-    type MuscleGroupPublic,
-} from '@/api/generated'
+    createExerciseFormSchema,
+    defaultExerciseFormValues,
+    useExerciseFormDialogSubmit,
+    type CreateExerciseForm,
+    type CreateExerciseFormInput,
+} from '@/components/exercises/useExerciseFormDialogSubmit'
 import {
-    zCreateExerciseRequest,
-    zUpdateExerciseRequest,
-} from '@/api/generated/zod.gen'
+    formatExerciseName,
+    getExerciseDialogLabels,
+    getExerciseFormValues,
+} from '@/components/exercises/utils'
 import { FormField } from '@/components/FormField'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
     Dialog,
     DialogClose,
@@ -21,51 +24,16 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/overrides/button'
-import { Spinner } from '@/components/ui/spinner'
-import { useRemoteSearch } from '@/components/useRemoteSearch'
 import { formatNullableDateTime } from '@/lib/datetime'
-import { handleApiError } from '@/lib/http'
-import { notify } from '@/lib/notify'
-import { capitalizeWords, dash, formatNullableString } from '@/lib/text'
-import { preprocessTrim } from '@/lib/validation'
+import { formatNullableString } from '@/lib/text'
+import type { ExerciseFormDialogMode } from '@/models/exercises-table'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-
-const createExerciseFormSchema = z.object({
-    name: preprocessTrim(zCreateExerciseRequest.shape.name),
-    description: preprocessTrim(zCreateExerciseRequest.shape.description),
-    muscle_group_ids: zCreateExerciseRequest.shape.muscle_group_ids,
-})
-
-const updateExerciseFormSchema = z.object({
-    name: preprocessTrim(zUpdateExerciseRequest.shape.name),
-    description: preprocessTrim(zUpdateExerciseRequest.shape.description),
-    muscle_group_ids: zUpdateExerciseRequest.shape.muscle_group_ids,
-})
-
-type CreateExerciseForm = z.infer<typeof createExerciseFormSchema>
-type UpdateExerciseForm = z.infer<typeof updateExerciseFormSchema>
-
-type CreateExerciseFormInput = z.input<typeof createExerciseFormSchema>
-type UpdateExerciseFormInput = z.input<typeof updateExerciseFormSchema>
-
-const defaultCreateExerciseFormValues: CreateExerciseForm = {
-    name: '',
-    description: '',
-    muscle_group_ids: [],
-}
-
-const defaultUpdateExerciseFormValues: UpdateExerciseForm = {
-    name: '',
-    description: '',
-    muscle_group_ids: [],
-}
 
 interface ExerciseFormDialogProps {
     open: boolean
-    mode: 'create' | 'edit' | 'view'
+    mode: ExerciseFormDialogMode
     exercise: ExercisePublic | null
     muscleGroups: MuscleGroupPublic[]
     isRowLoading: boolean
@@ -89,255 +57,100 @@ export function ExerciseFormDialog({
     onRowLoadingChange,
 }: ExerciseFormDialogProps) {
     const {
-        register: registerCreate,
-        handleSubmit: handleSubmitCreate,
-        setValue: setValueCreate,
-        watch: watchCreate,
+        register,
+        handleSubmit,
+        setValue,
+        watch,
         formState: {
-            errors: createErrors,
-            isDirty: isCreateDirty,
-            isSubmitting: isCreateSubmitting,
+            errors,
+            isDirty,
+            dirtyFields,
+            isSubmitting: isFormSubmitting,
         },
-        reset: resetCreate,
-        resetField: resetFieldCreate,
+        reset,
+        resetField,
     } = useForm<CreateExerciseFormInput, unknown, CreateExerciseForm>({
+        // future schema divergence may require separate forms
         resolver: zodResolver(createExerciseFormSchema),
-        defaultValues: defaultCreateExerciseFormValues,
-        mode: 'onSubmit',
-        reValidateMode: 'onChange',
-    })
-
-    const {
-        register: registerEdit,
-        handleSubmit: handleSubmitEdit,
-        setValue: setValueEdit,
-        watch: watchEdit,
-        formState: {
-            errors: editErrors,
-            isDirty: isEditDirty,
-            dirtyFields: editDirtyFields,
-            isSubmitting: isEditSubmitting,
-        },
-        reset: resetEdit,
-    } = useForm<UpdateExerciseFormInput, unknown, UpdateExerciseForm>({
-        resolver: zodResolver(updateExerciseFormSchema),
-        defaultValues: defaultUpdateExerciseFormValues,
+        defaultValues: defaultExerciseFormValues,
         mode: 'onSubmit',
         reValidateMode: 'onChange',
     })
 
     const isCreateMode = mode === 'create'
     const isViewMode = mode === 'view'
-    const isSubmitting =
-        (isCreateMode ? isCreateSubmitting : isEditSubmitting) || isRowLoading
-    const isDirty = isCreateMode ? isCreateDirty : isEditDirty
-    const errors = isCreateMode ? createErrors : editErrors
-    const {
-        searchQuery,
-        setSearchQuery,
-        isSearching,
-        displayedItems: displayedMuscleGroups,
-    } = useRemoteSearch({
-        items: muscleGroups,
-        enabled: open && !isViewMode,
-        fallbackMessage: 'Failed to search muscle groups',
-        search: (query, limit) =>
-            SearchService.searchMuscleGroups({
-                body: {
-                    query,
-                    limit,
-                },
-            }),
-        getItemId: (muscleGroup) => muscleGroup.id,
-        getResultId: (searchResult) => searchResult.id,
-    })
+    const isSubmitting = isFormSubmitting || isRowLoading
+    const dialogLabels = getExerciseDialogLabels(mode)
 
-    const selectedMuscleGroupIds = isCreateMode
-        ? // eslint-disable-next-line react-hooks/incompatible-library
-          (watchCreate('muscle_group_ids') ?? [])
-        : (watchEdit('muscle_group_ids') ?? [])
+    // eslint-disable-next-line react-hooks/incompatible-library
+    const selectedMuscleGroupIds = watch('muscle_group_ids') ?? []
+    const showTimestamps = exercise?.user_id !== null && !isCreateMode
 
     useEffect(() => {
         if (!open) return
-        if (isCreateMode) {
-            if (exercise) {
-                // copying existing exercise
-                resetCreate(
-                    {
-                        name: `${exercise.name} - copy`,
-                        description: exercise.description,
-                        muscle_group_ids: exercise.muscle_groups.map(
-                            (mg) => mg.id
-                        ),
-                    },
-                    {
-                        // use default values as initial for dirty check
-                        keepDefaultValues: true,
-                    }
-                )
-                return
-            }
-            resetCreate(defaultCreateExerciseFormValues)
-            return
+        const values = getExerciseFormValues(mode, exercise)
+        const options = {
+            // use default as initial for dirty check
+            keepDefaultValues: mode === 'create',
         }
-        if (exercise) {
-            resetEdit({
-                name: exercise.name,
-                description: exercise.description,
-                muscle_group_ids: exercise.muscle_groups.map((mg) => mg.id),
-            })
-            return
-        }
-        resetEdit(defaultUpdateExerciseFormValues)
-    }, [open, isCreateMode, exercise, resetCreate, resetEdit])
+        reset(values, options)
+    }, [open, mode, exercise, reset])
+
+    const closeDialog = () => {
+        onOpenChange(false)
+    }
 
     const attemptClose = () => {
         if (isSubmitting) return
         if (isDirty && !confirm('Discard changes?')) return
-        close()
+        closeDialog()
     }
 
-    const close = () => {
-        onOpenChange(false)
+    const preventDefaultAndAttemptClose = (event: {
+        preventDefault: () => void
+    }) => {
+        event.preventDefault()
+        attemptClose()
     }
 
-    const toggleMuscleGroup = (muscleGroupId: number, checked: boolean) => {
-        const selected = new Set(selectedMuscleGroupIds)
-
-        if (checked) selected.add(muscleGroupId)
-        else selected.delete(muscleGroupId)
-
-        if (isCreateMode)
-            setValueCreate('muscle_group_ids', Array.from(selected), {
-                shouldDirty: true,
-                shouldValidate: true,
-            })
-        else
-            setValueEdit('muscle_group_ids', Array.from(selected), {
-                shouldDirty: true,
-                shouldValidate: true,
-            })
-    }
-
-    const onSubmitCreateForm = async (form: CreateExerciseForm) => {
-        const { error } = await ExerciseService.createExercise({
-            body: createExerciseFormSchema.parse(form),
-        })
-        if (error) {
-            await handleApiError(error, {
-                httpErrorHandlers: {
-                    muscle_group_not_found: async () => {
-                        notify.error(
-                            'Invalid muscle group selected. Reloading data'
-                        )
-                        await onReloadMuscleGroups()
-                    },
-                    exercise_name_conflict: () => {
-                        notify.error(
-                            'An exercise with that name already exists'
-                        )
-                        resetFieldCreate('name')
-                    },
-                },
-                fallbackMessage: 'Failed to create exercise',
-            })
-            return
+    const handleSelectedMuscleGroupIdsChange = (muscleGroupIds: number[]) => {
+        const options = {
+            shouldDirty: true,
+            shouldValidate: true,
         }
-        notify.success('Exercise created')
-        await onSuccess()
-        close()
+        setValue('muscle_group_ids', muscleGroupIds, options)
     }
 
-    const onSubmitEditForm = async (form: UpdateExerciseForm) => {
-        if (!exercise) {
-            notify.error('Exercise data is missing. Try again')
-            close()
-            return
-        }
-
-        if (!isEditDirty) {
-            notify.warning('No changes to save')
-            close()
-            return
-        }
-
-        const body: Partial<UpdateExerciseForm> = {}
-        const parsedForm = updateExerciseFormSchema.parse(form)
-        if (editDirtyFields.name) body.name = parsedForm.name ?? ''
-        if (editDirtyFields.description)
-            body.description = parsedForm.description ?? ''
-        if (editDirtyFields.muscle_group_ids)
-            body.muscle_group_ids = parsedForm.muscle_group_ids ?? []
-
-        onRowLoadingChange(exercise.id, true)
-        try {
-            const { error } = await ExerciseService.updateExercise({
-                path: { exercise_id: exercise.id },
-                body,
-            })
-            if (error) {
-                await handleApiError(error, {
-                    httpErrorHandlers: {
-                        exercise_not_found: async () => {
-                            notify.error('Exercise not found. Reloading data')
-                            close()
-                            await onReloadExercises()
-                        },
-                        muscle_group_not_found: async () => {
-                            notify.error(
-                                'Invalid muscle group selected. Reloading data'
-                            )
-                            await onReloadMuscleGroups()
-                        },
-                        exercise_name_conflict: () => {
-                            notify.error(
-                                'An exercise with that name already exists'
-                            )
-                            resetEdit({ name: exercise.name })
-                        },
-                    },
-                    fallbackMessage: 'Failed to update exercise',
-                })
-                return
-            }
-            notify.success('Exercise updated')
-            await onSuccess()
-            close()
-        } finally {
-            onRowLoadingChange(exercise.id, false)
-        }
-    }
-
-    const formDialogTitle = isCreateMode
-        ? 'Create Exercise'
-        : isViewMode
-          ? 'View Exercise'
-          : 'Edit Exercise'
-    const formSubmitButtonText = isCreateMode ? 'Create' : 'Save'
-    const formSubmittingButtonText = isCreateMode ? 'Creating...' : 'Saving...'
-    const cancelButtonDisabled = isSubmitting || !isDirty
+    const { submitForm } = useExerciseFormDialogSubmit({
+        mode,
+        exercise,
+        isDirty,
+        dirtyFields,
+        handleSubmit,
+        resetField,
+        closeDialog,
+        onSuccess,
+        onReloadExercises,
+        onReloadMuscleGroups,
+        onRowLoadingChange,
+    })
 
     return (
         <Dialog
             open={open}
-            onOpenChange={() => {
+            onOpenChange={(isOpen) => {
                 // only triggered on close (open state controlled by parent)
+                if (isOpen) return
                 attemptClose()
             }}
         >
             <DialogContent
                 aria-describedby={undefined}
-                onPointerDownOutside={(e) => {
-                    e.preventDefault()
-                    attemptClose()
-                }}
-                onEscapeKeyDown={(e) => {
-                    e.preventDefault()
-                    attemptClose()
-                }}
+                onPointerDownOutside={preventDefaultAndAttemptClose}
+                onEscapeKeyDown={preventDefaultAndAttemptClose}
             >
                 <DialogHeader>
-                    <DialogTitle>{formDialogTitle}</DialogTitle>
+                    <DialogTitle>{dialogLabels.title}</DialogTitle>
                     {!isViewMode && (
                         <DialogDescription>
                             Set exercise details and assign target muscle groups
@@ -347,10 +160,8 @@ export function ExerciseFormDialog({
                 <form
                     id="exercise-form"
                     className="space-y-4"
-                    onSubmit={(e) => {
-                        if (isCreateMode)
-                            void handleSubmitCreate(onSubmitCreateForm)(e)
-                        else void handleSubmitEdit(onSubmitEditForm)(e)
+                    onSubmit={(event) => {
+                        void submitForm(event)
                     }}
                 >
                     <FormField
@@ -360,18 +171,14 @@ export function ExerciseFormDialog({
                     >
                         {isViewMode ? (
                             <div className="text-sm text-muted-foreground">
-                                {capitalizeWords(
-                                    formatNullableString(exercise?.name)
-                                )}
+                                {exercise && formatExerciseName(exercise)}
                             </div>
                         ) : (
                             <Input
                                 id="exercise-name"
                                 placeholder="e.g., Barbell Squat"
                                 aria-invalid={!!errors.name}
-                                {...(isCreateMode
-                                    ? registerCreate('name')
-                                    : registerEdit('name'))}
+                                {...register('name')}
                             />
                         )}
                     </FormField>
@@ -389,9 +196,7 @@ export function ExerciseFormDialog({
                                 id="exercise-description"
                                 placeholder="e.g., Lower-body compound movement"
                                 aria-invalid={!!errors.description}
-                                {...(isCreateMode
-                                    ? registerCreate('description')
-                                    : registerEdit('description'))}
+                                {...register('description')}
                             />
                         )}
                     </FormField>
@@ -399,94 +204,18 @@ export function ExerciseFormDialog({
                         label="Muscle Groups"
                         error={errors.muscle_group_ids?.message}
                     >
-                        {isViewMode ? (
-                            selectedMuscleGroupIds.length ? (
-                                <div className="flex flex-wrap gap-1">
-                                    {muscleGroups.map(
-                                        (group) =>
-                                            selectedMuscleGroupIds.includes(
-                                                group.id
-                                            ) && (
-                                                <span
-                                                    key={group.id}
-                                                    className="rounded-md bg-muted px-2 py-1 text-sm text-muted-foreground"
-                                                >
-                                                    {capitalizeWords(
-                                                        group.name
-                                                    )}
-                                                </span>
-                                            )
-                                    )}
-                                </div>
-                            ) : (
-                                <span className="text-sm text-muted-foreground">
-                                    {dash}
-                                </span>
-                            )
-                        ) : (
-                            <div className="space-y-2">
-                                <div className="relative">
-                                    <Input
-                                        placeholder="Search muscle groups..."
-                                        value={searchQuery}
-                                        onChange={(event) => {
-                                            setSearchQuery(event.target.value)
-                                        }}
-                                        className={isSearching ? 'pr-8' : ''}
-                                    />
-                                    {isSearching && (
-                                        <Spinner className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground" />
-                                    )}
-                                </div>
-                                <div className="max-h-50 space-y-2 overflow-y-auto rounded-md border p-3">
-                                    {displayedMuscleGroups.length ? (
-                                        displayedMuscleGroups.map((group) => {
-                                            const checked =
-                                                selectedMuscleGroupIds.includes(
-                                                    group.id
-                                                )
-                                            return (
-                                                <label
-                                                    key={group.id}
-                                                    className="flex cursor-pointer gap-2"
-                                                >
-                                                    <Checkbox
-                                                        checked={checked}
-                                                        onCheckedChange={(
-                                                            value
-                                                        ) => {
-                                                            toggleMuscleGroup(
-                                                                group.id,
-                                                                value === true
-                                                            )
-                                                        }}
-                                                        disabled={isSubmitting}
-                                                    />
-                                                    <span className="text-sm">
-                                                        <span className="font-medium">
-                                                            {capitalizeWords(
-                                                                group.name
-                                                            )}
-                                                        </span>
-                                                        <span className="text-muted-foreground">
-                                                            {' '}
-                                                            &mdash;{' '}
-                                                            {group.description}
-                                                        </span>
-                                                    </span>
-                                                </label>
-                                            )
-                                        })
-                                    ) : (
-                                        <div className="text-sm text-muted-foreground">
-                                            No muscle groups found.
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
+                        <ExerciseMuscleGroupSelector
+                            open={open}
+                            readOnly={isViewMode}
+                            muscleGroups={muscleGroups}
+                            selectedMuscleGroupIds={selectedMuscleGroupIds}
+                            disabled={isSubmitting}
+                            onSelectedMuscleGroupIdsChange={
+                                handleSelectedMuscleGroupIdsChange
+                            }
+                        />
                     </FormField>
-                    {exercise?.user_id !== null && !isCreateMode && (
+                    {showTimestamps && (
                         <>
                             <FormField label="Created">
                                 <div className="text-sm text-muted-foreground">
@@ -510,10 +239,7 @@ export function ExerciseFormDialog({
                         <Button
                             variant="destructive"
                             disabled={isSubmitting}
-                            onClick={(e) => {
-                                e.preventDefault()
-                                attemptClose()
-                            }}
+                            onClick={preventDefaultAndAttemptClose}
                         >
                             {isViewMode ? 'Close' : 'Cancel'}
                         </Button>
@@ -523,11 +249,11 @@ export function ExerciseFormDialog({
                             form="exercise-form"
                             type="submit"
                             variant="success"
-                            disabled={cancelButtonDisabled}
+                            disabled={isSubmitting || !isDirty}
                         >
                             {isSubmitting
-                                ? formSubmittingButtonText
-                                : formSubmitButtonText}
+                                ? dialogLabels.submittingButtonText
+                                : dialogLabels.submitButtonText}
                         </Button>
                     )}
                 </DialogFooter>

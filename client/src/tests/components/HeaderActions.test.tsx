@@ -1,3 +1,9 @@
+import { AuthService } from '@/api/generated'
+import { HeaderActions } from '@/components/HeaderActions'
+import { notify } from '@/lib/notify'
+import type { SessionContextType } from '@/models/session'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import type { ReactElement } from 'react'
 import {
     beforeEach,
@@ -8,19 +14,18 @@ import {
     type MockedFunction,
 } from 'vitest'
 
-import { AuthService } from '@/api/generated'
-import { HeaderActions } from '@/components/HeaderActions'
-import { notify } from '@/lib/notify'
-import type { SessionContextType } from '@/models/session'
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-
 const navigateMock = vi.fn()
 let refreshMock: MockedFunction<() => Promise<void>>
 const useSessionMock: MockedFunction<() => SessionContextType> = vi.fn()
-const logoutMock = vi.spyOn(AuthService, 'logout')
+const authServiceMock = vi.mocked(AuthService)
 const notifySuccessMock = vi.spyOn(notify, 'success')
 const notifyErrorMock = vi.spyOn(notify, 'error')
+
+vi.mock('@/api/generated', () => ({
+    AuthService: {
+        logout: vi.fn().mockResolvedValue({}),
+    },
+}))
 
 vi.mock('react-router-dom', () => ({
     useNavigate: () => navigateMock,
@@ -58,6 +63,9 @@ describe('HeaderActions', () => {
         useSessionMock.mockReturnValue(makeSession(refreshMock))
         notifySuccessMock.mockImplementation(() => undefined)
         notifyErrorMock.mockImplementation(() => undefined)
+        vi.mocked(authServiceMock.logout).mockResolvedValue({
+            error: undefined,
+        } as never)
     })
 
     it('renders all buttons', () => {
@@ -86,13 +94,15 @@ describe('HeaderActions', () => {
         })
 
         expect(notifyErrorMock).not.toHaveBeenCalled()
-        expect(logoutMock).toHaveBeenCalledOnce()
+        expect(authServiceMock.logout).toHaveBeenCalledOnce()
         expect(refreshMock).toHaveBeenCalledOnce()
         expect(navigateMock).toHaveBeenCalledWith('/login', { replace: true })
     })
 
     it('shows error notification when logout fails', async () => {
-        logoutMock.mockResolvedValue({ error: 'something went wrong' } as never)
+        vi.mocked(authServiceMock.logout).mockResolvedValue({
+            error: 'something went wrong',
+        } as never)
 
         render(<HeaderActions />)
 
@@ -104,7 +114,7 @@ describe('HeaderActions', () => {
         })
 
         expect(notifySuccessMock).not.toHaveBeenCalled()
-        expect(logoutMock).toHaveBeenCalledOnce()
+        expect(authServiceMock.logout).toHaveBeenCalledOnce()
         expect(refreshMock).not.toHaveBeenCalled()
         expect(navigateMock).not.toHaveBeenCalled()
     })

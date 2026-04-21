@@ -6,14 +6,20 @@ import {
 import { zExercisePublic } from '@/api/generated/zod.gen'
 import { useExercisesTableController } from '@/components/exercises/useExercisesTableController'
 import {
-    getExerciseRowActions,
+    getExerciseRowActionsConfig,
+    getExerciseToolbarConfig,
     handleDeleteExercise,
 } from '@/components/exercises/utils'
 import { useDialog } from '@/components/useDialog'
 import { useRemoteSearch } from '@/components/useRemoteSearch'
+import type {
+    DataTableRowActionsConfig,
+    DataTableToolbarConfig,
+    MenuItemConfig,
+} from '@/models/data-table'
+import type { ExerciseFormDialogMode } from '@/models/exercises-table'
 import { getMockProps } from '@/tests/utils'
 import { act, renderHook } from '@testing-library/react'
-import { Plus } from 'lucide-react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const dialogMocks = vi.hoisted(() => ({
@@ -39,11 +45,8 @@ vi.mock('@/components/useRemoteSearch', () => ({
 
 vi.mock('@/components/exercises/utils', () => ({
     handleDeleteExercise: vi.fn(),
-    getExerciseRowActions: vi.fn(),
-}))
-
-vi.mock('@/lib/text', () => ({
-    capitalizeWords: vi.fn((value: string) => `${value} - capitalized`),
+    getExerciseRowActionsConfig: vi.fn(),
+    getExerciseToolbarConfig: vi.fn(),
 }))
 
 vi.mock('@/api/generated', () => ({
@@ -77,6 +80,9 @@ const onReloadExercisesMock = vi.fn().mockResolvedValue(undefined)
 const onReloadMuscleGroupsMock = vi.fn().mockResolvedValue(undefined)
 const setRowLoadingMock = vi.fn()
 const isRowLoadingMock = vi.fn(() => false)
+const rowActionsMenuItemsMock =
+    vi.fn<(row: ExercisePublic) => MenuItemConfig[]>()
+const onCreateExerciseMock = vi.fn()
 
 const renderUseExercisesTableController = () =>
     renderHook(() =>
@@ -97,13 +103,6 @@ beforeEach(() => {
         data: [],
         error: undefined,
     } as never)
-    vi.mocked(getExerciseRowActions).mockReturnValue([
-        {
-            type: 'action',
-            label: 'View',
-            onSelect: vi.fn(),
-        },
-    ])
     remoteSearchMocks.useRemoteSearch.mockReturnValue({
         searchQuery: 'squat',
         setSearchQuery: remoteSearchMocks.setSearchQuery,
@@ -111,6 +110,44 @@ beforeEach(() => {
         refreshSearchResults: remoteSearchMocks.refreshSearchResults,
         displayedItems: mockDisplayedExercises,
     })
+    rowActionsMenuItemsMock.mockReturnValue([
+        {
+            type: 'action',
+            label: 'View',
+            onSelect: vi.fn(),
+        },
+    ])
+    const rowActionsConfigMock: DataTableRowActionsConfig<ExercisePublic> = {
+        schema: zExercisePublic,
+        menuItems: rowActionsMenuItemsMock,
+    }
+    vi.mocked(getExerciseRowActionsConfig).mockReturnValue(rowActionsConfigMock)
+    const toolbarConfigMock: DataTableToolbarConfig = {
+        search: {
+            placeholder: 'Search exercises...',
+            value: 'squat',
+            onChange: remoteSearchMocks.setSearchQuery,
+            isLoading: false,
+        },
+        filters: [
+            {
+                columnId: 'type',
+                title: 'Type',
+                options: [
+                    { label: 'System', value: 'system' },
+                    { label: 'Custom', value: 'custom' },
+                ],
+            },
+        ],
+        actions: [
+            {
+                label: 'Add Exercise',
+                onClick: onCreateExerciseMock,
+            },
+        ],
+        showViewOptions: true,
+    }
+    vi.mocked(getExerciseToolbarConfig).mockReturnValue(toolbarConfigMock)
     dialogMocks.useDialog.mockReturnValue({
         state: {
             isOpen: false,
@@ -156,60 +193,41 @@ describe('useExercisesTableController', () => {
 
     it('builds row actions config from row loading state and dialog handlers', () => {
         const { result } = renderUseExercisesTableController()
+        const props = getMockProps(vi.mocked(getExerciseRowActionsConfig)) as {
+            isRowLoading: (id: number) => boolean
+            openDeleteDialog: (exercise: ExercisePublic) => void
+            openFormDialog: (
+                mode: ExerciseFormDialogMode,
+                exercise?: ExercisePublic | null
+            ) => void
+        }
 
-        const menuItems =
-            result.current.rowActionsConfig.menuItems(mockExercise)
-
-        expect(menuItems).toHaveLength(1)
-        expect(result.current.rowActionsConfig.schema).toBe(zExercisePublic)
-        expect(isRowLoadingMock).toHaveBeenCalledExactlyOnceWith(
-            mockExercise.id
+        expect(result.current.rowActionsConfig).toBe(
+            vi.mocked(getExerciseRowActionsConfig).mock.results[0]?.value
         )
-        expect(getExerciseRowActions).toHaveBeenCalledExactlyOnceWith(
-            mockExercise,
-            false,
-            expect.any(Function),
-            expect.any(Function),
-            expect.any(Function),
-            dialogMocks.open
-        )
+        expect(props.isRowLoading).toBe(isRowLoadingMock)
+        expect(props.openDeleteDialog).toBe(dialogMocks.open)
+        expect(props.openFormDialog).toEqual(expect.any(Function))
     })
 
     it('builds toolbar config from remote search state and muscle groups', () => {
         const { result } = renderUseExercisesTableController()
+        const props = getMockProps(vi.mocked(getExerciseToolbarConfig)) as {
+            searchQuery: string
+            setSearchQuery: (value: string) => void
+            isSearching: boolean
+            muscleGroups: MuscleGroupPublic[]
+            onCreateExercise: () => void
+        }
 
-        expect(result.current.toolbarConfig).toMatchObject({
-            search: {
-                placeholder: 'Search exercises...',
-                value: 'squat',
-                onChange: remoteSearchMocks.setSearchQuery,
-                isLoading: false,
-            },
-            filters: [
-                {
-                    columnId: 'type',
-                    title: 'Type',
-                    options: [
-                        { label: 'System', value: 'system' },
-                        { label: 'Custom', value: 'custom' },
-                    ],
-                },
-                {
-                    columnId: 'muscle_groups',
-                    title: 'Muscle Groups',
-                    options: [{ label: 'quads - capitalized', value: '10' }],
-                },
-            ],
-            actions: [
-                {
-                    label: 'Add Exercise',
-                    icon: Plus,
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                    onClick: expect.any(Function),
-                },
-            ],
-            showViewOptions: true,
-        })
+        expect(result.current.toolbarConfig).toBe(
+            vi.mocked(getExerciseToolbarConfig).mock.results[0]?.value
+        )
+        expect(props.searchQuery).toBe('squat')
+        expect(props.setSearchQuery).toBe(remoteSearchMocks.setSearchQuery)
+        expect(props.isSearching).toBe(false)
+        expect(props.muscleGroups).toEqual(mockMuscleGroups)
+        expect(props.onCreateExercise).toEqual(expect.any(Function))
     })
 
     it('wires delete dialog confirm callback to handleDeleteExercise', async () => {
@@ -217,13 +235,13 @@ describe('useExercisesTableController', () => {
 
         expect(useDialog).toHaveBeenCalledOnce()
 
-        const onConfirm = getMockProps(dialogMocks.useDialog)
+        const onConfirm = getMockProps(dialogMocks.useDialog) as (
+            exercise: ExercisePublic
+        ) => Promise<void>
         expect(onConfirm).toBeTypeOf('function')
 
         await act(async () => {
-            // @ts-expect-error onConfirm is typed correctly
-            onConfirm(mockExercise)
-            await Promise.resolve()
+            await onConfirm(mockExercise)
         })
 
         expect(handleDeleteExercise).toHaveBeenCalledExactlyOnceWith(
@@ -253,8 +271,13 @@ describe('useExercisesTableController', () => {
     it('opens form dialog in create mode from toolbar action', async () => {
         const { result } = renderUseExercisesTableController()
 
+        const { onCreateExercise } = getMockProps(
+            vi.mocked(getExerciseToolbarConfig)
+        ) as { onCreateExercise: () => void }
+
         await act(async () => {
-            await result.current.toolbarConfig.actions?.[0]?.onClick()
+            onCreateExercise()
+            await Promise.resolve()
         })
 
         expect(result.current.formDialog).toEqual({
@@ -267,21 +290,17 @@ describe('useExercisesTableController', () => {
     it('opens form dialog for view, copy, and edit row actions', () => {
         const { result } = renderUseExercisesTableController()
 
-        result.current.rowActionsConfig.menuItems(mockExercise)
-
-        const [, , openViewDialog, openCopyDialog, openEditDialog] = vi.mocked(
-            getExerciseRowActions
-        ).mock.calls[0] as [
-            ExercisePublic,
-            boolean,
-            (exercise: ExercisePublic) => void,
-            (exercise: ExercisePublic) => void,
-            (exercise: ExercisePublic) => void,
-            (exercise: ExercisePublic) => void,
-        ]
+        const { openFormDialog } = getMockProps(
+            vi.mocked(getExerciseRowActionsConfig)
+        ) as {
+            openFormDialog: (
+                mode: ExerciseFormDialogMode,
+                exercise?: ExercisePublic | null
+            ) => void
+        }
 
         act(() => {
-            openViewDialog(mockExercise)
+            openFormDialog('view', mockExercise)
         })
 
         expect(result.current.formDialog).toEqual({
@@ -291,7 +310,7 @@ describe('useExercisesTableController', () => {
         })
 
         act(() => {
-            openCopyDialog(mockExercise)
+            openFormDialog('create', mockExercise)
         })
 
         expect(result.current.formDialog).toEqual({
@@ -301,7 +320,7 @@ describe('useExercisesTableController', () => {
         })
 
         act(() => {
-            openEditDialog(mockExercise)
+            openFormDialog('edit', mockExercise)
         })
 
         expect(result.current.formDialog).toEqual({

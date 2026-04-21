@@ -18,14 +18,24 @@ Copy the template and populate the environment variables:
 cp config/env/.env.example config/env/.env
 ```
 
-Install the required utilities using `brew`:
+Install the required utilities for your platform:
 
 - `docker` (container runtime)
+- `git2megaignore` (keeps generated `.megaignore` files in sync with `.gitignore` files)
 - `watchexec` (file watcher for API regeneration)
-- `gnu-getopt` (for parsing GNU-style flags)
 - `uv` (Python dependency manager)
 - `pnpm` (JavaScript package manager)
 - `zizmor` (GitHub Actions workflow linter used by the pre-commit hook)
+
+On macOS, `git2megaignore` can be installed with Cargo:
+
+```bash
+cargo install git2megaignore
+```
+
+On Linux, ensure the system `getopt` is GNU `getopt`.
+
+On macOS, install `gnu-getopt` as well. `./scripts/dev.sh` will use the system `getopt` when it already supports GNU-style flags, and otherwise falls back to the Homebrew-installed `gnu-getopt` binary.
 
 ### Running the development environment
 

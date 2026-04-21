@@ -9,14 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/overrides/button'
 import { formatIdentifier } from '@/lib/text'
-
-export interface DataTableColumnMeta {
-    viewLabel?: string
-    filterOnly?: boolean
-    hideOnBelowMd?: boolean
-    headerClassName?: string
-    cellClassName?: string
-}
+import type { DataTableColumnMeta } from '@/models/data-table'
 
 function getColumnViewLabel(columnId: string, meta?: unknown): string {
     const resolvedMeta = meta as DataTableColumnMeta | undefined

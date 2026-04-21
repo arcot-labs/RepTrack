@@ -77,13 +77,27 @@ export function getColumn<T>(
 export function testHeader<T>(
     column: ColumnDef<T>,
     id: string,
-    expectedTitle: string
+    expectedTitle: string,
+    expectMockedHeader = true
 ) {
     if (!hasHeader(column)) throw new Error('Column does not have a header')
 
-    const mockColumn = { id }
+    const mockColumn = {
+        id,
+        getCanSort: () => false,
+        getCanHide: () => false,
+        getIsSorted: () => false,
+        toggleSorting: vi.fn(),
+        clearSorting: vi.fn(),
+        toggleVisibility: vi.fn(),
+    }
     const header = column.header({ column: mockColumn } as unknown)
     render(header)
+
+    if (!expectMockedHeader) {
+        expect(screen.getByText(expectedTitle)).toBeInTheDocument()
+        return
+    }
 
     expect(
         screen.getByTestId('mock-data-table-column-header')
