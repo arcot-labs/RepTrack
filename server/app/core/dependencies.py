@@ -49,9 +49,11 @@ def get_db_session_factory(
 
 
 async def get_db_session(
-    settings: Annotated[Settings, Depends(get_settings)],
+    db_session_factory: Annotated[
+        async_sessionmaker[AsyncSession], Depends(get_db_session_factory)
+    ],
 ) -> AsyncGenerator[AsyncSession]:
-    async with get_db_session_factory(settings)() as session:
+    async with db_session_factory() as session:
         yield session
 
 

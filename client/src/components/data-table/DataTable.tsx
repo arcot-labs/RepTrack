@@ -1,12 +1,12 @@
-import {
-    DataTableContent,
-    type EdgePaddingConfig,
-} from '@/components/data-table/DataTableContent'
+import { DataTableContent } from '@/components/data-table/DataTableContent'
 import { DataTablePagination } from '@/components/data-table/DataTablePagination'
 import { DataTableSkeleton } from '@/components/data-table/DataTableSkeleton'
 import { DataTableToolbar } from '@/components/data-table/DataTableToolbar'
-import { type DataTableColumnMeta } from '@/components/data-table/DataTableViewOptions'
-import type { DataTableToolbarConfig } from '@/models/data-table'
+import type {
+    DataTableColumnMeta,
+    DataTableToolbarConfig,
+    EdgePaddingConfig,
+} from '@/models/data-table'
 import {
     type ColumnDef,
     type ColumnFiltersState,

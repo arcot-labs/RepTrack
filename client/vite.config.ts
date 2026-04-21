@@ -27,7 +27,8 @@ export default defineConfig({
             include: ['src/**/*.{ts,tsx}'],
             exclude: [
                 'src/api/generated/**',
-                'src/components/ui/**',
+                // include overrides
+                'src/components/ui/*.tsx',
                 'src/tests/**',
             ],
         },
