@@ -637,6 +637,47 @@ describe('getExerciseUpdateBody', () => {
         ).toEqual({})
     })
 
+    it('includes muscle_group_ids when array entry is dirty', () => {
+        expect(
+            getExerciseUpdateBody(
+                {
+                    muscle_group_ids: [false, true],
+                },
+                {
+                    muscle_group_ids: [20, 30],
+                }
+            )
+        ).toEqual({
+            muscle_group_ids: [20, 30],
+        })
+    })
+
+    it('does not include muscle_group_ids when dirty array is empty', () => {
+        expect(
+            getExerciseUpdateBody(
+                {
+                    muscle_group_ids: [],
+                },
+                {
+                    muscle_group_ids: [20, 30],
+                }
+            )
+        ).toEqual({})
+    })
+
+    it('does not include muscle_group_ids when dirty array has no true values', () => {
+        expect(
+            getExerciseUpdateBody(
+                {
+                    muscle_group_ids: [false, false],
+                },
+                {
+                    muscle_group_ids: [20, 30],
+                }
+            )
+        ).toEqual({})
+    })
+
     it('normalizes nullish dirty values to empty defaults', () => {
         expect(
             getExerciseUpdateBody(

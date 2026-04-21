@@ -252,6 +252,9 @@ export const getToggledMuscleGroupIds = (
     return Array.from(selectedIds)
 }
 
+const hasDirtyArrayValues = (value: boolean | boolean[] | undefined) =>
+    Array.isArray(value) && value.some(Boolean)
+
 type DirtyExerciseFormFields = Record<
     keyof ExerciseUpdateFormValues,
     boolean | boolean[] | undefined
@@ -268,10 +271,13 @@ export const getExerciseUpdateBody = (
     formValues: ExerciseUpdateFormValues
 ) => {
     const body: Partial<ExerciseUpdateFormValues> = {}
+    const isMuscleGroupIdsDirty =
+        dirtyFields.muscle_group_ids === true ||
+        hasDirtyArrayValues(dirtyFields.muscle_group_ids)
 
     if (dirtyFields.name) body.name = formValues.name ?? ''
     if (dirtyFields.description) body.description = formValues.description ?? ''
-    if (dirtyFields.muscle_group_ids)
+    if (isMuscleGroupIdsDirty)
         body.muscle_group_ids = formValues.muscle_group_ids ?? []
 
     return body
