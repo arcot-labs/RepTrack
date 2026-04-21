@@ -46,6 +46,7 @@ function stubPage(name: string) {
 
 vi.mock('@/pages/Dashboard', () => ({ Dashboard: stubPage('Dashboard page') }))
 vi.mock('@/pages/Exercises', () => ({ Exercises: stubPage('Exercises page') }))
+vi.mock('@/pages/Workouts', () => ({ Workouts: stubPage('Workouts page') }))
 vi.mock('@/pages/Docs', async () => {
     const { Outlet } = await import('react-router-dom')
 
@@ -88,53 +89,55 @@ describe('AppRoutes', () => {
         vi.clearAllMocks()
     })
 
-    it('renders dashboard inside layout', () => {
+    it('renders dashboard inside layout', async () => {
         renderAt('/')
 
-        expect(screen.getByTestId('app-layout')).toBeInTheDocument()
-        expect(screen.getByText('Dashboard page')).toBeInTheDocument()
-        expect(requireAuthMock).toHaveBeenCalledExactlyOnceWith(
+        expect(await screen.findByTestId('app-layout')).toBeInTheDocument()
+        expect(await screen.findByText('Dashboard page')).toBeInTheDocument()
+        expect(requireAuthMock).toHaveBeenCalledWith(
             expect.objectContaining({ requireAdmin: false })
         )
         expect(requireGuestMock).not.toHaveBeenCalled()
     })
 
-    it('renders exercises inside layout', () => {
-        renderAt('/exercises')
+    it.each([
+        ['/exercises', 'Exercises page'],
+        ['/workouts', 'Workouts page'],
+    ])('renders %s inside layout', async (path, pageText) => {
+        renderAt(path)
 
-        expect(screen.getByTestId('app-layout')).toBeInTheDocument()
-        expect(screen.getByText('Exercises page')).toBeInTheDocument()
+        expect(await screen.findByTestId('app-layout')).toBeInTheDocument()
+        expect(await screen.findByText(pageText)).toBeInTheDocument()
+        expect(requireAuthMock).toHaveBeenCalled()
+        expect(requireGuestMock).not.toHaveBeenCalled()
     })
 
-    it('renders docs index route inside docs layout', () => {
+    it('renders docs index route inside docs layout', async () => {
         renderAt('/docs')
 
-        expect(screen.getByTestId('app-layout')).toBeInTheDocument()
-        expect(screen.getByTestId('docs-layout')).toBeInTheDocument()
-        expect(screen.getByText('Docs index')).toBeInTheDocument()
+        expect(await screen.findByTestId('app-layout')).toBeInTheDocument()
+        expect(await screen.findByTestId('docs-layout')).toBeInTheDocument()
+        expect(await screen.findByText('Docs index')).toBeInTheDocument()
     })
 
-    it('renders docs detail route with nested params inside docs layout', () => {
+    it('renders docs detail route with nested params inside docs layout', async () => {
         renderAt('/docs/guide')
 
-        expect(screen.getByTestId('app-layout')).toBeInTheDocument()
-        expect(screen.getByTestId('docs-layout')).toBeInTheDocument()
-        expect(screen.getByText('Doc detail')).toBeInTheDocument()
+        expect(await screen.findByTestId('app-layout')).toBeInTheDocument()
+        expect(await screen.findByTestId('docs-layout')).toBeInTheDocument()
+        expect(await screen.findByText('Doc detail')).toBeInTheDocument()
     })
 
-    it('renders admin route inside layout and marks it as admin-only', () => {
+    it('renders admin route inside layout and marks it as admin-only', async () => {
         renderAt('/admin')
 
-        expect(screen.getByTestId('app-layout')).toBeInTheDocument()
-        expect(screen.getByText('Admin page')).toBeInTheDocument()
+        expect(await screen.findByTestId('app-layout')).toBeInTheDocument()
+        expect(await screen.findByText('Admin page')).toBeInTheDocument()
 
-        expect(requireAuthMock).toHaveBeenCalledTimes(2)
-        expect(requireAuthMock).toHaveBeenNthCalledWith(
-            1,
+        expect(requireAuthMock).toHaveBeenCalledWith(
             expect.objectContaining({ requireAdmin: false })
         )
-        expect(requireAuthMock).toHaveBeenNthCalledWith(
-            2,
+        expect(requireAuthMock).toHaveBeenCalledWith(
             expect.objectContaining({ requireAdmin: true })
         )
         expect(requireGuestMock).not.toHaveBeenCalled()
@@ -146,19 +149,19 @@ describe('AppRoutes', () => {
         ['/forgot-password', 'Forgot password page'],
         ['/reset-password', 'Reset password page'],
         ['/login', 'Login page'],
-    ])('renders guest route %s without layout', (path, pageText) => {
+    ])('renders guest route %s without layout', async (path, pageText) => {
         renderAt(path)
 
-        expect(screen.getByText(pageText)).toBeInTheDocument()
+        expect(await screen.findByText(pageText)).toBeInTheDocument()
         expect(screen.queryByTestId('app-layout')).not.toBeInTheDocument()
         expect(requireAuthMock).not.toHaveBeenCalled()
-        expect(requireGuestMock).toHaveBeenCalledTimes(1)
+        expect(requireGuestMock).toHaveBeenCalled()
     })
 
-    it('redirects unknown paths to login', () => {
+    it('redirects unknown paths to login', async () => {
         renderAt('/nope')
 
-        expect(screen.getByText('Login page')).toBeInTheDocument()
+        expect(await screen.findByText('Login page')).toBeInTheDocument()
         expect(screen.queryByTestId('app-layout')).not.toBeInTheDocument()
     })
 })

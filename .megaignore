@@ -2,22 +2,23 @@
 # For more info visit: https://github.com/Farfi55/git2megaignore.git
 
 +sync:.megaignore
+# from .pytest_cache/
+-dnG:.pytest_cache
+# from .ruff_cache/
+-dnG:.ruff_cache
+# from browser-profile/
+-dnG:browser-profile
 # from node_modules/
 -dnG:node_modules
+# from sandbox/
+-dnG:sandbox
 
 # from .env*
 -nG:.env*
 # from !.env.example
 +nG:.env.example
-
 # from openapi_spec.json
 -nG:openapi_spec.json
-
 # from todo.md
 -nG:todo.md
-
-# from sandbox/
--dnG:sandbox
-# from browser-profile/
--dnG:browser-profile
 # End of generated .megaignore

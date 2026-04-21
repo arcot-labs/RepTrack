@@ -4,6 +4,10 @@
 +sync:.megaignore
 # from coverage/
 -dnG:coverage
+# from dist/
+-dnG:dist
+# from node_modules/
+-dnG:node_modules
 
 # Logs
 # from logs
@@ -21,10 +25,6 @@
 # from lerna-debug.log*
 -nG:lerna-debug.log*
 
-# from node_modules
--nG:node_modules
-# from dist
--nG:dist
 # from dist-ssr
 -nG:dist-ssr
 # from *.local
