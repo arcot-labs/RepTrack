@@ -13,7 +13,7 @@
         "test": "vitest run",
         "test:coverage": "vitest run --coverage",
         "test:watch": "vitest --coverage --ui",
-        "update-components": "for file in src/components/ui/*.tsx; do npx shadcn@latest add -o $(basename \"$file\" .tsx); done && cd .. && npx prettier --write client/src/components/ui"
+        "update-components": "cd ../scripts && ./update_components.sh"
     },
     "lint-staged": {
         "*": [
