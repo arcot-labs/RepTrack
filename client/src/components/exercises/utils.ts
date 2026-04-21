@@ -192,3 +192,87 @@ export const getExerciseToolbarConfig = ({
     ],
     showViewOptions: true,
 })
+
+export const getExerciseDialogLabels = (mode: ExerciseFormDialogMode) => ({
+    title:
+        mode === 'create'
+            ? 'Create Exercise'
+            : mode === 'view'
+              ? 'View Exercise'
+              : 'Edit Exercise',
+    submitButtonText: mode === 'create' ? 'Create' : 'Save',
+    submittingButtonText: mode === 'create' ? 'Creating...' : 'Saving...',
+})
+
+export const getSelectedExerciseMuscleGroups = (
+    muscleGroups: MuscleGroupPublic[],
+    selectedMuscleGroupIds: number[]
+) => {
+    const selectedIds = new Set(selectedMuscleGroupIds)
+    return muscleGroups.filter((group) => selectedIds.has(group.id))
+}
+
+export const getExerciseFormValues = (
+    mode: ExerciseFormDialogMode,
+    exercise: ExercisePublic | null
+) => {
+    if (mode === 'create') {
+        if (!exercise) {
+            // create new
+            return {
+                name: '',
+                description: '',
+                muscle_group_ids: [],
+            }
+        }
+        // copy existing
+        return {
+            name: `${exercise.name} - copy`,
+            description: exercise.description,
+            muscle_group_ids: exercise.muscle_groups.map((mg) => mg.id),
+        }
+    }
+    // edit or view existing
+    if (!exercise) throw Error('Exercise data missing for edit/view mode')
+    return {
+        name: exercise.name,
+        description: exercise.description,
+        muscle_group_ids: exercise.muscle_groups.map((mg) => mg.id),
+    }
+}
+
+export const getToggledMuscleGroupIds = (
+    selectedMuscleGroupIds: number[],
+    muscleGroupId: number,
+    checked: boolean
+) => {
+    const selectedIds = new Set(selectedMuscleGroupIds)
+    if (checked) selectedIds.add(muscleGroupId)
+    else selectedIds.delete(muscleGroupId)
+    return Array.from(selectedIds)
+}
+
+type DirtyExerciseFormFields = Record<
+    keyof ExerciseUpdateFormValues,
+    boolean | boolean[] | undefined
+>
+
+interface ExerciseUpdateFormValues {
+    name?: string | null
+    description?: string | null
+    muscle_group_ids?: number[] | null
+}
+
+export const getExerciseUpdateBody = (
+    dirtyFields: Partial<DirtyExerciseFormFields>,
+    formValues: ExerciseUpdateFormValues
+) => {
+    const body: Partial<ExerciseUpdateFormValues> = {}
+
+    if (dirtyFields.name) body.name = formValues.name ?? ''
+    if (dirtyFields.description) body.description = formValues.description ?? ''
+    if (dirtyFields.muscle_group_ids)
+        body.muscle_group_ids = formValues.muscle_group_ids ?? []
+
+    return body
+}

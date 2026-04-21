@@ -1,9 +1,14 @@
 import { ExerciseService, type ExercisePublic } from '@/api/generated'
 import {
     formatExerciseName,
+    getExerciseDialogLabels,
+    getExerciseFormValues,
     getExerciseRowActions,
     getExerciseRowActionsConfig,
     getExerciseToolbarConfig,
+    getExerciseUpdateBody,
+    getSelectedExerciseMuscleGroups,
+    getToggledMuscleGroupIds,
     handleDeleteExercise,
 } from '@/components/exercises/utils'
 import { handleApiError } from '@/lib/http'
@@ -37,6 +42,24 @@ const mockExercise: ExercisePublic = {
     updated_at: '2026-04-13T00:00:00Z',
     muscle_groups: [],
 }
+
+const mockMuscleGroups = [
+    {
+        id: 10,
+        name: 'quads',
+        description: 'Quadriceps muscles',
+    },
+    {
+        id: 20,
+        name: 'glutes',
+        description: 'Glute muscles',
+    },
+    {
+        id: 30,
+        name: 'hamstrings',
+        description: 'Hamstring muscles',
+    },
+]
 
 const callHandleDelete = async (
     payload: { error: unknown } = { error: undefined },
@@ -453,5 +476,185 @@ describe('getExerciseToolbarConfig', () => {
 
         await config.actions?.[0]?.onClick()
         expect(onCreateExercise).toHaveBeenCalledOnce()
+    })
+})
+
+describe('getExerciseDialogLabels', () => {
+    it('returns create labels', () => {
+        expect(getExerciseDialogLabels('create')).toEqual({
+            title: 'Create Exercise',
+            submitButtonText: 'Create',
+            submittingButtonText: 'Creating...',
+        })
+    })
+
+    it('returns view labels', () => {
+        expect(getExerciseDialogLabels('view')).toEqual({
+            title: 'View Exercise',
+            submitButtonText: 'Save',
+            submittingButtonText: 'Saving...',
+        })
+    })
+
+    it('returns edit labels', () => {
+        expect(getExerciseDialogLabels('edit')).toEqual({
+            title: 'Edit Exercise',
+            submitButtonText: 'Save',
+            submittingButtonText: 'Saving...',
+        })
+    })
+})
+
+describe('getSelectedExerciseMuscleGroups', () => {
+    it('returns only selected muscle groups in source order', () => {
+        expect(
+            getSelectedExerciseMuscleGroups(mockMuscleGroups, [30, 10])
+        ).toEqual([mockMuscleGroups[0], mockMuscleGroups[2]])
+    })
+
+    it('returns empty array when nothing is selected', () => {
+        expect(getSelectedExerciseMuscleGroups(mockMuscleGroups, [])).toEqual(
+            []
+        )
+    })
+})
+
+describe('getExerciseFormValues', () => {
+    it('returns blank defaults for creating new exercise', () => {
+        expect(getExerciseFormValues('create', null)).toEqual({
+            name: '',
+            description: '',
+            muscle_group_ids: [],
+        })
+    })
+
+    it('returns copied values for creating from existing exercise', () => {
+        const exercise = {
+            ...mockExercise,
+            description: 'Barbell squat',
+            muscle_groups: mockMuscleGroups.slice(0, 2),
+        }
+
+        expect(getExerciseFormValues('create', exercise)).toEqual({
+            name: 'Back Squat - copy',
+            description: 'Barbell squat',
+            muscle_group_ids: [10, 20],
+        })
+    })
+
+    it('returns edit values from provided exercise', () => {
+        const exercise = {
+            ...mockExercise,
+            muscle_groups: mockMuscleGroups.slice(1),
+        }
+
+        expect(getExerciseFormValues('edit', exercise)).toEqual({
+            name: 'Back Squat',
+            description: 'Barbell squat',
+            muscle_group_ids: [20, 30],
+        })
+    })
+
+    it('returns view values from provided exercise', () => {
+        const exercise = {
+            ...mockExercise,
+            muscle_groups: mockMuscleGroups.slice(0, 1),
+        }
+
+        expect(getExerciseFormValues('view', exercise)).toEqual({
+            name: 'Back Squat',
+            description: 'Barbell squat',
+            muscle_group_ids: [10],
+        })
+    })
+
+    it('throws when edit mode is missing exercise data', () => {
+        expect(() => getExerciseFormValues('edit', null)).toThrow(
+            'Exercise data missing for edit/view mode'
+        )
+    })
+
+    it('throws when view mode is missing exercise data', () => {
+        expect(() => getExerciseFormValues('view', null)).toThrow(
+            'Exercise data missing for edit/view mode'
+        )
+    })
+})
+
+describe('getToggledMuscleGroupIds', () => {
+    it('adds muscle group when checked', () => {
+        expect(getToggledMuscleGroupIds([10, 30], 20, true)).toEqual([
+            10, 30, 20,
+        ])
+    })
+
+    it('removes muscle group when unchecked', () => {
+        expect(getToggledMuscleGroupIds([10, 20, 30], 20, false)).toEqual([
+            10, 30,
+        ])
+    })
+
+    it('avoids duplicates when checking already selected group', () => {
+        expect(getToggledMuscleGroupIds([10, 20], 20, true)).toEqual([10, 20])
+    })
+})
+
+describe('getExerciseUpdateBody', () => {
+    it('returns only dirty fields', () => {
+        expect(
+            getExerciseUpdateBody(
+                {
+                    name: true,
+                    description: false,
+                    muscle_group_ids: true,
+                },
+                {
+                    name: 'Front Squat',
+                    description: 'Upright squat',
+                    muscle_group_ids: [20, 30],
+                }
+            )
+        ).toEqual({
+            name: 'Front Squat',
+            muscle_group_ids: [20, 30],
+        })
+    })
+
+    it('returns empty body when nothing is dirty', () => {
+        expect(
+            getExerciseUpdateBody(
+                {
+                    name: false,
+                    description: false,
+                    muscle_group_ids: false,
+                },
+                {
+                    name: 'Front Squat',
+                    description: 'Upright squat',
+                    muscle_group_ids: [20, 30],
+                }
+            )
+        ).toEqual({})
+    })
+
+    it('normalizes nullish dirty values to empty defaults', () => {
+        expect(
+            getExerciseUpdateBody(
+                {
+                    name: true,
+                    description: true,
+                    muscle_group_ids: true,
+                },
+                {
+                    name: null,
+                    description: undefined,
+                    muscle_group_ids: null,
+                }
+            )
+        ).toEqual({
+            name: '',
+            description: '',
+            muscle_group_ids: [],
+        })
     })
 })
