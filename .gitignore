@@ -1,11 +1,10 @@
+.pytest_cache/
+.ruff_cache/
+browser-profile/
 node_modules/
+sandbox/
 
 .env*
 !.env.example
-
 openapi_spec.json
-
 todo.md
-
-sandbox/
-browser-profile/

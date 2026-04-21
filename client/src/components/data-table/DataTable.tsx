@@ -3,7 +3,6 @@ import { DataTablePagination } from '@/components/data-table/DataTablePagination
 import { DataTableSkeleton } from '@/components/data-table/DataTableSkeleton'
 import { DataTableToolbar } from '@/components/data-table/DataTableToolbar'
 import type {
-    DataTableColumnMeta,
     DataTableToolbarConfig,
     EdgePaddingConfig,
 } from '@/models/data-table'
@@ -40,8 +39,7 @@ function getResponsiveHiddenColumnIds<TData, TValue>(
     const hiddenColumnIds = new Set<string>()
 
     for (const col of columns) {
-        const meta = col.meta as DataTableColumnMeta | undefined
-        if (!meta?.hideOnBelowMd || col.enableHiding === false) continue
+        if (!col.meta?.hideOnBelowMd || col.enableHiding === false) continue
 
         if (typeof col.id === 'string') {
             hiddenColumnIds.add(col.id)

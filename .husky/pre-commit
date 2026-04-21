@@ -4,8 +4,8 @@ set -Eeuo pipefail
 echo "Running pre-commit hook..."
 echo
 
-echo "Checking .gitignore and .megaignore files..."
-./scripts/check_ignore_files.sh
+echo "Updating .megaignore files..."
+./scripts/check_megaignores.sh
 echo
 
 echo "Forcing API client generation..."
@@ -24,7 +24,7 @@ echo "Scanning GitHub Actions files..."
 zizmor .github/
 echo
 
-echo "Formatting and linting staged files..."
+echo "Linting and formatting staged files..."
 lint-staged
 echo
 

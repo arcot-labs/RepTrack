@@ -38,13 +38,10 @@ export function DataTableViewOptions<TData>({
                 {table
                     .getAllColumns()
                     .filter((column) => {
-                        const meta = column.columnDef.meta as
-                            | DataTableColumnMeta
-                            | undefined
                         return (
                             typeof column.accessorFn !== 'undefined' &&
                             column.getCanHide() &&
-                            !meta?.filterOnly
+                            !column.columnDef.meta?.filterOnly
                         )
                     })
                     .map((column) => {

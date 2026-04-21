@@ -5,7 +5,6 @@
         "check:py": "uv run --project server pyright",
         "format": "pnpm run prettier && pnpm run format:py",
         "format:py": "uv run --project server ruff format server",
-        "preinstall": "npx only-allow pnpm",
         "lint": "pnpm run lint:py && pnpm run check:py && cd client && pnpm run lint",
         "lint:py": "uv run --project server ruff check server --fix",
         "prepare": "husky && pnpm run sort-package-jsons",
@@ -31,5 +30,20 @@
         "prettier-plugin-organize-imports": "^4.3.0",
         "prettier-plugin-tailwindcss": "^0.7.2",
         "prettier-plugin-toml": "2.0.6"
+    },
+    "engines": {
+        "node": ">=24",
+        "pnpm": ">=10"
+    },
+    "devEngines": {
+        "runtime": {
+            "name": "node",
+            "onFail": "error"
+        },
+        "packageManager": {
+            "name": "pnpm",
+            "version": "10.33.0",
+            "onFail": "error"
+        }
     }
 }

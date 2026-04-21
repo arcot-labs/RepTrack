@@ -4,10 +4,15 @@
 +sync:.megaignore
 # from __pycache__/
 -dnG:__pycache__
+# from .pytest_cache/
+-dnG:.pytest_cache
+# from .ruff_cache/
+-dnG:.ruff_cache
 # from data/
 -dnG:data
 # from logs/
 -dnG:logs
+
 # from .coverage
 -nG:.coverage
 # from coverage.xml

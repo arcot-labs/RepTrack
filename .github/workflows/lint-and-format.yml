@@ -1,4 +1,4 @@
-name: Maintenance / Format and Lint (Reusable)
+name: Maintenance / Lint and Format (Reusable)
 
 on:
     workflow_call:
@@ -6,8 +6,8 @@ on:
 permissions: {}
 
 jobs:
-    format-and-lint:
-        name: Format and Lint
+    lint-and-format:
+        name: Lint and Format
         runs-on: self-hosted
         permissions:
             contents: write
@@ -64,10 +64,10 @@ jobs:
               working-directory: server
               run: uv sync
 
-            - name: format & lint
+            - name: lint & format
               run: |
-                  pnpm run format
                   pnpm run lint
+                  pnpm run format
 
             - name: commit & push
               run: |
@@ -77,9 +77,9 @@ jobs:
 
                     git add .
                     git status
-                    git commit -m "chore: format & lint after PR merge"
+                    git commit -m "chore: lint & format after PR merge"
                     git status
                     git push
                   else
-                    echo "No formatting changes to commit"
+                    echo "No linting or formatting changes to commit"
                   fi
