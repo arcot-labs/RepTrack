@@ -1,6 +1,8 @@
-import type { EdgePaddingConfig } from '@/components/data-table/DataTableContent'
-import type { DataTableColumnMeta } from '@/components/data-table/DataTableViewOptions'
 import { cn } from '@/lib/utils'
+import type {
+    DataTableColumnMeta,
+    EdgePaddingConfig,
+} from '@/models/data-table'
 import type { Cell, Header } from '@tanstack/react-table'
 
 export function isTruncatedText(textElement: HTMLElement | null): boolean {

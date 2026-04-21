@@ -1,5 +1,7 @@
-import type { EdgePaddingConfig } from '@/components/data-table/DataTableContent'
-import type { DataTableToolbarConfig } from '@/models/data-table'
+import type {
+    DataTableToolbarConfig,
+    EdgePaddingConfig,
+} from '@/models/data-table'
 import { getMockProps } from '@/tests/utils'
 import type { ColumnDef } from '@tanstack/react-table'
 import { render, screen } from '@testing-library/react'
