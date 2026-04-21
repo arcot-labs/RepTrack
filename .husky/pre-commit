@@ -24,7 +24,7 @@ echo "Scanning GitHub Actions files..."
 zizmor .github/
 echo
 
-echo "Formatting and linting staged files..."
+echo "Linting and formatting staged files..."
 lint-staged
 echo
 
