@@ -34,7 +34,7 @@ for GITIGNORE_FILE in "${GITIGNORE_FILES[@]}"; do
     echo "Updating $MEGAIGNORE_FILE from $GITIGNORE_FILE..."
     (
         cd "$GITIGNORE_DIR"
-        cat .gitignore | git2megaignore -mc
+        git show :"$GITIGNORE_FILE" | git2megaignore -mc
     )
 
     if git diff --quiet -- "$MEGAIGNORE_FILE"; then
