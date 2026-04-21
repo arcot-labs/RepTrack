@@ -38,21 +38,21 @@ export const getEdgePaddingClassName = (
         : paddingClasses.join(' ')
 }
 
+function getColumnMeta(meta: unknown): DataTableColumnMeta | undefined {
+    return meta as DataTableColumnMeta | undefined
+}
+
 export function getHeaderClassName<TData, TValue>(
     header: Header<TData, TValue>
 ): string | undefined {
-    const headerMeta = header.column.columnDef.meta as
-        | DataTableColumnMeta
-        | undefined
+    const headerMeta = getColumnMeta(header.column.columnDef.meta)
     return headerMeta?.headerClassName
 }
 
 export function getCellClassName<TData, TValue>(
     cell: Cell<TData, TValue>
 ): string | undefined {
-    const cellMeta = cell.column.columnDef.meta as
-        | DataTableColumnMeta
-        | undefined
+    const cellMeta = getColumnMeta(cell.column.columnDef.meta)
     const isActionsColumn = cell.column.id === 'actions'
     return cn('h-10', isActionsColumn && 'py-1', cellMeta?.cellClassName)
 }

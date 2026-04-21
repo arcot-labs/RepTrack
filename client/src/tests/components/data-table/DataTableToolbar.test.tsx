@@ -34,7 +34,7 @@ function createConfig(
 ): DataTableToolbarConfig {
     return {
         ...overrides,
-    } as DataTableToolbarConfig
+    }
 }
 
 function createTableMock(overrides?: Partial<Table<unknown>>) {
@@ -339,7 +339,7 @@ describe('DataTableToolbar - filters & reset', () => {
                 ],
             }),
             {
-                getColumn: getColumnMock as never,
+                getColumn: getColumnMock,
             }
         )
 

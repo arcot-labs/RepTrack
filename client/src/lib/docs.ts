@@ -1,10 +1,10 @@
 type DocRegistry = Record<string, string>
 
-const docs = import.meta.glob('../docs/*.md', {
+const docs = import.meta.glob<string>('../docs/*.md', {
     eager: true,
     query: '?raw',
     import: 'default',
-}) as DocRegistry
+})
 
 export function getDoc(slug: string, registry: DocRegistry = docs) {
     return registry[`../docs/${slug}.md`]
