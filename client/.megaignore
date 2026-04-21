@@ -1,0 +1,52 @@
+# Start of generated .megaignore using git2megaignore v0.4.0
+# For more info visit: https://github.com/Farfi55/git2megaignore.git
+
++sync:.megaignore
+# from coverage/
+-dnG:coverage
+
+# Logs
+# from logs
+-nG:logs
+# from *.log
+-nG:*.log
+# from npm-debug.log*
+-nG:npm-debug.log*
+# from yarn-debug.log*
+-nG:yarn-debug.log*
+# from yarn-error.log*
+-nG:yarn-error.log*
+# from pnpm-debug.log*
+-nG:pnpm-debug.log*
+# from lerna-debug.log*
+-nG:lerna-debug.log*
+
+# from node_modules
+-nG:node_modules
+# from dist
+-nG:dist
+# from dist-ssr
+-nG:dist-ssr
+# from *.local
+-nG:*.local
+
+# Editor directories and files
+# from .vscode/*
+-pG:.vscode/*
+# from !.vscode/extensions.json
++pG:.vscode/extensions.json
+# from .idea
+-nG:.idea
+# from .DS_Store
+-nG:.DS_Store
+# from *.suo
+-nG:*.suo
+# from *.ntvs*
+-nG:*.ntvs*
+# from *.njsproj
+-nG:*.njsproj
+# from *.sln
+-nG:*.sln
+# from *.sw?
+-nG:*.sw?
+# End of generated .megaignore

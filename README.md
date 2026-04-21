@@ -21,10 +21,17 @@ cp config/env/.env.example config/env/.env
 Install the required utilities for your platform:
 
 - `docker` (container runtime)
+- `git2megaignore` (keeps generated `.megaignore` files in sync with `.gitignore` files)
 - `watchexec` (file watcher for API regeneration)
 - `uv` (Python dependency manager)
 - `pnpm` (JavaScript package manager)
 - `zizmor` (GitHub Actions workflow linter used by the pre-commit hook)
+
+On macOS, `git2megaignore` can be installed with Cargo:
+
+```bash
+cargo install git2megaignore
+```
 
 On Linux, ensure the system `getopt` is GNU `getopt`.
 
