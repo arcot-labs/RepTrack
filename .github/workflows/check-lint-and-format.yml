@@ -16,3 +16,5 @@ jobs:
         uses: ./.github/workflows/lint-and-format.yml
         with:
             mode: check
+        permissions:
+            contents: write
