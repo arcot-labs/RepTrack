@@ -4,9 +4,13 @@
     "scripts": {
         "check:py": "uv run --project server pyright",
         "format": "pnpm run prettier && pnpm run format:py",
+        "format:check": "pnpm run prettier . --check && pnpm run format:py:check",
         "format:py": "uv run --project server ruff format server",
+        "format:py:check": "uv run --project server ruff format server --check",
         "lint": "pnpm run lint:py && pnpm run check:py && cd client && pnpm run lint",
+        "lint:check": "pnpm run lint:py:check && pnpm run check:py && cd client && pnpm run lint:check",
         "lint:py": "uv run --project server ruff check server --fix",
+        "lint:py:check": "uv run --project server ruff check server",
         "prepare": "husky && pnpm run sort-package-jsons",
         "prettier": "prettier . --write",
         "sort-package-jsons": "sort-package-json && sort-package-json client/package.json"

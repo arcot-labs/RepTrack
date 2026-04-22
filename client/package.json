@@ -8,6 +8,7 @@
         "dev": "vite",
         "generate-api": "openapi-ts",
         "lint": "eslint --fix --max-warnings=0",
+        "lint:check": "eslint . --max-warnings=0",
         "preview": "vite preview",
         "test": "vitest run",
         "test:coverage": "vitest run --coverage",
