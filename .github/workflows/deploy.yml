@@ -10,6 +10,7 @@ on:
             - .github/workflows/deploy*.yml
             - client/public/**
             - client/src/**
+            - '!client/src/tests/**'
             - client/Dockerfile
             - client/index.html
             - client/nginx.conf
@@ -20,6 +21,7 @@ on:
             - client/vite.config.ts
             - config/**
             - server/app/**
+            - '!server/app/tests/**'
             - server/alembic.ini
             - server/Dockerfile
             - server/pyproject.toml
