@@ -71,9 +71,7 @@ describe('handleApiError', () => {
     let errorSpy: MockInstance<typeof notify.error>
 
     beforeEach(() => {
-        errorSpy = vi.spyOn(notify, 'error').mockImplementation(() => {
-            /* empty */
-        })
+        errorSpy = vi.spyOn(notify, 'error').mockImplementation(() => vi.fn())
     })
 
     afterEach(() => {

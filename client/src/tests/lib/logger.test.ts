@@ -1,57 +1,42 @@
+import { logger } from '@/lib/logger'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+const envMock = vi.hoisted(() => ({ getEnv: () => ({ ENV: 'dev' }) }))
 
 let consoleDebugSpy: ReturnType<typeof vi.spyOn>
 let consoleInfoSpy: ReturnType<typeof vi.spyOn>
 let consoleWarnSpy: ReturnType<typeof vi.spyOn>
 let consoleErrorSpy: ReturnType<typeof vi.spyOn>
 
-const loadLoggerWithEnv = async (envValue: string) => {
-    vi.resetModules()
-    vi.doMock('@/config/env', () => ({ getEnv: () => ({ ENV: envValue }) }))
-    return import('@/lib/logger')
-}
+vi.mock('@/config/env', () => envMock)
 
 describe('logger', () => {
     beforeEach(() => {
-        vi.resetModules()
-        consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {
-            /* empty */
-        })
-        consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation(() => {
-            /* empty */
-        })
-        consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
-            /* empty */
-        })
-        consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {
-            /* empty */
-        })
+        consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(vi.fn())
+        consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation(vi.fn())
+        consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(vi.fn())
+        consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(vi.fn())
     })
 
     afterEach(() => {
-        vi.doUnmock('@/config/env')
         vi.restoreAllMocks()
     })
 
-    it('logs debug messages when env is not prod', async () => {
-        const { logger } = await loadLoggerWithEnv('dev')
-
+    it('logs debug messages when env is not prod', () => {
         logger.debug('log me')
 
         expect(consoleDebugSpy).toHaveBeenCalledExactlyOnceWith('log me')
     })
 
-    it('does not log debug messages when env is prod', async () => {
-        const { logger } = await loadLoggerWithEnv('prod')
-
+    it('does not log debug messages when env is prod', () => {
+        envMock.getEnv = () => ({ ENV: 'prod' })
         logger.debug('skip me')
 
         expect(consoleDebugSpy).not.toHaveBeenCalled()
     })
 
-    it('always forwards info/warn/error', async () => {
-        const { logger } = await loadLoggerWithEnv('prod')
-
+    it('always forwards info/warn/error', () => {
+        envMock.getEnv = () => ({ ENV: 'prod' })
         logger.info('info', { some: 'context' })
         logger.warn('warn')
         logger.error('error')
