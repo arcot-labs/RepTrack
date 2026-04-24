@@ -5,7 +5,7 @@ import {
     getWorkoutToolbarActions,
     handleDeleteWorkout,
 } from '@/components/workouts/utils'
-import { getMockProps } from '@/tests/utils'
+import { getMockCallArg } from '@/tests/utils'
 import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -112,7 +112,7 @@ describe('useWorkoutsTableController', () => {
 
         expect(dialogMocks.useDialog).toHaveBeenCalledOnce()
 
-        const onConfirm = getMockProps(dialogMocks.useDialog)
+        const onConfirm = getMockCallArg(dialogMocks.useDialog)
         expect(onConfirm).toBeTypeOf('function')
 
         await act(async () => {

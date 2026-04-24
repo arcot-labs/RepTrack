@@ -1,7 +1,7 @@
 import { SearchService, type MuscleGroupPublic } from '@/api/generated'
 import { ExerciseMuscleGroupSelector } from '@/components/exercises/ExerciseMuscleGroupSelector'
 import { dash } from '@/lib/text'
-import { getMockProps } from '@/tests/utils'
+import { getMockCallArg } from '@/tests/utils'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -151,7 +151,7 @@ describe('ExerciseMuscleGroupSelector', () => {
     it('configures remote search callbacks for muscle groups', async () => {
         renderSelector()
 
-        const props = getMockProps(remoteSearchMocks.useRemoteSearch) as {
+        const props = getMockCallArg(remoteSearchMocks.useRemoteSearch) as {
             fallbackMessage: string
             search: (query: string, limit: number) => Promise<unknown>
             getItemId: (muscleGroup: MuscleGroupPublic) => number

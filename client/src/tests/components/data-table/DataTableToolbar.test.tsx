@@ -1,6 +1,6 @@
 import { DataTableToolbar } from '@/components/data-table/DataTableToolbar'
 import type { DataTableToolbarConfig } from '@/models/data-table'
-import { getMockProps } from '@/tests/utils'
+import { getMockCallArg } from '@/tests/utils'
 import type { Table } from '@tanstack/react-table'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -224,7 +224,7 @@ describe('DataTableToolbar - view options', () => {
 
         expect(viewOptionsMock).toHaveBeenCalled()
 
-        const props = getMockProps(viewOptionsMock)
+        const props = getMockCallArg(viewOptionsMock)
         expect(props).toMatchObject({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             table: expect.any(Object),
@@ -368,7 +368,7 @@ describe('DataTableToolbar - filters & reset', () => {
 
         expect(facetedFilterMock).toHaveBeenCalled()
 
-        const props = getMockProps(facetedFilterMock)
+        const props = getMockCallArg(facetedFilterMock)
         expect(props).toMatchObject({
             column,
             title: 'Status',

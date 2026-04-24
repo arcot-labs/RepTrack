@@ -1,5 +1,6 @@
 import { useRemoteSearch } from '@/components/useRemoteSearch'
 import { handleApiError } from '@/lib/http'
+import { createDeferred } from '@/tests/utils'
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -81,17 +82,6 @@ const flushPromises = async () => {
     await act(async () => {
         await Promise.resolve()
     })
-}
-
-const createDeferred = <T>() => {
-    let resolvePromise!: (value: T) => void
-    const promise = new Promise<T>((resolve) => {
-        resolvePromise = resolve
-    })
-    return {
-        promise,
-        resolve: resolvePromise,
-    }
 }
 
 beforeEach(() => {

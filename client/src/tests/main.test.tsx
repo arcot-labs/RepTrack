@@ -1,4 +1,4 @@
-import { getMockProps } from '@/tests/utils'
+import { getMockCallArg } from '@/tests/utils'
 import { render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
@@ -124,7 +124,7 @@ describe('main bootstrap', () => {
         const rootElement = document.getElementById('root')
         expect(createRootMock).toHaveBeenCalledWith(rootElement)
 
-        const renderedTree = getMockProps(rootRenderMock)
+        const renderedTree = getMockCallArg(rootRenderMock)
         render(renderedTree as never)
 
         expect(themeProviderMock).toHaveBeenCalledExactlyOnceWith(

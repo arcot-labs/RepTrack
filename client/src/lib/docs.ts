@@ -1,4 +1,4 @@
-type DocRegistry = Record<string, string>
+import type { DocItem } from '@/models/doc'
 
 const docs = import.meta.glob<string>('../docs/*.md', {
     eager: true,
@@ -6,14 +6,13 @@ const docs = import.meta.glob<string>('../docs/*.md', {
     import: 'default',
 })
 
-export function getDoc(slug: string, registry: DocRegistry = docs) {
-    return registry[`../docs/${slug}.md`]
-}
+export const getDoc = (slug: string, registry = docs): string | undefined =>
+    registry[`../docs/${slug}.md`]
 
 const h1Regex = /^#\s+(.+)$/m
 
-export function getAllDocs(registry: DocRegistry = docs) {
-    return Object.entries(registry)
+export const getAllDocs = (registry = docs): DocItem[] =>
+    Object.entries(registry)
         .map(([path, content]) => {
             const match = h1Regex.exec(content)
             const slug = path.split('/').pop()?.replace('.md', '')
@@ -27,4 +26,3 @@ export function getAllDocs(registry: DocRegistry = docs) {
                 sensitivity: 'base',
             })
         )
-}

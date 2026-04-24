@@ -1,10 +1,5 @@
-import {
-    type AccessRequestPublic,
-    AccessRequestService,
-    type UserPublic,
-    UserService,
-} from '@/api/generated'
 import { AccessRequestsTable } from '@/components/access-requests/AccessRequestsTable'
+import { useAccessRequests } from '@/components/access-requests/useAccessRequests'
 import {
     Card,
     CardContent,
@@ -12,64 +7,17 @@ import {
     CardTitle,
 } from '@/components/ui/overrides/card'
 import { UsersTable } from '@/components/users/UsersTable'
-import { handleApiError } from '@/lib/http'
-import { logger } from '@/lib/logger'
-import { useEffect, useState } from 'react'
+import { useUsers } from '@/components/users/useUsers'
 
 export function Admin() {
-    const [requests, setRequests] = useState<AccessRequestPublic[]>([])
-    const [users, setUsers] = useState<UserPublic[]>([])
-    const [isLoadingRequests, setIsLoadingRequests] = useState(true)
-    const [isLoadingUsers, setIsLoadingUsers] = useState(true)
+    const {
+        requests,
+        isLoading: isLoadingRequests,
+        reload: reloadRequests,
+        update: updateRequest,
+    } = useAccessRequests()
 
-    const loadAccessRequests = async () => {
-        setIsLoadingRequests(true)
-        try {
-            const { data, error } =
-                await AccessRequestService.getAccessRequests()
-            if (error) {
-                await handleApiError(error, {
-                    fallbackMessage: 'Failed to fetch access requests',
-                })
-                setRequests([])
-                return
-            }
-            logger.info('Fetched access requests', data)
-            setRequests(data)
-        } finally {
-            setIsLoadingRequests(false)
-        }
-    }
-
-    const handleRequestUpdated = (request: AccessRequestPublic) => {
-        setRequests((prev) =>
-            prev.map((req) => (req.id === request.id ? request : req))
-        )
-    }
-
-    const loadUsers = async () => {
-        setIsLoadingUsers(true)
-        try {
-            const { data, error } = await UserService.getUsers()
-            if (error) {
-                await handleApiError(error, {
-                    fallbackMessage: 'Failed to fetch users',
-                })
-                setUsers([])
-                return
-            }
-            logger.info('Fetched users', data)
-            setUsers(data)
-        } finally {
-            setIsLoadingUsers(false)
-        }
-    }
-
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        void loadAccessRequests()
-        void loadUsers()
-    }, [])
+    const { users, isLoading: isLoadingUsers } = useUsers()
 
     return (
         <div className="space-y-4">
@@ -81,8 +29,8 @@ export function Admin() {
                     <AccessRequestsTable
                         requests={requests}
                         isLoading={isLoadingRequests}
-                        onRequestUpdated={handleRequestUpdated}
-                        onReloadRequests={loadAccessRequests}
+                        onRequestUpdated={updateRequest}
+                        onReloadRequests={reloadRequests}
                     />
                 </CardContent>
             </Card>

@@ -2,6 +2,10 @@ name: Maintenance / Lint and Format (Reusable)
 
 on:
     workflow_call:
+        inputs:
+            mode:
+                required: true
+                type: string
 
 permissions: {}
 
@@ -12,12 +16,29 @@ jobs:
         permissions:
             contents: write
         steps:
+            - name: validate mode
+              env:
+                  MODE: ${{ inputs.mode }}
+              run: |
+                  if [[ "$MODE" != "check" && "$MODE" != "fix" ]]; then
+                    echo "Invalid mode: $MODE"
+                    exit 1
+                  fi
+
             - name: set cache dirs
               run: |
                   echo "PNPM_STORE_DIR=$HOME/.cache/pnpm/store" >> $GITHUB_ENV
                   echo "UV_CACHE_DIR=$HOME/.cache/uv" >> $GITHUB_ENV
 
-            - name: checkout # zizmor: ignore[artipacked] - credentials needed for push
+            - name: checkout (check mode)
+              if: inputs.mode == 'check'
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+              with:
+                  ref: ${{ github.event.pull_request.head.sha || github.ref_name }}
+                  persist-credentials: false
+
+            - name: checkout (fix mode) # zizmor: ignore[artipacked] - credentials needed for push
+              if: inputs.mode == 'fix'
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
               with:
                   ref: stage
@@ -64,12 +85,22 @@ jobs:
               working-directory: server
               run: uv sync
 
-            - name: lint & format
+            - name: lint (check mode)
+              if: inputs.mode == 'check'
+              run: pnpm run lint:check
+
+            - name: format (check mode)
+              if: inputs.mode == 'check'
+              run: pnpm run format:check
+
+            - name: lint & format (fix mode)
+              if: inputs.mode == 'fix'
               run: |
                   pnpm run lint
                   pnpm run format
 
-            - name: commit & push
+            - name: commit & push (fix mode)
+              if: inputs.mode == 'fix'
               run: |
                   if [[ -n "$(git status --porcelain)" ]]; then
                     git config user.name "github-actions[bot]"

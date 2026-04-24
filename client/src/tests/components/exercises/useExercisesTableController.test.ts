@@ -18,7 +18,7 @@ import type {
     MenuItemConfig,
 } from '@/models/data-table'
 import type { ExerciseFormDialogMode } from '@/models/exercises-table'
-import { getMockProps } from '@/tests/utils'
+import { getMockCallArg } from '@/tests/utils'
 import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -166,7 +166,7 @@ describe('useExercisesTableController', () => {
 
         expect(useRemoteSearch).toHaveBeenCalledOnce()
 
-        const props = getMockProps(remoteSearchMocks.useRemoteSearch) as {
+        const props = getMockCallArg(remoteSearchMocks.useRemoteSearch) as {
             items: ExercisePublic[]
             fallbackMessage: string
             search: (query: string, limit: number) => Promise<unknown>
@@ -193,7 +193,9 @@ describe('useExercisesTableController', () => {
 
     it('builds row actions config from row loading state and dialog handlers', () => {
         const { result } = renderUseExercisesTableController()
-        const props = getMockProps(vi.mocked(getExerciseRowActionsConfig)) as {
+        const props = getMockCallArg(
+            vi.mocked(getExerciseRowActionsConfig)
+        ) as {
             isRowLoading: (id: number) => boolean
             openDeleteDialog: (exercise: ExercisePublic) => void
             openFormDialog: (
@@ -212,7 +214,7 @@ describe('useExercisesTableController', () => {
 
     it('builds toolbar config from remote search state and muscle groups', () => {
         const { result } = renderUseExercisesTableController()
-        const props = getMockProps(vi.mocked(getExerciseToolbarConfig)) as {
+        const props = getMockCallArg(vi.mocked(getExerciseToolbarConfig)) as {
             searchQuery: string
             setSearchQuery: (value: string) => void
             isSearching: boolean
@@ -235,7 +237,7 @@ describe('useExercisesTableController', () => {
 
         expect(useDialog).toHaveBeenCalledOnce()
 
-        const onConfirm = getMockProps(dialogMocks.useDialog) as (
+        const onConfirm = getMockCallArg(dialogMocks.useDialog) as (
             exercise: ExercisePublic
         ) => Promise<void>
         expect(onConfirm).toBeTypeOf('function')
@@ -271,7 +273,7 @@ describe('useExercisesTableController', () => {
     it('opens form dialog in create mode from toolbar action', async () => {
         const { result } = renderUseExercisesTableController()
 
-        const { onCreateExercise } = getMockProps(
+        const { onCreateExercise } = getMockCallArg(
             vi.mocked(getExerciseToolbarConfig)
         ) as { onCreateExercise: () => void }
 
@@ -290,7 +292,7 @@ describe('useExercisesTableController', () => {
     it('opens form dialog for view, copy, and edit row actions', () => {
         const { result } = renderUseExercisesTableController()
 
-        const { openFormDialog } = getMockProps(
+        const { openFormDialog } = getMockCallArg(
             vi.mocked(getExerciseRowActionsConfig)
         ) as {
             openFormDialog: (

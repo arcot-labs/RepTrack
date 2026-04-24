@@ -14,7 +14,7 @@ def is_email_identifier(identifier: str) -> bool:
         return False
 
 
-# string fields (except token & password) are trimmed
+# string fields (except password) are trimmed
 # EmailStr automatically trims
 # email & username are lowercased
 
@@ -25,7 +25,7 @@ Username = Annotated[
     _TrimmedStr, StringConstraints(min_length=3, max_length=255, to_lower=True)
 ]
 Password = Annotated[str, StringConstraints(min_length=8, max_length=64)]
-Token = Annotated[str, StringConstraints(min_length=1, max_length=64)]
+Token = Annotated[_TrimmedStr, StringConstraints(min_length=1, max_length=64)]
 Email = Annotated[EmailStr, StringConstraints(max_length=255, to_lower=True)]
 
 FeedbackUrl = Annotated[_TrimmedStr, StringConstraints(min_length=1, max_length=1000)]
