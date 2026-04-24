@@ -16,7 +16,7 @@ import {
     renderCell,
     testHeader,
 } from '@/tests/components/utils'
-import { getMockProps } from '@/tests/utils'
+import { getMockCallArg } from '@/tests/utils'
 import { render, screen } from '@testing-library/react'
 import { act } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -156,7 +156,7 @@ const mockDialogState = ({
 }
 
 const getDialogProps = () => {
-    return getMockProps(confirmDialogMock) as {
+    return getMockCallArg(confirmDialogMock) as {
         onOpenChange: (isOpen: boolean) => void
         onConfirm: () => void
         onCancel: () => void
@@ -343,7 +343,7 @@ describe('AccessRequestsTable', () => {
         expect(screen.getByTestId('mock-data-table')).toBeInTheDocument()
 
         expect(dataTableMock).toHaveBeenCalledOnce()
-        const props = getMockProps(dataTableMock)
+        const props = getMockCallArg(dataTableMock)
         expect(props).toMatchObject({
             data: defaultRequests,
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -366,7 +366,7 @@ describe('AccessRequestsTable - dialog', () => {
 
         expect(dialogMocks.useDialog).toHaveBeenCalledOnce()
 
-        const onConfirm = getMockProps(dialogMocks.useDialog)
+        const onConfirm = getMockCallArg(dialogMocks.useDialog)
         expect(onConfirm).toBeTypeOf('function')
 
         await act(async () => {

@@ -11,7 +11,7 @@ import {
     renderCell,
     testHeader,
 } from '@/tests/components/utils'
-import { getMockProps } from '@/tests/utils'
+import { getMockCallArg } from '@/tests/utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const inlineRowActionsMock = vi.hoisted(() => vi.fn())
@@ -119,7 +119,7 @@ describe('getExerciseColumns', () => {
             expect.objectContaining({ row: { original: customExercise } })
         )
 
-        const props = getMockProps(inlineRowActionsMock) as {
+        const props = getMockCallArg(inlineRowActionsMock) as {
             row: { original: ExercisePublic }
             config: DataTableRowActionsConfig<ExercisePublic>
         }

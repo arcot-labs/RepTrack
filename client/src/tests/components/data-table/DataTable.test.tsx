@@ -2,7 +2,7 @@ import type {
     DataTableToolbarConfig,
     EdgePaddingConfig,
 } from '@/models/data-table'
-import { getMockProps } from '@/tests/utils'
+import { getMockCallArg } from '@/tests/utils'
 import type { ColumnDef } from '@tanstack/react-table'
 import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -290,7 +290,7 @@ describe('DataTable', () => {
 
         expect(toolbarMock).toHaveBeenCalledTimes(1)
 
-        const props = getMockProps(toolbarMock)
+        const props = getMockCallArg(toolbarMock)
         expect(props).toMatchObject({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             table: expect.any(Object),
@@ -307,14 +307,14 @@ describe('DataTable', () => {
 
         expect(skeletonMock).toHaveBeenCalledTimes(1)
 
-        const skeletonProps = getMockProps(skeletonMock)
+        const skeletonProps = getMockCallArg(skeletonMock)
         expect(skeletonProps).toMatchObject({
             columnCount: 0,
         })
 
         expect(paginationMock).toHaveBeenCalledTimes(1)
 
-        const paginationProps = getMockProps(paginationMock)
+        const paginationProps = getMockCallArg(paginationMock)
         expect(paginationProps).toMatchObject({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             table: expect.any(Object),
@@ -330,7 +330,7 @@ describe('DataTable', () => {
 
         expect(contentMock).toHaveBeenCalledTimes(1)
 
-        const contentProps = getMockProps(contentMock)
+        const contentProps = getMockCallArg(contentMock)
         expect(contentProps).toMatchObject({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             table: expect.any(Object),
@@ -345,7 +345,7 @@ describe('DataTable', () => {
     it('uses default edgePaddingConfig when not provided', async () => {
         await renderDataTable(false)
 
-        const contentProps = getMockProps(contentMock)
+        const contentProps = getMockCallArg(contentMock)
 
         expect(contentProps).toMatchObject({
             edgePaddingConfig: {
@@ -363,7 +363,7 @@ describe('DataTable', () => {
 
         await renderDataTable(false, [], undefined, customConfig)
 
-        const contentProps = getMockProps(contentMock)
+        const contentProps = getMockCallArg(contentMock)
         expect(contentProps).toMatchObject({
             edgePaddingConfig: customConfig,
         })

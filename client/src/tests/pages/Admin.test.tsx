@@ -1,5 +1,5 @@
 import { Admin } from '@/pages/Admin'
-import { getMockProps } from '@/tests/utils'
+import { getMockCallArg } from '@/tests/utils'
 import { render, screen } from '@testing-library/react'
 import {
     beforeEach,
@@ -90,7 +90,7 @@ describe('Admin', () => {
         expect(screen.getByTestId('access-requests-table')).toBeInTheDocument()
         expect(accessRequestsTableMock).toHaveBeenCalledOnce()
 
-        const props = getMockProps(accessRequestsTableMock) as {
+        const props = getMockCallArg(accessRequestsTableMock) as {
             requests: unknown[]
             isLoading: boolean
             onReloadRequests: unknown
@@ -114,7 +114,7 @@ describe('Admin', () => {
         expect(screen.getByTestId('users-table')).toBeInTheDocument()
         expect(usersTableMock).toHaveBeenCalledOnce()
 
-        const props = getMockProps(usersTableMock) as {
+        const props = getMockCallArg(usersTableMock) as {
             users: unknown[]
             isLoading: boolean
         }

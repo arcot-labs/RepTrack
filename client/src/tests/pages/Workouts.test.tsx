@@ -1,5 +1,5 @@
 import { Workouts } from '@/pages/Workouts'
-import { getMockProps } from '@/tests/utils'
+import { getMockCallArg } from '@/tests/utils'
 import { render, screen } from '@testing-library/react'
 import {
     beforeEach,
@@ -65,7 +65,7 @@ describe('Workouts', () => {
         expect(screen.getByTestId('workouts-table')).toBeInTheDocument()
         expect(workoutsTableMock).toHaveBeenCalledOnce()
 
-        const props = getMockProps(workoutsTableMock) as {
+        const props = getMockCallArg(workoutsTableMock) as {
             workouts: unknown[]
             isLoading: boolean
             onWorkoutDeleted: unknown

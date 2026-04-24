@@ -1,4 +1,4 @@
-import { getMockProps } from '@/tests/utils'
+import { getMockCallArg } from '@/tests/utils'
 import type { ColumnDef } from '@tanstack/react-table'
 import { render, screen } from '@testing-library/react'
 import { expect, vi } from 'vitest'
@@ -21,7 +21,7 @@ vi.mock('@/components/data-table/DataTableColumnHeader', () => ({
 }))
 
 export function getDataTableProps<T>() {
-    return getMockProps(dataTableMock) as {
+    return getMockCallArg(dataTableMock) as {
         columns: ColumnDef<T>[]
     }
 }

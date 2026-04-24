@@ -41,7 +41,6 @@ const renderPage = (initialEntry = '/request-access') => {
         ],
         { initialEntries: [initialEntry] }
     )
-
     return {
         router,
         ...render(<RouterProvider router={router} />),

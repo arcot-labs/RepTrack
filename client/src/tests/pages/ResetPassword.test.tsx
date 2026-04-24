@@ -2,7 +2,7 @@ import { AuthService } from '@/api/generated'
 import * as httpModule from '@/lib/http'
 import { notify } from '@/lib/notify'
 import { ResetPassword } from '@/pages/ResetPassword'
-import { createDeferred } from '@/tests/utils'
+import { createDeferred, getMockCallArg } from '@/tests/utils'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { RouterProvider, createMemoryRouter } from 'react-router-dom'
@@ -33,7 +33,6 @@ const renderPage = (initialEntry = '/reset-password') => {
         ],
         { initialEntries: [initialEntry] }
     )
-
     return {
         router,
         ...render(<RouterProvider router={router} />),
@@ -180,7 +179,7 @@ describe('ResetPassword', () => {
             expect(handleApiErrorMock).toHaveBeenCalledOnce()
         })
 
-        const options = handleApiErrorMock.mock.calls[0]?.[1] as {
+        const options = getMockCallArg(handleApiErrorMock, 0, 1) as {
             fallbackMessage?: string
             httpErrorHandlers?: Record<string, unknown>
         }
