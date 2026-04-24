@@ -1,5 +1,3 @@
-import * as React from 'react'
-
 // eslint-disable-next-line no-restricted-imports
 import { Button as UIButton } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -11,7 +9,7 @@ type ButtonProps = Omit<UIButtonProps, 'variant'> & {
 }
 
 function Button({ variant = 'default', className, ...props }: ButtonProps) {
-    if (variant === 'success') {
+    if (variant === 'success')
         return (
             <UIButton
                 variant="default"
@@ -22,9 +20,8 @@ function Button({ variant = 'default', className, ...props }: ButtonProps) {
                 {...props}
             />
         )
-    }
 
-    if (variant === 'destructive') {
+    if (variant === 'destructive')
         return (
             <UIButton
                 variant="destructive"
@@ -32,10 +29,8 @@ function Button({ variant = 'default', className, ...props }: ButtonProps) {
                 {...props}
             />
         )
-    }
 
     return <UIButton variant={variant} className={className} {...props} />
 }
 
 export { Button }
-export type { ButtonProps as AppButtonProps }

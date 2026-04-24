@@ -1,5 +1,3 @@
-import * as React from 'react'
-
 // eslint-disable-next-line no-restricted-imports
 import {
     Card as UICard,
@@ -51,11 +49,11 @@ function CardTitle({ className, ...props }: CardTitleProps) {
 }
 
 function CardDescription({ className, ...props }: CardDescriptionProps) {
-    return <UICardDescription className={cn('', className)} {...props} />
+    return <UICardDescription className={cn(className)} {...props} />
 }
 
 function CardAction({ className, ...props }: CardActionProps) {
-    return <UICardAction className={cn('', className)} {...props} />
+    return <UICardAction className={cn(className)} {...props} />
 }
 
 function CardContent({ className, ...props }: CardContentProps) {
@@ -84,13 +82,4 @@ export {
     CardFooter,
     CardHeader,
     CardTitle,
-}
-export type {
-    CardActionProps,
-    CardContentProps,
-    CardDescriptionProps,
-    CardFooterProps,
-    CardHeaderProps,
-    CardProps,
-    CardTitleProps,
 }

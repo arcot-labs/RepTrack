@@ -1,5 +1,3 @@
-import * as React from 'react'
-
 // eslint-disable-next-line no-restricted-imports
 import {
     Tooltip as UITooltip,
@@ -11,15 +9,12 @@ import { cn } from '@/lib/utils'
 
 type UITooltipContentProps = React.ComponentProps<typeof UITooltipContent>
 
-type TooltipContentProps = UITooltipContentProps
+const TooltipProvider = UITooltipProvider
+const TooltipTrigger = UITooltipTrigger
+const Tooltip = UITooltip
 
-function TooltipContent({ className, ...props }: TooltipContentProps) {
+function TooltipContent({ className, ...props }: UITooltipContentProps) {
     return <UITooltipContent className={cn('max-w-xs', className)} {...props} />
 }
 
-const Tooltip = UITooltip
-const TooltipProvider = UITooltipProvider
-const TooltipTrigger = UITooltipTrigger
-
 export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger }
-export type { TooltipContentProps }

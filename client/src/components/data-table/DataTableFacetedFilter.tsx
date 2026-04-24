@@ -1,7 +1,3 @@
-import { type Column } from '@tanstack/react-table'
-import { Check, PlusCircle } from 'lucide-react'
-import * as React from 'react'
-
 import { Badge } from '@/components/ui/badge'
 import {
     Command,
@@ -20,6 +16,8 @@ import {
 } from '@/components/ui/popover'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
+import { type Column } from '@tanstack/react-table'
+import { Check, PlusCircle } from 'lucide-react'
 
 interface DataTableFacetedFilterProps<TData, TValue> {
     title: string
