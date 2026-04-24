@@ -1,73 +1,26 @@
-import {
-    type ExercisePublic,
-    ExerciseService,
-    type MuscleGroupPublic,
-    MuscleGroupService,
-} from '@/api/generated'
 import { ExercisesTable } from '@/components/exercises/ExercisesTable'
+import { useExercises } from '@/components/exercises/useExercises'
+import { useMuscleGroups } from '@/components/muscle-groups/useMuscleGroups'
 import {
     Card,
     CardContent,
     CardHeader,
     CardTitle,
 } from '@/components/ui/overrides/card'
-import { handleApiError } from '@/lib/http'
-import { logger } from '@/lib/logger'
-import { useEffect, useState } from 'react'
 
 export function Exercises() {
-    const [exercises, setExercises] = useState<ExercisePublic[]>([])
-    const [muscleGroups, setMuscleGroups] = useState<MuscleGroupPublic[]>([])
-    const [isLoadingExercises, setIsLoadingExercises] = useState(true)
-    const [isLoadingMuscleGroups, setIsLoadingMuscleGroups] = useState(true)
+    const {
+        exercises,
+        isLoading: isLoadingExercises,
+        reload: loadExercises,
+        remove: removeExercise,
+    } = useExercises()
 
-    const loadExercises = async () => {
-        setIsLoadingExercises(true)
-        try {
-            const { data, error } = await ExerciseService.getExercises()
-            if (error) {
-                await handleApiError(error, {
-                    fallbackMessage: 'Failed to fetch exercises',
-                })
-                setExercises([])
-                return
-            }
-            logger.info('Fetched exercises', data)
-            setExercises(data)
-        } finally {
-            setIsLoadingExercises(false)
-        }
-    }
-
-    const handleExerciseDeleted = (exerciseId: number) => {
-        setExercises((prevExercises) =>
-            prevExercises.filter((exercise) => exercise.id !== exerciseId)
-        )
-    }
-
-    const loadMuscleGroups = async () => {
-        setIsLoadingMuscleGroups(true)
-        try {
-            const { data, error } = await MuscleGroupService.getMuscleGroups()
-            if (error) {
-                await handleApiError(error, {
-                    fallbackMessage: 'Failed to fetch muscle groups',
-                })
-                setMuscleGroups([])
-                return
-            }
-            logger.info('Fetched muscle groups', data)
-            setMuscleGroups(data)
-        } finally {
-            setIsLoadingMuscleGroups(false)
-        }
-    }
-
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        void loadExercises()
-        void loadMuscleGroups()
-    }, [])
+    const {
+        muscleGroups,
+        isLoading: isLoadingMuscleGroups,
+        reload: loadMuscleGroups,
+    } = useMuscleGroups()
 
     return (
         <Card>
@@ -79,7 +32,7 @@ export function Exercises() {
                     exercises={exercises}
                     muscleGroups={muscleGroups}
                     isLoading={isLoadingExercises || isLoadingMuscleGroups}
-                    onExerciseDeleted={handleExerciseDeleted}
+                    onExerciseDeleted={removeExercise}
                     onReloadExercises={loadExercises}
                     onReloadMuscleGroups={loadMuscleGroups}
                 />

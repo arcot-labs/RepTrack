@@ -1,47 +1,14 @@
-import { WorkoutService, type WorkoutBase } from '@/api/generated'
 import {
     Card,
     CardContent,
     CardHeader,
     CardTitle,
 } from '@/components/ui/overrides/card'
+import { useWorkouts } from '@/components/workouts/useWorkouts'
 import { WorkoutsTable } from '@/components/workouts/WorkoutsTable'
-import { handleApiError } from '@/lib/http'
-import { logger } from '@/lib/logger'
-import { useEffect, useState } from 'react'
 
 export function Workouts() {
-    const [workouts, setWorkouts] = useState<WorkoutBase[]>([])
-    const [isLoading, setIsLoading] = useState(true)
-
-    const loadWorkouts = async () => {
-        setIsLoading(true)
-        try {
-            const { data, error } = await WorkoutService.getWorkouts()
-            if (error) {
-                await handleApiError(error, {
-                    fallbackMessage: 'Failed to fetch workouts',
-                })
-                setWorkouts([])
-                return
-            }
-            logger.info('Fetched workouts', data)
-            setWorkouts(data)
-        } finally {
-            setIsLoading(false)
-        }
-    }
-
-    const handleWorkoutDeleted = (workoutId: number) => {
-        setWorkouts((prev) =>
-            prev.filter((workout) => workout.id !== workoutId)
-        )
-    }
-
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        void loadWorkouts()
-    }, [])
+    const { workouts, isLoading, reload, remove } = useWorkouts()
 
     return (
         <Card>
@@ -52,8 +19,8 @@ export function Workouts() {
                 <WorkoutsTable
                     workouts={workouts}
                     isLoading={isLoading}
-                    onWorkoutDeleted={handleWorkoutDeleted}
-                    onReloadWorkouts={loadWorkouts}
+                    onWorkoutDeleted={remove}
+                    onReloadWorkouts={reload}
                 />
             </CardContent>
         </Card>

@@ -1,18 +1,19 @@
+import { notify } from '@/lib/notify'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const loggerMocks = {
+const loggerMocks = vi.hoisted(() => ({
     debug: vi.fn(),
     info: vi.fn(),
     warn: vi.fn(),
     error: vi.fn(),
-}
+}))
 
-const toastMocks = {
+const toastMocks = vi.hoisted(() => ({
     success: vi.fn(),
     info: vi.fn(),
     warning: vi.fn(),
     error: vi.fn(),
-}
+}))
 
 vi.mock('@/lib/logger', () => ({
     logger: loggerMocks,
@@ -22,20 +23,13 @@ vi.mock('sonner', () => ({
     toast: toastMocks,
 }))
 
-const loadNotify = async () => {
-    vi.resetModules()
-    return import('@/lib/notify')
-}
-
 describe('notify', () => {
     beforeEach(() => {
         Object.values(loggerMocks).forEach((mock) => mock.mockReset())
         Object.values(toastMocks).forEach((mock) => mock.mockReset())
     })
 
-    it('logs debug and shows a success toast', async () => {
-        const { notify } = await loadNotify()
-
+    it('logs debug and shows a success toast', () => {
         notify.success('done')
 
         expect(loggerMocks.debug).toHaveBeenCalledExactlyOnceWith(
@@ -45,9 +39,7 @@ describe('notify', () => {
         expect(toastMocks.success).toHaveBeenCalledExactlyOnceWith('done')
     })
 
-    it('logs info and shows an info toast', async () => {
-        const { notify } = await loadNotify()
-
+    it('logs info and shows an info toast', () => {
         notify.info('info message')
 
         expect(loggerMocks.info).toHaveBeenCalledExactlyOnceWith(
@@ -57,9 +49,7 @@ describe('notify', () => {
         expect(toastMocks.info).toHaveBeenCalledExactlyOnceWith('info message')
     })
 
-    it('logs warn and shows a warning toast', async () => {
-        const { notify } = await loadNotify()
-
+    it('logs warn and shows a warning toast', () => {
         notify.warning('be careful')
 
         expect(loggerMocks.warn).toHaveBeenCalledExactlyOnceWith(
@@ -69,9 +59,7 @@ describe('notify', () => {
         expect(toastMocks.warning).toHaveBeenCalledExactlyOnceWith('be careful')
     })
 
-    it('logs errors and shows an error toast with duration options', async () => {
-        const { notify } = await loadNotify()
-
+    it('logs errors and shows an error toast with duration options', () => {
         notify.error('fatal')
 
         expect(loggerMocks.error).toHaveBeenCalledExactlyOnceWith(
