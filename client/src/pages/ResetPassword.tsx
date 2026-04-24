@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/overrides/card'
 import { handleApiError } from '@/lib/http'
 import { notify } from '@/lib/notify'
+import { preprocessTrim } from '@/lib/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
@@ -19,6 +20,7 @@ import { z } from 'zod'
 
 const zResetPasswordFormSchema = zResetPasswordRequest
     .extend({
+        token: preprocessTrim(zResetPasswordRequest.shape.token),
         confirmPassword: zResetPasswordRequest.shape.password,
     })
     .refine((data) => data.password === data.confirmPassword, {

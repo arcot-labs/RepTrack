@@ -13,6 +13,18 @@ const resetPasswordMock = vi.spyOn(AuthService, 'resetPassword')
 const handleApiErrorMock = vi.spyOn(httpModule, 'handleApiError')
 const notifySuccessMock = vi.spyOn(notify, 'success')
 const notifyErrorMock = vi.spyOn(notify, 'error')
+const preprocessTrim = vi.hoisted(() => vi.fn())
+
+vi.mock('@/lib/validation', async () => {
+    const { z } = await import('zod')
+    return {
+        preprocessTrim: (schema: unknown) =>
+            z.preprocess((value) => {
+                preprocessTrim(value)
+                return value
+            }, schema as never),
+    }
+})
 
 const createDeferred = <T,>() => {
     let resolvePromise!: (value: T) => void
@@ -153,6 +165,7 @@ describe('ResetPassword', () => {
         expect(resetPasswordMock).toHaveBeenCalledWith({
             body: { token: 'abc123', password: 'password123' },
         })
+        expect(preprocessTrim).toHaveBeenCalledWith('abc123')
 
         expect(notifySuccessMock).toHaveBeenCalledWith(
             'Password reset. You can now log in'
