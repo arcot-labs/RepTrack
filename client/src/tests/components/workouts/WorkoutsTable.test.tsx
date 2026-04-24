@@ -9,7 +9,7 @@ import {
     renderCell,
     testHeader,
 } from '@/tests/components/utils'
-import { getMockProps } from '@/tests/utils'
+import { getMockCallArg } from '@/tests/utils'
 import { act, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -124,7 +124,7 @@ const mockControllerState = ({
 }
 
 const getDialogProps = () => {
-    return getMockProps(confirmDialogMock) as {
+    return getMockCallArg(confirmDialogMock) as {
         onOpenChange: (isOpen: boolean) => void
         onConfirm: () => void
         onCancel: () => void
@@ -170,7 +170,7 @@ describe('WorkoutsTable - columns', () => {
             })
         )
 
-        const props = getMockProps(inlineRowActionsMock) as {
+        const props = getMockCallArg(inlineRowActionsMock) as {
             row: { original: WorkoutBase }
             config: DataTableRowActionsConfig<WorkoutBase>
         }
@@ -291,7 +291,7 @@ describe('WorkoutsTable', () => {
         expect(screen.getByTestId('mock-data-table')).toBeInTheDocument()
 
         expect(dataTableMock).toHaveBeenCalledOnce()
-        const props = getMockProps(dataTableMock)
+        const props = getMockCallArg(dataTableMock)
         expect(props).toMatchObject({
             data: [workout],
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

@@ -9,7 +9,7 @@ import {
     renderCell,
     testHeader,
 } from '@/tests/components/utils'
-import { getMockProps } from '@/tests/utils'
+import { getMockCallArg } from '@/tests/utils'
 import { render, screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -180,7 +180,7 @@ describe('UsersTable', () => {
         expect(screen.getByTestId('mock-data-table')).toBeInTheDocument()
 
         expect(dataTableMock).toHaveBeenCalledOnce()
-        const props = getMockProps(dataTableMock)
+        const props = getMockCallArg(dataTableMock)
         expect(props).toMatchObject({
             data: defaultUsers,
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

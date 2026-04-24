@@ -1,7 +1,7 @@
 import { type ExercisePublic, type MuscleGroupPublic } from '@/api/generated'
 import type { DataTableRowActionsConfig } from '@/models/data-table'
 import { dataTableMock } from '@/tests/components/utils'
-import { getMockProps } from '@/tests/utils'
+import { getMockCallArg } from '@/tests/utils'
 import { act, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -160,7 +160,7 @@ const mockControllerState = ({
 }
 
 const getDialogProps = () => {
-    return getMockProps(confirmDialogMock) as {
+    return getMockCallArg(confirmDialogMock) as {
         onOpenChange: (isOpen: boolean) => void
         onConfirm: () => void
         onCancel: () => void
@@ -171,7 +171,7 @@ const getDialogProps = () => {
 }
 
 const getFormDialogProps = () => {
-    return getMockProps(exerciseFormDialogMock) as {
+    return getMockCallArg(exerciseFormDialogMock) as {
         open: boolean
         mode: 'create' | 'edit' | 'view'
         exercise: ExercisePublic | null
@@ -210,7 +210,7 @@ describe('ExercisesTable', () => {
         expect(screen.getByTestId('mock-data-table')).toBeInTheDocument()
 
         expect(dataTableMock).toHaveBeenCalledOnce()
-        const props = getMockProps(dataTableMock)
+        const props = getMockCallArg(dataTableMock)
         expect(props).toMatchObject({
             data: displayedExercises,
             columns,

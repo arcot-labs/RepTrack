@@ -1,9 +1,8 @@
-import type { ErrorResponse } from '@/api/generated'
 import { AuthService } from '@/api/generated'
 import * as httpModule from '@/lib/http'
 import { notify } from '@/lib/notify'
-import type { ApiErrorOptions } from '@/models/error'
 import { ResetPassword } from '@/pages/ResetPassword'
+import { createDeferred, getMockCallArg } from '@/tests/utils'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { RouterProvider, createMemoryRouter } from 'react-router-dom'
@@ -13,25 +12,18 @@ const resetPasswordMock = vi.spyOn(AuthService, 'resetPassword')
 const handleApiErrorMock = vi.spyOn(httpModule, 'handleApiError')
 const notifySuccessMock = vi.spyOn(notify, 'success')
 const notifyErrorMock = vi.spyOn(notify, 'error')
+const preprocessTrim = vi.hoisted(() => vi.fn())
 
-const createDeferred = <T,>() => {
-    let resolvePromise!: (value: T) => void
-    const promise = new Promise<T>((resolve) => {
-        resolvePromise = resolve
-    })
-    return { promise, resolve: resolvePromise }
-}
-
-const isErrorResponse = (value: unknown): value is ErrorResponse => {
-    return (
-        typeof value === 'object' &&
-        value !== null &&
-        'code' in value &&
-        typeof value.code === 'string' &&
-        'detail' in value &&
-        typeof (value as { detail: unknown }).detail === 'string'
-    )
-}
+vi.mock('@/lib/validation', async () => {
+    const { z } = await import('zod')
+    return {
+        preprocessTrim: (schema: unknown) =>
+            z.preprocess((value) => {
+                preprocessTrim(value)
+                return value
+            }, schema as never),
+    }
+})
 
 const renderPage = (initialEntry = '/reset-password') => {
     const router = createMemoryRouter(
@@ -41,7 +33,6 @@ const renderPage = (initialEntry = '/reset-password') => {
         ],
         { initialEntries: [initialEntry] }
     )
-
     return {
         router,
         ...render(<RouterProvider router={router} />),
@@ -153,6 +144,7 @@ describe('ResetPassword', () => {
         expect(resetPasswordMock).toHaveBeenCalledWith({
             body: { token: 'abc123', password: 'password123' },
         })
+        expect(preprocessTrim).toHaveBeenCalledWith('abc123')
 
         expect(notifySuccessMock).toHaveBeenCalledWith(
             'Password reset. You can now log in'
@@ -187,7 +179,7 @@ describe('ResetPassword', () => {
             expect(handleApiErrorMock).toHaveBeenCalledOnce()
         })
 
-        const options = handleApiErrorMock.mock.calls[0]?.[1] as {
+        const options = getMockCallArg(handleApiErrorMock, 0, 1) as {
             fallbackMessage?: string
             httpErrorHandlers?: Record<string, unknown>
         }
@@ -207,13 +199,9 @@ describe('ResetPassword', () => {
         const error = { code: 'invalid_token', detail: 'Invalid token' }
         resetPasswordMock.mockResolvedValue({ error } as never)
 
-        handleApiErrorMock.mockImplementation(
-            async (err: unknown, options: ApiErrorOptions) => {
-                if (!isErrorResponse(err)) return
-                const handler = options.httpErrorHandlers?.[err.code]
-                if (handler) await handler(err)
-            }
-        )
+        handleApiErrorMock.mockImplementation(async (err, options) => {
+            await options.httpErrorHandlers?.[error.code]?.(err as never)
+        })
 
         const { router } = renderPage('/reset-password?token=abc123')
 
