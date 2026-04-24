@@ -1,5 +1,6 @@
 import * as React from 'react'
 
+// eslint-disable-next-line no-restricted-imports
 import {
     Card as UICard,
     CardAction as UICardAction,

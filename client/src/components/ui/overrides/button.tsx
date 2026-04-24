@@ -1,5 +1,6 @@
 import * as React from 'react'
 
+// eslint-disable-next-line no-restricted-imports
 import { Button as UIButton } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
