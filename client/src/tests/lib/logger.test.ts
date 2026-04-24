@@ -20,6 +20,7 @@ describe('logger', () => {
 
     afterEach(() => {
         vi.restoreAllMocks()
+        envMock.getEnv = () => ({ ENV: 'dev' })
     })
 
     it('logs debug messages when env is not prod', () => {
