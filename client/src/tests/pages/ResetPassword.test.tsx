@@ -1,9 +1,8 @@
-import type { ErrorResponse } from '@/api/generated'
 import { AuthService } from '@/api/generated'
 import * as httpModule from '@/lib/http'
 import { notify } from '@/lib/notify'
-import type { ApiErrorOptions } from '@/models/error'
 import { ResetPassword } from '@/pages/ResetPassword'
+import { createDeferred } from '@/tests/utils'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { RouterProvider, createMemoryRouter } from 'react-router-dom'
@@ -25,25 +24,6 @@ vi.mock('@/lib/validation', async () => {
             }, schema as never),
     }
 })
-
-const createDeferred = <T,>() => {
-    let resolvePromise!: (value: T) => void
-    const promise = new Promise<T>((resolve) => {
-        resolvePromise = resolve
-    })
-    return { promise, resolve: resolvePromise }
-}
-
-const isErrorResponse = (value: unknown): value is ErrorResponse => {
-    return (
-        typeof value === 'object' &&
-        value !== null &&
-        'code' in value &&
-        typeof value.code === 'string' &&
-        'detail' in value &&
-        typeof (value as { detail: unknown }).detail === 'string'
-    )
-}
 
 const renderPage = (initialEntry = '/reset-password') => {
     const router = createMemoryRouter(
@@ -220,13 +200,9 @@ describe('ResetPassword', () => {
         const error = { code: 'invalid_token', detail: 'Invalid token' }
         resetPasswordMock.mockResolvedValue({ error } as never)
 
-        handleApiErrorMock.mockImplementation(
-            async (err: unknown, options: ApiErrorOptions) => {
-                if (!isErrorResponse(err)) return
-                const handler = options.httpErrorHandlers?.[err.code]
-                if (handler) await handler(err)
-            }
-        )
+        handleApiErrorMock.mockImplementation(async (err, options) => {
+            await options.httpErrorHandlers?.[error.code]?.(err as never)
+        })
 
         const { router } = renderPage('/reset-password?token=abc123')
 

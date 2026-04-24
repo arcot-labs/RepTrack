@@ -2,6 +2,7 @@ import { AuthService } from '@/api/generated'
 import * as httpModule from '@/lib/http'
 import { notify } from '@/lib/notify'
 import { ForgotPassword } from '@/pages/ForgotPassword'
+import { createDeferred } from '@/tests/utils'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
@@ -22,14 +23,6 @@ vi.mock('@/lib/validation', async () => {
             }, schema as never),
     }
 })
-
-const createDeferred = <T,>() => {
-    let resolvePromise!: (value: T) => void
-    const promise = new Promise<T>((resolve) => {
-        resolvePromise = resolve
-    })
-    return { promise, resolve: resolvePromise }
-}
 
 const renderPage = () =>
     render(
